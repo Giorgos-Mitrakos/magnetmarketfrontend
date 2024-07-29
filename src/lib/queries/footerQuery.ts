@@ -1,0 +1,64 @@
+import { gql } from "graphql-request";
+
+export const GET_FOOTER = gql`
+{
+    footer{
+      data{
+        attributes{
+          telephone
+          opening_hours
+          address
+          city
+          postcode
+          email
+          sections{
+            id
+            Label
+            links{
+              id
+              label
+              url
+              isLink
+            }
+          }
+        }
+      }
+    }
+  }`
+
+export interface IfooterProps {
+  footer: {
+    data: {
+      attributes: {
+        telephone: string
+        opening_hours: string
+        address: string
+        city: string
+        postcode: string
+        email: string
+        sections: [{
+          id: string
+          Label: string
+          links: [{
+            id: string
+            label: string
+            url: string
+            isLink: boolean
+          }]
+        }]
+      }
+    }
+    // attributes: {
+    //   Section: [{
+    //     id: string
+    //     label: string
+    //     links: [{
+    //       id: string
+    //       Label: string
+    //       url: string
+    //       isLink: boolean
+    //     }]
+    //   }]
+    // }
+  }
+}
