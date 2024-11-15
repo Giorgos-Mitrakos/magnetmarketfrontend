@@ -95,4 +95,6 @@ const ShippingMethods = forwardRef<ShippingMethodsRef>((props, ref) => {
     )
 })
 
+ShippingMethods.displayName='ShippingMethods'
+
 export default ShippingMethods

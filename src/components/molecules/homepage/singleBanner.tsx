@@ -1,5 +1,3 @@
-import { IcategoryProductsProps } from "@/lib/queries/productQuery";
-import Carousel from "../../atoms/carousel";
 import NextImage from "@/components/atoms/nextImage";
 import Link from "next/link";
 

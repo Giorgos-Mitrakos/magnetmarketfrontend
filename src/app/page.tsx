@@ -26,7 +26,7 @@ export default async function Home() {
   return (
     <main className="w-full grid space-y-16">
       <HeroBanners carousel={data.homepage.data.attributes.Carousel} fixed_hero_banners={data.homepage.data.attributes.fixed_hero_banners} />
-      <SiteFeatures classes="grid lg:divide-x bg-transparent xs:grid-cols-2 gap-2 lg:grid-cols-4 w-full justify-center" />
+      <SiteFeatures/>
       {/* <ListProductsBanner props={data.homepage.data.attributes.body[0]} /> */}
       <BlockManager blocks={data.homepage.data.attributes.body} />
       <Newsletter />

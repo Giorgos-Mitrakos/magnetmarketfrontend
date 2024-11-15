@@ -201,37 +201,8 @@ export interface IHomepageProps {
   homepage: {
     data: {
       attributes: {
-        Carousel: {
-          __typename: string,
-          id: string,
-          image: {
-            data: {
-              attributes: {
-                name: string
-                alternativeText: string
-                url: string
-              }
-            }
-          }
-          link_label: string
-          href: string
-          target: string
-        }
-        fixed_hero_banners: {
-          __typename: string
-          image: {
-            data: {
-              attributes: {
-                name: string
-                alternativeText: string
-                url: string
-              }
-            }
-            link_label: string
-            href: string
-            target: string
-          }
-        }
+        Carousel: ICarousel[]
+        fixed_hero_banners: IFixedHeroBanners[]
         body: {
           __typename: string
           title: string
@@ -300,4 +271,38 @@ export interface IHomepageProps {
       }
     }
   }
+}
+
+export interface IFixedHeroBanners {
+  __typename: string
+  image: {
+    data: {
+      attributes: {
+        name: string
+        alternativeText: string
+        url: string
+      }
+    }
+  }
+
+  link_label: string
+  href: string
+  target: string
+}
+
+export interface ICarousel {
+  __typename: string,
+  id: string,
+  image: {
+    data: {
+      attributes: {
+        name: string
+        alternativeText: string
+        url: string
+      }
+    }
+  }
+  link_label: string
+  href: string
+  target: string
 }

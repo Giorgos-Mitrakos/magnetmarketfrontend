@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import NextImage from '../../atoms/nextImage';
+import { IFixedHeroBanners } from '@/lib/queries/homepage';
 
-const HeroFixedBanners = ({ fixed_hero_banners }) => {
+const HeroFixedBanners = ({ fixed_hero_banners }:{fixed_hero_banners:IFixedHeroBanners[]}) => {
     return (
         <div className='flex items-center md:flex-col md:justify-between h-full space-x-4 md:space-x-0 md:space-y-4'>
             {

@@ -3,11 +3,12 @@ import Image from "next/image"
 // import HeroCarousel from "../molecules/heroCarousel"
 import HeroFixedBanners from "../molecules/homepage/heroFixedBanners"
 import dynamic from 'next/dynamic'
+import { ICarousel, IFixedHeroBanners } from "@/lib/queries/homepage"
 
 const HeroCarousel = dynamic(() => import('../molecules/homepage/heroCarousel'))
 
 
-const HeroBanners = ({ carousel, fixed_hero_banners }) => {
+const HeroBanners = ({ carousel, fixed_hero_banners }: { carousel: ICarousel[], fixed_hero_banners: IFixedHeroBanners[] }) => {
     return (
         <section className="grid w-full grid-cols-1 gap-4 md:grid-cols-3 my-4">
             <div className="md:col-span-2 h-full w-full">

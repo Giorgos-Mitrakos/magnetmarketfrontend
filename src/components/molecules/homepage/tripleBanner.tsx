@@ -45,8 +45,6 @@ const TripleBanner = ({ id, rightTripleBanner,
         leftTripleTarget: string
     }) => {
 
-
-    console.log("rest:", middleTripleBanner.data)
     return (
         <div key={id} className='grid md:grid-cols-3 gap-4'>
             <Link href={rightTripleHref} target={rightTripleTarget}>

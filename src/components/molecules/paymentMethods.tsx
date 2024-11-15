@@ -44,7 +44,7 @@ const PaymentMethods = forwardRef<PaymentMethodsRef>((props, ref) => {
     const paymentMethods = paymentMethodsData as IPaymentMethods
 
     const loadInitialValues = () => {
-        const savedValues =typeof window !== 'undefined' && localStorage.getItem('paymentMethod');
+        const savedValues = typeof window !== 'undefined' && localStorage.getItem('paymentMethod');
         return savedValues ? JSON.parse(savedValues) : { payment: '' };
     }
 
@@ -77,7 +77,6 @@ const PaymentMethods = forwardRef<PaymentMethodsRef>((props, ref) => {
     // }
 
     useEffect(() => {
-        console.log(formik.values.payment)
         const updatePayment = { ...paymentMethod, payment: formik.values.payment }
         savePaymentMethod(updatePayment)
     }, [formik.values.payment])
@@ -100,5 +99,7 @@ const PaymentMethods = forwardRef<PaymentMethodsRef>((props, ref) => {
         </form >
     )
 })
+
+PaymentMethods.displayName = 'PaymentMethods'
 
 export default PaymentMethods

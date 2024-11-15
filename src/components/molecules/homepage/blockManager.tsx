@@ -9,9 +9,9 @@ const getBlockComponent = ({ __typename, ...rest }: { __typename: string }, inde
     let Block: any;
 
     switch (__typename) {
-        // case 'ComponentHomepageBannerListProducts':
-        //     Block = ListProductsBanner;
-        //     break;
+        case 'ComponentHomepageBannerListProducts':
+            Block = ListProductsBanner;
+            break;
         case 'ComponentHomepageSingleBanner':
             Block = SingleBanner;
             break;

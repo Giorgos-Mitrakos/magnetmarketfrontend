@@ -29,7 +29,7 @@ async function CategoryPageTemplate(props: pageProps) {
 
     return (
         <div className="w-full flex flex-col">
-            <SiteFeatures classes="grid lg:divide-x bg-transparent xs:grid-cols-2 gap-2 lg:grid-cols-4 w-full justify-center" />
+            <SiteFeatures/>
             <div className="grid pt-32 w-full bg-white">
                 <div className="grid lg:grid-cols-4 gap-4">
                     <div className="hidden lg:flex lg:flex-col bg-slate-100 p-4 rounded">

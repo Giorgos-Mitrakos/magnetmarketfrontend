@@ -10,7 +10,7 @@ interface ICustomInput {
     onChange: (e: ChangeEvent<any>) => void,
     onBlur: (e: FocusEvent<any, Element>) => void,
     value: string,
-    label: string
+    label?: string
 }
 
 const CustomInput = (props: ICustomInput) => {

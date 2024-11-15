@@ -816,4 +816,6 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
     )
 })
 
+Addresses.displayName='Addresses'
+
 export default Addresses

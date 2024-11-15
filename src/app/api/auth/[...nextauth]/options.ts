@@ -63,14 +63,14 @@ export const options: NextAuthOptions = {
 
       // console.log("account:", account, "session:", session, "token:", token, "user:", user, "profile:", profile)
       const isSignIn = user ? true : false;
-      if (user) {
-        try {
-          token.jwt = user.jwt;
-          token.id = user.user.id;
-        } catch (error) {
+      // if (user) {
+      //   try {
+      //     token.jwt = user.jwt;
+      //     token.id = user.user.id;
+      //   } catch (error) {
 
-        }
-      }
+      //   }
+      // }
       if (isSignIn && account && account.provider !== "credentials") {
         try {
           // console.log("Google Account >>>>>>>>>>>>>> ", account);

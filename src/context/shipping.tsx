@@ -118,6 +118,7 @@ export const ShippingContext = createContext<IShippingContext>({
 
 export const ShippingProvider = ({ children }: any) => {
     const { data: session, status } = useSession()
+    console.log("session---->", session)
     const { cartItems, cartTotal } = useContext(CartContext)
     const [addresses, setAddresses] = useState<IAddresses>({
         different_shipping: false,
@@ -211,7 +212,7 @@ export const ShippingProvider = ({ children }: any) => {
             (!addresses.different_shipping && addresses.billing.country && addresses.billing.state && addresses.billing.city))
             getShippingCost()
 
-    }, [addresses, shippingMethod])
+    }, [addresses, shippingMethod, cartItems])
 
     useEffect(() => {
         if (paymentMethod.payment && paymentMethod.payment !== "") {
@@ -276,10 +277,10 @@ export const ShippingProvider = ({ children }: any) => {
 
         if (isAllProductsAvailable) {
             const myHeaders = new Headers();
-
+            console.log("session----------->", session)
             myHeaders.append('Content-Type', 'application/json')
-            if (session?.user)
-                myHeaders.append("authorization", `Bearer ${session?.user?.jwt}`)
+            if (session && session.user)
+                myHeaders.append("authorization", `Bearer ${session.user.jwt}`)
 
             const myInit = {
                 method: "POST",
