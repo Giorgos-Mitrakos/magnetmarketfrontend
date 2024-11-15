@@ -86,7 +86,19 @@ const CartItemTemplate = ({ item }: { item: ICartItem }) => {
                 className="flex row-start-5 xs:row-start-1 xs:col-start-9 lg:col-start-12 col-span-2 lg:col-span-1 xs:col-span-1 border xs:border-none p-2 border-red-500 items-start lg:items-center justify-center">
                 <FaRegTrashCan className="text-3xl text-red-500" />
             </button>
-            <div className=" xs:col-span-3 lg:col-span-2 flex items-center justify-center text-gray-500 font-semibold">{data?.product.data.attributes.price} €</div>
+            {data?.product.data.attributes.is_sale ?
+                <div className="flex flex-col  xs:col-span-3 lg:col-span-2 items-center justify-center text-gray-500 font-semibold">
+                    <h3 className="text-sm line-through align-top mr-1 text-gray-500"
+                        aria-label={`${data?.product.data.attributes.price.toFixed(2)} €`}>{data?.product.data.attributes.price.toFixed(2)} €</h3>
+                    <h2 className="text-lg font-bold"
+                        aria-label={`${data?.product.data.attributes.sale_price.toFixed(2)} €`}>{data?.product.data.attributes.sale_price.toFixed(2)} €</h2>
+                </div>
+                : <div className="flex flex-col  xs:col-span-3 lg:col-span-2 items-center justify-center text-gray-500 font-semibold">
+                    <span className="text-lg font-bold"
+                        aria-label={`${data?.product.data.attributes.price.toFixed(2)} €`}>
+                        {data?.product.data.attributes.price.toFixed(2)} €</span>
+                </div>}
+            {/* <div className=" xs:col-span-3 lg:col-span-2 flex items-center justify-center text-gray-500 font-semibold">{data?.product.data.attributes.price} €</div> */}
             <div className=" xs:col-span-3 lg:col-span-2  flex items-center justify-center xs:justify-end">
                 <button type="button" id="decrement-button"
                     onClick={() => decreaseQuantity(item)}
@@ -105,7 +117,10 @@ const CartItemTemplate = ({ item }: { item: ICartItem }) => {
                     </svg>
                 </button>
             </div>
-            <div className="col-span-2 xs:col-span-3 lg:col-span-2 flex items-center justify-end text-siteColors-purple font-semibold">{data?.product.data.attributes.price && (item.quantity * data?.product.data.attributes.price).toFixed(2)} €</div>
+            <div className="col-span-2 xs:col-span-3 lg:col-span-2 flex items-center justify-end text-siteColors-purple font-semibold">{
+                data?.product.data.attributes.is_sale ?
+                    data?.product.data.attributes.sale_price && (item.quantity * data?.product.data.attributes.sale_price).toFixed(2) :
+                    data?.product.data.attributes.price && (item.quantity * data?.product.data.attributes.price).toFixed(2)} €</div>
 
         </div>
     )

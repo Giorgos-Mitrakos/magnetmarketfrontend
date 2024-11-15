@@ -2,7 +2,7 @@ import { FaPercent } from "react-icons/fa";
 
 export default function ApplyCoupon() {
     return (
-        <div className="relative w-full sm:w-1/2 lg:w-full bg-sky-400 p-4 rounded">
+        <div className="relative w-full bg-sky-400 p-4 rounded">
             <label htmlFor="coupon" className="flex items-center mb-2 font-semibold"
                 aria-label="Εκπτωτικός κωδικός">
                 <FaPercent className="mr-2 text-red-500" />

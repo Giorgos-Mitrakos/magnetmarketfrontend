@@ -44,8 +44,8 @@ const ProductFilter = (props: FilterProps) => {
 
     return (
         <div>
-            <h2 className='border-b-2 border-black py-2 text-lg uppercase'>{props.title}</h2>
-            <ul className='mt-4 max-h-32 overflow-y-auto custom-scrollbar cursor-pointer'>
+            <h2 className='border-b-2 border-black py-2 uppercase'>{props.title}</h2>
+            <ul className='mt-4 max-h-32 overflow-y-auto p-4 custom-scrollbar cursor-pointer border shadow-sm rounded-sm bg-white'>
                 {props.filters.map(filter => (
                     <li key={filter.slug ? filter.slug : filter.name} >
                         <input id={`${filter.name}-checkbox`} type="checkbox"

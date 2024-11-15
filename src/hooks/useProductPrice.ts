@@ -7,6 +7,7 @@ export default function useProductPrice(id: number) {
     const [profit, setProfit] = useState<number>()
     const [discount, setDiscount] = useState<number>()
     const [isSale, setIsSale] = useState<boolean>(false)
+    const [salePrice, setSalePrice] = useState<number>()
 
     const query = GET_PRODUCT_PRICE
     const variables = { id }
@@ -25,8 +26,9 @@ export default function useProductPrice(id: number) {
             setIsSale(is_sale)
             setProfit(price - salePrice)
             setDiscount((price - salePrice) * 100 / price)
+            setSalePrice(salePrice)
         }
     }, [isLoading, data])
 
-    return { profit, discount, isSale,isLoading, error, data }
+    return { profit, discount, isSale, salePrice, isLoading, error, data }
 }

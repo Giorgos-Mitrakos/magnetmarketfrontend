@@ -1,4 +1,4 @@
-import Menu from "@/components/molecules/menu";
+import Menu from "@/components/molecules/sideMenu";
 import ProductCard from "@/components/organisms/productCard";
 import { IcategoryProductsProps } from "@/lib/queries/productQuery";
 import CategoryPageHeader from "../organisms/categoryPageHeader";
@@ -30,13 +30,13 @@ async function CategoryPageTemplate(props: pageProps) {
     return (
         <div className="w-full flex flex-col">
             <SiteFeatures classes="grid lg:divide-x bg-transparent xs:grid-cols-2 gap-2 lg:grid-cols-4 w-full justify-center" />
-            <div className="grid pt-32 w-full bg-slate-100">
-                <div className="grid lg:grid-cols-4">
-                    <div className="mx-4 hidden lg:flex lg:flex-col">
+            <div className="grid pt-32 w-full bg-white">
+                <div className="grid lg:grid-cols-4 gap-4">
+                    <div className="hidden lg:flex lg:flex-col bg-slate-100 p-4 rounded">
                         <Menu category1={category1} category2={category2 ? category2 : null} category3={category3 ? category3 : null} />
                         <CategoryFilters category1={category1} category2={category2} category3={category3} allProducts={filteredProducts.allProducts} products={filteredProducts.products} searchParams={searchParams} />
                     </div>
-                    <div className="flex flex-col col-span-3 w-full">
+                    <div className="flex flex-col pr-4 col-span-3 w-full">
                         <CategoryPageHeader totalItems={filteredProducts.totalItems} />
                         <section className="grid gap-1 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 place-content-center">
                             {filteredProducts.pageProducts.map(product => (

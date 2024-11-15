@@ -79,11 +79,13 @@ export async function generateMetadata(
 
     const response = data as IcategoryMetadataProps
 
+    console.log(response.categories.data[0].attributes.image.data)
+
     let metadata: Metadata = {
         title: `MagnetMarket-${response.categories.data[0].attributes.name} `,
     }
 
-    if (response.categories.data[0].attributes.image.data.length>0) {
+    if (response.categories.data[0].attributes.image.data) {
         metadata.openGraph = { images: [`${process.env.NEXT_PUBLIC_API_URL} /${response.categories.data[0].attributes.image.data?.attributes.url}`] }
     }
 

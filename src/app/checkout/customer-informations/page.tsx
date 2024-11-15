@@ -1,12 +1,13 @@
 "use client"
-import * as Yup from 'yup'
-import { useFormik } from "formik";
-import Radio from '@/components/atoms/radio';
-import Addresses from '@/components/molecules/addresses';
-import { useState } from 'react';
-import CustomInput from '@/components/atoms/input';
+
+import Addresses, { FormInputRef } from '@/components/organisms/addresses'
+import { useRef } from 'react';
 import { useApiRequest } from '@/repositories/clientRepository';
 import { useSession } from 'next-auth/react';
+import CartAside from '@/components/organisms/cartItemsAside';
+import ApplyCoupon from '@/components/atoms/discountCoupon';
+import CartSummary from '@/components/atoms/cartSummary';
+import { useRouter } from 'next/navigation';
 
 
 export interface IProfile {
@@ -30,9 +31,8 @@ export interface IProfile {
             doy: string,
             companyName: string,
             businessActivity: string,
-            title: string,
             isInvoice: boolean
-        }[],
+        },
         billing_address: {
             id: number,
             firstname: string,
@@ -48,29 +48,57 @@ export interface IProfile {
             doy: string,
             companyName: string,
             businessActivity: string,
-            title: string,
             isInvoice: boolean
-        }[]
+        }
     }
 }
 
 const CustomerInfo = () => {
+    const router = useRouter()
 
     const { data: session, status } = useSession()
 
     const { data, loading, error }: { data: IProfile, loading: boolean, error: any } = useApiRequest({ api: "/api/user-address/getUser", jwt: `${session?.user?.jwt}` })
 
-    console.log("data:", data)
+    const formikRef = useRef<FormInputRef | null>(null);
+
+    const handleNextOnClik = () => {
+        formikRef.current?.submitForm()
+        setTimeout(() => {
+            if (formikRef.current?.isSubmitting) {
+                router.push('/checkout/order-informations')
+            }
+        }, 100);
+
+    }
 
     return (
-        <div className='grid md:grid-cols-2'>
-            {loading ?
-                <div>Loading...</div>
-                :
-                <div className=' m-4 '>
-                    <h2 className='text-lg mb-2 font-medium text-siteColors-purple'>Στοιχεία Πελάτη</h2>
-                    <Addresses user={data.user} />
-                </div>}
+        <div className='grid mx-auto max-w-lg space-y-8 md:max-w-none md:grid-cols-2 md:space-y-0 md:gap-8'>
+            <div>
+                {loading ?
+                    <div>Loading...</div>
+                    :
+                    <div>
+                        <h2 className='text-lg mb-2 font-medium text-siteColors-purple'>Στοιχεία Πελάτη</h2>
+                        <Addresses user={data.user} ref={formikRef} />
+                    </div>}
+            </div>
+            <div className='space-y-2 md:col-start-2'>
+                <CartAside />
+                <div className="bg-slate-200 rounded">
+                    <CartSummary />
+                </div>
+                <div className='max-w-sm'>
+                    <ApplyCoupon />
+                </div>
+            </div>
+
+            <button onClick={handleNextOnClik}
+                className="md:row-start-2 md:col-start-2 flex justify-center items-center px-4 py-2 w-full rounded border md:text-slate-100 text-lg font-semibold
+                bg-gradient-to-b from-siteColors-pink via-siteColors-purple to-siteColors-pink text-white
+                md:bg-gradient-to-br md:from-siteColors-lightblue md:to-siteColors-blue
+                hover:bg-gradient-to-b hover:from-siteColors-pink hover:via-siteColors-purple hover:to-siteColors-pink hover:text-white">Επόμενο</button>
+
         </div>
     )
 }

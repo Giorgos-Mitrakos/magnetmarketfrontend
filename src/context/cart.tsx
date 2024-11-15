@@ -20,7 +20,7 @@ interface ICartItemsContext {
   increaseQuantity: (cartItem: ICartItem) => void;
   decreaseQuantity: (cartItem: ICartItem) => void;
   clearCart: () => void;
-  getCartTotal: () => number;
+  cartTotal: number;
 }
 
 export const CartContext = createContext<ICartItemsContext>({
@@ -30,15 +30,16 @@ export const CartContext = createContext<ICartItemsContext>({
   increaseQuantity: () => { },
   decreaseQuantity: () => { },
   clearCart: () => { },
-  getCartTotal: () => 0
+  cartTotal: 0
 })
 
 export const CartProvider = ({ children }: any) => {
   const [firstRender, setFirstRender] = useState(true);
   const [cartItems, setCartItems] = useState<ICartItem[]>([])
+  const [cartTotal, setCartTotal] = useState(0);
 
   const synchronizeCart = async (cart: ICartItem[]) => {
-    
+
     const query = GET_CART_PRODUCTS
 
     const itemIds = cart.map(item => item.id)
@@ -133,12 +134,39 @@ export const CartProvider = ({ children }: any) => {
     setCartItems([]);
   };
 
-  const getCartTotal = () => {
-    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-  };
+  useEffect(() => {
+    const getCartTotal = async () => {
+      const myHeaders = new Headers();
+
+      myHeaders.append('Content-Type', 'application/json')
+
+      const myInit = {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify({ cartItems })
+        // mode: "cors",
+        // cache: "default",
+      };
+
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/shipping/findCartTotal`,
+        myInit,
+      )
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+
+      const json = await response.json()
+      setCartTotal(json.cartTotal)
+    };
+
+    if (cartItems)
+      getCartTotal()
+  }, [cartItems])
+
 
   useEffect(() => {
-    
+
     if (firstRender) return;
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }, [cartItems, firstRender]);
@@ -171,7 +199,7 @@ export const CartProvider = ({ children }: any) => {
         increaseQuantity,
         decreaseQuantity,
         clearCart,
-        getCartTotal,
+        cartTotal,
       }}
     >
       {children}

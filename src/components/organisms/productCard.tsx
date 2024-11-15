@@ -50,8 +50,8 @@ const ProductCard = (props: ProductCardProps) => {
     const brand = product.brand
 
     return (
-        <div className="overflow-hidden ">
-            <div className="grid h-full relative grid-rows-cardLayout shadow-md hover:shadow-lg bg-white rounded-lg m-1 p-4">
+        <div className="relative py-2 px-1 overflow-hidden">
+            <div className="grid h-full grid-rows-cardLayout shadow-md hover:shadow-lg bg-white rounded-lg m-1 p-4">
                 <ProductCardHead brand={brand} id={props.prod.id} />
                 <Link className="grid w-full place-content-center relative" href={`/product/${product.slug}`}
                     aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${product.name}`}>

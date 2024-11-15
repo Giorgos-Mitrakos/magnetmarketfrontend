@@ -9,6 +9,7 @@ query getCategoryProducts($filters:ProductFiltersInput!,$sort:[String!]){
         attributes{
             name
             slug
+            weight
             prod_chars {
               name
               value
@@ -251,6 +252,7 @@ query getCategoryProducts($slug:String!){
           structuredData
         }
         prod_chars{
+          id
           name
           value
         }
@@ -525,8 +527,8 @@ export interface IGetCartProductsProps {
         barcode: string
         price: number
         sale_price: number
-        is_sale:boolean
-        is_hot:boolean
+        is_sale: boolean
+        is_hot: boolean
         weight: number
         height: number
         width: number
@@ -593,4 +595,110 @@ query getProductPrice($filters:ProductFiltersInput!){
       }
     }
 }`
+
+export const GET_HOT_OR_DEALS_PRODUCTS = gql`
+query getProductPrice($filters:ProductFiltersInput!,$sort:[String!]){
+    products(filters: $filters,pagination:{limit:10},sort:$sort){
+      data{
+        id
+        attributes{
+          name
+          slug
+          sku
+          mpn
+          barcode
+          price
+          sale_price
+          is_sale
+          is_hot
+          weight
+          height
+          width
+          length
+          status
+          brand {
+            data{
+                  attributes{
+                    name
+                    slug
+                    logo{
+                      data{
+                        attributes{
+                          name
+                          url
+                          formats
+                        }
+                      }
+                    }
+                  }
+                }
+          }
+          image{
+            data {
+              attributes {
+                url
+                alternativeText
+                width
+                height
+              }
+            }
+          }
+        }
+      }
+    }
+}`
+
+export interface IGetHotOrDealsProductsProps {
+  products: {
+    data: [{
+      id: number
+      attributes: {
+        name: string
+        slug: string
+        sku: string
+        mpn: string
+        barcode: string
+        price: number
+        sale_price: number
+        is_sale: boolean
+        is_hot: boolean
+        weight: number
+        height: number
+        width: number
+        length: number
+        status: string
+        brand: {
+          data: {
+            attributes: {
+              name: string,
+              slug: string
+              logo: {
+                data: {
+                  attributes: {
+                    name: string,
+                    url: string,
+                    formats: {
+                      thumbnail: IimageProps,
+                      small: IimageProps
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        image: {
+          data: {
+            attributes: {
+              url: string
+              alternativeText: string
+              width: number
+              height: number
+            }
+          }
+        }
+      }
+    }]
+  }
+}
 

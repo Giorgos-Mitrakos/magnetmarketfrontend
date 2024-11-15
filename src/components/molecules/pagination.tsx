@@ -109,7 +109,7 @@ function PaginationBar({ totalItems, currentPage, itemsPerPage }: { totalItems: 
         pagesMobile.push(
             <li key={page} className="px-4 py-2 bg-slate-50">
                 <button
-                    className={`flex items-center justify-center w-8 h-8 text-lg text-siteColors-blue font-semibol`}
+                    className={`flex items-center justify-center w-8 h-8 text-lg text-siteColors-blue font-semibold`}
                     tabIndex={0}
                     onKeyDown={() => handleItemClick(page)}
                     onClick={() => handleItemClick(page)}>

@@ -1,8 +1,7 @@
 'use client'
 
-import Addresses from "@/components/molecules/addresses";
-import UserInfo from "@/components/molecules/userInfo";
-import Profile from "@/components/organisms/profileTabContent";
+import UserOrders from "@/components/molecules/userOrders";
+import ProfileAddresses from "@/components/organisms/profileAddresses";
 import { useApiRequest } from "@/repositories/clientRepository";
 import { signOut, useSession } from "next-auth/react";
 import { ReactNode, useReducer, useState } from "react";
@@ -30,55 +29,58 @@ const TabContent = ({ id, activeTab, children }: { id: string, activeTab: string
 
 const tabs = [
     { title: 'Το Προφίλ μου', content: "Profile", icon: <AiOutlineUser /> },
-    { title: 'Διευθύνσεις Χρέωσης', content: 'BillingAddresses', icon: <AiOutlineUser /> },
-    { title: 'Διευθύνσεις Αποστολής', content: 'ShippingAddresses', icon: <AiOutlineUser /> },
-    { title: 'Παραγγελίες', content: 'Orders', icon: <AiOutlineAppstore /> },
-    { title: 'Οι πόντοι μου', content: 'MyPoints', icon: <FaCoins /> },
-    { title: 'Είδα Πρόσφατα', content: 'Recently', icon: <AiOutlineHistory /> }
+    // { title: 'Διευθύνσεις Χρέωσης', content: 'BillingAddresses', icon: <AiOutlineUser /> },
+    // { title: 'Διευθύνσεις Αποστολής', content: 'ShippingAddresses', icon: <AiOutlineUser /> },
+    { title: 'Οι Παραγγελίες μου', content: 'Orders', icon: <AiOutlineAppstore /> },
+    // { title: 'Οι πόντοι μου', content: 'MyPoints', icon: <FaCoins /> },
+    // { title: 'Είδα Πρόσφατα', content: 'Recently', icon: <AiOutlineHistory /> }
 ]
 
 const TabContentList = ({ state, session }: any) => {
     interface IProfile {
         user: {
             info: {
-                firstName: string;
-                lastName: string;
+                id: string,
+                username: string;
                 email: string
-                telephone: string,
-                mobilePhone: string
             },
             shipping_address: {
                 id: number,
                 firstname: string,
                 lastname: string,
+                telephone: string;
+                mobilePhone: string;
                 street: string,
                 city: string,
                 state: string,
-                zipCode: number,
+                zipCode: string,
                 country: string,
-                afm: number,
+                afm: string,
                 doy: string,
                 companyName: string,
                 businessActivity: string,
                 title: string,
                 isInvoice: boolean
-            }[],
+            },
             billing_address: {
                 id: number,
                 firstname: string,
                 lastname: string,
+                telephone: string;
+                mobilePhone: string;
                 street: string,
                 city: string,
                 state: string,
-                zipCode: number,
+                zipCode: string,
                 country: string,
-                afm: number,
+                afm: string,
                 doy: string,
                 companyName: string,
                 businessActivity: string,
                 title: string,
                 isInvoice: boolean
-            }[]
+                different_shipping: boolean;
+            }
         }
     }
 
@@ -89,31 +91,24 @@ const TabContentList = ({ state, session }: any) => {
             {loading && !data ? <div>Loading</div> :
                 <div className="w-full text-center">
                     <TabContent id="Profile" activeTab={state.tabs[state.activeTab]?.content}>
-                        <UserInfo user={session?.user} info={data.user.info} />
-                    </TabContent>
-                    <TabContent id="BillingAddresses" activeTab={state.tabs[state.activeTab]?.content}>
-                        <div className="grid grid-cols-2">
-                            {data?.user.billing_address.map(address => (
-                                <Addresses key={address.id} address={address} type="billing" />
-                            ))}
-                        </div>
-                    </TabContent>
-                    <TabContent id="ShippingAddresses" activeTab={state.tabs[state.activeTab]?.content}>
-                        <div className="grid grid-cols-2">
-                            {data?.user.shipping_address.map(address => (
-                                <Addresses key={address.id} address={address} type="shipping" />
-                            ))}
+                        <div className="grid">
+                            <ProfileAddresses key={data.user.info.id}
+                                userInfo={data.user.info}
+                                billingAddress={data.user.billing_address}
+                                shippingAddress={data.user.shipping_address}
+                                jwt={session.user.jwt} />
+
                         </div>
                     </TabContent>
                     <TabContent id="Orders" activeTab={state.tabs[state.activeTab]?.content}>
-                        <p>Tab Orders!</p>
+                        <UserOrders jwt={session.user.jwt}/>
                     </TabContent>
-                    <TabContent id="MyPoints" activeTab={state.tabs[state.activeTab]?.content}>
+                    {/* <TabContent id="MyPoints" activeTab={state.tabs[state.activeTab]?.content}>
                         <p>Tab MyPoints!</p>
                     </TabContent>
                     <TabContent id="Recently" activeTab={state.tabs[state.activeTab]?.content}>
                         <p>Tab Recently!</p>
-                    </TabContent>
+                    </TabContent> */}
                 </div>}
         </>)
 }
@@ -131,10 +126,10 @@ export default function Account() {
 
     return (
         <div className="flex">
-            <ul className=" text-siteColors-purple min-w-fit bg-slate-100">
+            <ul className=" text-siteColors-purple min-w-fit mr-4 bg-slate-100">
                 {state.tabs.map((tab, index) => (
                     <li
-                        className=" border-b-2 border-r-2 p-4"
+                        className=" border-b-2 border-r-2 p-4 cursor-pointer"
                         key={index}
                         onClick={() => handleTabClick(index)}
                     >

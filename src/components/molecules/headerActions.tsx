@@ -24,7 +24,7 @@ const HeaderActions = ({ user }: any) => {
     const { cartItems } = useContext(CartContext)
     // console.log(session, status)
     return (
-        <div className="flex h-full w-auto">
+        <div className="hidden lg:flex h-full w-auto mx-6">
             {status !== "loading" && <div className="flex flex-row-reverse w-full justify-between xs:grid xs:grid-rows-2">
                 <div className="flex justify-start items-center">
                     {/* <SearchInput /> */}
@@ -32,7 +32,7 @@ const HeaderActions = ({ user }: any) => {
                         aria-label="Καρδιά" />}
                         url='https://www.google.com'
                         aria-label="Τα αγαπημένα σου!" />
-                    <div className="inline-flex items-center group">
+                    <div className="inline-flex items-center group relative">
                         <IconLink icon={<FaOpencart
                             aria-label="Καλάθι" />}
                             url='/shopping-cart'

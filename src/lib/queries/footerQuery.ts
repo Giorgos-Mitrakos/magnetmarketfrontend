@@ -17,7 +17,8 @@ export const GET_FOOTER = gql`
             links{
               id
               label
-              url
+              href
+              target
               isLink
             }
           }
@@ -42,7 +43,8 @@ export interface IfooterProps {
           links: [{
             id: string
             label: string
-            url: string
+            href: string
+            target:string
             isLink: boolean
           }]
         }]

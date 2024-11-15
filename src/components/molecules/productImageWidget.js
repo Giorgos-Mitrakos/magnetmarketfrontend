@@ -1,11 +1,12 @@
 'use client'
 // Import Swiper React components
 import { useRef, useEffect, useState } from 'react';
+import NextImage from '../atoms/nextImage';
 import { register } from 'swiper/element/bundle';
 
 register();
 
-import NextImage from '../atoms/nextImage';
+
 // import Badge from '../shared/badge';
 
 // interface ProductImageProps {

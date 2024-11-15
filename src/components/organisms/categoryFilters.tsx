@@ -163,7 +163,7 @@ const CategoryFilters = async (props: CategoryFiltersProps) => {
 
     return (
         <div className='mt-4 space-y-4'>
-            <ProductFilter title="Εταιρίες" filterBy="brands" filters={brands} />
+            {brands.length>0 && <ProductFilter title="Εταιρίες" filterBy="brands" filters={brands} />}
             {
                 filters.length > 0 &&
                 filters.map(filter => (

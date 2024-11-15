@@ -39,7 +39,7 @@ function ProductAddToCart({ product }: ProductProps) {
     }
 
     return (
-        <div className="fixed md:static shadow-topShadow md:shadow-none bottom-16 left-0 justify-center w-full bg-white z-10">
+        <div className="fixed md:static pb-4 shadow-topShadow md:shadow-none bottom-14 left-0 justify-center w-full bg-white z-10">
 
             <div className="flex md:hidden h-14 my-1 justify-between p-4 items-center">
                 {data?.product.data.attributes.is_sale ?
@@ -61,7 +61,7 @@ function ProductAddToCart({ product }: ProductProps) {
                     aria-label={product.attributes.image.data.attributes.name || "Φωτογραφία Προϊόντος"}
                     quality={75} />
             </div>
-            <div className="w-full flex">
+            <div className="w-full rounded-lg px-2 flex">
                 <button
                     onClick={() => handleAddProductClick(item)}
                     className="flex justify-center items-center px-4 py-2 w-full rounded border md:text-slate-100 text-lg font-semibold

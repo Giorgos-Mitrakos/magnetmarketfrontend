@@ -1,18 +1,18 @@
 'use client'
 
-interface RadioProps {
+type RadioProps = {
     id: string
-    label: string,
     name: string,
-    isChecked: boolean,
-    onChange: () => void
+    value: string,
+    checked: boolean,
+    onChange: (e?: React.ChangeEvent<HTMLInputElement>) => void
 }
 
-const Radio = ({ id, name, label, isChecked, onChange }: RadioProps) => (
+const Radio = ({ id, name, checked, onChange, value, ...props }: RadioProps) => (
     <div className="flex gap-2 items-center">
-        <input type="radio" id={id} name={name} checked={isChecked} onChange={onChange}
-            className="w-4 h-4 border-2 border-blue-500 rounded-full" />
-        <label htmlFor={id} className="text-sm tracking-wide">{label}</label>
+        <input type="radio" id={id} name={name} checked={checked} onChange={onChange} {...props}
+            className="w-4 h-4 border-2 border-blue-500 rounded-full" value={value} />
+        <label htmlFor={id} className="text-sm tracking-wide">{value}</label>
     </div>
 );
 

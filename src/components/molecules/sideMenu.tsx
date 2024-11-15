@@ -17,9 +17,9 @@ const Menu = async (props: MenuProps) => {
 
     return (
         <div>
-            <h2 className='border-b-2 border-black py-2 text-lg'>{response.categories.data[0].attributes.name}</h2>
+            <h2 className='border-b-2 border-black py-2 text-lg'>{response.categories.data[0]?.attributes.name}</h2>
             <ul className='mt-4'>
-                {response.categories.data[0].attributes.categories.data.map(sub => (
+                {response.categories.data[0]?.attributes.categories.data.map(sub => (
                     <li key={sub.attributes.slug} >
                         <Link href={`${process.env.NEXT_URL}/category/${props.category1}/${sub.attributes.slug}`}
                             className='font-semibold text-sm'>{sub.attributes.name}</Link>

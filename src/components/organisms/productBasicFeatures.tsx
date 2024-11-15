@@ -151,17 +151,20 @@ const ProductBasicFeatures = ({ product }: ProductProps) => {
   return (
     <div className="flex flex-col p-4">
       <div className="flex h-8 relative">
-        {product.attributes.brand.data.attributes.logo.data !== null ? <Image className="flex object-contain object-left"
-          aria-label={`Λογότυπο της εταιρίας ${product.attributes.brand.data.attributes.name}`}
-          src={getStrapiMedia(product.attributes.brand.data.attributes.logo.data.attributes.url)}
-          fill
-          // width={36}
-          // height={36}
-          alt="Test"
-        /> :
-          <h2 className="text-xl text-slate-500 font-bold uppercase"
-            aria-label={`Εταιρία: ${product.attributes.brand.data.attributes.name}`}>{product.attributes.brand.data.attributes.name}</h2>
-        }
+        {product.attributes.brand.data &&
+          <div>
+            {
+              product.attributes.brand.data.attributes.logo.data !== null ? <Image className="flex object-contain object-left"
+                aria-label={`Λογότυπο της εταιρίας ${product.attributes.brand.data.attributes.name}`}
+                src={getStrapiMedia(product.attributes.brand.data.attributes.logo.data.attributes.url)}
+                fill
+                // width={36}
+                // height={36}
+                alt="Test"
+              /> :
+                <h2 className="text-xl text-slate-500 font-bold uppercase"
+                  aria-label={`Εταιρία: ${product.attributes.brand.data.attributes.name}`}>{product.attributes.brand.data.attributes.name}</h2>
+            }</div>}
       </div>
       <h1 className="text-xl sm:text-2xl text-siteColors-purple font-semibold"
         aria-label={`Τίτλος: ${product.attributes.name}`}>{product.attributes.name}</h1>

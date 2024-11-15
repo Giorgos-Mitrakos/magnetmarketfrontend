@@ -26,7 +26,7 @@ function SearchInput() {
                                 className='text-siteColors-purple text-2xl mb-1' />}
                     </button>}
                 <input type="search" placeholder="Αναζήτηση" value={text} onChange={(e) => setText(e.target.value)}
-                    className="px-3 w-64 bg-inherit focus:outline-0" 
+                    className="px-2 w-80 bg-inherit outline-none border-none" 
                     aria-label="Πεδίο αναζήτησης προϊόντων"/>
             </form>
             <IconLink icon={<AiOutlineSearch />}

@@ -7,7 +7,8 @@ export interface FooterSectionProps {
             id: string,
             label: string,
             isLink: boolean,
-            url: string
+            href: string,
+            target:string
         }
     ]
 }
@@ -21,7 +22,7 @@ const FooterSection = (props: FooterSectionProps) => {
                 {props.links.map(link => (
                     <li key={link.id} className='w-auto'>
                         {link.isLink ?
-                            <Link href={link.url} className='relative after:duration-300
+                            <Link href={link.href} target={link.target} className='relative after:duration-300
                             after:absolute after:content-[""] after:h-[1px] after:bg-siteColors-purple after:w-0 hover:after:w-full
                             after:left-0 after:-bottom-[2px] after:rounded-xl'
                             aria-label={link.label}>

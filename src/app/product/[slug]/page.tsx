@@ -37,16 +37,16 @@ export default async function Product({ params }:
       slug: "/"
     },
     {
-      title: data.products.data[0]?.attributes.category.data.attributes.parents.data[0].attributes.parents.data[0].attributes.name,
-      slug: `/category/${data.products.data[0]?.attributes.category.data.attributes.parents.data[0].attributes.parents.data[0].attributes.slug}`
+      title: data.products.data[0]?.attributes.category.data.attributes.parents.data[0]?.attributes.parents.data[0].attributes.name,
+      slug: `/category/${data.products.data[0]?.attributes.category.data.attributes.parents.data[0]?.attributes.parents.data[0].attributes.slug}`
     },
     {
-      title: data.products.data[0]?.attributes.category.data.attributes.parents.data[0].attributes.name,
-      slug: `/category/${data.products.data[0]?.attributes.category.data.attributes.parents.data[0].attributes.parents.data[0].attributes.slug}/${data.products.data[0]?.attributes.category.data.attributes.parents.data[0].attributes.slug}`
+      title: data.products.data[0]?.attributes.category.data.attributes.parents.data[0]?.attributes.name,
+      slug: `/category/${data.products.data[0]?.attributes.category.data.attributes.parents.data[0]?.attributes.parents.data[0]?.attributes.slug}/${data.products.data[0]?.attributes.category.data.attributes.parents.data[0]?.attributes.slug}`
     },
     {
       title: data.products.data[0]?.attributes.category.data.attributes.name,
-      slug: `/category/${data.products.data[0]?.attributes.category.data.attributes.parents.data[0].attributes.parents.data[0].attributes.slug}/${data.products.data[0]?.attributes.category.data.attributes.parents.data[0].attributes.slug}/${data.products.data[0]?.attributes.category.data.attributes.slug}`
+      slug: `/category/${data.products.data[0]?.attributes.category.data.attributes.parents.data[0]?.attributes.parents.data[0].attributes.slug}/${data.products.data[0]?.attributes.category.data.attributes.parents.data[0]?.attributes.slug}/${data.products.data[0]?.attributes.category.data.attributes.slug}`
     },
     {
       title: data.products.data[0]?.attributes.name,

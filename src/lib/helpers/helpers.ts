@@ -94,7 +94,7 @@ export function filtersProducts(products: IcategoryProductsProps, searchParams: 
     for (const [key, value] of Object.entries(searchParams)) {
         if (key !== "sort" && key !== "pageSize" && key !== "page") {
             if (key === "brands") {
-                filteredProducts = filteredProducts.filter(product => value.includes(product.attributes.brand.data.attributes.slug))
+                filteredProducts = filteredProducts.filter(product => value.includes(product.attributes.brand.data?.attributes.slug))
 
             }
             else {

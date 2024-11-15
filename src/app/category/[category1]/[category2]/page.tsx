@@ -1,4 +1,4 @@
-import Menu from "@/components/molecules/menu";
+import Menu from "@/components/molecules/sideMenu";
 import CategoryPageTemplate from "@/components/templates/categoryPage";
 import { createFiltersForDbQuery } from "@/lib/helpers/helpers";
 import { GET_CATEGORIES_MAPPING, GET_CATEGORY_METADATA, IcategoriesMappingProps, IcategoryMetadataProps } from "@/lib/queries/categoryQuery";
@@ -85,7 +85,7 @@ export async function generateMetadata(
         title: `MagnetMarket-${response.categories.data[0].attributes.name}`,
     }
 
-    if (response.categories.data[0].attributes.image.data.length>0) {
+    if (response.categories.data[0].attributes.image.data) {
         console.log(response.categories.data[0])
         metadata.openGraph = { images: [`${process.env.NEXT_PUBLIC_API_URL}/${response.categories.data[0].attributes.image.data?.attributes.url}`] }
     }

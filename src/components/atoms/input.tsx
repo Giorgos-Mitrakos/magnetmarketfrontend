@@ -18,7 +18,7 @@ const CustomInput = (props: ICustomInput) => {
     return (
         <div className="h-full w-full">
             <input
-                className='block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent focus:outline-none focus:ring-0 focus:border-blue-600 peer'
+                className='block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent focus:outline-none focus:ring-0 peer focus:ring-blue-500 focus:border-blue-500'
                 aria-label={props.aria_label}
                 type={props.type}
                 id={props.id}

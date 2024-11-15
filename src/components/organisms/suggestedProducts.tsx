@@ -32,7 +32,7 @@ const SuggestedProducts = async ({ product }: ProductProps) => {
         price: product.attributes.price,
         salePrice: product.attributes.sale_price,
         wholesale: minSupplierPrice.wholesale,
-        brand: product.attributes.brand.data.attributes.name
+        brand: product.attributes.brand.data?.attributes.name
     }
 
     const productChars = productFilters.attributes.map(att => {

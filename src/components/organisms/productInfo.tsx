@@ -15,13 +15,14 @@ const ProductInfo = ({ description, chars }: ProductDescriptionProps) => {
 
     const [active, setActive] = useState(description ? 'description' : chars ? "specification" : null);
 
-    const htmlString = description
+    const htmlString = description ? description
         .replaceAll('&lt;', '<')
         .replaceAll('&gt;', '>')
         .replaceAll('&amp;', '&')
         .replaceAll('&quot;', '"')
         .replaceAll('&amp;nbsp;', '\n \n')
         .replaceAll('class;', 'className')
+        : ''
 
     const sanitizedData = () => ({
         __html: DOMPurify.sanitize(htmlString)
