@@ -277,7 +277,6 @@ export const ShippingProvider = ({ children }: any) => {
 
         if (isAllProductsAvailable) {
             const myHeaders = new Headers();
-            console.log("session----------->", session)
             myHeaders.append('Content-Type', 'application/json')
             if (session && session.user)
                 myHeaders.append("authorization", `Bearer ${session.user.jwt}`)
