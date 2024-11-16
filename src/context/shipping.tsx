@@ -118,7 +118,7 @@ export const ShippingContext = createContext<IShippingContext>({
 
 export const ShippingProvider = ({ children }: any) => {
     const { data: session, status } = useSession()
-    console.log("session---->", session)
+    
     const { cartItems, cartTotal } = useContext(CartContext)
     const [addresses, setAddresses] = useState<IAddresses>({
         different_shipping: false,

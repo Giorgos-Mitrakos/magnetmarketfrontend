@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
 
   const peiraeus = request.nextUrl.searchParams.get('peiraeus')
-  console.log(ticket)
+  
   redirect('/checkout/confirm')
   return new Response(`Welcome to my Next application ${peiraeus}`);
 }
