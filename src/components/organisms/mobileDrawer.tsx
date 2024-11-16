@@ -5,7 +5,7 @@ import { useNoRevalideteQuery } from "@/repositories/clientRepository"
 import Link from "next/link"
 import { SetStateAction, useContext, useEffect, useState } from "react"
 import NextImage from "../atoms/nextImage"
-import { FaArrowLeftLong } from "react-icons/fa6";
+import { FaArrowLeftLong, FaRegImage } from "react-icons/fa6";
 import { MenuContext } from "@/context/menu"
 
 interface IMenuCategoryProps {
@@ -50,7 +50,7 @@ function Sub2categoryDrawer({ category, subcategory }:
     return (
         <div className="h-screen absolute top-0">
             <div className="p-4">
-            <h2 className="text-lg text-center text-white rounded font-semibold mb-4 bg-siteColors-blue p-2">Κατηγορίες</h2>
+                <h2 className="text-lg text-center text-white rounded font-semibold mb-4 bg-siteColors-blue p-2">Κατηγορίες</h2>
                 <h3 className="text text-center rounded font-semibold">{subcategory?.attributes.name}</h3>
                 <button className="flex items-center px-4 w-auto text-sm mb-4"
                     onClick={() => closeSubCategoryDrawer()} ><FaArrowLeftLong className="w-4 h-4 mr-2" /> Πίσω</button>
@@ -61,7 +61,9 @@ function Sub2categoryDrawer({ category, subcategory }:
                             <Link onClick={() => closeMenu()} href={`/category/${category}/${subcategory.attributes.slug}/${cat.attributes.slug}`}>
                                 <div className="flex flex-col justify-between items-center ">
                                     <p className="rounded-full w-24 h-24 border-2 p-4 bg-white hover:shadow">
-                                        <NextImage media={cat.attributes.image.data.attributes} width={80} height={80} />
+                                        {cat.attributes.image.data ?
+                                            <NextImage media={cat.attributes.image.data.attributes} width={80} height={80} />
+                                            : <FaRegImage className="w-16 h-16 self-center" />}
                                     </p>
                                     <p className="break-words text-wrap text-center text-sm ">{cat.attributes.name}</p>
                                 </div>
@@ -105,7 +107,9 @@ function SubcategoryDrawer({ category }: {
                             <button onClick={() => handleOnclickSub(cat)}>
                                 <div className="flex flex-col items-center">
                                     <p className="flex rounded-full w-24 h-24 border-2 p-4 bg-white items-center hover:shadow-sm">
-                                        <NextImage media={cat.attributes.image.data.attributes} width={80} height={80} />
+                                        {cat.attributes.image.data ?
+                                            <NextImage media={cat.attributes.image.data.attributes} width={80} height={80} /> :
+                                            <FaRegImage className="w-16 h-16 self-center" />}
                                     </p>
                                     <p className="break-words text-wrap text-center text-sm mt-2">{cat.attributes.name}</p>
                                 </div>
@@ -147,7 +151,9 @@ export default function MobileDrawer() {
                             <button onClick={() => handleOnclickSub(cat)}>
                                 <div className="flex flex-col justify-between items-center ">
                                     <p className="rounded-full w-24 h-24 border-2 p-4 bg-white hover:shadow-sm">
-                                        <NextImage media={cat.attributes.image.data.attributes} width={80} height={80} />
+                                        {cat.attributes.image.data ?
+                                            <NextImage media={cat.attributes.image.data.attributes} width={80} height={80} /> :
+                                            <FaRegImage className="w-16 h-16 self-center" />}
                                     </p>
                                     <p className="break-words text-wrap text-center text-sm ">{cat.attributes.name}</p>
                                 </div>

@@ -20,12 +20,13 @@ export default function Header({ user }: { user: any }) {
                 <HeaderActions user={user} />
             </header>
             <div className="flex content-start">
-                <div className='hidden relative lg:flex max-w-fit items-center mb-2 ml-8 border-siteColors-lightblue text-lg cursor-pointer'
-                    onMouseEnter={() => setOpenMenu(true)}
-                    onMouseLeave={() => setOpenMenu(false)}>
-                    <FaBarsStaggered className='mr-2' />
-                    <span className=' font-bold'>ΠΡΟΙΟΝΤΑ</span>
-                    <MainMenu isMenuOpen={openMenu} />
+                <div className='hidden lg:flex relative w-full'>
+                    <div className="flex max-w-fit items-center z-50 mb-2 ml-8 border-siteColors-lightblue text-lg cursor-pointer" onMouseEnter={() => setOpenMenu(true)}
+                        onMouseLeave={() => setOpenMenu(false)}>
+                        <FaBarsStaggered className='mr-2' />
+                        <span className=' font-bold'>ΠΡΟΙΟΝΤΑ</span>
+                        <MainMenu isMenuOpen={openMenu} />
+                    </div>
                 </div>
             </div>
         </div>

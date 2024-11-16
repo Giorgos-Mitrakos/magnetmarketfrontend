@@ -13,9 +13,6 @@ const MainMenu = ({ isMenuOpen }: { isMenuOpen: boolean }) => {
 
     const menu = menuData as IMenuProps
 
-    // console.log(menu)
-
-
     return (
         <section className={`absolute ${isMenuOpen ? "flex" : "hidden"} top-6 max-w-7xl z-20 bg-white border-2 border-slate-200 cursor-default`}>
             <ul className="flex flex-col pt-4 border-slate-200">
@@ -33,7 +30,7 @@ const MainMenu = ({ isMenuOpen }: { isMenuOpen: boolean }) => {
             {menu && menu.categories.data.map(cat => (
                 <div key={cat.attributes.slug}>
                     <ul className={`${active === cat.attributes.slug ? "grid" : "hidden"}
-                        grid-cols-5 w-full max-w-full min-h-full z-10`}>
+                        grid-cols-5 w-full max-w-full min-h-full z-10 bg-white`}>
                         {cat.attributes.categories.data.map(sub => (
                             <li key={sub.attributes.slug} className="w-44 mt-4 pl-8">
                                 <Link href={`/category/${cat.attributes.slug}/${sub.attributes.slug}`}>
