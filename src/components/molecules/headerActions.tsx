@@ -22,7 +22,7 @@ const HeaderActions = ({ user }: any) => {
     const { data: session, status } = useSession()
 
     const { cartItems } = useContext(CartContext)
-    // console.log(session, status)
+    
     return (
         <div className="hidden lg:flex h-full w-auto mx-6">
             {status !== "loading" && <div className="flex flex-row-reverse w-full justify-between xs:grid xs:grid-rows-2">

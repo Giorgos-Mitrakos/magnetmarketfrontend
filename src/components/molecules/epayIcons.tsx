@@ -10,7 +10,7 @@ const EpayIcons = () => {
                 height={32} />
             <Image src={Mastercard} alt="Mastercard" 
                 height={48} />
-            <Image src={Maestro} height={48} alt="Maestro"/>
+            <Image src={Maestro} height={52} alt="Maestro"/>
         </div>
     );
 

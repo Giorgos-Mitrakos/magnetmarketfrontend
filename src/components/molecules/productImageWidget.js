@@ -39,7 +39,7 @@ const ProductImageWidget = ({ images }) => {
     }
 
     return (
-        <div className='max-w-full md:pr-8 mx-4'>
+        <div className='xs:max-w-sm max-w-full md:pr-8 mx-4'>
             <div className=' mb-4'>
                 <swiper-container
                     spaceBetween={0}

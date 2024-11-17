@@ -21,8 +21,6 @@ async function getCategoryProducts(category: string, searchParams: ({ [key: stri
     const filters = await createFiltersForDbQuery({ category, categoryLevel: 1 })
     const sorted = [sortedBy]
 
-    // console.log("filters---->", filters)
-
     const data = await requestSSR({
         query: GET_CATEGORY_PRODUCTS, variables: { filters: filters, sort: sorted }
     });

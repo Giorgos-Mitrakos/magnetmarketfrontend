@@ -14,9 +14,9 @@ const SiteFeature = (props: SiteFeatureProps) => {
                     {props.icon}
                 </div>
                 <div className="pl-4">
-                    <h4 className="text-sm md:text-base lg:text-base font-semibold"
+                    <h4 className="text-sm md:text-base lg:text-base font-semibold text-black"
                     aria-label={props["aria-label"]}>{props.header}</h4>
-                    <p className="text-xs break-words md:text-xs lg:text-xs text-slate-500"
+                    <p className="text-xs break-words md:text-xs lg:text-xs text-slate-600"
                     aria-label={props["aria-description"]}>{props.content}</p>
                 </div>
             </div>

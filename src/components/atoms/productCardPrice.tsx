@@ -23,7 +23,7 @@ function ProductCardPrice(props: { id: number }) {
                 </div>
                 : error ? <div>Error...</div> :
                     <div className="flex justify-end items-center text-siteColors-purple xs:text-xl font-semibold mt-4">
-                        {data?.product.data.attributes.is_sale?
+                        {data?.product.data.attributes.is_sale && data?.product.data.attributes.sale_price?
                         <div>
                             <span className="text-sm line-through align-top mr-1 text-gray-500"
                             aria-label={`${data?.product.data.attributes.price.toFixed(2)} €`}>{data?.product.data.attributes.price.toFixed(2)} €</span>

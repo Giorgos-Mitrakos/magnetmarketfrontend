@@ -15,7 +15,7 @@ export default function Header({ user }: { user: any }) {
                 aria-label="Κεφαλίδα">
                 <Logo />
                 <div className="hidden lg:flex items-center">
-                    {/* <SearchInput /> */}
+                    <SearchInput />
                 </div>
                 <HeaderActions user={user} />
             </header>

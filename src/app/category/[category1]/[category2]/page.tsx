@@ -86,7 +86,7 @@ export async function generateMetadata(
     }
 
     if (response.categories.data[0].attributes.image.data) {
-        console.log(response.categories.data[0])
+        
         metadata.openGraph = { images: [`${process.env.NEXT_PUBLIC_API_URL}/${response.categories.data[0].attributes.image.data?.attributes.url}`] }
     }
 

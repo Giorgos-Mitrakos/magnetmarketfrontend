@@ -24,7 +24,6 @@ async function CategoryPageTemplate(props: pageProps) {
     const { params, products, searchParams } = props
     const { category1, category2, category3 } = params
 
-    // console.log(products)
     const filteredProducts = filtersProducts(products, searchParams)
 
     return (

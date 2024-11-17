@@ -12,7 +12,7 @@ export function getLocalStorage(key: string, defaultValue: any) {
         try {
             return JSON.parse(stickyValue);
         } catch (error) {
-            console.error(`Error parsing JSON for key "${key}":`, error);
+            
             return defaultValue;
         }
     } else {

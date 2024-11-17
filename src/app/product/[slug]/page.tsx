@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import Breadcrumb from '@/components/molecules/breadcrumb';
 import Newsletter from '@/components/molecules/newsletter';
-import ProductImageWidget from '@/components/molecules/productImageWidget';
+// import ProductImageWidget from '@/components/molecules/productImageWidget';
 import ProductBasicFeatures from '@/components/organisms/productBasicFeatures';
 import SiteFeatures from '@/components/organisms/siteFeatures';
 import SuggestedProducts from '@/components/organisms/suggestedProducts';
@@ -13,6 +13,11 @@ const ProductInfo = dynamic(() => import("@/components/organisms/productInfo"), 
   ssr: false,
   loading: () => <p>Loading...</p>
 });
+
+const ProductImageWidget = dynamic(() => import('@/components/molecules/productImageWidget'), {
+  ssr: false,
+  loading: () => <p>Loading...</p>
+})
 
 
 

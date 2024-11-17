@@ -19,10 +19,6 @@ export default async function Home() {
 
   const data = await getHomepageData()
 
-  // if (data) {
-  //   console.log(data.homepage.data.attributes.body)
-  // }
-
   return (
     <main className="w-full grid space-y-16">
       <HeroBanners carousel={data.homepage.data.attributes.Carousel} fixed_hero_banners={data.homepage.data.attributes.fixed_hero_banners} />
