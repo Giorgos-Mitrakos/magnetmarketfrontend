@@ -23,14 +23,14 @@ function ProductCardFoot({ product }: any) {
     return (
         <div className="grid grid-cols-3 gap-1 text-3xl text-slate-50">
             <button
-                className="flex justify-center items-center text-slate-400 rounded-md
+                className="flex justify-center items-center text-slate-400 dark:text-slate-300 rounded-md
                     hover:bg-gradient-to-br hover:from-siteColors-pink hover:to-siteColors-purple hover:text-white"
                 aria-label="Προσθήκη στα αγαπημένα">
                 <FaHeart
                     aria-label="Καρδιά" />
             </button>
             <button
-                className="flex justify-center items-center text-slate-400 rounded-md 
+                className="flex justify-center items-center text-slate-400 dark:text-slate-300 rounded-md 
                     hover:bg-gradient-to-br hover:from-siteColors-pink hover:to-siteColors-purple hover:text-white"
                 aria-label="Επισκόπηση προϊόντος">
                 <FaRegEye

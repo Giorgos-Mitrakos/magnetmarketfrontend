@@ -36,10 +36,10 @@ function PaginationBar({ totalItems, currentPage, itemsPerPage }: { totalItems: 
             pages.push(
                 <li key={1}>
                     <button
-                        className={`flex items-center justify-center w-10 h-10 text-lg text-siteColors-blue font-semibold rounded-full 
+                        className={`flex items-center justify-center w-10 h-10 text-lg text-siteColors-blue dark:text-slate-200 font-semibold rounded-full 
                     ${currentPage === page ?
-                                'border border-siteColors-blue' :
-                                'cursor-pointer hover:text-white hover:bg-siteColors-blue'}
+                                'border border-siteColors-blue dark:border-slate-200' :
+                                'cursor-pointer hover:text-white hover:bg-siteColors-blue dark:text-slate-200 dark:hover:text-slate-800 dark:hover:bg-slate-200'}
                     `}
                         tabIndex={0}
                         onKeyDown={() => handleItemClick(1)}
@@ -52,7 +52,7 @@ function PaginationBar({ totalItems, currentPage, itemsPerPage }: { totalItems: 
                 pages.push(
                     <li key={'leftGap'}>
                         <span
-                            className={`flex items-center justify-center w-10 h-10 text-lg text-siteColors-blue font-semibold rounded-full 
+                            className={`flex items-center justify-center w-10 h-10 text-lg text-siteColors-blue dark:text-slate-200 font-semibold rounded-full 
                         `}>
                             ...
                         </span>
@@ -63,10 +63,10 @@ function PaginationBar({ totalItems, currentPage, itemsPerPage }: { totalItems: 
         pages.push(
             <li key={page}>
                 <button
-                    className={`flex items-center justify-center w-10 h-10 text-lg text-siteColors-blue font-semibold rounded-full 
+                    className={`flex items-center justify-center w-10 h-10 text-lg text-siteColors-blue dark:text-slate-200 font-semibold rounded-full 
                 ${currentPage === page ?
-                            'border border-siteColors-blue' :
-                            'cursor-pointer hover:text-white hover:bg-siteColors-blue'}
+                            'border border-siteColors-blue dark:border-slate-200' :
+                            'cursor-pointer hover:text-white hover:bg-siteColors-blue dark:text-slate-200 dark:hover:text-slate-800 dark:hover:bg-slate-200'}
                 `}
                     tabIndex={page === 1 ? 0 : undefined}
                     onKeyDown={() => handleItemClick(page)}
@@ -80,7 +80,7 @@ function PaginationBar({ totalItems, currentPage, itemsPerPage }: { totalItems: 
                 pages.push(
                     <li key={'rightGap'}>
                         <span
-                            className={`flex items-center justify-center w-10 h-10 text-lg text-siteColors-blue font-semibold rounded-full 
+                            className={`flex items-center justify-center w-10 h-10 text-lg text-siteColors-blue dark:text-slate-200 font-semibold rounded-full 
                         `}>
                             ...
                         </span>
@@ -90,10 +90,10 @@ function PaginationBar({ totalItems, currentPage, itemsPerPage }: { totalItems: 
             pages.push(
                 <li key={pageCount}>
                     <button
-                        className={`flex items-center justify-center w-10 h-10 text-lg text-siteColors-blue font-semibold rounded-full 
+                        className={`flex items-center justify-center w-10 h-10 text-lg text-siteColors-blue dark:text-slate-200 font-semibold rounded-full 
                     ${currentPage === page ?
-                                'border border-siteColors-blue' :
-                                'cursor-pointer hover:text-white hover:bg-siteColors-blue'}
+                                'border border-siteColors-blue dark:border-slate-200' :
+                                'cursor-pointer hover:text-white hover:bg-siteColors-blue dark:text-slate-200 dark:hover:text-slate-800 dark:hover:bg-slate-200'}
                     `}
                         onKeyDown={() => handleItemClick(pageCount)}
                         onClick={() => handleItemClick(pageCount)}>
@@ -107,9 +107,9 @@ function PaginationBar({ totalItems, currentPage, itemsPerPage }: { totalItems: 
 
     for (let page = 1; page <= pageCount; page++) {
         pagesMobile.push(
-            <li key={page} className="px-4 py-2 bg-slate-50">
+            <li key={page} className="px-4 py-2 bg-slate-50 dark:bg-slate-700">
                 <button
-                    className={`flex items-center justify-center w-8 h-8 text-lg text-siteColors-blue font-semibold`}
+                    className={`flex items-center justify-center w-8 h-8 text-lg text-siteColors-blue dark:text-slate-200 font-semibold`}
                     tabIndex={0}
                     onKeyDown={() => handleItemClick(page)}
                     onClick={() => handleItemClick(page)}>
@@ -125,7 +125,7 @@ function PaginationBar({ totalItems, currentPage, itemsPerPage }: { totalItems: 
                 <ul className="flex justify-center space-x-1.5">
                     {currentPage > 1 && <li className="flex items-center">
                         <button className={`flex items-center justify-center w-8 h-8 text-lg text-siteColors-blue font-semibold rounded-full                 
-                            cursor-pointer hover:text-white hover:bg-siteColors-blue`}
+                            cursor-pointer hover:text-white hover:bg-siteColors-blue dark:text-slate-200 dark:hover:text-slate-800 dark:hover:bg-slate-200`}
                             onKeyDown={() => handleItemClick(currentPage - 1)}
                             onClick={() => handleItemClick(currentPage - 1)}>
                             <span className="sr-only">Previous</span>
@@ -134,8 +134,8 @@ function PaginationBar({ totalItems, currentPage, itemsPerPage }: { totalItems: 
                     </li>}
                     {pages}
                     {currentPage < pageCount && <li className="flex items-center">
-                        <button className={`flex items-center justify-center w-8 h-8 text-lg text-siteColors-blue font-semibold rounded-full                 
-                            cursor-pointer hover:text-white hover:bg-siteColors-blue`}
+                        <button className={`flex items-center justify-center w-8 h-8 text-lg text-siteColors-blue  font-semibold rounded-full                 
+                            cursor-pointer hover:text-white hover:bg-siteColors-blue dark:text-slate-200 dark:hover:text-slate-800 dark:hover:bg-slate-200`}
                             onKeyDown={() => handleItemClick(currentPage + 1)}
                             onClick={() => handleItemClick(currentPage + 1)}>
                             <span className="sr-only">Next</span>
@@ -146,27 +146,27 @@ function PaginationBar({ totalItems, currentPage, itemsPerPage }: { totalItems: 
             </nav>
             <nav className="my-8 h-8 flex justify-center items-center sm:hidden">
                 {currentPage > 1 &&
-                    <button className={`flex items-center justify-center w-10 h-10 text-lg text-siteColors-blue font-semibold`}
+                    <button className={`flex items-center justify-center w-10 h-10 text-lg text-siteColors-blue dark:text-slate-200 font-semibold`}
                         onKeyDown={() => handleItemClick(currentPage - 1)}
                         onClick={() => handleItemClick(currentPage - 1)}>
                         <span className="sr-only">Previous</span>
                         <AiOutlineLeft />
                     </button>}
                 <div key={currentPage}
-                    className='flex relative items-center justify-center h-10 text-lg text-siteColors-blue 
+                    className='flex relative items-center justify-center h-10 text-lg text-siteColors-blue dark:text-slate-200
                     font-semibold cursor-pointer'
                     onClick={() => setPageOpen(!isPageOpen)} aria-label={`Βρίσκεστε στη σελίδα ${currentPage}`}>
                     {currentPage}
 
                     <ul className={`${isPageOpen ? 'block' : 'hidden'}
-                    absolute bottom-10 bg-slate-300shadow-md rounded-md
+                    absolute bottom-10 bg-slate-300 shadow-md rounded-md
                     max-h-40 z-10 overflow-y-scroll ring-2 divide-y-2 `}>
                         {pagesMobile}
                     </ul>
                 </div>
 
                 {currentPage < pageCount &&
-                    <button className='flex items-center justify-center w-10 h-10 text-lg text-siteColors-blue font-semibold'
+                    <button className='flex items-center justify-center w-10 h-10 text-lg text-siteColors-blue dark:text-slate-200 font-semibold'
                         onKeyDown={() => handleItemClick(currentPage + 1)}
                         onClick={() => handleItemClick(currentPage + 1)}>
                         <span className="sr-only">Next</span>

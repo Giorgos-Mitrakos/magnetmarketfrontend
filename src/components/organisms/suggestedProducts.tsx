@@ -95,12 +95,12 @@ const SuggestedProducts = async ({ product }: ProductProps) => {
     // console.log(suggestedProducts.map(x=>x.attributes.price))
 
     return (
-        <section className="flex flex-col border">
+        <section className="flex flex-col border  dark:border-slate-600">
             <h2 className="bg-siteColors-lightblue py-3 text-center text-white text-lg md:text-xl font-semibold">Παρόμοια Προϊόντα</h2>
             <ul className="grid grid-cols-1 sm:grid-cols-3 lg:flex lg:flex-col">
                 {suggestedProducts.map((prod, i) => (
                     <div key={i} className="overflow-hidden ">
-                        <div className="flex flex-col relative shadow-md hover:shadow-lg bg-white rounded-lg m-1 p-4">
+                        <div className="flex flex-col relative shadow-md hover:shadow-lg dark:shadow-slate-500 dark:hover:shadow-slate-600 bg-white dark:bg-slate-700 rounded-lg m-1 p-4">
                             <ProductCardHead brand={prod.attributes.brand} id={prod.id} />
                             <Link className="grid h-48 w-full place-content-center relative" href={`/product/${prod.attributes.slug}`}
                                 aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${prod.attributes.name}`}>
@@ -118,16 +118,16 @@ const SuggestedProducts = async ({ product }: ProductProps) => {
                                         sizes="(max-width: 640px) 33vw, (max-width: 1024px) 17vw"
                                     />}
                             </Link>
-                            <div className='mt-1 h-28 flex flex-col justify-between border-b pb-2'>
+                            <div className='mt-1 h-28 flex flex-col justify-between border-b pb-2 dark:bg-slate-700'>
                                 <Link href={`/product/${prod.attributes.slug}`}
                                     aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${prod.attributes.name}`}>
-                                    <h2 className='w-full font-semibold xs:text-lg text-left line-clamp-3'
+                                    <h2 className='w-full text-siteColors-purple dark:text-slate-200 font-semibold xs:text-lg text-left line-clamp-3'
                                         aria-label="Τίτλος προϊόντος">{prod.attributes.name}</h2>
                                 </Link>
-                                <p className="text-xs text-gray-500">Κωδ:{prod.id}</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-300">Κωδ:{prod.id}</p>
                             </div>
                             <div className="flex items-center justify-center">
-                                <p className="text-green-700 text-sm font-semibold"
+                                <p className="text-green-700 dark:text-green-400 text-sm font-semibold"
                                     aria-label="Διαθεσιμότητα">Διαθέσιμο</p>
                             </div>
                             <ProductCardPrice id={prod.id} />

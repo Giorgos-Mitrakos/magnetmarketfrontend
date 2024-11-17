@@ -29,9 +29,9 @@ async function CategoryPageTemplate(props: pageProps) {
     return (
         <div className="w-full flex flex-col">
             <SiteFeatures/>
-            <div className="grid pt-32 w-full bg-white">
+            <div className="grid pt-32 w-full bg-white dark:bg-slate-800">
                 <div className="grid lg:grid-cols-4 gap-4">
-                    <div className="hidden lg:flex lg:flex-col bg-slate-100 p-4 rounded">
+                    <div className="hidden lg:flex lg:flex-col bg-slate-100 dark:bg-slate-700 p-4 rounded">
                         <Menu category1={category1} category2={category2 ? category2 : null} category3={category3 ? category3 : null} />
                         <CategoryFilters category1={category1} category2={category2} category3={category3} allProducts={filteredProducts.allProducts} products={filteredProducts.products} searchParams={searchParams} />
                     </div>

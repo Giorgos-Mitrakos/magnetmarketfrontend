@@ -10,7 +10,7 @@ function SearchInput() {
     const { text, setText, isListening, startListening, stopListening, hasRecognitionSupport } = useSpeechRecognition()
 
     return (
-        <div className="flex items-center">
+        <div className="flex items-center px-8">
             <form className="flex items-end border-b-2 bg-inherit border-siteColors-purple"
                 aria-label="Αναζήτηση">
                 {hasRecognitionSupport &&

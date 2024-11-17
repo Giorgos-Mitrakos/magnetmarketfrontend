@@ -17,7 +17,7 @@ export default function MobileTabMenu() {
 
     return (
         <div className='h-full'>
-            <div className={`fixed lg:hidden bottom-0 left-0 z-20 h-full w-full shadow-lg bg-blue-100
+            <div className={`fixed lg:hidden bottom-0 left-0 z-20 h-full w-full shadow-lg bg-blue-100 dark:bg-slate-600
             transition-transform transform ${isMenuOpen ? "translate-x-0" :
                     "-translate-x-full"} duration-500`}>
                 <MobileDrawer />

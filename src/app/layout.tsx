@@ -36,7 +36,7 @@ export default async function RootLayout({
       <Suspense fallback={null}>
         <GoogleAnalytics GA_MEASUREMENT_ID={GA_MEASUREMENT_ID} />
       </Suspense>
-      <body className={`${inter.className} h-full`}>
+      <body className={`${inter.className} h-full dark:bg-slate-800`}>
         <SessionProviders session={session}>
           <CartProvider>
             <ShippingProvider>

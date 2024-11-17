@@ -39,8 +39,8 @@ const ProductImageWidget = ({ images }) => {
     }
 
     return (
-        <div className='xs:max-w-sm max-w-full md:pr-8 mx-4'>
-            <div className=' mb-4'>
+        <div className='max-w-full md:pr-8 mx-4'>
+            <div className='w-full mb-4'>
                 <swiper-container
                     spaceBetween={0}
                     slides-per-view="3"
@@ -59,9 +59,9 @@ const ProductImageWidget = ({ images }) => {
                         <NextImage media={mediaNotFound} height={320} width={320} />}
                 </swiper-container>
             </div>
-            <div>
+            <div className='dark:bg-slate-800'>
                 <swiper-container
-                    class="mySwiper2"
+                    class="mySwiper2 dark:bg-slate-800"
                     space-between="2"
                     slides-per-view="4"
                     free-mode="true"
@@ -102,7 +102,7 @@ const ProductImageWidget = ({ images }) => {
                 >
                     {images.map((item, i) => (
                         <swiper-slide key={i} >
-                            {<div className={`${indexThumb === 0} ? 'border-siteColors-blue' : ''} cursor-pointer hover:border-siteColors-blue border-2 w-20 h-20 flex items-center`}>
+                            {<div className={`${indexThumb === 0} ? 'border-siteColors-blue' : ''} cursor-pointer dark:border-black bg-white hover:border-siteColors-blue border-2 w-20 h-20 flex items-center`}>
                                 <NextImage media={item?.attributes} height={80} width={80} />
                             </div>}
                         </swiper-slide>

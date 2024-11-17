@@ -25,13 +25,13 @@ function ProductCardPrice(props: { id: number }) {
                     <div className="flex justify-end items-center text-siteColors-purple xs:text-xl font-semibold mt-4">
                         {data?.product.data.attributes.is_sale && data?.product.data.attributes.sale_price?
                         <div>
-                            <span className="text-sm line-through align-top mr-1 text-gray-500"
+                            <span className="text-sm line-through align-top mr-1 text-gray-500 dark:text-slate-300"
                             aria-label={`${data?.product.data.attributes.price.toFixed(2)} €`}>{data?.product.data.attributes.price.toFixed(2)} €</span>
-                            <span
+                            <span className="dark:text-slate-200"
                             aria-label={`${data?.product.data.attributes.price.toFixed(2)} €`}
                             >{data?.product.data.attributes.sale_price.toFixed(2)} €</span>
                         </div>
-                         :<span>{data?.product.data.attributes.price.toFixed(2)} €</span>}
+                         :<span className="dark:text-slate-200">{data?.product.data.attributes.price.toFixed(2)} €</span>}
                     </div>
             }</div>
     )

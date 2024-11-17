@@ -61,9 +61,9 @@ const Newsletter = () => {
             <form className="flex flex-col sm:flex-row"
                 onSubmit={formik.handleSubmit} method="post">
                 <div className="w-full sm:w-1/2">
-                    <h3 className=" font-semibold text-2xl md:text-3xl mb-1 text-siteColors-purple"
+                    <h3 className=" font-semibold text-2xl md:text-3xl mb-1 text-siteColors-purple dark:text-slate-200"
                         aria-label="Newsletter">Newsletter</h3>
-                    <p className="mb-0 md:mb-2 text-base md:text-lg text-siteColors-pink"
+                    <p className="mb-0 md:mb-2 text-base md:text-lg text-siteColors-pink dark:text-slate-300"
                         aria-label="Για να μην χάνεις καμία προσφορά!!!">Για να μην χάνεις καμία προσφορά!!!</p>
                 </div>
                 <div className="w-full sm:w-1/2">

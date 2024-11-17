@@ -39,19 +39,19 @@ function ProductAddToCart({ product }: ProductProps) {
     }
 
     return (
-        <div className="fixed md:static pb-4 shadow-topShadow md:shadow-none bottom-14 left-0 justify-center w-full bg-white z-10">
+        <div className="fixed md:static pb-4 shadow-topShadow md:shadow-none bottom-14 left-0 justify-center w-full bg-white dark:bg-slate-800 z-10">
 
             <div className="flex md:hidden h-14 my-1 justify-between p-4 items-center">
                 {data?.product.data.attributes.is_sale ?
                     <div className="flex flex-col">
-                        <h2 className="text-xl font-bold text-siteColors-purple"
+                        <h2 className="text-xl font-bold text-siteColors-purple dark:text-slate-200"
                             aria-label={`${data?.product.data.attributes.sale_price} €`}>{data?.product.data.attributes.sale_price} €</h2>
-                        <h3 className="text-sm line-through align-top mr-1 text-gray-500"
+                        <h3 className="text-sm line-through align-top mr-1 text-gray-500 dark:text-slate-300"
                             aria-label={`${data?.product.data.attributes.price} €`}>{data?.product.data.attributes.price} €</h3>
                     </div>
                     : <span className="text-xl font-bold"
                         aria-label={`${data?.product.data.attributes.price} €`}>{data?.product.data.attributes.price} €</span>}
-                <h4 className="hidden xs:inline-block text-base text-lime-600"
+                <h4 className="hidden xs:inline-block text-base text-lime-700 dark:text-lime-400"
                     aria-label={`${data?.product.data.attributes.status} €`}>{data?.product.data.attributes.status}</h4>
                 <Image className="object-contain p-2"
                     height={72}
@@ -64,7 +64,7 @@ function ProductAddToCart({ product }: ProductProps) {
             <div className="w-full rounded-lg px-2 flex">
                 <button
                     onClick={() => handleAddProductClick(item)}
-                    className="flex justify-center items-center px-4 py-2 w-full rounded border md:text-slate-100 text-lg font-semibold
+                    className="flex justify-center items-center px-4 py-2 w-full rounded border dark:border-slate-300 md:text-slate-100 text-lg font-semibold
                 bg-gradient-to-b from-siteColors-pink via-siteColors-purple to-siteColors-pink text-white
             md:bg-gradient-to-br md:from-siteColors-lightblue md:to-siteColors-blue
             hover:bg-gradient-to-b hover:from-siteColors-pink hover:via-siteColors-purple hover:to-siteColors-pink hover:text-white">

@@ -66,7 +66,7 @@ export default async function Product({ params }:
   })
 
   return (
-    <div>
+    <div className="dark:bg-gray-800">
       <SiteFeatures />
       <Breadcrumb breadcrumbs={breadcrumbs} />
       {data.products.data.length > 0 &&

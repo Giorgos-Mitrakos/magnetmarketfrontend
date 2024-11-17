@@ -51,7 +51,7 @@ const ProductCard = (props: ProductCardProps) => {
 
     return (
         <div className="relative py-2 px-1 max-w-xss: overflow-hidden">
-            <div className="grid h-full grid-rows-cardLayout shadow-md hover:shadow-lg bg-white rounded-lg m-1 p-4">
+            <div className="grid h-full grid-rows-cardLayout shadow-md hover:shadow-lg dark:shadow-slate-500 dark:hover:shadow-slate-600 bg-white dark:bg-slate-700 rounded-lg m-1 p-4">
                 <ProductCardHead brand={brand} id={props.prod.id} />
                 <Link className="grid w-full place-content-center relative" href={`/product/${product.slug}`}
                     aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${product.name}`}>
@@ -77,18 +77,17 @@ const ProductCard = (props: ProductCardProps) => {
                     <Link href={`/product/${product.slug}`}
                         className="row-span-4"
                         aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${product.name}`}>
-                        <h2 className='w-full font-semibold xs:text-lg text-left line-clamp-3 text-siteColors-purple hover:text-siteColors-pink'
+                        <h2 className='w-full font-semibold xs:text-lg text-left line-clamp-3 text-siteColors-purple dark:text-slate-200 dark:hover:text-slate-100 hover:text-siteColors-pink'
                             aria-label="Τίτλος προϊόντος">{product.name}</h2>
                     </Link>
-                    <p className="text-xs text-gray-500">Κωδ:{props.prod.id}</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-300">Κωδ:{props.prod.id}</p>
                 </div>
                 <div className="flex items-center justify-center">
-                    <p className="text-green-700 text-sm font-semibold"
+                    <p className="text-green-700 dark:text-green-400 text-sm font-semibold"
                         aria-label="Διαθεσιμότητα">Διαθέσιμο</p>
                 </div>
                 <ProductCardPrice id={props.prod.id} />
                 <ProductCardFoot product={props.prod} />
-
             </div>
 
         </div>

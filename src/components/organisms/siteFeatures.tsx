@@ -41,7 +41,7 @@ const features = [
 const SiteFeatures = () => {
     {
         return (
-            <section aria-label="Παροχές του καταστήματος" className="w-full overflow-hidden  bg-slate-100 ">
+            <section aria-label="Παροχές του καταστήματος" className="w-full overflow-hidden  bg-slate-100 dark:bg-slate-700">
                 <div className="flex min-w-fit justify-between animate-scroll-text-horizontal lg:animate-none">
                     {features.map(x => (
                         <SiteFeature key={x.header}

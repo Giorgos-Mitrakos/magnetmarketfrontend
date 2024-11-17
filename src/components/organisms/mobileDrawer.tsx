@@ -66,7 +66,7 @@ function Sub2categoryDrawer({ category, subcategory }:
                                                 <NextImage media={cat.attributes.image.data.attributes} width={80} height={80} />
                                                 : <FaRegImage className="w-16 h-16 self-center" />}
                                         </p>
-                                        <p className="break-words text-wrap text-center text-sm ">{cat.attributes.name}</p>
+                                        <p className="break-words text-wrap text-center text-sm dark:text-slate-200 ">{cat.attributes.name}</p>
                                     </div>
                                 </Link>
                             </li>
@@ -92,7 +92,7 @@ function SubcategoryDrawer({ category }: {
 
     return (
         <div className="h-screen">
-            {category && isSubCategoriesOpen && <div className={`absolute lg:hidden bottom-0 left-0 z-30 h-full w-full shadow-lg bg-blue-100
+            {category && isSubCategoriesOpen && <div className={`absolute lg:hidden bottom-0 left-0 z-30 h-full w-full shadow-lg bg-blue-100 dark:bg-slate-600
             transition-transform transform ${isSubCategoriesOpen ? "translate-x-0" :
                     "-translate-x-full"} duration-500`}>
                 <Sub2categoryDrawer category={category.attributes.slug} subcategory={subCategory} />
@@ -114,7 +114,7 @@ function SubcategoryDrawer({ category }: {
                                                 <NextImage media={cat.attributes.image.data.attributes} width={80} height={80} /> :
                                                 <FaRegImage className="w-16 h-16 self-center" />}
                                         </p>
-                                        <p className="break-words text-wrap text-center text-sm mt-2">{cat.attributes.name}</p>
+                                        <p className="break-words text-wrap text-center text-sm dark:text-slate-200 mt-2">{cat.attributes.name}</p>
                                     </div>
                                 </button>
                             </li>
@@ -141,7 +141,7 @@ export default function MobileDrawer() {
 
     return (
         <div className="h-screen">
-            {isCategoriesOpen && <div className={`absolute lg:hidden bottom-0 left-0 z-20 h-full w-full shadow-lg bg-blue-100
+            {isCategoriesOpen && <div className={`absolute lg:hidden bottom-0 left-0 z-20 h-full w-full shadow-lg bg-blue-100 dark:bg-slate-600
             transition-transform transform ${isCategoriesOpen ? "translate-x-0" :
                     "-translate-x-full"} duration-500`}>
                 <SubcategoryDrawer category={category} />
@@ -160,7 +160,7 @@ export default function MobileDrawer() {
                                                 <NextImage media={cat.attributes.image.data.attributes} width={80} height={80} /> :
                                                 <FaRegImage className="w-16 h-16 self-center" />}
                                         </p>
-                                        <p className="break-words text-wrap text-center text-sm ">{cat.attributes.name}</p>
+                                        <p className="break-words text-wrap text-center text-sm dark:text-slate-200 ">{cat.attributes.name}</p>
                                     </div>
                                 </button>
                             </li>
