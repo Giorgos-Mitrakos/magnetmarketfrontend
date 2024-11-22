@@ -26,8 +26,8 @@ const OrderInfo = () => {
     return (
         <div className='grid mx-auto max-w-lg space-y-8 md:max-w-none md:grid-cols-2 md:gap-8'>
             <div>
-                <div>
-                    <h2 className='text-lg mb-2 font-medium text-siteColors-purple'>Στοιχεία Παραγγελίας</h2>
+                <div className="space-y-4">
+                    <h2 className='text-lg mb-2 font-medium text-siteColors-purple dark:text-slate-200'>Στοιχεία Παραγγελίας</h2>
                     <ShippingMethods ref={shippingRef} />
                     <PaymentMethods ref={paymentRef} />
                 </div>

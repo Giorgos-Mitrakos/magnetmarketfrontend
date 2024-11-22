@@ -66,7 +66,7 @@ export default function Dropdown({ items, filter }: DropdownFilter) {
                     <span>{selectedItem}</span>
                     <FaCaretDown aria-label='Εικονίδιο για εμφάνιση λίστας ταξιμόνησης'/>
                 </button>
-                <div className={`absolute top-10 z-20 flex flex-col divide-y-2 bg-gray-50 rounded-md ${transClass}`}>
+                <div className={`absolute top-8 z-20 flex flex-col divide-y-2 bg-gray-50 dark:bg-slate-800 rounded-md overflow-hidden ${transClass}`}>
                     {
                         items.map(item =>
                             <div key={item.title}

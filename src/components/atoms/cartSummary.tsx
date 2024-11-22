@@ -16,12 +16,12 @@ export default function CartSummary() {
     }
 
     return (
-        <ul className="p-4 space-y-4 bg-inherit rounded">
+        <ul className="p-4 space-y-4 bg-inherit dark:bg-slate-700 rounded">
             <li className="flex justify-between w-full">
                 <label className="font-semibold " aria-label="Μερικό σύνολο">
                     Μερικό σύνολο:
                 </label>
-                <div className="text-siteColors-purple font-bold"
+                <div className="text-siteColors-purple dark:text-slate-200 font-bold"
                     aria-label={`${cartItems && cartTotal} €`}>
                     {cartItems && cartTotal.toFixed(2)} €
                 </div>
@@ -30,7 +30,7 @@ export default function CartSummary() {
                 <label className="font-semibold" aria-label="Μεταφορικά">
                     Μεταφορικά:
                 </label>
-                <div className="text-siteColors-purple font-bold"
+                <div className="text-siteColors-purple dark:text-slate-200 font-bold"
                     aria-label="Κόστος μεταφορικών">
                     {shippingCost.cost  ? `${shippingCost.cost.toFixed(2)} €` : "Υπολογίζεται κατά τη διάρκεια αγοράς"}
                 </div>
@@ -40,7 +40,7 @@ export default function CartSummary() {
                     <label className="font-semibold" aria-label={paymentMethod.payment}>
                         {paymentMethod.payment}:
                     </label>
-                    <div className="text-siteColors-purple font-bold"
+                    <div className="text-siteColors-purple dark:text-slate-200 font-bold"
                         aria-label={paymentMethod.payment}>
                         {paymentCost.cost.toFixed(2)} €
                     </div>
@@ -51,7 +51,7 @@ export default function CartSummary() {
                     <label className="font-semibold" aria-label="Σύνολο">
                         Σύνολο:
                     </label>
-                    <div className="text-siteColors-purple font-bold"
+                    <div className="text-siteColors-purple dark:text-slate-200 font-bold"
                         aria-label="Συνολικό κόστος">
                         {calculateTotalCosts()} €
                     </div>

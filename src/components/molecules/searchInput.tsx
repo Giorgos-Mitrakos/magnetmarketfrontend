@@ -15,23 +15,24 @@ function SearchInput() {
                 aria-label="Αναζήτηση">
                 {hasRecognitionSupport &&
                     <button onClick={isListening ? stopListening : startListening}
-                        className="flex items-end text-siteColors-purple text-lg xs:text-xl md:text-2xl"
+                        className="flex items-end text-siteColors-purple dark:text-slate-200 text-lg xs:text-xl md:text-2xl"
                         aria-label="Ενεργοποίηση φωνητικής αναζήτησης"
                     >
                         {isListening ?
                             <FaMicrophone
-                            aria-label="Φωνητική αναζήτηση - Αναζητήστε ανά προϊόν, κατασκευαστή ή κατηγορία με φωνητικές εντολές!"                            
+                                aria-label="Φωνητική αναζήτηση - Αναζητήστε ανά προϊόν, κατασκευαστή ή κατηγορία με φωνητικές εντολές!"
                                 className='text-red-600 text-2xl mb-1 ' /> :
                             <FaMicrophoneSlash
-                                className='text-siteColors-purple text-2xl mb-1' />}
+                                className='text-siteColors-purple dark:text-slate-200 text-2xl mb-1' />}
                     </button>}
                 <input type="search" placeholder="Αναζήτηση" value={text} onChange={(e) => setText(e.target.value)}
-                    className="px-2 w-80 bg-inherit outline-none border-none" 
-                    aria-label="Πεδίο αναζήτησης προϊόντων"/>
+                    className="px-2 w-80 bg-inherit outline-none border-none dark:text-slate-200 dark:placeholder:text-slate-300"
+                    aria-label="Πεδίο αναζήτησης προϊόντων" />
             </form>
-            <IconLink icon={<AiOutlineSearch />}
+            <IconLink
+                icon={<AiOutlineSearch />}
                 url="#"
-                aria-label="Αναζήτηση - Αναζητήστε ανά προϊόν, κατασκευαστή ή κατηγορία"/>
+                aria-label="Αναζήτηση - Αναζητήστε ανά προϊόν, κατασκευαστή ή κατηγορία" />
         </div>
     )
 }

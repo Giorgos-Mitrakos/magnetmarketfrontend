@@ -82,9 +82,9 @@ const PaymentMethods = forwardRef<PaymentMethodsRef>((props, ref) => {
     }, [formik.values.payment])
 
     return (
-        <form className='space-y-4 w-full p-4 bg-slate-50 rounded-lg'
+        <form className='space-y-4 w-full p-4 bg-slate-50 dark:bg-slate-700 rounded-lg'
             onSubmit={formik.handleSubmit}>
-            <h3 className='font-medium mb-6 border-b text-siteColors-purple'>Τρόποι πληρωμής</h3>
+            <h3 className='font-medium mb-6 border-b text-siteColors-purple dark:text-slate-200'>Τρόποι πληρωμής</h3>
             <ul className="space-y-4">
                 {!loadingPaymentMethods && paymentMethods.payments.data.map(method => (
                     <li key={method.id} className="flex items-center text-sm t space-x-2">

@@ -79,7 +79,7 @@ const CustomerInfo = () => {
                     <div>Loading...</div>
                     :
                     <div>
-                        <h2 className='text-lg mb-2 font-medium text-siteColors-purple'>Στοιχεία Πελάτη</h2>
+                        <h2 className='text-lg mb-2 font-medium text-siteColors-purple dark:text-slate-200'>Στοιχεία Πελάτη</h2>
                         <Addresses user={data.user} ref={formikRef} />
                     </div>}
             </div>

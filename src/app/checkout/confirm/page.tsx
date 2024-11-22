@@ -24,7 +24,7 @@ interface IAddressSumary {
 
 const AddressSummary = ({ address }: { address: IAddressSumary }) => {
     return (
-        <div className="flex flex-wrap text-sm text-gray-900">
+        <div className="flex flex-wrap text-sm text-slate-900  dark:text-slate-200">
             {address.isInvoice ?
                 <>
                     <span className="mr-2">{address.companyName}</span>
@@ -88,30 +88,30 @@ const Confirm = () => {
 
     return (
         <div>
-            <h2 className='font-medium text-xl text-center mb-6 text-siteColors-purple'>Σύνοψη Παραγγελίας</h2>
+            <h2 className='font-medium text-xl text-center mb-6 text-siteColors-purple text-slate-200'>Σύνοψη Παραγγελίας</h2>
             <div className='grid mx-auto max-w-lg space-y-8 md:max-w-none md:grid-cols-4 md:space-y-0 md:gap-8'>
                 <div className="md:col-span-3">
                     <CartAside />
                 </div>
-                <ul className="flex flex-col bg-slate-100 rounded">
+                <ul className="flex flex-col bg-slate-100 dark:bg-slate-700 rounded">
                     <li className="p-4 rounded">
-                        <h2 className='font-medium mb-4 border-b text-siteColors-purple'>Διεύθυνση χρέωσης {!addresses.different_shipping ? '- αποστολής' : ''}</h2>
+                        <h2 className='font-medium mb-4 border-b text-siteColors-purple dark:text-slate-200'>Διεύθυνση χρέωσης {!addresses.different_shipping ? '- αποστολής' : ''}</h2>
                         <AddressSummary address={addresses.billing} />
                     </li>
                     {addresses.different_shipping && <li className="p-4 rounded">
-                        <h2 className='font-medium  mb-4 border-b text-siteColors-purple'>Διεύθυνση αποστολής</h2>
+                        <h2 className='font-medium  mb-4 border-b text-siteColors-purple dark:text-slate-200'>Διεύθυνση αποστολής</h2>
                         <AddressSummary address={addresses.different_shipping ? addresses.shipping : addresses.billing} />
                     </li>}
                     <li className="p-4 rounded">
-                        <h2 className='font-medium  mb-4 border-b text-siteColors-purple'>Τρόπος πληρωμής</h2>
+                        <h2 className='font-medium  mb-4 border-b text-siteColors-purple dark:text-slate-200'>Τρόπος πληρωμής</h2>
                         <span>{paymentMethod.payment}</span>
                     </li>
                     <li className="p-4 rounded">
-                        <h2 className='font-medium  mb-4 border-b text-siteColors-purple'>Τρόπος αποστολής</h2>
+                        <h2 className='font-medium  mb-4 border-b text-siteColors-purple dark:text-slate-200'>Τρόπος αποστολής</h2>
                         <span>{shippingMethod.pickup ? 'Παραλαβή από το κατάστημα' : shippingMethod.shipping}</span>
                     </li>
                     <li className="p-4 rounded">
-                        <h2 className='font-medium  mb-4 border-b text-siteColors-purple'>Τύπος παραστατικού</h2>
+                        <h2 className='font-medium  mb-4 border-b text-siteColors-purple dark:text-slate-200'>Τύπος παραστατικού</h2>
                         <span>{addresses.billing.isInvoice ? "Τιμολόγιο" : "Απόδειξη"}</span>
                     </li>
                     <li>

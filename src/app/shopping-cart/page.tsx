@@ -30,7 +30,7 @@ export default function Cart() {
         <div className=''>
             <SiteFeatures />
             <Breadcrumb breadcrumbs={breadcrumbs} />
-            <h1 className="text-xl sm:text-3xl my-4 lg:my-8 text-center font-bold text-slate-700">Καλάθι αγορών</h1>
+            <h1 className="text-xl sm:text-3xl my-4 lg:my-8 text-center font-bold text-slate-700 dark:text-slate-200">Καλάθι αγορών</h1>
             <div className="grid lg:grid-cols-4 gap-4">
                 <div className="lg:col-span-3">
                     {cartItems.map(item => (
@@ -75,25 +75,25 @@ const CartItemTemplate = ({ item }: { item: ICartItem }) => {
             </div>
             <div className="col-span-2 xs:col-span-5 lg:col-span-4 flex flex-col justify-between">
                 <Link href={`/product/${item.slug}`}
-                    className="text-sm lg:text-base line-clamp-2 xs:line-clamp-3 font-semibold text-siteColors-purple hover:text-siteColors-pink">{item.name}</Link>
-                <div className="text-sm text-gray-500">Κωδικός:{item.id}</div>
+                    className="text-sm lg:text-base line-clamp-2 xs:line-clamp-3 font-semibold text-siteColors-purple hover:text-siteColors-pink dark:text-slate-300 dark:hover:text-slate-200">{item.name}</Link>
+                <div className="text-sm text-slate-500 dark:text-slate-300">Κωδικός : {item.id}</div>
                 {
-                    !redAlert && <div className="font-semibold text-red-500">Το προϊόν δεν είναι διαθέσιμο</div>
+                    !redAlert && <div className="font-semibold text-red-500 dark:text-red-400">Το προϊόν δεν είναι διαθέσιμο</div>
                 }
             </div>
             <button
                 onClick={() => removeFromCart(item)}
                 className="flex row-start-5 xs:row-start-1 xs:col-start-9 lg:col-start-12 col-span-2 lg:col-span-1 xs:col-span-1 border xs:border-none p-2 border-red-500 items-start lg:items-center justify-center">
-                <FaRegTrashCan className="text-3xl text-red-500" />
+                <FaRegTrashCan className="text-3xl text-red-500 dark:text-red-400" />
             </button>
             {data?.product.data.attributes.is_sale ?
                 <div className="flex flex-col  xs:col-span-3 lg:col-span-2 items-center justify-center text-gray-500 font-semibold">
-                    <h3 className="text-sm line-through align-top mr-1 text-gray-500"
+                    <h3 className="text-sm line-through align-top mr-1 text-slate-500 dark:text-slate-300"
                         aria-label={`${data?.product.data.attributes.price.toFixed(2)} €`}>{data?.product.data.attributes.price.toFixed(2)} €</h3>
-                    <h2 className="text-lg font-bold"
+                    <h2 className="text-lg font-bold dark:text-slate-200"
                         aria-label={`${data?.product.data.attributes.sale_price.toFixed(2)} €`}>{data?.product.data.attributes.sale_price.toFixed(2)} €</h2>
                 </div>
-                : <div className="flex flex-col  xs:col-span-3 lg:col-span-2 items-center justify-center text-gray-500 font-semibold">
+                : <div className="flex flex-col  xs:col-span-3 lg:col-span-2 items-center justify-center text-slate-500 dark:text-slate-200 font-semibold">
                     <span className="text-lg font-bold"
                         aria-label={`${data?.product.data.attributes.price.toFixed(2)} €`}>
                         {data?.product.data.attributes.price.toFixed(2)} €</span>
@@ -117,7 +117,7 @@ const CartItemTemplate = ({ item }: { item: ICartItem }) => {
                     </svg>
                 </button>
             </div>
-            <div className="col-span-2 xs:col-span-3 lg:col-span-2 flex items-center justify-end text-siteColors-purple font-semibold">{
+            <div className="col-span-2 xs:col-span-3 lg:col-span-2 flex items-center justify-end text-siteColors-purple dark:text-slate-200 text-lg font-semibold">{
                 data?.product.data.attributes.is_sale ?
                     data?.product.data.attributes.sale_price && (item.quantity * data?.product.data.attributes.sale_price).toFixed(2) :
                     data?.product.data.attributes.price && (item.quantity * data?.product.data.attributes.price).toFixed(2)} €</div>

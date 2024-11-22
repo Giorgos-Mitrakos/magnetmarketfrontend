@@ -71,9 +71,9 @@ const ShippingMethods = forwardRef<ShippingMethodsRef>((props, ref) => {
     }, [formik.values.shipping])
 
     return (
-        <form className='space-y-4 w-full p-4 bg-slate-50 rounded-lg'
+        <form className='space-y-4 w-full p-4 bg-slate-50 dark:bg-slate-700 rounded-lg'
             onSubmit={formik.handleSubmit}>
-            <h3 className='font-medium mb-6 border-b text-siteColors-purple'>Τρόποι αποστολής</h3>
+            <h3 className='font-medium mb-6 border-b text-siteColors-purple dark:text-slate-200'>Τρόποι αποστολής</h3>
             <ul className="space-y-4">
                 <li className="flex items-center space-x-2">
                     <input type="checkbox" name="pickup" id="pickup" className="bg-siteColors-purple rounded"

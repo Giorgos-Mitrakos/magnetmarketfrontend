@@ -35,41 +35,40 @@ const CartItem = ({ item }: { item: ICartItem }) => {
             </div>
             <div className="col-span-5 flex flex-col justify-between">
                 <Link href={`/product/${item.slug}`}
-                    className="text-sm lg:text-base line-clamp-2 xs:line-clamp-3 font-semibold text-siteColors-purple hover:text-siteColors-pink">{item.name}</Link>
-                <div className="text-sm text-gray-500">Κωδικός : {item.id}</div>
+                    className="text-sm lg:text-base line-clamp-2 xs:line-clamp-3 font-semibold text-siteColors-purple dark:text-slate-300 dark:hover:text-slate-200 hover:text-siteColors-pink">{item.name}</Link>
+                <div className="text-sm text-slate-500 dark:text-slate-300">Κωδικός : {item.id}</div>
                 {
-                    !redAlert && <div className="font-semibold text-red-500">Το προϊόν δεν είναι διαθέσιμο</div>
+                    !redAlert && <div className="font-semibold text-red-500 dark:text-red-400">Το προϊόν δεν είναι διαθέσιμο</div>
                 }
             </div>
-            <div className="col-span-2 flex items-center justify-start text-gray-500 text-sm font-semibold">{item.quantity} x {data?.product.data.attributes.price} €</div>
+            <div className="col-span-2 flex items-center justify-start text-slate-500 dark:text-slate-200 text-sm font-semibold">{item.quantity} x {data?.product.data.attributes.price} €</div>
             <div className="col-span-4 flex flex-col items-end justify-end text-siteColors-purple font-semibold">
                 {isSale && salePrice && profit && discount ?
                     <div className="grid items-end">
-                        <h3 className="flex text-sm line-through justify-end align-top text-gray-500"
+                        <h3 className="flex text-sm line-through justify-end align-top text-slate-500 dark:text-slate-300"
                             aria-label={`${data?.product.data.attributes.price.toFixed(2)} €`}>{data && (item.quantity * data.product.data.attributes.price).toFixed(2)} €</h3>
 
                         <div className="grid grid-cols-2 items-end">
-                            <label className="font-semibold"
+                            <label className="font-semibol  dark:text-slate-300"
                                 aria-label={item.quantity * profit < 50 ? 'Έκπτωση:' : 'Κέρδος:'}>{item.quantity * profit < 50 ? 'Έκπτωση:' : 'Κέρδος:'}</label>
-                            <h3 className="flex justify-end font-bold text-sm"
+                            <h3 className="flex justify-end font-bold text-sm dark:text-slate-200"
                                 aria-label={`${item.quantity * profit < 50 ? `${discount.toFixed(2)} %` : `${(item.quantity * profit).toFixed(2)} €`}`}>
                                 {item.quantity * profit < 50 ? `-${discount.toFixed(2)} %` : `-${(item.quantity * profit).toFixed(2)} €`}
                             </h3>
                         </div>
-                        <div className="grid grid-cols-2 items-end font-bold">
-                            <label>Κόστος:</label>
-                            <h3>{(item.quantity * salePrice).toFixed(2)} €</h3>
+                        <div className="grid grid-cols-2 items-end font-bold ">
+                            <label className=" dark:text-slate-300">Κόστος:</label>
+                            <h3 className=" dark:text-slate-200">{(item.quantity * salePrice).toFixed(2)} €</h3>
                         </div>
 
                     </div>
                     : <div className="grid grid-cols-2 items-end font-bold">
-                        <label>Κόστος:</label>
-                        <h3 aria-label={`${data?.product.data.attributes.price.toFixed(2)} €`}>
+                        <label className=" dark:text-slate-300">Κόστος:</label>
+                        <h3 className=" dark:text-slate-200" aria-label={`${data?.product.data.attributes.price.toFixed(2)} €`}>
                             {data && (item.quantity * data.product.data.attributes.price).toFixed(2)} €
                         </h3>
                     </div>}
             </div>
-
         </div>
     )
 }
@@ -80,7 +79,7 @@ export default function CartAside() {
 
     return (
         <div>
-            <h2 className="text-lg mb-2 font-medium text-siteColors-purple">Η παραγγελία μου</h2>
+            <h2 className="text-lg mb-2 font-medium text-siteColors-purple  dark:text-slate-200">Η παραγγελία μου</h2>
             {cartItems.map(item => (
                 <CartItem key={item.id} item={item} />)
             )}

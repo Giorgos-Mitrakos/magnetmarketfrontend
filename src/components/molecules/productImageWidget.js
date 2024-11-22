@@ -40,10 +40,11 @@ const ProductImageWidget = ({ images }) => {
 
     return (
         <div className='max-w-full md:pr-8 mx-4'>
-            <div className='w-full mb-4'>
+            <div className='w-full max-h-96 mb-4'>
                 <swiper-container
+                className='max-h-96'
                     spaceBetween={0}
-                    slides-per-view="3"
+                    slides-per-view="1"
                     zoom="true"
                     thumbs-swiper=".mySwiper2"
                     effect="fade"
@@ -51,7 +52,7 @@ const ProductImageWidget = ({ images }) => {
                     {images.length > 0 ?
                         images.map((item, i) => (
                             <swiper-slide key={i} className='w-full overflow-hidden'>
-                                <div className="swiper-zoom-container">
+                                <div className="swiper-zoom-container max-h-96">
                                     <NextImage media={item.attributes} height={320} width={320} />
                                 </div>
                             </swiper-slide>

@@ -304,9 +304,9 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
     return (
         <section>
             <form onSubmit={formik.handleSubmit}>
-                <ul className='space-y-4 w-full p-4 bg-slate-50 rounded-lg' >
+                <ul className='space-y-4 w-full p-4 bg-slate-50 dark:bg-slate-800 rounded-lg' >
                     <li>
-                        <h3 className='font-medium mb-6 border-b text-siteColors-purple'>Στοιχεία επικοινωνίας</h3>
+                        <h3 className='font-medium mb-6 border-b text-siteColors-purple dark:text-slate-200'>Στοιχεία επικοινωνίας</h3>
                         <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
                             <CustomInput
                                 aria_label="Φόρμα εισαγωγής Email"
@@ -323,14 +323,14 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
 
                     </li>
                     <li>
-                        <h3 className='font-medium mt-8 mb-4 border-b text-siteColors-purple'>Τύπος παραστατικού</h3>
+                        <h3 className='font-medium mt-8 mb-4 border-b text-siteColors-purple dark:text-slate-200'>Τύπος παραστατικού</h3>
                         <Radio name="checkNote" id="receipt" value="Απόδειξη"
                             checked={!addresses.billing.isInvoice} onChange={onCheckNoteChange}></Radio>
                         <Radio name="checkNote" id="invoice"value="Τιμολόγιο"
                             checked={addresses.billing.isInvoice} onChange={onCheckNoteChange}></Radio>
                     </li>
                     <li>
-                        <h3 className='font-medium mt-8 mb-6 border-b text-siteColors-purple'>Διεύθυνση</h3>
+                        <h3 className='font-medium mt-8 mb-6 border-b text-siteColors-purple dark:text-slate-200'>Διεύθυνση</h3>
                         <ul className="space-y-4">
                             {formik.values.isInvoice === true ?
                                 <>
@@ -453,13 +453,13 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                             </li>
                             <li className="grid sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
                                 <div>
-                                    {!loading && <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
+                                    {!loading && <div className="relative rounded-lg border border-1 border-slate-300 bg-white appearance-none">
                                         <label htmlFor="country"
-                                            className="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent dark:bg-gray-900 px-2 
+                                            className="absolute text-sm text-slate-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
                                     peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
                                      peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Χώρα*</label>
                                         <select
-                                            className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
+                                            className='bg-transparent border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-300 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
                                             id='country'
                                             name='country'
                                             onChange={(e) => {
@@ -480,13 +480,13 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                         <small id="feedback" className="text-sm text-red-500">{formik.errors.country}</small>}
                                 </div>
                                 <div>
-                                    <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
+                                    <div className="relative rounded-lg border border-1 border-slate-300 bg-white appearance-none">
                                         <label htmlFor="state"
-                                            className="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent dark:bg-gray-900 px-2 
+                                            className="absolute text-sm text-slate-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
                                     peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
                                      peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Νομός*</label>
                                         <select
-                                            className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
+                                            className='bg-transparent border border-slate-300 text-slate-900 dark:text-slate-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-300 dark:focus:ring-blue-500 dark:focus:border-blue-500"'
                                             id='state'
                                             name='state'
                                             onChange={(e) => {
@@ -510,11 +510,11 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                 <div>
                                     <div className="relative rounded-lg border border-1 border-gray-300  bg-white appearance-none">
                                         <label htmlFor="city"
-                                            className="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent dark:bg-gray-900 px-2 
+                                            className="absolute text-sm text-slate-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
                                     peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
                                      peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Πόλη*</label>
                                         <select
-                                            className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
+                                            className='bg-transparent border border-gray-300 text-slate-900 dark:text-slate-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"'
                                             id='city'
                                             name='city'
                                             onChange={(e) => {
@@ -536,9 +536,9 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                 <div>
                                     <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
                                         <label htmlFor="zipCode"
-                                            className="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent dark:bg-gray-900 px-2 
-                                    peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
-                                     peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Τ.Κ*</label>
+                                            className="absolute text-sm text-slate-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
+                                    peer-focus:px-2 peer-focus:text-blue-600 slateeer-focus:dark:text-blue-500 
+                                     peer-placeholder-shown:scale-100 peer-plslateceholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Τ.Κ*</label>
                                         <input
                                             onChange={formik.handleChange}
                                             onBlur={formik.handleBlur}
@@ -546,7 +546,7 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                             id='zipCode'
                                             name="zipCode"
                                             list="postals-list"
-                                            className="block px-2.5 py-2.5 w-full text-sm text-gray-900 bg-transparent focus:outline-none focus:ring-0 peer focus:ring-blue-500 focus:border-blue-500" />
+                                            className="block px-2.5 py-2.5 w-full text-sm text-slate-900 dark:text-slate-200 bg-transparent dark:bg-slate-700 focus:outline-none focus:ring-0 peer focus:ring-blue-500 focus:border-blue-500 rounded-lg" />
                                         {!loadingPostals && postals !== undefined &&
                                             <datalist id="postals-list">
                                                 {postals?.regions?.data[0]?.attributes.postal_codes.data.map(postal => (
@@ -596,9 +596,9 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                         </ul>
                     </li>
                     <li className="space-y-2">
-                        <label htmlFor="deliveryNotes" className="text-sm tracking-wide">Σχόλια</label>
+                        <label htmlFor="deliveryNotes" className="text-sm tracking-wide ">Σχόλια</label>
                         <textarea
-                            className="w-full p-4"
+                            className="w-full p-4 dark:bg-slate-700"
                             id="deliveryNotes"
                             name="deliveryNotes"
                             onChange={formik.handleChange}
@@ -610,10 +610,10 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                     <li>
                         <div className='flex my-4'>
                             <input type='checkbox' id='different_shipping' name='different_shipping' checked={addresses.different_shipping} onChange={() => ondifferentAddressChange()} />
-                            <label htmlFor='different_shipping' className="text-sm text-siteColors-purple ml-1">Θέλω να παραλάβω σε άλλη διεύθυνση.</label>
+                            <label htmlFor='different_shipping' className="text-sm text-siteColors-purple dark:text-slate-200 ml-1">Θέλω να παραλάβω σε άλλη διεύθυνση.</label>
                         </div>
                         {formik.values.different_shipping && <>
-                            <h3 className='font-medium mt-8 mb-6 border-b text-siteColors-purple'>Διεύθυνση Αποστολής</h3>
+                            <h3 className='font-medium mt-8 mb-6 border-b text-siteColors-purple dark:text-slate-200'>Διεύθυνση Αποστολής</h3>
                             <ul className="space-y-4">
                                 <li className="grid sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
                                     <div>
@@ -669,11 +669,11 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                     <div>
                                         {!loading && <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
                                             <label htmlFor="ship_country"
-                                                className="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent dark:bg-gray-900 px-2 
+                                                className="absolute text-sm text-slate-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
                                     peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
                                      peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Χώρα*</label>
                                             <select
-                                                className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
+                                                className='bg-transparent border border-gray-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-slate-200 dark:focus:ring-blue-500 dark:focus:border-blue-500"'
                                                 id='ship_country'
                                                 name='ship_country'
                                                 onChange={(e) => {
@@ -696,11 +696,11 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                     <div>
                                         <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
                                             <label htmlFor="ship_state"
-                                                className="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent dark:bg-gray-900 px-2 
+                                                className="absolute text-sm text-slate-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
                                     peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
                                      peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Νομός*</label>
                                             <select
-                                                className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
+                                                className='bg-transparent border border-gray-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-slate-200 dark:focus:ring-blue-500 dark:focus:border-blue-500"'
                                                 id='ship_state'
                                                 name='ship_state'
                                                 onChange={(e) => {
@@ -724,11 +724,11 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                     <div>
                                         <div className="relative rounded-lg border border-1 border-gray-300  bg-white appearance-none">
                                             <label htmlFor="ship_city"
-                                                className="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent dark:bg-gray-900 px-2 
+                                                className="absolute text-sm text-slate-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
                                     peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
                                      peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Πόλη*</label>
                                             <select
-                                                className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
+                                                className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-slate-200 dark:focus:ring-blue-500 dark:focus:border-blue-500"'
                                                 id='ship_city'
                                                 name='ship_city'
                                                 onChange={(e) => {
@@ -750,7 +750,7 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                     <div>
                                         <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
                                             <label htmlFor="ship_zipCode"
-                                                className="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent dark:bg-gray-900 px-2 
+                                                className="absolute text-sm text-slate-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
                                     peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
                                      peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Τ.Κ*</label>
                                             <input
@@ -760,7 +760,7 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                                 id='ship_zipCode'
                                                 name="ship_zipCode"
                                                 list="ship-postals-list"
-                                                className="block px-2.5 py-2.5 w-full text-sm text-gray-900 bg-transparent focus:outline-none focus:ring-0 peer focus:ring-blue-500 focus:border-blue-500" />
+                                                className="block px-2.5 py-2.5 w-full text-sm text-slate-900 dark:text-slate-200 bg-transparent dark:bg-slate-700 focus:outline-none focus:ring-0 peer focus:ring-blue-500 focus:border-blue-500" />
                                             {!loadingShipPostals && shipPostals !== undefined &&
                                                 <datalist id="ship-postals-list">
                                                     {shipPostals?.regions?.data[0]?.attributes.postal_codes.data.map(postal => (

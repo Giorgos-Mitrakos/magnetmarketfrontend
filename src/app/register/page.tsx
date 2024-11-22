@@ -82,11 +82,11 @@ export default function Login() {
                     <h2>Εγγραφή</h2>
                 </Link>
             </div>
-            <form className='grid gap-6 w-full mt-8 p-4 md:border-2 bg-white dark:bg-slate-700 mx-auto rounded-md shadow-sm'
+            <form className='grid gap-6 w-full mt-8 p-4 md:border-2 bg-white mx-auto rounded-md shadow-sm'
                 method="post" action="/api/auth/callback/credentials">
                 <h2 className='text-center text-xl font-medium'>Συνδεθείτε</h2>
                 <div className='h-14'>
-                    <div className="flex h-12 rounded-lg border border-1 border-slate-300 appearance-none">
+                    <div className="flex h-10 rounded-lg border border-1 border-gray-300 appearance-none">
                         {/* <label htmlFor='email' className='text-sm w-20 content-center'>Email:</label> */}
                         <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
                         <CustomInput
@@ -103,7 +103,7 @@ export default function Login() {
                         : null}
                 </div>
                 <div className='h-14'>
-                    <div className="flex h-12 rounded-lg border border-1 border-gray-300 appearance-none">
+                    <div className="flex h-10 rounded-lg border border-1 border-gray-300 appearance-none">
                         <CustomInput
                             aria_label="Φόρμα εισαγωγής Κωδικού"
                             type={toggle ? "text" : "password"}
@@ -137,7 +137,7 @@ export default function Login() {
             </form>
             {providers && Object.values(providers).map((provider) => (
                 provider.name !== "Credentials" ? <div key={provider.name}>
-                    <button className='border rounded-md bg-siteColors-blue w-full p-2 text-lg font-medium'
+                    <button className='border rounded-md w-full p-2 text-lg font-medium'
                         onClick={() => signIn(provider.id, {
                             callbackUrl: callbackUrl ? callbackUrl : "/"
                         })}>
