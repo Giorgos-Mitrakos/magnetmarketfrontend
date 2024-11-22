@@ -10,8 +10,8 @@ function SearchInput() {
     const { text, setText, isListening, startListening, stopListening, hasRecognitionSupport } = useSpeechRecognition()
 
     return (
-        <div className="flex items-center px-8">
-            <form className="flex items-end border-b-2 bg-inherit border-siteColors-purple"
+        <div className="flex items-center w-full">
+            <form className="flex w-full items-end border-b-2 bg-inherit border-siteColors-purple"
                 aria-label="Αναζήτηση">
                 {hasRecognitionSupport &&
                     <button onClick={isListening ? stopListening : startListening}
@@ -26,7 +26,7 @@ function SearchInput() {
                                 className='text-siteColors-purple dark:text-slate-200 text-2xl mb-1' />}
                     </button>}
                 <input type="search" placeholder="Αναζήτηση" value={text} onChange={(e) => setText(e.target.value)}
-                    className="px-2 w-80 bg-inherit outline-none border-none dark:text-slate-200 dark:placeholder:text-slate-300"
+                    className="pl-2  bg-inherit outline-none border-none dark:text-slate-200 dark:placeholder:text-slate-300"
                     aria-label="Πεδίο αναζήτησης προϊόντων" />
             </form>
             <IconLink
