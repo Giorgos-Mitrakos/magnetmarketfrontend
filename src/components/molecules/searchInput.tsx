@@ -23,7 +23,7 @@ function SearchInput() {
                                 aria-label="Φωνητική αναζήτηση - Αναζητήστε ανά προϊόν, κατασκευαστή ή κατηγορία με φωνητικές εντολές!"
                                 className='text-red-600 text-2xl mb-1 ' /> :
                             <FaMicrophoneSlash
-                                className='text-siteColors-purple dark:text-slate-200 text-2xl mb-1' />}
+                                className='text-siteColors-purple dark:text-slate-800 text-2xl mb-1' />}
                     </button>}
                 <input type="search" placeholder="Αναζήτηση" value={text} onChange={(e) => setText(e.target.value)}
                     className="pl-2 bg-inherit outline-none border-none"

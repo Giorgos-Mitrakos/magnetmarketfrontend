@@ -5,6 +5,7 @@ import ProductCardPrice from "../atoms/productCardPrice"
 import ProductCardHead from "../molecules/productCardHead"
 import { IimageProps } from "@/lib/queries/categoryQuery"
 import ProductCardFoot from "../molecules/productCardFoot"
+import { FaRegImage } from "react-icons/fa6"
 
 
 export interface ProductCardProps {
@@ -55,7 +56,7 @@ const ProductCard = (props: ProductCardProps) => {
                 <ProductCardHead brand={brand} id={props.prod.id} />
                 <Link className="grid w-full place-content-center relative" href={`/product/${product.slug}`}
                     aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${product.name}`}>
-                    {product.image.data &&
+                    {product.image.data ?
                         <Image className="object-contain p-2"
                             aria-label={`Φωτογραφία προϊόντος${product.name}`}
                             // layout='responsive'
@@ -67,9 +68,9 @@ const ProductCard = (props: ProductCardProps) => {
                             alt={product.image.data.attributes.alternativeText || ""}
                             quality={75}
                             sizes="(max-width: 640px) 33vw, (max-width: 1024px) 17vw"
-                        />}
-                    {/* :
-                            <Image media={mediaNotFound} height={160} width={160} />} */}
+                        />
+                        :
+                        <FaRegImage  className='h-80 w-80'/>}
 
                 </Link>
                 {/* {props.prod.attributes.sale_price && <Badge product={product} />} */}
