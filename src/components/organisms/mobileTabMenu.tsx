@@ -22,7 +22,7 @@ export default function MobileTabMenu() {
                     "-translate-x-full"} duration-500`}>
                 <MobileDrawer />
             </div>
-            <div className={`fixed lg:hidden rounded w-full z-50 top-0 bg-white shadow-lg flex justify-center p-4 
+            <div className={`fixed lg:hidden rounded w-full z-50 top-0 bg-white shadow-lg flex justify-center py-4 px-8 
                 transition-transform transform ${isSearchOpen ? "translate-y-0" :
                     "-translate-y-full"} duration-500`}>
                 <SearchInput />

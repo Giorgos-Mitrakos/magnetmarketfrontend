@@ -8,7 +8,7 @@ export interface IconLinkProps {
 
 function IconLink(props: IconLinkProps) {
     return (
-        <Link href={props.url} className=" text-siteColors-purple dark:text-slate-200 text-xl p-3 xs:text-2xl sm:p-4 md:text-3xl"
+        <Link href={props.url} className=" text-siteColors-purple dark:text-slate-800 text-xl p-3 xs:text-2xl sm:p-4 md:text-3xl"
             aria-label={props["aria-label"]}>
             {props.icon}
         </Link>

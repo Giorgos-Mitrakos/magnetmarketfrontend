@@ -21,12 +21,12 @@ const Menu = async (props: MenuProps) => {
             <ul className='mt-4'>
                 {response.categories.data[0]?.attributes.categories.data.map(sub => (
                     <li className='' key={sub.attributes.slug} >
-                        <Link href={`${process.env.NEXT_URL}/category/${props.category1}/${sub.attributes.slug}`}
+                        <Link href={`/category/${props.category1}/${sub.attributes.slug}`}
                             className='font-semibold text-sm'>{sub.attributes.name}</Link>
                         <ul>
                             {sub.attributes.slug === props.category2 && sub.attributes.categories.data.map(sub2 => (
                                 <li className='text-base space-y-3 ml-1' key={sub2.attributes.slug}>
-                                    <Link href={`${process.env.NEXT_URL}/category/${props.category1}/${sub.attributes.slug}/${sub2.attributes.slug}`}>{sub2.attributes.name}</Link>
+                                    <Link href={`/category/${props.category1}/${sub.attributes.slug}/${sub2.attributes.slug}`}>{sub2.attributes.name}</Link>
                                 </li>
                             ))}
                         </ul>

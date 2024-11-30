@@ -45,7 +45,7 @@ const ProductInfo = ({ description, chars }: ProductDescriptionProps) => {
             <div id="myTabContent">
                 {description && active === "description" ?
                     <div className="py-4 bg-gray-50 rounded-lg dark:bg-gray-800" id="description" role="tabpanel" aria-labelledby="description-tab">
-                        <p className="text-sm xs:text-base md:text-lg text-gray-500 dark:text-slate-200 px-4" dangerouslySetInnerHTML={sanitizedData()}></p>
+                        <p className="text-sm max-w-full xs:text-base md:text-lg text-gray-500 dark:text-slate-200 px-4" dangerouslySetInnerHTML={sanitizedData()}></p>
                     </div> :
                     <div className="py-4 rounded-lg dark:bg-gray-800" id="specification" role="tabpanel" aria-labelledby="specification-tab">
                         <table className="table-auto w-full  dark:border-black">
