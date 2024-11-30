@@ -2,8 +2,8 @@ import { gql } from "graphql-request";
 import { IimageProps } from "./categoryQuery";
 
 export const GET_CATEGORY_PRODUCTS = gql`
-query getCategoryProducts($filters:ProductFiltersInput!,$sort:[String!]){
-  products(filters: $filters,pagination:{limit:-1},sort:$sort){
+query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationArg!,$sort:[String!]){
+  products(filters: $filters,pagination:$pagination,sort:$sort){
     data{
         id
         attributes{
@@ -41,50 +41,54 @@ query getCategoryProducts($filters:ProductFiltersInput!,$sort:[String!]){
             }
         }
     }
+    meta{
+      pagination{
+        total
+        page
+        pageSize
+        pageCount
+      }
+    }
   }
 }`
 
 export interface IcategoryProductsProps {
-  products: {
-    data: [{
-      id: number
-      attributes: {
-        name: string
-        slug: string
-        prod_chars: {
-          name: string
-          value: string
-        }[]
-        brand: {
-          data: {
-            attributes: {
-              name: string,
-              slug: string,
-              logo: {
-                data: {
-                  attributes: {
-                    name: string
-                    url: string
-                    formats: {
-                      thumbnail: IimageProps,
-                      small: IimageProps
-                    }
-                  }
+  id: number
+  attributes: {
+    name: string
+    slug: string
+    prod_chars: {
+      name: string
+      value: string
+    }[]
+    brand: {
+      data: {
+        attributes: {
+          name: string,
+          slug: string,
+          logo: {
+            data: {
+              attributes: {
+                name: string
+                url: string
+                formats: {
+                  thumbnail: IimageProps,
+                  small: IimageProps
                 }
               }
             }
           }
         }
-        image: {
-          data: {
-            attributes: {
-              url: string
-              alternativeText: string
-            }
-          }
+      }
+    }
+    image: {
+      data: {
+        attributes: {
+          url: string
+          alternativeText: string
         }
       }
-    }]
+    }
   }
 }
 

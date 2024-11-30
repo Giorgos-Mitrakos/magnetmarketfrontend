@@ -14,19 +14,31 @@ type MetadataProps = {
 export const dynamicParams = false
 
 
-async function getCategoryProducts(category: string, searchParams: ({ [key: string]: string | string[]})) {
+async function getCategoryProducts(category: string, searchParams: ({ [key: string]: string | string[] })) {
 
-    const {sort } = searchParams
+    const { sort, page, pageSize, brands } = searchParams
 
     let sortedBy: string = sort ? sort.toString() : 'price:asc'
-    const filters =await createFiltersForDbQuery({  category, categoryLevel: 2 })
+    const filters = await createFiltersForDbQuery({ category, categoryLevel: 2, brands, searchParams })
     const sorted = [sortedBy]
 
     const data = await requestSSR({
-        query: GET_CATEGORY_PRODUCTS, variables: { filters: filters, sort: sorted }
+        query: GET_CATEGORY_PRODUCTS, variables: { filters: filters, pagination: { page: page ? Number(page) : 1, pageSize: pageSize ? Number(pageSize) : 12 }, sort: sorted }
     });
 
-    const res = data as IcategoryProductsProps
+    const res = data as {
+        products: {
+            data: IcategoryProductsProps[],
+            meta: {
+                pagination: {
+                    total: number,
+                    page: number,
+                    pageSize: number,
+                    pageCount: number,
+                }
+            }
+        }
+    }
 
     return res
 }
@@ -37,10 +49,10 @@ export default async function Category2({ params, searchParams }:
         searchParams: { [key: string]: string | string[] }
     }) {
 
-        const data = await getCategoryProducts(
-            params.category2,
-            searchParams
-        )
+    const data = await getCategoryProducts(
+        params.category2,
+        searchParams
+    )
 
     return (
         <CategoryPageTemplate
@@ -86,7 +98,7 @@ export async function generateMetadata(
     }
 
     if (response.categories.data[0].attributes.image.data) {
-        
+
         metadata.openGraph = { images: [`${process.env.NEXT_PUBLIC_API_URL}/${response.categories.data[0].attributes.image.data?.attributes.url}`] }
     }
 

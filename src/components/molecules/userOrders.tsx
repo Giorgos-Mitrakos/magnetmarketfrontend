@@ -171,7 +171,7 @@ const Accordion = ({ order }: { order: IOrder }) => {
 
 const UserOrders = ({ jwt }: { jwt: string }) => {
 
-    const { data, loading, error }: { data: IOrders, loading: boolean, error: any } = useApiRequest({ api: "/api/user-address/getUserOrders", jwt })
+    const { data, loading, error }: { data: IOrders, loading: boolean, error: any } = useApiRequest({method:"GET", api: "/api/user-address/getUserOrders", jwt })
 
     return (
         <div className="space-y-4">

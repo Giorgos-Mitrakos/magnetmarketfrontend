@@ -58,7 +58,7 @@ const CustomerInfo = () => {
 
     const { data: session, status } = useSession()
 
-    const { data, loading, error }: { data: IProfile, loading: boolean, error: any } = useApiRequest({ api: "/api/user-address/getUser", jwt: `${session?.user?.jwt}` })
+    const { data, loading, error }: { data: IProfile, loading: boolean, error: any } = useApiRequest({method:"GET", api: "/api/user-address/getUser", jwt: `${session?.user?.jwt}` })
 
     const formikRef = useRef<FormInputRef | null>(null);
 

@@ -15,17 +15,29 @@ type MetadataProps = {
 
 async function getCategoryProducts(category: string, searchParams: ({ [key: string]: string | string[] })) {
 
-    const { sort } = searchParams
+    const { sort, page, pageSize, brands } = searchParams
 
     let sortedBy: string = sort ? sort.toString() : 'price:asc'
-    const filters = await createFiltersForDbQuery({ category, categoryLevel: 1 })
+    const filters = await createFiltersForDbQuery({ category, categoryLevel: 1, brands, searchParams })
     const sorted = [sortedBy]
 
     const data = await requestSSR({
-        query: GET_CATEGORY_PRODUCTS, variables: { filters: filters, sort: sorted }
+        query: GET_CATEGORY_PRODUCTS, variables: { filters: filters, pagination: { page: page ? Number(page) : 1, pageSize: pageSize ? Number(pageSize) : 12 }, sort: sorted }
     });
 
-    const res = data as IcategoryProductsProps
+    const res = data as {
+        products: {
+            data: IcategoryProductsProps[],
+            meta: {
+                pagination: {
+                    total: number,
+                    page: number,
+                    pageSize: number,
+                    pageCount: number,
+                }
+            }
+        }
+    }
 
     return res
 }

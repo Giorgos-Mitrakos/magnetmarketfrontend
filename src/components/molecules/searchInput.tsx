@@ -26,7 +26,7 @@ function SearchInput() {
                                 className='text-siteColors-purple dark:text-slate-200 text-2xl mb-1' />}
                     </button>}
                 <input type="search" placeholder="Αναζήτηση" value={text} onChange={(e) => setText(e.target.value)}
-                    className="pl-2  bg-inherit outline-none border-none dark:text-slate-200 dark:placeholder:text-slate-300"
+                    className="pl-2  bg-inherit outline-none border-none"
                     aria-label="Πεδίο αναζήτησης προϊόντων" />
             </form>
             <IconLink

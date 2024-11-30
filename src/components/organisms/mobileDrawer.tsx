@@ -7,6 +7,7 @@ import { SetStateAction, useContext, useEffect, useState } from "react"
 import NextImage from "../atoms/nextImage"
 import { FaArrowLeftLong, FaRegImage } from "react-icons/fa6";
 import { MenuContext } from "@/context/menu"
+import { useRouter } from "next/navigation"
 
 interface IMenuCategoryProps {
     attributes: {
@@ -81,13 +82,21 @@ function Sub2categoryDrawer({ category, subcategory }:
 function SubcategoryDrawer({ category }: {
     category: IMenuCategoryProps | null
 }) {
-
-    const { isSubCategoriesOpen, openSubCategoryDrawer, closeCategoryDrawer } = useContext(MenuContext)
+    const router = useRouter()
+    const { isSubCategoriesOpen, openSubCategoryDrawer, closeCategoryDrawer, closeMenuDrawer } = useContext(MenuContext)
     const [subCategory, setSubCategory] = useState<IMenuSubCategoryProps | null>(null)
 
-    const handleOnclickSub = (category: IMenuSubCategoryProps) => {
-        setSubCategory(category)
-        openSubCategoryDrawer()
+    const handleOnclickSub = (cat: IMenuSubCategoryProps) => {
+        if (cat.attributes.categories.data.length > 0) {
+            setSubCategory(cat)
+            openSubCategoryDrawer()
+        }
+        else {
+            if (category) {
+                router.push(`/category/${category.attributes.slug}/${cat.attributes.slug}`)
+                closeMenuDrawer()
+            }
+        }
     }
 
     return (
@@ -127,7 +136,8 @@ function SubcategoryDrawer({ category }: {
 }
 
 export default function MobileDrawer() {
-    const { isCategoriesOpen, openCategoryDrawer } = useContext(MenuContext)
+    const router = useRouter()
+    const { isCategoriesOpen, openCategoryDrawer, closeMenuDrawer } = useContext(MenuContext)
     const { data: menuData, loading, error } = useNoRevalideteQuery({ query: GET_MENU, jwt: '' })
 
     const menu = menuData as IMenuProps
@@ -135,8 +145,14 @@ export default function MobileDrawer() {
     const [category, setCategory] = useState<IMenuCategoryProps | null>(null)
 
     const handleOnclickSub = (category: IMenuCategoryProps) => {
-        setCategory(category)
-        openCategoryDrawer()
+        if (category.attributes.categories.data.length > 0) {
+            setCategory(category)
+            openCategoryDrawer()
+        }
+        else {
+            router.push(`/category/${category.attributes.slug}`)
+            closeMenuDrawer()
+        }
     }
 
     return (

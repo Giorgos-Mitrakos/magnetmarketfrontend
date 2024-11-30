@@ -10,6 +10,14 @@ interface requestProps {
     jwt: string
 }
 
+interface requestApiProps {
+    method: string
+    api?: string
+    query?: string
+    variables?: { [key: string]: string | number | string[] | object[] }
+    jwt: string
+}
+
 interface requestPublicProps {
     api?: string
     query?: string
@@ -66,15 +74,17 @@ export function useNoRevalideteQuery({ query, variables, jwt }: requestProps) {
     }
 }
 
-export function useApiRequest({ api, variables, jwt }: requestProps) {
+export function useApiRequest({ method, api, variables, jwt }: requestApiProps) {
     const myHeaders = new Headers();
     myHeaders.append("authorization", `Bearer ${jwt}`);
+    myHeaders.append('Content-Type', 'application/json')
 
     const myInit = {
-        method: "GET",
+        method: `${method}`,
         headers: myHeaders,
         // mode: "cors",
         // cache: "default",
+        body: JSON.stringify(variables)
     };
 
     const fetcher = ([url, variables]: any) =>

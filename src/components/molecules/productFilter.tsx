@@ -1,6 +1,6 @@
 'use client'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 
 interface FilterProps {
     title: string,
@@ -27,6 +27,17 @@ const ProductFilter = (props: FilterProps) => {
         return filters
     })
 
+    useEffect(()=>{
+        const filters: string[] = []
+        if (search) {
+            search.forEach(filter => {
+                filters.push(filter.toLowerCase())
+            });
+        }
+
+        setSelectedFilters(filters)
+    },[searchParams])
+
     const handleItemClick = (filter: string) => {
         const params = new URLSearchParams(searchParams)
         if (search.includes(filter.toLowerCase())) {
@@ -39,7 +50,7 @@ const ProductFilter = (props: FilterProps) => {
         if (params.has("page"))
             params.delete("page")
 
-        router.push(pathname + '?' + params)
+        router.replace(pathname + '?' + params)
     }
 
     return (

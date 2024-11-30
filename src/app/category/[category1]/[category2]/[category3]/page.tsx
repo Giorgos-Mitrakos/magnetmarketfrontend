@@ -1,5 +1,5 @@
 import CategoryPageTemplate from "@/components/templates/categoryPage";
-import { createFiltersForDbQuery, filtersProducts } from "@/lib/helpers/helpers";
+import { createFiltersForDbQuery } from "@/lib/helpers/helpers";
 import { GET_CATEGORIES_MAPPING, GET_CATEGORY_METADATA, IcategoriesMappingProps, IcategoryMetadataProps } from "@/lib/queries/categoryQuery";
 import { GET_CATEGORY_PRODUCTS, IcategoryProductsProps } from "@/lib/queries/productQuery";
 import { requestSSR } from "@/repositories/repository";
@@ -14,17 +14,29 @@ export const dynamicParams = false
 
 async function getCategoryProducts(category: string, searchParams: ({ [key: string]: string | string[] })) {
 
-    const {sort } = searchParams
+    const { sort, page, pageSize, brands } = searchParams
 
     let sortedBy: string = sort ? sort.toString() : 'price:asc'
-    const filters =await createFiltersForDbQuery({ category, categoryLevel: 3 })
+    const filters = await createFiltersForDbQuery({ category, categoryLevel: 3, brands, searchParams })
     const sorted = [sortedBy]
 
     const data = await requestSSR({
-        query: GET_CATEGORY_PRODUCTS, variables: { filters: filters, sort: sorted }
+        query: GET_CATEGORY_PRODUCTS, variables: { filters: filters, pagination: { page: page ? Number(page) : 1, pageSize: pageSize ? Number(pageSize) : 12 }, sort: sorted }
     });
 
-    const res = data as IcategoryProductsProps
+    const res = data as {
+        products: {
+            data: IcategoryProductsProps[],
+            meta: {
+                pagination: {
+                    total: number,
+                    page: number,
+                    pageSize: number,
+                    pageCount: number,
+                }
+            }
+        }
+    }
 
     return res
 }
