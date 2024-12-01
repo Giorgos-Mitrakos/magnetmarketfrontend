@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState } from 'react';
 import NextImage from '../atoms/nextImage';
 import { register } from 'swiper/element/bundle';
+import { FaRegImage } from 'react-icons/fa6';
 
 register();
 
