@@ -3,7 +3,6 @@
 import { useRef, useEffect, useState } from 'react';
 import NextImage from '../atoms/nextImage';
 import { register } from 'swiper/element/bundle';
-import { FaRegImage } from 'react-icons/fa6';
 
 register();
 
@@ -34,26 +33,32 @@ const ProductImageWidget = ({ images }) => {
     const [thumbsSwiper, setThumbsSwiper] = useState(null);
     const [indexThumb, setIndexThumb] = useState(0);
 
+    const mediaNotFound = {
+        url: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/not-found.jpg`,
+        alternativeText: "image not found"
+    }
+
     return (
         <div className='max-w-full md:pr-8 mx-4'>
             <div className='w-full max-h-96 mb-4'>
                 <swiper-container
-                className='max-h-96'
+                    className='max-h-96'
                     spaceBetween={0}
                     slides-per-view="1"
                     zoom="true"
                     thumbs-swiper=".mySwiper2"
                     effect="fade"
                 >
-                    {images.length > 0 ?
+                    {images.length > 0 &&
                         images.map((item, i) => (
                             <swiper-slide key={i} className='w-full overflow-hidden'>
                                 <div className="swiper-zoom-container max-h-96">
-                                    <NextImage media={item.attributes} height={320} width={320} />
+                                    {item.attributes ?
+                                        <NextImage media={item.attributes} height={320} width={320} />
+                                        : <FaRegImage className='h-60 w-60' />}
                                 </div>
                             </swiper-slide>
-                        )) :
-                        <FaRegImage className='h-80 w-80' />}
+                        ))}
                 </swiper-container>
             </div>
             <div className='dark:bg-slate-800'>

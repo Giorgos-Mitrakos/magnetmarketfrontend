@@ -60,6 +60,7 @@ export default async function Product({ params }:
   ]
 
   const images = []
+  if(data.products.data[0]?.attributes.image.data)
   images.push(data.products.data[0]?.attributes.image.data)
   data.products.data[0]?.attributes.additionalImages.data.forEach(x => {
     images.push(x)

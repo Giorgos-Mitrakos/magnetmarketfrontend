@@ -59,7 +59,7 @@ const Carousel = ({ products }) => {
             // navigation
             >
                 {products.data.map((product, i) =>
-                    <swiper-slide key={i} lazy="true">
+                    <swiper-slide key={i}>
                         <ProductCard prod={product} />
                     </swiper-slide>)
                 }

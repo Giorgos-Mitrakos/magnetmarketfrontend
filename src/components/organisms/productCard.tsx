@@ -70,7 +70,7 @@ const ProductCard = (props: ProductCardProps) => {
                             sizes="(max-width: 640px) 33vw, (max-width: 1024px) 17vw"
                         />
                         :
-                        <FaRegImage  className='h-80 w-80'/>}
+                        <FaRegImage  className='h-40 w-40 text-siteColors-purple dark:text-slate-200'/>}
 
                 </Link>
                 {/* {props.prod.attributes.sale_price && <Badge product={product} />} */}
