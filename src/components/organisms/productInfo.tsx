@@ -36,17 +36,18 @@ const ProductInfo = ({ description, chars }: ProductDescriptionProps) => {
                         <button className={`inline-block py-4 px-4 font-medium lg:font-semibold text-center rounded-t-lg border-b-2 md:border-b-4 ${active === "description" ? "border-gray-300 text-black " : "border-transparent text-gray-500"} hover:text-gray-600 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100`} id="description-tab" data-tabs-target="#Description" type="button" role="tab" aria-controls="Description" aria-selected={active === "description"}
                             onClick={() => setActive("description")}>Περιγραφή</button>
                     </li>}
-                    <li className="mr-2" role="presentation">
+                    {chars && chars.length > 0 && <li className="mr-2" role="presentation">
                         <button className={`inline-block py-4 px-4 font-medium lg:font-semibold text-center rounded-t-lg border-b-2 md:border-b-4 ${active === "specification" ? "border-gray-300 text-black" : "border-transparent text-gray-500"} hover:text-gray-600 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100`} id="specification-tab" data-tabs-target="#Specification" type="button" role="tab" aria-controls="Specification" aria-selected={active === "specification"}
                             onClick={() => setActive("specification")}>Χαρακτηριστικά</button>
-                    </li>
+                    </li>}
                 </ul>
             </div>
             <div id="myTabContent">
-                {description && active === "description" ?
+                {description && active === "description" &&
                     <div className="py-4 bg-gray-50 rounded-lg dark:bg-gray-800" id="description" role="tabpanel" aria-labelledby="description-tab">
                         <p className="text-sm max-w-full xs:text-base md:text-lg text-gray-500 dark:text-slate-200 px-4" dangerouslySetInnerHTML={sanitizedData()}></p>
-                    </div> :
+                    </div>}
+                {chars && chars.length > 0 &&
                     <div className="py-4 rounded-lg dark:bg-gray-800" id="specification" role="tabpanel" aria-labelledby="specification-tab">
                         <table className="table-auto w-full  dark:border-black">
                             <tbody>

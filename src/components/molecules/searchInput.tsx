@@ -28,11 +28,11 @@ function SearchInput() {
                 <input type="search" placeholder="Αναζήτηση" value={text} onChange={(e) => setText(e.target.value)}
                     className="pl-2 bg-inherit outline-none border-none"
                     aria-label="Πεδίο αναζήτησης προϊόντων" />
+                <button onSubmit={() => { }}
+                    aria-label="Αναζήτηση - Αναζητήστε ανά προϊόν, κατασκευαστή ή κατηγορία">
+                    <AiOutlineSearch className="text-3xl text-siteColors-purple dark:text-slate-200"/>
+                </button>
             </form>
-            <IconLink
-                icon={<AiOutlineSearch />}
-                url="#"
-                aria-label="Αναζήτηση - Αναζητήστε ανά προϊόν, κατασκευαστή ή κατηγορία" />
         </div>
     )
 }
