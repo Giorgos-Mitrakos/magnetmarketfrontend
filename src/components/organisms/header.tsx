@@ -4,13 +4,20 @@ import Logo from "../atoms/logo";
 import { useState } from "react";
 import { FaBarsStaggered } from "react-icons/fa6";
 import MainMenu from "./mainMenu";
-import SearchInput from "../molecules/searchInput";
+// import SearchInput from "../molecules/searchInput";
+import dynamic from "next/dynamic";
+import Minicart from "./minicart";
+
+const SearchInput = dynamic(() => import('@/components/molecules/searchInput'), {
+    ssr: false,
+    loading: () => <p>Loading...</p>
+  })
 
 export default function Header({ user }: { user: any }) {
     const [openMenu, setOpenMenu] = useState(false)
 
     return (
-        <div>
+        <div>            
             <header className="flex justify-center xs:flex-row p-2 w-full h-auto lg:justify-between dark:bg-black"
                 aria-label="Κεφαλίδα">
                 <Logo />

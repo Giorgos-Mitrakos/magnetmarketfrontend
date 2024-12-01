@@ -1,7 +1,6 @@
 "use client"
 
 import { AiOutlineSearch } from "react-icons/ai";
-import IconLink from "../atoms/iconLink";
 import { FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
 import useSpeechRecognition from "@/hooks/useSpeechRecognition";
 

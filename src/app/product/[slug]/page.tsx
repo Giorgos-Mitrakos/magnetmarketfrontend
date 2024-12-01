@@ -67,12 +67,10 @@ export default async function Product({ params }:
     images.push(x)
   })
 
-  console.log(images)
-
   return (
     <div className="dark:bg-gray-800">
       <SiteFeatures />
-      {/* <Breadcrumb breadcrumbs={breadcrumbs} /> */}
+      <Breadcrumb breadcrumbs={breadcrumbs} />
       {data.products.data.length > 0 &&
         < div className="grid md:grid-cols-4 lg:grid-cols-5 w-full mt-8">
           <div className='col-span-4'>

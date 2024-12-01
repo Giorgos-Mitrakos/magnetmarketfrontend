@@ -7,7 +7,12 @@ import { useContext, useState } from 'react';
 import { CartContext } from '@/context/cart';
 import MobileDrawer from './mobileDrawer';
 import { MenuContext } from '@/context/menu';
-import SearchInput from '../molecules/searchInput';
+import dynamic from 'next/dynamic';
+
+const SearchInput = dynamic(() => import('@/components/molecules/searchInput'), {
+    ssr: false,
+    loading: () => <p>Loading...</p>
+  })
 
 export default function MobileTabMenu() {
     const { data: session, status } = useSession()

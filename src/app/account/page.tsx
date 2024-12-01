@@ -6,7 +6,6 @@ import { useApiRequest } from "@/repositories/clientRepository";
 import { signOut, useSession } from "next-auth/react";
 import { ReactNode, useReducer, useState } from "react";
 import { AiOutlineAppstore, AiOutlineHistory, AiOutlineLogout, AiOutlineUser } from "react-icons/ai";
-import { FaCoins } from "react-icons/fa6";
 
 
 const reducer = (state: { tabs: { title: string, content: string, icon: ReactNode }[], activeTab: number }, action: { type: string, payload: number }) => {

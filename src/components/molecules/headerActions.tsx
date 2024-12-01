@@ -41,7 +41,7 @@ const HeaderActions = ({ user }: any) => {
                             aria-label={`Το καλάθι σου!`} />
                         <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-siteColors-pink border-2 border-white rounded-full top-1 right-1 dark:border-gray-900">
                             {cartItems.reduce((previousValue, currentValue, currentIndex) => { return previousValue + currentValue.quantity }, 0)}</div>
-                        <Minicart />
+
                     </div>
                 </div>
                 <div className="flex flex-row group relative h-auto w-auto justify-start items-center">
@@ -61,8 +61,10 @@ const HeaderActions = ({ user }: any) => {
                             <button onClick={() => signOut({ callbackUrl: process.env.NEXT_URL })} aria-label="Αποσύνδεση">Sign out</button>
                         </div>}
                 </div>
-
             </div>}
+            {/* <div className="absolute w-full">
+                <Minicart />
+            </div> */}
         </div>
     )
 }
