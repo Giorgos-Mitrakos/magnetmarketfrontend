@@ -70,7 +70,7 @@ export default function Dropdown({ items, filter }: DropdownFilter) {
                     {
                         items.map(item =>
                             <div key={item.title}
-                                className='p-4 font-normal cursor-pointer hover:bg-slate-100'
+                                className='p-4 font-normal cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700'
                                 onClick={() => handleItemClick(item)}
                                 aria-label={item.title}
                             >

@@ -9,6 +9,7 @@ import { GET_PRODUCT_BY_SLUG, IProductProps } from '@/lib/queries/productQuery';
 import { getStrapiMedia } from '@/repositories/medias';
 import { requestSSR } from '@/repositories/repository';
 import Image from 'next/image'
+import { FaRegImage } from "react-icons/fa";
 const ProductInfo = dynamic(() => import("@/components/organisms/productInfo"), {
   ssr: false,
   loading: () => <p>Loading...</p>
@@ -60,11 +61,13 @@ export default async function Product({ params }:
   ]
 
   const images = []
-  if(data.products.data[0]?.attributes.image.data)
-  images.push(data.products.data[0]?.attributes.image.data)
+  if (data.products.data[0]?.attributes.image.data)
+    images.push(data.products.data[0]?.attributes.image.data)
   data.products.data[0]?.attributes.additionalImages.data.forEach(x => {
     images.push(x)
   })
+
+  console.log(images)
 
   return (
     <div className="dark:bg-gray-800">
@@ -75,7 +78,11 @@ export default async function Product({ params }:
           <div className='col-span-4'>
             <div className='grid grid-cols-1 sm:grid-cols-2 col-span-4'>
               <div>
-                <ProductImageWidget images={images} />
+                {images.length > 0 ?
+                  <ProductImageWidget images={images} /> :
+                  <div className="flex justify-center text-siteColors-purple">
+                    <FaRegImage className='h-60 w-60' />
+                  </div>}
               </div>
               <div>
                 <ProductBasicFeatures product={data.products.data[0]} />

@@ -59,6 +59,7 @@ const ProductCard = (props: ProductCardProps) => {
                     {product.image.data ?
                         <Image className="object-contain p-2"
                             aria-label={`Φωτογραφία προϊόντος${product.name}`}
+                            loading="lazy"
                             // layout='responsive'
                             // width={product.image.data.attributes.width / 4}
                             // height={product.image.data.attributes.height / 4}

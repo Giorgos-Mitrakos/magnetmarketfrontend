@@ -14,7 +14,7 @@ const MainMenu = ({ isMenuOpen }: { isMenuOpen: boolean }) => {
     const menu = menuData as IMenuProps
 
     return (
-        <section className={`absolute ${isMenuOpen ? "flex" : "hidden"} top-6 max-w-7xl z-20 bg-white border-2 border-slate-200 cursor-default`}>
+        <section className={`absolute ${isMenuOpen ? "flex" : "hidden"} top-6 max-w-7xl z-20 bg-white dark:bg-slate-700 border-2 border-slate-200 cursor-default`}>
             <ul className="flex flex-col pt-4 border-slate-200">
                 {menu && menu.categories.data.map(cat => (
                     cat.attributes.name !== "Uncategorized" && 
@@ -23,20 +23,19 @@ const MainMenu = ({ isMenuOpen }: { isMenuOpen: boolean }) => {
                             <h3>{cat.attributes.name}</h3>
                         </Link>
                         {cat.attributes.categories.data.length > 0 &&
-                            <FaAngleRight className="pr-1 text-slate-500" />}
+                            <FaAngleRight className="pr-2 text-slate-500 dark:text-slate-300" />}
                     </li>
                 ))}
             </ul>
             {menu && menu.categories.data.map(cat => (
                 <div key={cat.attributes.slug}>
                     <ul className={`${active === cat.attributes.slug ? "grid" : "hidden"}
-                        grid-cols-5 w-full max-w-full min-h-full z-10 bg-white`}>
+                        grid-cols-5 w-full max-w-full min-h-full z-10 bg-white dark:bg-slate-700`}>
                         {cat.attributes.categories.data.map(sub => (
                             <li key={sub.attributes.slug} className="w-44 mt-4 pl-8">
                                 <Link href={`/category/${cat.attributes.slug}/${sub.attributes.slug}`}>
-                                    <h3 className="text-sm text-black font-semibold pr-4 mb-4">{sub.attributes.name}</h3>
+                                    <h3 className="text-sm text-black dark:text-slate-200 font-semibold pr-4 mb-4">{sub.attributes.name}</h3>
                                 </Link>
-
                                 <ul className="flex flex-col">
                                     {sub.attributes.categories.data.map(sub2 => (
                                         <li key={sub2.attributes.slug}>

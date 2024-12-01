@@ -34,11 +34,6 @@ const ProductImageWidget = ({ images }) => {
     const [thumbsSwiper, setThumbsSwiper] = useState(null);
     const [indexThumb, setIndexThumb] = useState(0);
 
-    const mediaNotFound = {
-        url: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/not-found.jpg`,
-        alternativeText: "image not found"
-    }
-
     return (
         <div className='max-w-full md:pr-8 mx-4'>
             <div className='w-full max-h-96 mb-4'>
@@ -52,7 +47,7 @@ const ProductImageWidget = ({ images }) => {
                 >
                     {images.length > 0 &&
                         images.map((item, i) => (
-                            <swiper-slide key={i} className='w-full overflow-hidden'>
+                            <swiper-slide key={i} className='w-full overflow-hidden' lazy="true">
                                 <div className="swiper-zoom-container max-h-96">
                                     {item.attributes ?
                                         <NextImage media={item.attributes} height={320} width={320} />

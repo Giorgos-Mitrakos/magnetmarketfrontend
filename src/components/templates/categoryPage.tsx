@@ -5,7 +5,7 @@ import CategoryPageHeader from "../organisms/categoryPageHeader";
 import PaginationBar from "../molecules/pagination";
 import CategoryFilters from "../organisms/categoryFilters";
 import SiteFeatures from "../organisms/siteFeatures";
-import { FaFilter } from "react-icons/fa6";
+import MobileFilters from "../organisms/mobileFilters";
 
 type pageProps = {
     params: {
@@ -54,9 +54,7 @@ async function CategoryPageTemplate(props: pageProps) {
                                 </div>
                             ))}
                         </section>
-                        <button className="fixed lg:hidden bottom-24 right-8 flex justify-center items-center rounded-full bg-siteColors-lightblue h-14 w-14 shadow-xl">
-                            <FaFilter className="text-white h-6 w-6" />
-                        </button>
+                        <MobileFilters category1={category1} category2={category2} category3={category3} searchParams={searchParams}  />
                         <PaginationBar totalItems={products.products.meta.pagination.total}
                             currentPage={products.products.meta.pagination.page}
                             itemsPerPage={products.products.meta.pagination.pageSize} />
