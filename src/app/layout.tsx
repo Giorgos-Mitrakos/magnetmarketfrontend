@@ -14,6 +14,7 @@ import { Suspense } from 'react'
 import GoogleAnalytics from '@/components/molecules/homepage/google-analytics'
 import CookieBanner from '@/components/molecules/homepage/cookie-banner'
 import EpayIcons from '@/components/molecules/epayIcons'
+import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ['greek'] })
 
@@ -40,8 +41,18 @@ export default async function RootLayout({
         <SessionProviders session={session}>
           <CartProvider>
             <ShippingProvider>
+              <Toaster
+                toastOptions={{
+                  unstyled: true,
+                  classNames: {
+                    error: 'bg-red-400',
+                    success: 'bg-green-500 p-4 rounded-lg',
+                    warning: 'text-yellow-400',
+                    info: 'relative w-96 right-10 w-auto z-20 bg-slate-50 rounded-lg p-4',
+                  },
+                }} />
               <Αnnouncement />
-              <Header user={session?.user?.name} />
+              <Header user={session?.user?.name?.split('@')[0]} />
               <main className='mx-2 xs:mx-4 sm:mx-6 md:mx-8'>
                 {children}
               </main>

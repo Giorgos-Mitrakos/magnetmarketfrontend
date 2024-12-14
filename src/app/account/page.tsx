@@ -83,7 +83,7 @@ const TabContentList = ({ state, session }: any) => {
         }
     }
 
-    const { data, loading, error }: { data: IProfile, loading: boolean, error: any } = useApiRequest({method:'GET', api: "/api/user-address/getUser", jwt: `${session.user.jwt}` })
+    const { data, loading, error }: { data: IProfile, loading: boolean, error: any } = useApiRequest({method:'POST', api: "/api/user-address/getUser", jwt: `${session.user.jwt}` })
 
     return (
         <>
@@ -91,10 +91,10 @@ const TabContentList = ({ state, session }: any) => {
                 <div className="w-full text-center">
                     <TabContent id="Profile" activeTab={state.tabs[state.activeTab]?.content}>
                         <div className="grid">
-                            <ProfileAddresses key={data.user.info.id}
-                                userInfo={data.user.info}
-                                billingAddress={data.user.billing_address}
-                                shippingAddress={data.user.shipping_address}
+                            <ProfileAddresses key={data?.user?.info.id}
+                                userInfo={data?.user?.info}
+                                billingAddress={data?.user?.billing_address}
+                                shippingAddress={data?.user?.shipping_address}
                                 jwt={session.user.jwt} />
 
                         </div>
@@ -125,7 +125,7 @@ export default function Account() {
 
     return (
         <div className="flex">
-            <ul className=" text-siteColors-purple min-w-fit mr-4 bg-slate-100">
+            <ul className=" text-siteColors-purple min-w-fit mr-2 lg:mr-4 bg-slate-100">
                 {state.tabs.map((tab, index) => (
                     <li
                         className=" border-b-2 border-r-2 p-4 cursor-pointer"

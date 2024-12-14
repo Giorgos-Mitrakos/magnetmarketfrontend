@@ -68,7 +68,7 @@ export default function Login() {
             password: Yup.string().required("*Συμπληρώστε τον κωδικό σας!"),
         }),
         onSubmit: (values) => {
-            console.log("values:", values)
+            // console.log("values:", values)
             // signIn('Credentials',values)
         }
     });
@@ -77,10 +77,10 @@ export default function Login() {
         <div className='grid lg:grid-cols-3 gap-4 mt-8 justify-center'>
             <div className='w-full h-full'>
                 <div className='flex text-xl sm:text-2xl md:text-3xl px-2 font-semibold justify-around'>
-                    <Link href='/account/login'>
+                    <Link href='/login'>
                         <h2>Είσοδος</h2>
                     </Link>
-                    <Link href='/account/register' className=' text-slate-500'>
+                    <Link href='/register' className=' text-slate-500'>
                         <h2>Εγγραφή</h2>
                     </Link>
                 </div>
@@ -88,7 +88,7 @@ export default function Login() {
                     method="post" action="/api/auth/callback/credentials">
                     <h2 className='text-center text-xl font-medium'>Συνδεθείτε</h2>
                     <div className='h-14'>
-                        <div className="flex h-12 rounded-lg border border-1 border-slate-300 appearance-none">
+                        <div className="flex relative h-12 rounded-lg border border-1 border-slate-300 appearance-none">
                             {/* <label htmlFor='email' className='text-sm w-20 content-center'>Email:</label> */}
                             <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
                             <CustomInput
@@ -98,14 +98,15 @@ export default function Login() {
                                 name='email'
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
-                                value={formik.values.email} />
+                                value={formik.values.email}
+                                label="Email" />
                         </div>
                         {formik.touched.email && formik.errors.email ?
                             <p className='formError text-sm text-red-600'>{formik.errors.email}</p>
                             : null}
                     </div>
                     <div className='h-14'>
-                        <div className="flex h-12 rounded-lg border border-1 border-gray-300 appearance-none">
+                        <div className="flex relative h-12 rounded-lg border border-1 border-gray-300 appearance-none">
                             <CustomInput
                                 aria_label="Φόρμα εισαγωγής Κωδικού"
                                 type={toggle ? "text" : "password"}
@@ -113,7 +114,8 @@ export default function Login() {
                                 name='password'
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
-                                value={formik.values.password} />
+                                value={formik.values.password}
+                                label="password" />
                         </div>
                         {formik.touched.password && formik.errors.password ?
                             <p className='formError  text-sm text-red-600'>{formik.errors.password}</p>

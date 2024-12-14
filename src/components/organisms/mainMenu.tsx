@@ -14,7 +14,7 @@ const MainMenu = ({ isMenuOpen }: { isMenuOpen: boolean }) => {
     const menu = menuData as IMenuProps
 
     return (
-        <section className={`absolute ${isMenuOpen ? "flex" : "hidden"} top-6 max-w-7xl z-20 bg-white dark:bg-slate-700 border-2 border-slate-200 cursor-default`}>
+        <section className={`absolute ${isMenuOpen ? "flex" : "hidden"} top-6 max-w-7xl z-20 bg-white dark:bg-slate-700 border-2 border-slate-200 cursor-default rounded-md`}>
             <ul className="flex flex-col pt-4 border-slate-200">
                 {menu && menu.categories.data.map(cat => (
                     cat.attributes.name !== "Uncategorized" && 

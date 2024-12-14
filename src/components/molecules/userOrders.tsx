@@ -1,7 +1,7 @@
 'use client'
 import { useApiRequest } from "@/repositories/clientRepository";
 import { useState } from "react";
-import { FaMinus, FaPlus } from "react-icons/fa6";
+import { FaCaretUp, FaCaretDown, FaRegTrashCan } from "react-icons/fa6";
 import NextImage from "../atoms/nextImage";
 import { getStrapiMedia } from "@/repositories/medias";
 import Image from "next/image";
@@ -85,17 +85,28 @@ const Accordion = ({ order }: { order: IOrder }) => {
 
     return (
         <div className="my-2">
-            <div className="border-2 bg-slate-100 grid grid-cols-6 items-center hover:cursor-pointer" onClick={() => setOpen(!open)} >
-                <p className="p-4">{open ? <FaMinus /> : <FaPlus />}</p>
-                <p>{time.toLocaleDateString()}</p>
-                <p>{order.id}</p>
+            <div className="flex  lg:grid lg:grid-cols-6 text-sm lg:text-base justify-between border-2 bg-slate-100 items-center hover:cursor-pointer" onClick={() => setOpen(!open)} >
+                <p className="p-4">{open ? <FaCaretUp /> : <FaCaretDown />}</p>
+                <p className="grid">
+                    <span className="lg:hidden font-semibold">Ημ/νία</span>
+                    <span>{time.toLocaleDateString()}</span>
+                </p>
+                <p className="grid">
+                    <span className="flex lg:hidden font-semibold">Αρ. Παρ.</span>
+                    <span>{order.id}</span>
+                </p>
                 <p></p>
-                <p>{order.status}</p>
-                <button className="flex justify-center items-center m-2 px-4 py-2 rounded border md:text-slate-100 font-semibold
-                bg-red-500 hover:bg-red-600 disabled:bg-red-200 shadow-md" disabled={order.status !== "Ολοκληρωμένη"}>Ακύρωση</button>
+                <p className="grid">
+                    <span className="lg:hidden font-semibold">Κατάσταση</span>
+                    <span>{order.status}</span>
+                </p>
+                <button className="flex lg:hidden justify-center items-center m-2 px-4 py-2 font-semibold
+                text-red-500 hover:text-red-600 disabled:text-red-200" disabled={order.status === "Ολοκληρωμένη"}><FaRegTrashCan /></button>
+                <button className="hidden lg:flex justify-center items-center m-2 px-4 py-2 rounded border md:text-slate-100 font-semibold
+                bg-red-500 hover:bg-red-600 disabled:bg-red-200 shadow-md" disabled={order.status === "Ολοκληρωμένη"}>Ακύρωση</button>
             </div>
-            {open && <div className={`w-full border transition-transform transform ${open ? "translate-y-0" :
-                    "translate-y-full"} duration-500 `}>
+            {open && <div className={`w-full text-sm lg:text-base border transition-transform transform ${open ? "translate-y-0" :
+                "translate-y-full"} duration-500 `}>
                 <div className="grid w-full grid-cols-3 py-4">
                     <div>
                         <h3 className="font-semibold">Χρέωση {!order.different_shipping && '- Αποστολή'}</h3>
@@ -127,35 +138,36 @@ const Accordion = ({ order }: { order: IOrder }) => {
                                 <li>{order.shipping_address.country}</li>
                             </ul>
                         </div>}
-                    <div>Τιμολόγιο: {order.isInvoice ? "Ναι" : "Όχι"}</div>
-                    <div className="col-span-3 mt-8">
-                        <ul className="mx-8">
-                            <li className="grid grid-cols-6 items-center font-semibold">
+                    <div>
+                        <h3 className="font-semibold">Τιμολόγιο</h3>
+                        <p>{order.isInvoice ? "Ναι" : "Όχι"}</p>
+                    </div>
+                    <div className="col-span-3 mt-8 border py-4 mx-1 rounded">
+                        <ul className="mx-2 lg:mx-8">
+                            <li className="grid grid-cols-6 mb-4 items-center font-semibold">
                                 <p></p>
                                 <p className="col-span-3">Προϊόν</p>
-                                <p>Ποσότητα</p>
+                                <p>Ποσ.</p>
                                 <p>Τιμή</p>
                             </li>
                             {order.products.map(product => (
-                                <>
-                                    <li className="grid grid-cols-6 items-center border">
-                                        <Image
-                                            // layout='responsive'
-                                            className="object-contain p-4"
-                                            width={96}
-                                            height={96}
-                                            src={getStrapiMedia(product.image)}
-                                            alt={product.name || ""}
-                                            quality={75}
-                                            aria-label={product.name || ""}
-                                            blurDataURL={getStrapiMedia(product.image)}
-                                            placeholder="blur"
-                                        />
-                                        <p className="col-span-3">{product.name}</p>
-                                        <p className="">{product.quantity}</p>
-                                        <p className="">{product.sale_price ? product.sale_price : product.price}</p>
-                                    </li>
-                                </>
+                                <li key={product.id} className="grid grid-cols-6 gap-1 mt-4 w-full items-center">
+                                    <Image
+                                        // layout='responsive'
+                                        className="object-scale-down "
+                                        width={96}
+                                        height={96}
+                                        src={getStrapiMedia(product.image)}
+                                        alt={product.name || ""}
+                                        quality={75}
+                                        aria-label={product.name || ""}
+                                        blurDataURL={getStrapiMedia(product.image)}
+                                        placeholder="blur"
+                                    />
+                                    <p className="col-span-3 line-clamp-3">{product.name}</p>
+                                    <p className="">{product.quantity}</p>
+                                    <p className="">{product.sale_price ? product.sale_price : product.price} €</p>
+                                </li>
                             ))}
                             <div className="text-right m-4 font-semibold">
                                 Σύνολο: {order.total} €
@@ -171,14 +183,14 @@ const Accordion = ({ order }: { order: IOrder }) => {
 
 const UserOrders = ({ jwt }: { jwt: string }) => {
 
-    const { data, loading, error }: { data: IOrders, loading: boolean, error: any } = useApiRequest({method:"GET", api: "/api/user-address/getUserOrders", jwt })
+    const { data, loading, error }: { data: IOrders, loading: boolean, error: any } = useApiRequest({ method: "GET", api: "/api/user-address/getUserOrders", jwt })
 
     return (
         <div className="space-y-4">
             <h2 className="mb-4 text-xl text-siteColors-blue font-bold">Οι παραγγελίες μου</h2>
             {loading && !data ? <div>Loading</div> :
                 <div>
-                    <div className="grid grid-cols-6 w-full font-semibold mb-2">
+                    <div className="hidden lg:grid lg:grid-cols-6 w-full font-semibold mb-2">
                         <p></p>
                         <p>Ημερομηνία</p>
                         <p>Αριθμός Παραγγελίας</p>

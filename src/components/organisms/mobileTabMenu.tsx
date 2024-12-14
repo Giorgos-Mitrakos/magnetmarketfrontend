@@ -43,7 +43,7 @@ export default function MobileTabMenu() {
                     <AiOutlineMenu />
                 </button>
 
-                <Link href="/" className='py-4 xs:px-4' onClick={() => closeMenu()}>
+                <Link href="/account" className='py-4 xs:px-4' onClick={() => closeMenu()}>
                     <AiOutlineUser />
                 </Link>
                 <div className="inline-flex items-center group relative">

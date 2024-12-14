@@ -1,6 +1,13 @@
-import type { NextAuthOptions } from 'next-auth'
+import type { NextAuthOptions, DefaultUser } from 'next-auth'
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials"
+
+declare module "next-auth" {
+  interface User extends DefaultUser {
+    username: string; // the user will now have the property 
+    jwt: string
+  }
+}
 
 export const options: NextAuthOptions = {
   providers: [
@@ -31,6 +38,7 @@ export const options: NextAuthOptions = {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/local`, {
           method: 'POST',
           body: JSON.stringify({
+            username: credentials?.username,
             identifier: credentials?.email,
             password: credentials?.password,
           }),
@@ -38,10 +46,9 @@ export const options: NextAuthOptions = {
         })
         const user = await res.json()
 
-        // console.log("user1111:::::::", user)
         // If no error and we have user data, return it
         if (res.ok && user) {
-          return { id: user.user.id, name: user.user.username, email: user.user.email, jwt: user.jwt }
+          return { id: user.user.id, username: user.user.username, email: user.user.email, jwt: user.jwt }
         }
         // Return null if user data could not be retrieved
         return null
@@ -60,17 +67,8 @@ export const options: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user, account, profile, session }) {
-
-      // console.log("account:", account, "session:", session, "token:", token, "user:", user, "profile:", profile)
       const isSignIn = user ? true : false;
-      // if (user) {
-      //   try {
-      //     token.jwt = user.jwt;
-      //     token.id = user.user.id;
-      //   } catch (error) {
 
-      //   }
-      // }
       if (isSignIn && account && account.provider !== "credentials") {
         try {
           // console.log("Google Account >>>>>>>>>>>>>> ", account);
@@ -86,23 +84,20 @@ export const options: NextAuthOptions = {
           console.error('Fetch failed:', error);
         }
       }
-      // else {
-      //   console.log("Useerrrrr >>>>>>>>>>>>>> ", user,"Token >>>>>>>>>>>>>> ", token,
-      //   "account >>>>>>>>>>>>>> ",account,"profile >>>>>>>>>>>>>> ", profile);
-      //   token.jwt = user?.jwt;
-      //   token.id = user?.user.id;
-      //   token.name = user?.user.username;
-      //   token.email = user?.user.email
-      // }
-      // console.log("token:", token)
+
+      if (account && account.provider === 'credentials') {
+        token.jwt = user?.jwt;
+        token.id = user?.id;
+        token.name = user?.username;
+      }
+
       return Promise.resolve(token);
     },
     async session({ session, token, user }) {
 
       // Send properties to the client, like an access_token from a provider.
       session.user = token as any;
-      // console.log("session:", session, "token:", token, "user:", user)
-      // session.user.id = user ? user.id : null;
+
       return Promise.resolve(session);
     }
   },

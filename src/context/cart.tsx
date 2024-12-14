@@ -1,7 +1,11 @@
 'use client'
+import NextImage from '@/components/atoms/nextImage';
 import { GET_CART_PRODUCTS, GET_PRODUCT_PRICE, IGetCartProductsProps, IProductPriceProps } from '@/lib/queries/productQuery';
+import { getStrapiMedia } from '@/repositories/medias';
 import { fetcher } from '@/repositories/repository';
+import Image from 'next/image';
 import { createContext, useState, useEffect } from 'react'
+import { toast } from 'sonner';
 
 export interface ICartItem {
   id: number,
@@ -67,38 +71,71 @@ export const CartProvider = ({ children }: any) => {
   }
 
   const addToCart = async (item: ICartItem) => {
-    const isItemInCart = cartItems.find((cartItem) => cartItem.id === item.id);
-    const query = GET_PRODUCT_PRICE
-    const data = await fetcher({ query, variables: { id: item.id } })
-    const product = data as IProductPriceProps
-    let itemPrice = product.product.data.attributes.is_sale && product.product.data.attributes.sale_price ? product.product.data.attributes.sale_price : product.product.data.attributes.price
+    try {
+      const isItemInCart = cartItems.find((cartItem) => cartItem.id === item.id);
+      const query = GET_PRODUCT_PRICE
+      const data = await fetcher({ query, variables: { id: item.id } })
+      const product = data as IProductPriceProps
+      let itemPrice = product.product.data.attributes.is_sale && product.product.data.attributes.sale_price ? product.product.data.attributes.sale_price : product.product.data.attributes.price
+      const addedQuantity = item.quantity | 1
 
-    if (isItemInCart) {
-      setCartItems(
-        cartItems.map((cartItem) =>
-          cartItem.id === item.id
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
-        )
-      );
-    } else {
-      setCartItems([...cartItems, { ...item, quantity: 1, price: itemPrice, isAvailable: true }]);
+      if (isItemInCart) {
+        setCartItems(
+          cartItems.map((cartItem) =>
+            cartItem.id === item.id
+              ? { ...cartItem, quantity: cartItem.quantity + addedQuantity }
+              : cartItem
+          )
+        );
+      } else {
+        setCartItems([...cartItems, { ...item, quantity: addedQuantity, price: itemPrice, isAvailable: true }]);
+      }
+      toast.success(() => (
+        <>
+          <p className='mb-4'>Ένα προϊόν προστέθηκε στο καλάθι σας!</p>
+        </>
+      ), {
+        description: () => <div className='grid grid-cols-5 gap-2'>
+          <Image
+            width={48}
+            height={48}
+            src={getStrapiMedia(item.image)}
+            alt={item.name || ""}
+            quality={75}
+            aria-label={item.name || ""}
+            blurDataURL={getStrapiMedia(item.image)}
+            placeholder="blur"
+          />
+          <p className='col-span-3 line-clamp-3 font-semibold'>{item.name}</p>
+          <p className='text-center font-semibold text-lg'>{itemPrice} €</p>
+        </div>,
+        position: 'top-right',
+      })
+
+    } catch (error) {
+      toast.error("Κάτι πήγε στραβά!", {
+        position: 'top-right',
+      })
     }
+
+
   };
 
   const removeFromCart = (item: ICartItem) => {
-    const isItemInCart = cartItems.find((cartItem) => cartItem.id === item.id);
+    try {
+      const isItemInCart = cartItems.find((cartItem) => cartItem.id === item.id);
 
-    if (isItemInCart && isItemInCart.quantity === 1) {
-      setCartItems(cartItems.filter((cartItem) => cartItem.id !== item.id));
-    } else {
-      setCartItems(
-        cartItems.map((cartItem) =>
-          cartItem.id === item.id
-            ? { ...cartItem, quantity: cartItem.quantity - 1 }
-            : cartItem
-        )
-      );
+      if (isItemInCart) {
+        setCartItems(cartItems.filter((cartItem) => cartItem.id !== item.id));
+      }
+
+      toast.success("Ένα προϊόν αφαιρέθηκε από το καλάθι σας!", {
+        position: 'top-right',
+      })
+    } catch (error) {
+      toast.error("Κάτι πήγε στραβά!", {
+        position: 'top-right',
+      })
     }
   };
 

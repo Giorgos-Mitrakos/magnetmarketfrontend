@@ -1,14 +1,11 @@
 import dynamic from "next/dynamic";
 import Breadcrumb from '@/components/molecules/breadcrumb';
 import Newsletter from '@/components/molecules/newsletter';
-// import ProductImageWidget from '@/components/molecules/productImageWidget';
 import ProductBasicFeatures from '@/components/organisms/productBasicFeatures';
 import SiteFeatures from '@/components/organisms/siteFeatures';
 import SuggestedProducts from '@/components/organisms/suggestedProducts';
 import { GET_PRODUCT_BY_SLUG, IProductProps } from '@/lib/queries/productQuery';
-import { getStrapiMedia } from '@/repositories/medias';
 import { requestSSR } from '@/repositories/repository';
-import Image from 'next/image'
 import { FaRegImage } from "react-icons/fa";
 const ProductInfo = dynamic(() => import("@/components/organisms/productInfo"), {
   ssr: false,

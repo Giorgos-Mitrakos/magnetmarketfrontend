@@ -130,9 +130,9 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
     const countries = countriesData as ICountries
 
     let initialValues = {
-        id: userInfo.id,
-        username: userInfo.username,
-        email: userInfo.email,
+        id: userInfo?.id,
+        username: userInfo?.username,
+        email: userInfo?.email,
         firstname: billingAddress?.firstname || "",
         lastname: billingAddress?.lastname || "",
         street: billingAddress?.street || "",
@@ -303,7 +303,7 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
 
     return (
         <section>
-            <form onSubmit={formik.handleSubmit} className='space-y-8 w-full p-4' >
+            <form onSubmit={formik.handleSubmit} className='space-y-8 w-full' >
                 <div className='grid space-y-2 p-4 rounded-lg shadow-md bg-slate-50'>
                     <h2 className='uppercase font-semibold text-siteColors-blue'>Βασικά στοιχεία</h2>
                     <ul className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
@@ -351,7 +351,7 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                         <label htmlFor="invoice" className="text-sm tracking-wide">Τιμολόγιο</label>
                     </div>
                 </div>
-                <div className="grid grid-cols-2 gap-8">
+                <div className="grid md:grid-cols-2 gap-8">
                     <ul className=" p-4 bg-slate-50 rounded-lg shadow-md">
                         <li>
                             <h3 className='font-medium mt-8 mb-6 border-b text-siteColors-purple'>Διεύθυνση Χρέωσης</h3>

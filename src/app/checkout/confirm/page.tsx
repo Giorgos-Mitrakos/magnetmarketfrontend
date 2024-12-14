@@ -4,6 +4,8 @@ import CartAside from "@/components/organisms/cartItemsAside"
 import { ShippingContext } from "@/context/shipping"
 import { getTransactionTicket } from "@/lib/helpers/piraeusGateway"
 import { useContext, useState } from "react"
+import { useRouter } from 'next/navigation'
+import { CartContext } from "@/context/cart"
 
 interface IAddressSumary {
     firstname: string,
@@ -49,6 +51,8 @@ const AddressSummary = ({ address }: { address: IAddressSumary }) => {
 
 const Confirm = () => {
     const { paymentMethod, shippingMethod, addresses, createOrder } = useContext(ShippingContext)
+    const { clearCart } = useContext(CartContext)
+    const router = useRouter()
 
     const [formData, setFormData] = useState({
         orderId: 115,
@@ -84,10 +88,13 @@ const Confirm = () => {
             //     myInit
             // )
         }
+
+        clearCart()
+        router.push('/')
     }
 
     return (
-        <div>
+        <div className="mt-8">
             <h2 className='font-medium text-xl text-center mb-6 text-siteColors-purple dark:text-slate-200'>Σύνοψη Παραγγελίας</h2>
             <div className='grid mx-auto max-w-lg space-y-8 md:max-w-none md:grid-cols-4 md:space-y-0 md:gap-8'>
                 <div className="md:col-span-3">
