@@ -3,14 +3,16 @@
 import { AiOutlineSearch } from "react-icons/ai";
 import { FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
 import useSpeechRecognition from "@/hooks/useSpeechRecognition";
+import { useRouter } from "next/navigation";
 
 function SearchInput() {
+    const router = useRouter();
 
     const { text, setText, isListening, startListening, stopListening, hasRecognitionSupport } = useSpeechRecognition()
 
     return (
         <div className="flex items-center w-full dark:text-slate-800">
-            <form className="flex w-full items-end border-b-2 bg-inherit border-siteColors-purple"
+            <form onSubmit={()=>{ router.push(`/search?search=${text}`) }} className="flex w-full items-end border-b-2 bg-inherit border-siteColors-purple"
                 aria-label="Αναζήτηση">
                 {hasRecognitionSupport &&
                     <button onClick={isListening ? stopListening : startListening}
@@ -27,9 +29,9 @@ function SearchInput() {
                 <input type="search" placeholder="Αναζήτηση" value={text} onChange={(e) => setText(e.target.value)}
                     className="pl-2 bg-inherit outline-none border-none"
                     aria-label="Πεδίο αναζήτησης προϊόντων" />
-                <button onSubmit={() => { }}
+                <button type="submit"
                     aria-label="Αναζήτηση - Αναζητήστε ανά προϊόν, κατασκευαστή ή κατηγορία">
-                    <AiOutlineSearch className="text-3xl text-siteColors-purple dark:text-slate-200"/>
+                    <AiOutlineSearch className="text-3xl text-siteColors-purple dark:text-slate-200" />
                 </button>
             </form>
         </div>

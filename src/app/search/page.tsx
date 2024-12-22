@@ -1,6 +1,7 @@
 
 import PaginationBar from "@/components/molecules/pagination"
 import CategoryPageHeader from "@/components/organisms/categoryPageHeader"
+import MobileSearchFilters from "@/components/organisms/mobileSearchFilters"
 import ProductCard from "@/components/organisms/productCard"
 import SearchFilters from "@/components/organisms/searchFilters"
 import { GET_FILTERED_PRODUCTS, IcategoryProductsProps } from "@/lib/queries/productQuery"
@@ -106,7 +107,9 @@ export default async function SearchPage({ searchParams }: MetadataProps) {
         <div>
             <h2 className="mb-4 text-center font-medium">ΑΠΟΤΕΛΕΣΜΑΤΑ ΑΝΑΖΗΤΗΣΗΣ ΓΙΑ: <span className="font-semibold text-xl">{searchParams.search}</span></h2>
             <div className="mt-8 grid lg:grid-cols-4 gap-4" >
-                <SearchFilters searchParams={searchParams} />
+                <div className="hidden lg:flex lg:flex-col bg-slate-100 dark:bg-slate-700 p-4 rounded">
+                    <SearchFilters searchParams={searchParams} />
+                </div>
                 <div className="flex flex-col pr-4 col-span-3 w-full">
                     <CategoryPageHeader totalItems={response?.products.meta.pagination.total || 0} />
                     {/* {response && JSON.stringify(response)} */}
@@ -119,7 +122,7 @@ export default async function SearchPage({ searchParams }: MetadataProps) {
                             </div>
                         ))}
                     </section>
-
+                    <MobileSearchFilters searchParams={searchParams} />
                     {response && <PaginationBar totalItems={response.products.meta.pagination.total}
                         currentPage={response.products.meta.pagination.page}
                         itemsPerPage={response.products.meta.pagination.pageSize} />}

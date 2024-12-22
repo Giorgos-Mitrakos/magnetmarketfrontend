@@ -76,7 +76,7 @@ const SearchFilters = (props: SearchFiltersProps) => {
     } = useApiRequest({ method: 'POST', api: "/api/product/searchFilters", variables: ({ searchParams: props.searchParams }), jwt: "" })
 
     return (
-        <div className='space-y-4 bg-slate-100 p-4 rounded'>
+        <div className='space-y-4 p-4 rounded'>
             {loadingFilters && !filters ? <div>Loading</div> :
                 filters && filters.map(filter => (
                     <ProductFilter key={filter.title} title={filter.title} filterBy={filter.title} filters={filter.filterValues} />
