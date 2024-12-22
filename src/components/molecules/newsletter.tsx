@@ -4,6 +4,7 @@ import { fetcher } from "@/repositories/repository";
 import { useFormik } from "formik";
 import * as Yup from 'yup';
 import CustomInput from "../atoms/input";
+import { toast } from "sonner";
 
 const Newsletter = () => {
     const POST_EMAIL = `
@@ -18,7 +19,7 @@ const Newsletter = () => {
         }
       }
     `
-    
+
     const initialValues = {
         email: "",
     }
@@ -32,11 +33,46 @@ const Newsletter = () => {
         onSubmit: async (values, { setErrors }) => {
             try {
                 let date = new Date()
-                const variables = {
-                    email: values.email,
-                    publishedAt: date
+                // const variables = {
+                //     email: values.email,
+                //     publishedAt: date
+                // }
+
+                const myHeaders = new Headers();
+
+                myHeaders.append('Content-Type', 'application/json')
+
+                const myInit = {
+                    method: "POST",
+                    headers: myHeaders,
+                    body: JSON.stringify({
+                        data: {
+                            email: values.email,
+                            publishedAt: date
+                        }
+                    })
+                    // mode: "cors",
+                    // cache: "default",
+                };
+
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/newsletters`,
+                    myInit,
+                )
+
+                const { data, error } = await response.json()
+                if (data) {
+                    toast.success(
+                        <p className='font-semibold'>Η εγγραφή σας έγινε με επιτυχία!</p>, {
+                        position: 'top-right',
+                    })
                 }
-                const response = await fetcher({ query: POST_EMAIL, variables })
+                else {
+                    if (error.message === "This attribute must be unique") {
+                        toast.info(<p className='font-semibold'>Το email σας είναι ήδη καταχωρημένο!</p>, {
+                            position: 'top-right',
+                        })
+                    }
+                }
             }
             catch (err: any) {
                 const errors: { [key: string]: string } = {}

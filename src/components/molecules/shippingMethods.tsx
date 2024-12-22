@@ -32,11 +32,12 @@ const ShippingMethods = forwardRef<ShippingMethodsRef>((props, ref) => {
 
     const loadInitialValues = () => {
         const savedValues = typeof window !== 'undefined' && localStorage.getItem('shippingMethod');
-        return savedValues ? JSON.parse(savedValues) : { pickup: false, shipping: '' };
+
+        return shippingMethod// savedValues ? JSON.parse(savedValues) : { pickup: false, shipping: '' };
     }
 
     const formik = useFormik({
-        initialValues: loadInitialValues(),
+        initialValues: shippingMethod,
         validationSchema: Yup.object({
             pickup: Yup.boolean(),
             shipping: Yup.string().when("pickup", {
@@ -61,6 +62,9 @@ const ShippingMethods = forwardRef<ShippingMethodsRef>((props, ref) => {
     }));
 
     useEffect(() => {
+        if (formik.values.pickup)
+            formik.setFieldValue("shipping", "")
+
         const updateShipping = { ...shippingMethod, pickup: formik.values.pickup }
         saveShippingMethod(updateShipping)
     }, [formik.values.pickup])
@@ -77,7 +81,7 @@ const ShippingMethods = forwardRef<ShippingMethodsRef>((props, ref) => {
             <ul className="space-y-4">
                 <li className="flex items-center space-x-2">
                     <input type="checkbox" name="pickup" id="pickup" className="bg-siteColors-purple rounded"
-                        checked={shippingMethod.pickup} onChange={formik.handleChange} />
+                        checked={shippingMethod?.pickup} onChange={formik.handleChange} />
                     <label htmlFor="pickup" className="text-sm tracking-wide">Παραλαβή από το κατάστημα</label>
                 </li>
                 {!loadingShippingMethods && !shippingMethod.pickup && shippingMethods.shippings.data.map(method => (
@@ -95,6 +99,6 @@ const ShippingMethods = forwardRef<ShippingMethodsRef>((props, ref) => {
     )
 })
 
-ShippingMethods.displayName='ShippingMethods'
+ShippingMethods.displayName = 'ShippingMethods'
 
 export default ShippingMethods

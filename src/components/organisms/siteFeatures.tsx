@@ -47,7 +47,6 @@ const SiteFeatures = () => {
                         <SiteFeature key={x.header}
                             icon={x.icon}
                             aria-label={x["aria-label"]}
-                            aria-description={x["aria-description"]}
                             header={x.header}
                             content={x.content} />
                     ))}

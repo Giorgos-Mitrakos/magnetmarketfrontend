@@ -52,6 +52,59 @@ query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationAr
   }
 }`
 
+export const GET_FILTERED_PRODUCTS = gql`
+query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationArg!,$sort:[String!]){
+  products(filters: $filters,
+    pagination:$pagination,
+    sort:$sort){
+    data{
+        id
+        attributes{
+            name
+            slug
+            weight
+            prod_chars {
+              name
+              value
+            }
+            brand{
+                data{
+                  attributes{
+                    name
+                    slug
+                    logo{
+                      data{
+                        attributes{
+                          name
+                          url
+                          formats
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            image{
+                data{
+                    attributes{
+                    url
+                    alternativeText
+                    }
+                }
+            }
+        }
+    }
+    meta{
+      pagination{
+        total
+        page
+        pageSize
+        pageCount
+      }
+    }
+  }
+}`
+
 export interface IcategoryProductsProps {
   id: number
   attributes: {

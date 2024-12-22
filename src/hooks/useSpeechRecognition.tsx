@@ -1,3 +1,4 @@
+import { redirect, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react'
 
 let recognition: any = null;
@@ -9,14 +10,24 @@ if (typeof window !== "undefined" && "webkitSpeechRecognition" in window) {
 }
 
 const useSpeechRecognition = () => {
+    const router = useRouter();
     const [text, setText] = useState("")
     const [isListening, setIsListening] = useState(false)
 
     useEffect(() => {
+        const getData = setTimeout(() => {
+            if (text !== "" && text.length > 2)
+                router.push(`/search?search=${text}`)
+        }, 2000)
+
+        return () => clearTimeout(getData)
+    }, [text, router])
+
+    useEffect(() => {
         if (!recognition) return
-        
+
         recognition.onresult = (event: SpeechRecognitionEvent) => {
-            
+
             setText(event.results[0][0].transcript)
             recognition.stop()
             setIsListening(false)

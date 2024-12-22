@@ -5,7 +5,7 @@ import { useContext} from "react";
 
 export default function CartSummary() {
     const { cartItems, cartTotal } = useContext(CartContext)
-    const { shippingCost, paymentMethod, paymentCost } = useContext(ShippingContext)
+    const { shippingCost, paymentMethod, paymentCost,shippingMethod } = useContext(ShippingContext)
 
     const calculateTotalCosts = () => {
         
@@ -26,16 +26,16 @@ export default function CartSummary() {
                     {cartItems && cartTotal.toFixed(2)} €
                 </div>
             </li>
-            <li className="flex justify-between w-full">
+            {!shippingMethod?.pickup && <li className="flex justify-between w-full">
                 <label className="font-semibold" aria-label="Μεταφορικά">
                     Μεταφορικά:
                 </label>
-                <div className="text-siteColors-purple dark:text-slate-200 font-bold"
+                <div className="text-siteColors-purple text-right dark:text-slate-200 font-bold"
                     aria-label="Κόστος μεταφορικών">
                     {shippingCost.cost  ? `${shippingCost.cost.toFixed(2)} €` : "Υπολογίζεται κατά τη διάρκεια αγοράς"}
                 </div>
-            </li>
-            {paymentCost.cost !== null && paymentCost.cost > 0 &&
+            </li>}
+            {!shippingMethod?.pickup && paymentCost.cost !== null && paymentCost.cost > 0 &&
                 <li className="flex justify-between w-full">
                     <label className="font-semibold" aria-label={paymentMethod.payment}>
                         {paymentMethod.payment}:

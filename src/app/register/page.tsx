@@ -1,15 +1,11 @@
 "use client"
 import * as Yup from 'yup'
 import { ClientSafeProvider, LiteralUnion, getProviders, getCsrfToken, signIn } from "next-auth/react"
-import { getServerSession } from "next-auth/next"
 import Link from "next/link"
 import { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import { BuiltInProviderType } from 'next-auth/providers'
-import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai"
-import Credentials from 'next-auth/providers/credentials'
 import CustomInput from '@/components/atoms/input'
-// import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { useSearchParams } from 'next/navigation'
 
 
@@ -94,9 +90,9 @@ export default function Login() {
     });
 
     return (
-        <div className='grid lg:grid-cols-3 gap-4 mt-8 justify-center'>
+        <div className='grid lg:grid-cols-3 gap-4 mt-4 justify-center'>
             <div className='w-full h-full'>
-                <div className='flex text-xl sm:text-2xl md:text-3xl px-2 font-semibold justify-around'>
+                <div className='flex mb-2 text-xl sm:text-2xl md:text-3xl px-2 font-semibold justify-around'>
                     <Link href='/login' className=' text-slate-500'>
                         <h2>Είσοδος</h2>
                     </Link>
@@ -104,12 +100,11 @@ export default function Login() {
                         <h2>Εγγραφή</h2>
                     </Link>
                 </div>
-                <form className='grid gap-6 w-full mt-8 p-4 md:border-2 bg-white mx-auto rounded-md shadow-sm'
+                <form className='grid gap-4 w-full p-4 md:border-2 dark:bg-slate-800 mx-auto rounded-md shadow-sm'
                     onSubmit={formik.handleSubmit}>
                     <h2 className='text-center text-xl font-medium'>Εγγραφείτε</h2>
                     <div className='h-14'>
-                        <div className="flex relative h-10 rounded-lg border border-1 border-gray-300 appearance-none">
-                            {/* <label htmlFor='email' className='text-sm w-20 content-center'>Email:</label> */}
+                        <div className="flex relative rounded-lg border border-1 border-gray-300 appearance-none">
                             <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
                             <CustomInput
                                 aria_label="Φόρμα εισαγωγής Email"
@@ -126,7 +121,7 @@ export default function Login() {
                             : null}
                     </div>
                     <div className='h-14'>
-                        <div className="flex relative h-10 rounded-lg border border-1 border-gray-300 appearance-none">
+                        <div className="flex relative rounded-lg border border-1 border-gray-300 appearance-none">
                             <CustomInput
                                 aria_label="Φόρμα εισαγωγής Κωδικού"
                                 type={toggle ? "text" : "password"}
@@ -142,7 +137,7 @@ export default function Login() {
                             : null}
                     </div>
                     <div className='h-14'>
-                        <div className="flex relative h-10 rounded-lg border border-1 border-gray-300 appearance-none">
+                        <div className="flex relative rounded-lg border border-1 border-gray-300 appearance-none">
                             <CustomInput
                                 aria_label="Φόρμα εισαγωγής Κωδικού"
                                 type={toggle ? "text" : "password"}
@@ -159,14 +154,14 @@ export default function Login() {
                     </div>
                     <button
                         type='submit'
-                        className='text-white tracking-wide text-lg font-semibold h-12 bg-gradient-to-br from-siteColors-blue via-siteColors-lightblue to-siteColors-purple hover:bg-gradient-to-tl'>
+                        className='text-white rounded tracking-wide text-lg font-semibold h-12 bg-gradient-to-br from-siteColors-blue via-siteColors-lightblue to-siteColors-purple hover:bg-gradient-to-tl'>
                         Εγγραφή
                     </button>
                 </form>
             </div>
             <div className='w-full h-full'>
                 <div className='flex flex-col w-full h-full text-xl sm:text-2xl md:text-3xl px-2 font-semibold'>
-                    <h2 className='text-slate-800 dark:text-slate-200 text-center mb-8'>Σύνδεση Μέσω Social</h2>
+                    <h2 className='text-slate-800 dark:text-slate-200 text-center mb-4'>Σύνδεση Μέσω Social</h2>
                     <div className='w-full h-full p-4 border border-slate-200 rounded-lg '>
                         {providers && Object.values(providers).map((provider) => (
                             provider.name !== "Credentials" ? <div key={provider.name}>

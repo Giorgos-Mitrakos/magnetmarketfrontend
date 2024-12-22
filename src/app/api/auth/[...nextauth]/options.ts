@@ -1,4 +1,5 @@
-import type { NextAuthOptions, DefaultUser } from 'next-auth'
+
+import { AuthOptions, DefaultUser, getServerSession } from 'next-auth'
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials"
 
@@ -9,7 +10,7 @@ declare module "next-auth" {
   }
 }
 
-export const options: NextAuthOptions = {
+const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -105,3 +106,7 @@ export const options: NextAuthOptions = {
     signIn: '/login'
   },
 }
+
+const  getSession = () => getServerSession(authOptions)
+
+export { authOptions, getSession }

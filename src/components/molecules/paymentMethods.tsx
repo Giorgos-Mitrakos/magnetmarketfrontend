@@ -10,7 +10,7 @@ import * as Yup from 'yup'
 
 export type PaymentMethodsRef = {
     submitForm: () => void;
-    isSubmitting: boolean
+    isSubmitting: boolean,
 };
 
 interface IPaymentMethods {
@@ -38,7 +38,7 @@ interface IPaymentMethods {
 }
 
 const PaymentMethods = forwardRef<PaymentMethodsRef>((props, ref) => {
-    const { paymentMethod, savePaymentMethod } = useContext(ShippingContext)
+    const { paymentMethod, savePaymentMethod, shippingMethod } = useContext(ShippingContext)
     const { data: paymentMethodsData, loading: loadingPaymentMethods, error: errorPaymentMethods } = useQuery({ query: GET_PAYMENT_METHODS, jwt: '' })
 
     const paymentMethods = paymentMethodsData as IPaymentMethods
@@ -77,6 +77,13 @@ const PaymentMethods = forwardRef<PaymentMethodsRef>((props, ref) => {
     // }
 
     useEffect(() => {
+        if (shippingMethod.pickup && paymentMethod.payment === "Αντικαταβολή") {
+            formik.setFieldValue("payment", "")
+        }
+
+    }, [shippingMethod.pickup])
+
+    useEffect(() => {
         const updatePayment = { ...paymentMethod, payment: formik.values.payment }
         savePaymentMethod(updatePayment)
     }, [formik.values.payment])
@@ -86,7 +93,12 @@ const PaymentMethods = forwardRef<PaymentMethodsRef>((props, ref) => {
             onSubmit={formik.handleSubmit}>
             <h3 className='font-medium mb-6 border-b text-siteColors-purple dark:text-slate-200'>Τρόποι πληρωμής</h3>
             <ul className="space-y-4">
-                {!loadingPaymentMethods && paymentMethods.payments.data.map(method => (
+                {!loadingPaymentMethods && paymentMethods.payments.data.filter(method => {
+                    if (shippingMethod.pickup && method.attributes.name === "Αντικαταβολή") {
+                        return false
+                    }
+                    return true
+                }).map(method => (
                     <li key={method.id} className="flex items-center text-sm t space-x-2">
                         <Radio name="payment"
                             id={method.attributes.name}

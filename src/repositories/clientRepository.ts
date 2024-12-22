@@ -14,7 +14,7 @@ interface requestApiProps {
     method: string
     api?: string
     query?: string
-    variables?: { [key: string]: string | number | string[] | object[] }
+    variables?: object//{ [key: string]: string | number | string[] | object[] }
     jwt: string
 }
 

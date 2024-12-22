@@ -1,4 +1,3 @@
-import Menu from "@/components/molecules/sideMenu";
 import CategoryPageTemplate from "@/components/templates/categoryPage";
 import { createFiltersForDbQuery } from "@/lib/helpers/helpers";
 import { GET_CATEGORIES_MAPPING, GET_CATEGORY, GET_CATEGORY_METADATA, IcategoriesMappingProps, IcategoryMetadataProps, IcategoryProps } from "@/lib/queries/categoryQuery";

@@ -37,8 +37,8 @@ export default function Cart() {
                         <CartItemTemplate key={item.id} item={item} />)
                     )}
                 </div>
-                <div className="flex flex-col space-y-2">
-                    <ApplyCoupon />
+                <div className="flex flex-col space-y-2 border rounded">
+                    {/* <ApplyCoupon /> */}
                     <CartSummary />
                     <Link href={`${status === "authenticated" ? "/checkout/customer-informations" : "/login?callbackUrl=/checkout/customer-informations"}`}
                         className="flex justify-center items-center px-4 py-2 w-full rounded border md:text-slate-100 text-lg font-semibold

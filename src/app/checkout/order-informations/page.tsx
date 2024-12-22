@@ -6,19 +6,32 @@ import ShippingMethods, { ShippingMethodsRef } from "@/components/molecules/ship
 import CartAside from "@/components/organisms/cartItemsAside"
 import { useRouter } from "next/navigation"
 import { useRef } from "react"
+import { toast } from "sonner"
 
 const OrderInfo = () => {
     const router = useRouter()
 
     const shippingRef = useRef<ShippingMethodsRef | null>(null);
     const paymentRef = useRef<PaymentMethodsRef | null>(null);
-    
+
     const handleConfirmClick = () => {
+
         shippingRef.current?.submitForm()
         paymentRef.current?.submitForm()
         setTimeout(() => {
             if (shippingRef.current?.isSubmitting && paymentRef.current?.isSubmitting) {
                 router.push('/checkout/confirm')
+            }
+            else {
+                if (!shippingRef.current?.isSubmitting)
+                    toast.error("Δεν έχετε επιλέξει τρόπο αποστολής", {
+                        position: 'top-right',
+                    })
+
+                if (!paymentRef.current?.isSubmitting)
+                    toast.error("Δεν έχετε επιλέξει τρόπο πληρωμής", {
+                        position: 'top-right',
+                    })
             }
         }, 300);
     }

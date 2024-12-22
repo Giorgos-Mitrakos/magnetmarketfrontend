@@ -3,7 +3,7 @@ export interface SiteFeatureProps {
     header: string;
     content: string;
     "aria-label": string;
-    "aria-description": string;
+    // "aria-description": string;
 }
 
 const SiteFeature = (props: SiteFeatureProps) => {
@@ -15,9 +15,9 @@ const SiteFeature = (props: SiteFeatureProps) => {
                 </div>
                 <div className="pl-4">
                     <h4 className="text-sm md:text-base lg:text-base font-semibold dark:text-slate-200 "
-                    aria-label={props["aria-label"]}>{props.header}</h4>
-                    <p className="text-xs break-words md:text-xs lg:text-xs text-slate-600 dark:text-slate-300"
-                    aria-label={props["aria-description"]}>{props.content}</p>
+                        aria-label={props["aria-label"]}>{props.header}</h4>
+                    <p className="text-xs break-words md:text-xs lg:text-xs text-slate-600 dark:text-slate-300">
+                        {props.content}</p>
                 </div>
             </div>
         )

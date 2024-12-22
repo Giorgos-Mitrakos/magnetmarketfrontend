@@ -88,9 +88,9 @@ const CustomerInfo = () => {
                 <div className="bg-slate-200 rounded">
                     <CartSummary />
                 </div>
-                <div className='max-w-sm'>
+                {/* <div className='max-w-sm'>
                     <ApplyCoupon />
-                </div>
+                </div> */}
             </div>
 
             <button onClick={handleNextOnClik}

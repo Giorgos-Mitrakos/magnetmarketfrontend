@@ -68,10 +68,10 @@ export async function createFiltersForDbQuery({ category, categoryLevel, brands,
     const categoriesSlug = { slugs: [] }
     findCategoryChilds(response.categories.data, categoriesSlug)
 
-    let categoryFIlterString = []
+    let categoryFilterString = []
 
     for (let slug of categoriesSlug.slugs) {
-        categoryFIlterString.push({ slug: { eq: `${slug}` } })
+        categoryFilterString.push({ slug: { eq: `${slug}` } })
     }
 
     let filterBrandString = []
@@ -122,7 +122,7 @@ export async function createFiltersForDbQuery({ category, categoryLevel, brands,
 
     let filters: ({ [key: string]: object }) = {}
 
-    filters.and = [{ brand: { or: filterBrandString } }, { category: { or: categoryFIlterString } }, { and: filterCharString }]
+    filters.and = [{ brand: { or: filterBrandString } }, { category: { or: categoryFilterString } }, { and: filterCharString }]
 
     return filters
 }

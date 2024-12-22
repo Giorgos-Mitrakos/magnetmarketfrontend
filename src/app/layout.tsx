@@ -4,9 +4,6 @@ import Header from '@/components/organisms/header'
 import Footer from '@/components/organisms/footer'
 import Αnnouncement from '@/components/atoms/announcement'
 import MobileTabMenu from '@/components/organisms/mobileTabMenu'
-import SessionProviders from '@/components/molecules/sessionProvider'
-import { getServerSession } from "next-auth/next"
-import { options } from './api/auth/[...nextauth]/options'
 import { CartProvider } from '@/context/cart'
 import { ShippingProvider } from '@/context/shipping'
 import { MenuProvider } from '@/context/menu'
@@ -15,6 +12,8 @@ import GoogleAnalytics from '@/components/molecules/homepage/google-analytics'
 import CookieBanner from '@/components/molecules/homepage/cookie-banner'
 import EpayIcons from '@/components/molecules/epayIcons'
 import { Toaster } from 'sonner';
+import SessionProviders from '@/components/molecules/sessionProvider'
+import { getSession } from './api/auth/[...nextauth]/options'
 
 const inter = Inter({ subsets: ['greek'] })
 
@@ -28,7 +27,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await getServerSession(options)
+  const session = await getSession()
 
   const GA_MEASUREMENT_ID = process.env.GA_MEASUREMENT_ID as string
 
@@ -43,12 +42,11 @@ export default async function RootLayout({
             <ShippingProvider>
               <Toaster
                 toastOptions={{
-                  unstyled: true,
                   classNames: {
-                    error: 'bg-red-400',
+                    error: 'bg-red-400 p-4 rounded-lg',
                     success: 'bg-green-500 p-4 rounded-lg',
-                    warning: 'text-yellow-400',
-                    info: 'relative w-96 right-10 w-auto z-20 bg-slate-50 rounded-lg p-4',
+                    warning: 'text-yellow-400 p-4 rounded-lg',
+                    info: ' bg-blue-300 text-black p-4 rounded-lg',
                   },
                 }} />
               <Αnnouncement />

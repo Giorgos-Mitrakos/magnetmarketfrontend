@@ -74,9 +74,9 @@ export default function Login() {
     });
 
     return (
-        <div className='grid lg:grid-cols-3 gap-4 mt-8 justify-center'>
+        <div className='grid lg:grid-cols-3 gap-4 mt-4 justify-center'>
             <div className='w-full h-full'>
-                <div className='flex text-xl sm:text-2xl md:text-3xl px-2 font-semibold justify-around'>
+                <div className='flex text-xl sm:text-2xl md:text-3xl mb-2 px-2 font-semibold justify-around'>
                     <Link href='/login'>
                         <h2>Είσοδος</h2>
                     </Link>
@@ -84,7 +84,7 @@ export default function Login() {
                         <h2>Εγγραφή</h2>
                     </Link>
                 </div>
-                <form className='grid gap-6 mt-8 p-4 md:border-2 bg-white dark:bg-slate-700 mx-auto rounded-md shadow-sm'
+                <form className='grid gap-6 p-4 md:border-2 bg-white dark:bg-slate-700 mx-auto rounded-md shadow-sm'
                     method="post" action="/api/auth/callback/credentials">
                     <h2 className='text-center text-xl font-medium'>Συνδεθείτε</h2>
                     <div className='h-14'>
@@ -142,7 +142,7 @@ export default function Login() {
             </div>
             <div className='w-full h-full'>
                 <div className='flex flex-col w-full h-full text-xl sm:text-2xl md:text-3xl px-2 font-semibold'>
-                    <h2 className='text-slate-800 dark:text-slate-200 text-center mb-8'>Σύνδεση Μέσω Social</h2>
+                    <h2 className='text-slate-800 dark:text-slate-200 text-center mb-2'>Σύνδεση Μέσω Social</h2>
                     <div className='w-full h-full p-4 border border-slate-200 rounded-lg '>
                         {providers && Object.values(providers).map((provider) => (
                             provider.name !== "Credentials" ? <div key={provider.name}>
@@ -159,7 +159,7 @@ export default function Login() {
             </div>
             <div className='w-full h-full'>
                 <div className='flex flex-col w-full h-full text-xl sm:text-2xl md:text-3xl px-2 font-semibold'>
-                    <h2 className='text-slate-800 dark:text-slate-200 text-center mb-8'>Γρήγορη Παραγγελία</h2>
+                    <h2 className='text-slate-800 dark:text-slate-200 text-center mb-2'>Γρήγορη Παραγγελία</h2>
                     <Link href='/checkout/customer-informations'
                         className='flex flex-col text-slate-200 items-center justify-center w-full h-full p-4 border border-slate-200 rounded-lg bg-green-500 '>
                         <h3 className='bg-inherit mb-4'><FaBagShopping className='w-16 h-16' /></h3>

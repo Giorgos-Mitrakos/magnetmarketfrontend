@@ -118,7 +118,7 @@ export const ShippingContext = createContext<IShippingContext>({
 
 export const ShippingProvider = ({ children }: any) => {
     const { data: session, status } = useSession()
-    
+
     const { cartItems, cartTotal } = useContext(CartContext)
     const [addresses, setAddresses] = useState<IAddresses>({
         different_shipping: false,
@@ -164,6 +164,9 @@ export const ShippingProvider = ({ children }: any) => {
     const [paymentMethod, setPaymentMethod] = useState<IPaymentMethod>({ payment: '' })
 
     useEffect(() => {
+        if (!localStorage)
+            return
+        
         const address = localStorage.getItem("addresses");
         if (address) {
             const parsedAddress = JSON.parse(address)
@@ -179,6 +182,7 @@ export const ShippingProvider = ({ children }: any) => {
             const parsedPayMeth = JSON.parse(payMeth)
             setPaymentMethod(parsedPayMeth)
         }
+
     }, [])
 
     useEffect(() => {
@@ -224,7 +228,7 @@ export const ShippingProvider = ({ children }: any) => {
                 const myInit = {
                     method: "POST",
                     headers: myHeaders,
-                    body: JSON.stringify({ paymentMethod })
+                    body: JSON.stringify({ paymentMethod, shippingMethod })
                     // mode: "cors",
                     // cache: "default",
                 };
@@ -245,7 +249,7 @@ export const ShippingProvider = ({ children }: any) => {
             if (paymentMethod.payment && paymentMethod.payment !== "")
                 getPaymentCost()
         }
-    }, [paymentMethod])
+    }, [paymentMethod, shippingMethod])
 
     const saveAddresses = (address: IAddresses) => {
         setAddresses(address)
