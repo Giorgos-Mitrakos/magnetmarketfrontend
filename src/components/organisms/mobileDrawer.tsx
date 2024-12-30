@@ -62,7 +62,7 @@ function Sub2categoryDrawer({ category, subcategory }:
                             <li className="text-siteColors-blue cursor-pointer h-full" key={cat.attributes.slug}>
                                 <Link onClick={() => closeMenu()} href={`/category/${category}/${subcategory.attributes.slug}/${cat.attributes.slug}`}>
                                     <div className="flex flex-col justify-between items-center ">
-                                        <p className="rounded-full w-24 h-24 border-2 p-4 bg-white hover:shadow">
+                                        <p className="flex rounded-full w-24 h-24 border-2 p-4 items-center bg-white hover:shadow">
                                             {cat.attributes.image.data ?
                                                 <NextImage media={cat.attributes.image.data.attributes} width={80} height={80} />
                                                 : <FaRegImage className="w-16 h-16 self-center" />}
@@ -171,7 +171,7 @@ export default function MobileDrawer() {
                             <li className="text-siteColors-blue cursor-pointer h-full" key={cat.attributes.slug}>
                                 <button onClick={() => handleOnclickSub(cat)}>
                                     <div className="flex flex-col justify-between items-center ">
-                                        <p className="rounded-full w-24 h-24 border-2 p-4 bg-white hover:shadow-sm">
+                                        <p className="flex rounded-full w-24 h-24 border-2 p-4 items-center bg-white hover:shadow-sm">
                                             {cat.attributes.image.data ?
                                                 <NextImage media={cat.attributes.image.data.attributes} width={80} height={80} /> :
                                                 <FaRegImage className="w-16 h-16 self-center" />}
