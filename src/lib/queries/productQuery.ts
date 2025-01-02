@@ -195,6 +195,7 @@ query getCategoryProducts($slug:String!){
         sale_price
         is_sale
         is_hot
+        publishedAt
         supplierInfo {
           name
           wholesale
@@ -339,6 +340,7 @@ export interface IProductProps {
         sale_price: number
         is_sale: boolean
         is_hot: boolean
+        publishedAt: Date
         supplierInfo: {
           name: string
           wholesale: number

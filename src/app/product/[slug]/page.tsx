@@ -118,6 +118,7 @@ export default async function Product({ params }:
     image: structuredDataImages,
     keywords: `${product.attributes.category.data.attributes.name}`,
     offers: structuredDataPrice,
+    datePublished: product.attributes.publishedAt
     // author: [
     //   {
     //     '@type': 'Person',
@@ -128,9 +129,9 @@ export default async function Product({ params }:
     // datePublished: product.attributes,
   };
 
-  const BreadcrumbList = breadcrumbs.map(breabcrumb => ({
+  const BreadcrumbList = breadcrumbs.map((breabcrumb, i) => ({
     "@type": "ListItem",
-    "position": 1,
+    "position": i + 1,
     "name": breabcrumb.title,
     "item": `${process.env.NEXT_URL}${breabcrumb.slug}`
   }))
@@ -140,8 +141,6 @@ export default async function Product({ params }:
     "@type": "BreadcrumbList",
     "itemListElement": BreadcrumbList
   }
-
-  console.log(BreadcrumbStructuredData)
 
   const structuredData = []
   structuredData.push(productStructuredData)

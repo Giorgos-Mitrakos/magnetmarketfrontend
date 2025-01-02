@@ -7,6 +7,9 @@ import CategoryFilters from "../organisms/categoryFilters";
 import SiteFeatures from "../organisms/siteFeatures";
 import MobileFilters from "../organisms/mobileFilters";
 import Script from 'next/script'
+import { requestSSR } from "@/repositories/repository";
+import { GET_CATEGORY_NAME, IcategoryNameProps } from "@/lib/queries/categoryQuery";
+import Breadcrumb from "../molecules/breadcrumb";
 
 type pageProps = {
     params: {
@@ -37,20 +40,73 @@ async function CategoryPageTemplate(props: pageProps) {
     const { params, products, searchParams } = props
     const { category1, category2, category3 } = params
 
-    const structuredData = {
-        '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
-        headline: 'Title of the blog post',
-        description: 'Description of the blog post',
-        author: [
-            {
-                '@type': 'Person',
-                name: 'John Doe',
-            },
-        ],
-        datePublished: '2022-09-14T09:00:00.000Z',
-    };
+    const breadcrumbs = [
+        {
+            title: "Home",
+            slug: "/"
+        }
+    ]
 
+    if (category1) {
+        const data = await requestSSR({
+            query: GET_CATEGORY_NAME, variables: { category: category1 }
+        });
+
+        const response = data as IcategoryNameProps
+
+        breadcrumbs.push(
+            {
+                title: response.categories.data[0].attributes.name,
+                slug: `/category/${category1}`
+            }
+        )
+
+        if (category2) {
+            const data = await requestSSR({
+                query: GET_CATEGORY_NAME, variables: { category: category2 }
+            });
+
+            const response = data as IcategoryNameProps
+
+            breadcrumbs.push(
+                {
+                    title: response.categories.data[0].attributes.name,
+                    slug: `/category/${category1}/${category2}`
+                }
+            )
+
+            if (category3) {
+                const data = await requestSSR({
+                    query: GET_CATEGORY_NAME, variables: { category: category3 }
+                });
+
+                const response = data as IcategoryNameProps
+
+                breadcrumbs.push(
+                    {
+                        title: response.categories.data[0].attributes.name,
+                        slug: `/category/${category1}/${category2}/${category3}`
+                    }
+                )
+            }
+        }
+    }
+
+    const BreadcrumbList = breadcrumbs.map((breabcrumb, i) => ({
+        "@type": "ListItem",
+        "position": i + 1,
+        "name": breabcrumb.title,
+        "item": `${process.env.NEXT_URL}${breabcrumb.slug}`
+    }))
+
+    const BreadcrumbStructuredData = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": BreadcrumbList
+    }
+
+    const structuredData = []
+    structuredData.push(BreadcrumbStructuredData)
 
     return (
         <>
@@ -61,6 +117,7 @@ async function CategoryPageTemplate(props: pageProps) {
             />
             <div className="w-full flex flex-col">
                 <SiteFeatures />
+                <Breadcrumb breadcrumbs={breadcrumbs} />
                 <div className="grid pt-32 w-full bg-white dark:bg-slate-800">
                     <div className="grid lg:grid-cols-4 gap-4">
                         <div className="hidden lg:flex lg:flex-col bg-slate-100 dark:bg-slate-700 p-4 rounded">

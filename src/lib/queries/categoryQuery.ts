@@ -235,6 +235,30 @@ export interface IcategoryProps {
     }
 }
 
+export const GET_CATEGORY_NAME = gql`
+query getCategory($category:String!){
+    categories(filters:{slug:{eq:$category}},pagination:{limit:-1}){
+        data{
+            id
+            attributes{
+                name
+                slug
+            }
+        }
+    }
+}`
+
+export interface IcategoryNameProps {
+    categories: {
+        data: [{
+            attributes: {
+                name: string
+                slug: string                
+            }
+        }]
+    }
+}
+
 export const GET_CATEGORY_BRANDS = gql`
 query getCategoryBrands($filters:BrandFiltersInput!){
     brands(filters:$filters,sort:"name",pagination:{limit:-1}){
