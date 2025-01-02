@@ -96,7 +96,6 @@ export default async function Product({ params }:
     structuredDataPrice = {
       "@type": "Offer",
       availability: "https://schema.org/InStock",
-
       itemCondition: 'https://schema.org/NewCondition',
       price: product.attributes.price,
       priceCurrency: "EUR",
@@ -132,7 +131,7 @@ export default async function Product({ params }:
   return (
     <>
       <Script
-        key="structured-data"
+        id="structured-data"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
