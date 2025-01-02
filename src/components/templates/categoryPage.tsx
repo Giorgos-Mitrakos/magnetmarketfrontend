@@ -55,7 +55,7 @@ async function CategoryPageTemplate(props: pageProps) {
     return (
         <>
             <Script
-                key="structured-data"
+                id="structured-data"
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
             />
