@@ -109,7 +109,7 @@ export default async function Product({ params }:
     description: product.attributes.description,
     sku: product.id,
     mpn: product.attributes.mpn,
-    barcode: product.attributes.barcode,
+    gtin13: product.attributes.barcode,
     brand: {
       '@type': 'Brand',
       name: product.attributes.brand.data.attributes.name,
