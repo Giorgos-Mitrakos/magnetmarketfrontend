@@ -102,7 +102,7 @@ export default async function Product({ params }:
     }
   }
 
-  const structuredData = {
+  const productStructuredData = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.attributes.name,
@@ -127,6 +127,25 @@ export default async function Product({ params }:
     // image: post.imageUrl,
     // datePublished: product.attributes,
   };
+
+  const BreadcrumbList = breadcrumbs.map(breabcrumb => ({
+    "@type": "ListItem",
+    "position": 1,
+    "name": breabcrumb.title,
+    "item": `${process.env.NEXT_URL}${breabcrumb.slug}`
+  }))
+
+  const BreadcrumbStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": BreadcrumbList
+  }
+
+  console.log(BreadcrumbStructuredData)
+
+  const structuredData = []
+  structuredData.push(productStructuredData)
+  structuredData.push(BreadcrumbStructuredData)
 
   return (
     <>
