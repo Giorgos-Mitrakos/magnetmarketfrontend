@@ -87,10 +87,16 @@ export async function generateMetadata(
 
     let metadata: Metadata = {
         title: `MagnetMarket-${response.categories.data[0].attributes.name}`,
+        category: response.categories.data[0].attributes.name
     }
 
     if (response.categories.data[0].attributes.image.data) {
-        metadata.openGraph = { images: [`${process.env.NEXT_PUBLIC_API_URL}/${response.categories.data[0].attributes.image.data?.attributes.url}`] }
+        metadata.openGraph = { images: [`${process.env.NEXT_PUBLIC_API_URL}${response.categories.data[0].attributes.image.data?.attributes.url}`] }
+    }
+
+    if (response.categories.data[0].attributes.categories.data.length > 0) {
+        const subCatTitles = response.categories.data[0].attributes.categories.data.map(cat => cat.attributes.name)
+        metadata.description = `Η κατηγορία ${response.categories.data[0].attributes.name} περιέχει προϊόντα από τις υποκατηγορίες ${subCatTitles.join(',')}`
     }
 
     return metadata

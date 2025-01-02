@@ -83,7 +83,6 @@ query getCategoryChilds($slug:String!){
     }
 }`
 
-
 export interface IcategoryChildsProps {
     categories: {
         data: [{
@@ -126,6 +125,13 @@ query getCategory($category:String!){
                   }
                 }
             }
+            categories{
+                data{
+                    attributes{
+                        name
+                    }
+                }
+            }
           }
         }
     }
@@ -160,6 +166,13 @@ export interface IcategoryMetadataProps {
                             url: string
                         }
                     }
+                }
+                categories: {
+                    data: {
+                        attributes: {
+                            name: string
+                        }
+                    }[]
                 }
             }
         }]

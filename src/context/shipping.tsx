@@ -64,7 +64,7 @@ interface IShippingContext {
     saveAddresses: (address: IAddresses) => void,
     saveShippingMethod: (id: IShippingMethod) => void,
     savePaymentMethod: (id: IPaymentMethod) => void,
-    createOrder: () => Promise<{ status: string, message: string, orderId: number | null }>
+    createOrder: () => Promise<{ status: string, message: string, orderId: number | null, amount?: number | null }>
 
 }
 
@@ -113,7 +113,7 @@ export const ShippingContext = createContext<IShippingContext>({
     saveAddresses: () => { },
     saveShippingMethod: () => { },
     savePaymentMethod: () => { },
-    createOrder: async () => { return { message: "", status: "", orderId: null } }
+    createOrder: async () => { return { message: "", status: "", orderId: null, amount: null } }
 })
 
 export const ShippingProvider = ({ children }: any) => {
@@ -166,7 +166,7 @@ export const ShippingProvider = ({ children }: any) => {
     useEffect(() => {
         if (!localStorage)
             return
-        
+
         const address = localStorage.getItem("addresses");
         if (address) {
             const parsedAddress = JSON.parse(address)
@@ -268,13 +268,13 @@ export const ShippingProvider = ({ children }: any) => {
 
     const createOrder = async () => {
         if (!addresses)
-            return { message: "addresses", status: "fail", orderId: null }
+            return { message: "addresses", status: "fail", orderId: null, amount: null }
         if (!cartItems)
-            return { message: "cartItems", status: "fail", orderId: null }
+            return { message: "cartItems", status: "fail", orderId: null, amount: null }
         if (!shippingMethod)
-            return { message: "shippingMethod", status: "fail", orderId: null }
+            return { message: "shippingMethod", status: "fail", orderId: null, amount: null }
         if (!paymentMethod)
-            return { message: "paymentMethod", status: "fail", orderId: null }
+            return { message: "paymentMethod", status: "fail", orderId: null, amount: null }
 
         // Ελέγχω αν όλα τα προϊόντα είναι διαθέσιμα
         const isAllProductsAvailable = cartItems.every(item => item.isAvailable === true)
@@ -306,7 +306,8 @@ export const ShippingProvider = ({ children }: any) => {
             return {
                 status: json.status,
                 message: json.message,
-                orderId: json.orderId
+                orderId: json.orderId,
+                amount: json.amount
             }
         }
         else {

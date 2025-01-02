@@ -1,5 +1,6 @@
 import dynamic from "next/dynamic";
 import Breadcrumb from '@/components/molecules/breadcrumb';
+import { Metadata, ResolvingMetadata } from 'next'
 import Newsletter from '@/components/molecules/newsletter';
 import ProductBasicFeatures from '@/components/organisms/productBasicFeatures';
 import SiteFeatures from '@/components/organisms/siteFeatures';
@@ -7,6 +8,7 @@ import SuggestedProducts from '@/components/organisms/suggestedProducts';
 import { GET_PRODUCT_BY_SLUG, IProductProps } from '@/lib/queries/productQuery';
 import { requestSSR } from '@/repositories/repository';
 import { FaRegImage } from "react-icons/fa";
+import Script from 'next/script'
 const ProductInfo = dynamic(() => import("@/components/organisms/productInfo"), {
   ssr: false,
   loading: () => <p>Loading...</p>
@@ -16,6 +18,10 @@ const ProductImageWidget = dynamic(() => import('@/components/molecules/productI
   ssr: false,
   loading: () => <p>Loading...</p>
 })
+
+type MetadataProps = {
+  params: { slug: string }
+}
 
 
 
@@ -64,36 +70,134 @@ export default async function Product({ params }:
     images.push(x)
   })
 
+  const product = data.products.data[0]
+
+  const structuredDataImages = images.map(x => `${process.env.NEXT_PUBLIC_API_URL}${x.attributes.url}`)
+
+  let structuredDataPrice = {}
+
+  if (product.attributes.is_sale && product.attributes.sale_price) {
+    structuredDataPrice = {
+      "@type": "Offer",
+      availability: "https://schema.org/InStock",
+
+      itemCondition: 'https://schema.org/NewCondition',
+      price: product.attributes.sale_price,
+      priceCurrency: "EUR",
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        "priceType": "https://schema.org/ListPrice",
+        "price": product.attributes.price,
+        "priceCurrency": "GBP"
+      }
+    }
+  }
+  else {
+    structuredDataPrice = {
+      "@type": "Offer",
+      availability: "https://schema.org/InStock",
+
+      itemCondition: 'https://schema.org/NewCondition',
+      price: product.attributes.price,
+      priceCurrency: "EUR",
+    }
+  }
+
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.attributes.name,
+    description: product.attributes.description,
+    sku: product.id,
+    mpn: product.attributes.mpn,
+    barcode: product.attributes.barcode,
+    brand: {
+      '@type': 'Brand',
+      name: product.attributes.brand.data.attributes.name,
+      logo: product.attributes.brand.data.attributes.logo
+    },
+    image: structuredDataImages,
+    keywords: `${product.attributes.category.data.attributes.name}`,
+    offers: structuredDataPrice,
+    // author: [
+    //   {
+    //     '@type': 'Person',
+    //     name: post.author,
+    //   },
+    // ],
+    // image: post.imageUrl,
+    // datePublished: product.attributes,
+  };
+
   return (
-    <div className="dark:bg-gray-800">
-      <SiteFeatures />
-      <Breadcrumb breadcrumbs={breadcrumbs} />
-      {data.products.data.length > 0 &&
-        < div className="grid md:grid-cols-4 lg:grid-cols-5 w-full mt-8">
-          <div className='col-span-4'>
-            <div className='grid grid-cols-1 sm:grid-cols-2 col-span-4'>
-              <div>
-                {images.length > 0 ?
-                  <ProductImageWidget images={images} /> :
-                  <div className="flex justify-center text-siteColors-purple">
-                    <FaRegImage className='h-60 w-60' />
-                  </div>}
+    <>
+      <Script
+        key="structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <div className="dark:bg-gray-800">
+        <SiteFeatures />
+        <Breadcrumb breadcrumbs={breadcrumbs} />
+        {data.products.data.length > 0 &&
+          < div className="grid md:grid-cols-4 lg:grid-cols-5 w-full mt-8">
+            <div className='col-span-4'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 col-span-4'>
+                <div>
+                  {images.length > 0 ?
+                    <ProductImageWidget images={images} /> :
+                    <div className="flex justify-center text-siteColors-purple">
+                      <FaRegImage className='h-60 w-60' />
+                    </div>}
+                </div>
+                <div>
+                  <ProductBasicFeatures product={data.products.data[0]} />
+                </div>
               </div>
-              <div>
-                <ProductBasicFeatures product={data.products.data[0]} />
+              <div className='mt-16 lg:mr-4'>
+                <ProductInfo description={data.products.data[0].attributes.description} chars={data.products.data[0].attributes.prod_chars} />
               </div>
             </div>
-            <div className='mt-16 lg:mr-4'>
-              <ProductInfo description={data.products.data[0].attributes.description} chars={data.products.data[0].attributes.prod_chars} />
-            </div>
-          </div>
-          <aside className='col-span-4 lg:col-start-5'>
-            <SuggestedProducts product={data.products.data[0]} />
-          </aside>
-        </div>}
-      <div className='mt-20'>
-        <Newsletter />
-      </div>
-    </div >
+            <aside className='col-span-4 lg:col-start-5'>
+              <SuggestedProducts product={data.products.data[0]} />
+            </aside>
+          </div>}
+        <div className='mt-20'>
+          <Newsletter />
+        </div>
+      </div >
+    </>
   )
+}
+
+
+export async function generateMetadata({ params }: MetadataProps,
+  parent: ResolvingMetadata): Promise<Metadata> {
+
+  const data = await getProductData(params.slug)
+
+  const product = data.products.data[0]
+
+  let metadata: Metadata = {
+    title: `MagnetMarket-${product.attributes.name}`,
+    category: `${product.attributes.category.data.attributes.name}`,
+  }
+
+  if (product.attributes.short_description) {
+    metadata.description = `${product.attributes.short_description
+      .replaceAll("<p>", "")
+      .replaceAll("</p>", "")
+      .replaceAll("&nbsp;", " ")
+      .replaceAll("\n", "")
+      }`
+  }
+  else {
+    metadata.description = `To ${product.attributes.name} είναι ένα προϊόν της εταιρίας ${product.attributes.brand.data.attributes.name}`
+  }
+
+  if (product.attributes.image.data) {
+    metadata.openGraph = { images: [`${process.env.NEXT_PUBLIC_API_URL}${product.attributes.image.data?.attributes.url}`] }
+  }
+
+  return metadata
 }

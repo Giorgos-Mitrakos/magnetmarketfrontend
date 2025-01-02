@@ -22,11 +22,11 @@ async function getFilteredProducts(searchParams: ({ [key: string]: string | stri
     if (Κατασκευαστές) {
         if (typeof Κατασκευαστές !== "string") {
             for (let brand of Κατασκευαστές) {
-                filterBrandString.push({ name: { eq: `${brand}` } })
+                filterBrandString.push({ name: { eq: `${brand}` } }, { slug: { eq: `${brand}` } })
             }
         }
         else {
-            filterBrandString.push({ name: { eq: `${Κατασκευαστές}` } })
+            filterBrandString.push({ name: { eq: `${Κατασκευαστές}` } }, { slug: { eq: `${Κατασκευαστές}` } })
         }
     }
 
@@ -70,8 +70,6 @@ async function getFilteredProducts(searchParams: ({ [key: string]: string | stri
     else {
         filters.or = filterOr
     }
-
-
 
     if (search) {
         const data = await requestSSR({
