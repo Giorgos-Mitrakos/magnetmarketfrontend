@@ -198,6 +198,10 @@ export async function generateMetadata({ params }: MetadataProps,
   let metadata: Metadata = {
     title: `MagnetMarket-${product.attributes.name}`,
     category: `${product.attributes.category.data.attributes.name}`,
+    alternates: {
+      canonical: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
+    }
+
   }
 
   if (product.attributes.short_description) {
@@ -213,7 +217,13 @@ export async function generateMetadata({ params }: MetadataProps,
   }
 
   if (product.attributes.image.data) {
-    metadata.openGraph = { images: [`${process.env.NEXT_PUBLIC_API_URL}${product.attributes.image.data?.attributes.url}`] }
+    metadata.openGraph = {
+      images: [`${process.env.NEXT_PUBLIC_API_URL}${product.attributes.image.data?.attributes.url}`],
+      siteName: "www.magnetmarket.gr",
+      phoneNumbers: ["2221121657"],
+      emails: ["info@magnetmarket.gr"],
+      countryName: 'Ελλάδα',      
+    }
   }
 
   return metadata

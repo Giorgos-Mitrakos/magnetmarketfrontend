@@ -61,12 +61,14 @@ const Confirm = () => {
     });
 
     const handleConfirmClik = async () => {
-        const response = await createOrder()
-        if (response && response.status === "fail") {
-            alert(response.message)
+        const newOrder = await createOrder()
+        if (newOrder && newOrder.status === "fail") {
+            alert(newOrder.message)
         }
 
-        if (response && paymentMethod.payment === "Κάρτα") {
+        console.log("CreateOrder:", newOrder)
+
+        if (newOrder && paymentMethod.payment === "Κάρτα") {
 
             const myInit = {
                 method: "POST",
@@ -74,23 +76,27 @@ const Confirm = () => {
                 body: JSON.stringify(formData)
             };
 
-            // await getTransactionTicket({
-            //     orderId: 115,
-            //     amount: 1170,
-            //     installments: 3
-            // })
+            if (newOrder.orderId && newOrder.amount) {
+                const response = await getTransactionTicket({
+                    orderId: newOrder.orderId,
+                    amount: newOrder.amount,
+                    installments: 3
+                })
 
-            await fetch(`${process.env.NEXT_URL}/api/checkout-piraeus-gateway`,
-                myInit,
-            )
+                console.log(response)
+            }
+
+            // await fetch(`${process.env.NEXT_URL}/api/checkout-piraeus-gateway`,
+            //     myInit,
+            // )
 
             // await fetch('https://paycenter.piraeusbank.gr/redirection/pay.aspx',
             //     myInit
             // )
         }
 
-        clearCart()
-        router.push('/')
+        // clearCart()
+        // router.push('/')
     }
 
     return (

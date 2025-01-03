@@ -87,11 +87,19 @@ export async function generateMetadata(
 
     let metadata: Metadata = {
         title: `MagnetMarket-${response.categories.data[0].attributes.name}`,
-        category: response.categories.data[0].attributes.name
+        category: response.categories.data[0].attributes.name,
+        alternates: {
+            canonical: `${process.env.NEXT_URL}/category${params.category1}`,
+        }
     }
 
     if (response.categories.data[0].attributes.image.data) {
-        metadata.openGraph = { images: [`${process.env.NEXT_PUBLIC_API_URL}${response.categories.data[0].attributes.image.data?.attributes.url}`] }
+        metadata.openGraph = { 
+            images: [`${process.env.NEXT_PUBLIC_API_URL}${response.categories.data[0].attributes.image.data?.attributes.url}`],
+            siteName: "www.magnetmarket.gr",
+            phoneNumbers: ["2221121657"],
+            emails: ["info@magnetmarket.gr"],
+            countryName: 'Ελλάδα', }
     }
 
     if (response.categories.data[0].attributes.categories.data.length > 0) {
