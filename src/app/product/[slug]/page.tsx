@@ -9,7 +9,6 @@ import { GET_PRODUCT_BY_SLUG, IProductProps } from '@/lib/queries/productQuery';
 import { requestSSR } from '@/repositories/repository';
 import { FaRegImage } from "react-icons/fa";
 import Script from 'next/script'
-import { organizationStructuredData } from "@/lib/helpers/structureData";
 const ProductInfo = dynamic(() => import("@/components/organisms/productInfo"), {
   ssr: false,
   loading: () => <p>Loading...</p>
@@ -81,7 +80,6 @@ export default async function Product({ params }:
     structuredDataPrice = {
       "@type": "Offer",
       availability: "https://schema.org/InStock",
-
       itemCondition: 'https://schema.org/NewCondition',
       price: product.attributes.sale_price,
       priceCurrency: "EUR",
@@ -90,6 +88,33 @@ export default async function Product({ params }:
         "priceType": "https://schema.org/ListPrice",
         "price": product.attributes.price,
         "priceCurrency": "GBP"
+      },
+      "shippingDetails": {
+        "@type": "OfferShippingDetails",
+        "shippingRate": {
+          "@type": "MonetaryAmount",
+          "value": 3.49,
+          "currency": "EUR"
+        },
+        "shippingDestination": {
+          "@type": "DefinedRegion",
+          "addressCountry": "GR"
+        },
+        "deliveryTime": {
+          "@type": "ShippingDeliveryTime",
+          "handlingTime": {
+            "@type": "QuantitativeValue",
+            "minValue": 0,
+            "maxValue": 1,
+            "unitCode": "DAY"
+          },
+          "transitTime": {
+            "@type": "QuantitativeValue",
+            "minValue": 1,
+            "maxValue": 5,
+            "unitCode": "DAY"
+          }
+        }
       }
     }
   }
@@ -100,6 +125,33 @@ export default async function Product({ params }:
       itemCondition: 'https://schema.org/NewCondition',
       price: product.attributes.price,
       priceCurrency: "EUR",
+      "shippingDetails": {
+        "@type": "OfferShippingDetails",
+        "shippingRate": {
+          "@type": "MonetaryAmount",
+          "value": 3.49,
+          "currency": "EUR"
+        },
+        "shippingDestination": {
+          "@type": "DefinedRegion",
+          "addressCountry": "GR"
+        },
+        "deliveryTime": {
+          "@type": "ShippingDeliveryTime",
+          "handlingTime": {
+            "@type": "QuantitativeValue",
+            "minValue": 0,
+            "maxValue": 1,
+            "unitCode": "DAY"
+          },
+          "transitTime": {
+            "@type": "QuantitativeValue",
+            "minValue": 1,
+            "maxValue": 5,
+            "unitCode": "DAY"
+          }
+        }
+      }
     }
   }
 
@@ -115,15 +167,7 @@ export default async function Product({ params }:
     image: structuredDataImages,
     keywords: `${product.attributes.category.data.attributes.name}`,
     offers: structuredDataPrice,
-    datePublished: product.attributes.publishedAt
-    // author: [
-    //   {
-    //     '@type': 'Person',
-    //     name: post.author,
-    //   },
-    // ],
-    // image: post.imageUrl,
-    // datePublished: product.attributes,
+    // datePublished: product.attributes.publishedAt
   };
 
   if (product.attributes.brand.data) {
@@ -152,7 +196,6 @@ export default async function Product({ params }:
   const structuredData = []
   structuredData.push(productStructuredData)
   structuredData.push(breadcrumbStructuredData)
-  structuredData.push(organizationStructuredData)
 
   return (
     <>
