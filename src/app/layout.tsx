@@ -19,7 +19,7 @@ const inter = Inter({ subsets: ['greek'] })
 
 export const metadata = {
   title: 'Magnet Market',
-  description: 'Η τεχολογία στο δικό σου πεδίο!',
+  description: 'Η τεχνολογία στο δικό σου πεδίο!',
 }
 
 export default async function RootLayout({

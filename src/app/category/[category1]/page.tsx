@@ -94,12 +94,15 @@ export async function generateMetadata(
     }
 
     if (response.categories.data[0].attributes.image.data) {
-        metadata.openGraph = { 
+        metadata.openGraph = {
+            url: `${process.env.NEXT_URL}/category${params.category1}`,
+            type: 'website',
             images: [`${process.env.NEXT_PUBLIC_API_URL}${response.categories.data[0].attributes.image.data?.attributes.url}`],
             siteName: "www.magnetmarket.gr",
             phoneNumbers: ["2221121657"],
             emails: ["info@magnetmarket.gr"],
-            countryName: 'Ελλάδα', }
+            countryName: 'Ελλάδα',
+        }
     }
 
     if (response.categories.data[0].attributes.categories.data.length > 0) {

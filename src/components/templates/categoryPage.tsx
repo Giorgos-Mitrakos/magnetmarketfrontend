@@ -10,6 +10,7 @@ import Script from 'next/script'
 import { requestSSR } from "@/repositories/repository";
 import { GET_CATEGORY_NAME, IcategoryNameProps } from "@/lib/queries/categoryQuery";
 import Breadcrumb from "../molecules/breadcrumb";
+import { organizationStructuredData } from "@/lib/helpers/structureData";
 
 type pageProps = {
     params: {
@@ -107,6 +108,7 @@ async function CategoryPageTemplate(props: pageProps) {
 
     const structuredData = []
     structuredData.push(BreadcrumbStructuredData)
+    structuredData.push(organizationStructuredData)
 
     return (
         <>

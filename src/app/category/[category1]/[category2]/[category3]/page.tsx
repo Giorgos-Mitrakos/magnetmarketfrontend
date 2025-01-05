@@ -101,6 +101,8 @@ export async function generateMetadata(
 
     if (response.categories.data[0].attributes.image.data) {
         metadata.openGraph = {
+            url: `${process.env.NEXT_URL}/category${params.category1}/${params.category2}/${params.category3}`,
+            type: 'website',
             images: [`${process.env.NEXT_PUBLIC_API_URL}${response.categories.data[0].attributes.image.data?.attributes.url}`],
             siteName: "www.magnetmarket.gr",
             phoneNumbers: ["2221121657"],

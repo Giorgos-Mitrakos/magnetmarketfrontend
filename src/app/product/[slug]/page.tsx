@@ -9,6 +9,7 @@ import { GET_PRODUCT_BY_SLUG, IProductProps } from '@/lib/queries/productQuery';
 import { requestSSR } from '@/repositories/repository';
 import { FaRegImage } from "react-icons/fa";
 import Script from 'next/script'
+import { organizationStructuredData } from "@/lib/helpers/structureData";
 const ProductInfo = dynamic(() => import("@/components/organisms/productInfo"), {
   ssr: false,
   loading: () => <p>Loading...</p>
@@ -133,22 +134,25 @@ export default async function Product({ params }:
     }
   }
 
-  const BreadcrumbList = breadcrumbs.map((breabcrumb, i) => ({
+  const breadcrumbList = breadcrumbs.map((breabcrumb, i) => ({
     "@type": "ListItem",
     "position": i + 1,
     "name": breabcrumb.title,
     "item": `${process.env.NEXT_URL}${breabcrumb.slug}`
   }))
 
-  const BreadcrumbStructuredData = {
+  const breadcrumbStructuredData = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    "itemListElement": BreadcrumbList
+    "itemListElement": breadcrumbList
   }
+
+
 
   const structuredData = []
   structuredData.push(productStructuredData)
-  structuredData.push(BreadcrumbStructuredData)
+  structuredData.push(breadcrumbStructuredData)
+  structuredData.push(organizationStructuredData)
 
   return (
     <>
@@ -222,6 +226,8 @@ export async function generateMetadata({ params }: MetadataProps,
 
   if (product.attributes.image.data) {
     metadata.openGraph = {
+      url: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
+      type: 'website',
       images: [`${process.env.NEXT_PUBLIC_API_URL}${product.attributes.image.data?.attributes.url}`],
       siteName: "www.magnetmarket.gr",
       phoneNumbers: ["2221121657"],
