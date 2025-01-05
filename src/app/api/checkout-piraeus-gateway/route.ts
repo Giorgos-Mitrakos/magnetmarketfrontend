@@ -22,6 +22,44 @@ export async function POST(request: NextRequest) {
 
   const { orderId, amount, installments } = data
 
+
+  // στέλνω στην τράπεζα τις πληροφορίες ώστε να μου αποστείλει πίσω το τικετ
+  const response = await getTransactionTicket({
+    orderId: orderId,
+    amount: amount,
+    installments: installments || 1
+  })
+
+  const myHeaders = new Headers();
+  myHeaders.append('Content-Type', 'application/json')
+
+  // αποθηκέυω το τικετ στην παραγγελία του πελάτη στη βαση δεδομένων
+  await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/saveTicket`,
+    {
+      method: "POST",
+      headers: myHeaders,
+      body: JSON.stringify({
+        orderId: orderId,
+        TransTicket: response.TransTicket
+      })
+    },
+  )
+
+  const form = new FormData()
+  form.append('AcquirerId', '14')
+  form.append('MerchantId', 'Test')
+  form.append('PosId', '99999999')
+  form.append('User', `${process.env.PEIRAIWS_USERNAME}`)
+  form.append('LanguageCode', 'el-GR')
+  form.append('MerchantReference', orderId)
+  form.append('ParamBackLink', 'magnetmarket.gr/checkout/confirm')
+
+  // Αποστολή δεδομένων με Fetch API 
+  await fetch('https://paycenter.winbank.gr/redirection/pay/aspx', { method: 'POST', body: form })
+    .then(response => response)
+    .then(data => console.log('Success:', data))
+    .catch(error => console.error('Error:', error));
+
   // const ticket = await getTransactionTicket({ orderId, amount, installments })
   const ticket = '4236ece6142b4639925eb6f80217122f'
   const posId = '99999999'

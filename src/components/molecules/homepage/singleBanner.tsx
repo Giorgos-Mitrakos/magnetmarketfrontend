@@ -20,7 +20,7 @@ const SingleBanner = ({ id,
     return (
         <div key={id} className='flex w-full'>
             <Link href={href} target={target}>
-                <NextImage media={singleBanner.data.attributes} height={1024} width={2024} />
+                <NextImage media={singleBanner.data.attributes} height={768} width={1536} />
             </Link>
         </div>
     )

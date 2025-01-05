@@ -47,7 +47,8 @@ interface IShippingCost {
 }
 
 interface IPaymentMethod {
-    payment: string | undefined
+    payment: string | undefined,
+    installments?: number
 }
 
 interface IPaymentCost {
@@ -64,7 +65,7 @@ interface IShippingContext {
     saveAddresses: (address: IAddresses) => void,
     saveShippingMethod: (id: IShippingMethod) => void,
     savePaymentMethod: (id: IPaymentMethod) => void,
-    createOrder: () => Promise<{ status: string, message: string, orderId: number | null, amount?: number | null }>
+    createOrder: () => Promise<{ status: string, message: string, orderId: number | null, amount?: number | null, installments?: number | null }>
 
 }
 
@@ -108,12 +109,12 @@ export const ShippingContext = createContext<IShippingContext>({
         shipping: ''
     },
     paymentCost: { cost: null },
-    paymentMethod: { payment: '' },
+    paymentMethod: { payment: '', installments: 1 },
     shippingCost: { cost: null },
     saveAddresses: () => { },
     saveShippingMethod: () => { },
     savePaymentMethod: () => { },
-    createOrder: async () => { return { message: "", status: "", orderId: null, amount: null } }
+    createOrder: async () => { return { message: "", status: "", orderId: null, amount: null, installments: 1 } }
 })
 
 export const ShippingProvider = ({ children }: any) => {
@@ -307,7 +308,8 @@ export const ShippingProvider = ({ children }: any) => {
                 status: json.status,
                 message: json.message,
                 orderId: json.orderId,
-                amount: json.amount
+                amount: json.amount,
+                installments: json.installments
             }
         }
         else {

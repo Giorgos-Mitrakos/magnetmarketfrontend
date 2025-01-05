@@ -68,10 +68,13 @@ const ProductCard = (props: ProductCardProps) => {
                             // src={`${process.env.NEXT_PUBLIC_API_URL}${props.prod.attributes.image.data.attributes.url}`}
                             alt={product.image.data.attributes.alternativeText || ""}
                             quality={75}
-                            sizes="(max-width: 640px) 33vw, (max-width: 1024px) 17vw"
+                            sizes="300px"
+                            style={{
+                                objectFit: 'contain',
+                            }}
                         />
                         :
-                        <FaRegImage  className='h-40 w-40 text-siteColors-purple dark:text-slate-200'/>}
+                        <FaRegImage className='h-40 w-40 text-siteColors-purple dark:text-slate-200' />}
 
                 </Link>
                 {/* {props.prod.attributes.sale_price && <Badge product={product} />} */}

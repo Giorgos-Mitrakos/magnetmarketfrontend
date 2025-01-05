@@ -16,13 +16,13 @@ const CartItem = ({ item }: { item: ICartItem }) => {
         <div className="grid gap-y-4 space-x-4 grid-cols-6 mb-4 py-2 border-t last:border-b">
             <div className="relative col-span-1">
                 {item.image ?
-                    <div className="relative h-20 w-full ">
+                    <div className="relative h-20 w-full">
                         <Image
                             // layout='responsive'
-                            className="object-contain object-center"
-                            // height={100}
-                            // width={100}
-                            fill
+                            // className="object-center"
+                            height={100}
+                            width={100}
+                            // fill
                             src={getStrapiMedia(item.image)}
                             alt={item.name}
                             quality={75}

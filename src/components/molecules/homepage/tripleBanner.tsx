@@ -48,13 +48,13 @@ const TripleBanner = ({ id, rightTripleBanner,
     return (
         <div key={id} className='grid md:grid-cols-3 gap-4'>
             <Link href={rightTripleHref} target={rightTripleTarget}>
-                <NextImage media={rightTripleBanner.data.attributes} height={512} width={1024} />
+                <NextImage media={rightTripleBanner.data.attributes} height={256} width={512} />
             </Link>
             <Link href={middleTripleHref} target={middleTripleTarget}>
-                <NextImage media={middleTripleBanner.data.attributes} height={512} width={1024} />
+                <NextImage media={middleTripleBanner.data.attributes} height={256} width={512} />
             </Link>
             <Link href={leftTripleHref} target={leftTripleTarget}>
-                <NextImage media={leftTripleBanner.data.attributes} height={512} width={1024} />
+                <NextImage media={leftTripleBanner.data.attributes} height={256} width={512} />
             </Link>
         </div>
     )

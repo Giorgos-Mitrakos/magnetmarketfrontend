@@ -6,6 +6,8 @@ import { getTransactionTicket } from "@/lib/helpers/piraeusGateway"
 import { useContext, useState } from "react"
 import { useRouter } from 'next/navigation'
 import { CartContext } from "@/context/cart"
+import { toast } from "sonner"
+import CryptoJS from "crypto-js"
 
 interface IAddressSumary {
     firstname: string,
@@ -63,32 +65,60 @@ const Confirm = () => {
     const handleConfirmClik = async () => {
         const newOrder = await createOrder()
         if (newOrder && newOrder.status === "fail") {
-            alert(newOrder.message)
+            toast.error(newOrder.message, {
+                position: 'top-right',
+            })
         }
-
-        console.log("CreateOrder:", newOrder)
 
         if (newOrder && paymentMethod.payment === "Κάρτα") {
 
-            const myInit = {
-                method: "POST",
-                headers: { 'Content-Type': 'application/json', },
-                body: JSON.stringify(formData)
-            };
+            // const myInit = {
+            //     method: "POST",
+            //     headers: { 'Content-Type': 'application/json', },
+            //     body: JSON.stringify(formData)
+            // };
 
             if (newOrder.orderId && newOrder.amount) {
-                const response = await getTransactionTicket({
-                    orderId: newOrder.orderId,
-                    amount: newOrder.amount,
-                    installments: 3
-                })
 
-                console.log(response)
+
+                // const secretKey = process.env.ADMIN_JWT_SECRET;
+                // const dataToEncrypt = response.TransTicket;
+                // // Encrypt data 
+                // const encryptedData = CryptoJS.AES.encrypt(dataToEncrypt, secretKey).toString();
+                // console.log('Encrypted Data:', encryptedData);
+                // // Decrypt data 
+                // const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+                // const decryptedData = decryptedBytes.toString(CryptoJS.enc.Utf8);
+                // console.log('Decrypted Data:', decryptedData);
+
+                const myHeaders = new Headers();
+                myHeaders.append('Content-Type', 'application/json')
+
+                const myInit = {
+                    method: "POST",
+                    headers: myHeaders,
+                    body: JSON.stringify({
+                        orderId: newOrder.orderId,
+                        amount: newOrder.amount,
+                        installments: newOrder.amount
+                    })
+                    // mode: "cors",
+                    // cache: "default",
+                };
+
+                await fetch(`${process.env.NEXT_URL}/api/checkout-piraeus-gateway`,
+                    myInit,
+                )
+
+
+                // const responseTicket = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/saveTicket`,
+                //     myInit,
+                // )
+
+                // console.log(responseTicket)
             }
 
-            // await fetch(`${process.env.NEXT_URL}/api/checkout-piraeus-gateway`,
-            //     myInit,
-            // )
+
 
             // await fetch('https://paycenter.piraeusbank.gr/redirection/pay.aspx',
             //     myInit

@@ -110,11 +110,7 @@ export default async function Product({ params }:
     sku: product.id,
     mpn: product.attributes.mpn,
     gtin13: product.attributes.barcode,
-    brand: {
-      '@type': 'Brand',
-      name: product.attributes.brand.data.attributes.name,
-      logo: product.attributes.brand.data.attributes.logo
-    },
+    brand: {},
     image: structuredDataImages,
     keywords: `${product.attributes.category.data.attributes.name}`,
     offers: structuredDataPrice,
@@ -128,6 +124,14 @@ export default async function Product({ params }:
     // image: post.imageUrl,
     // datePublished: product.attributes,
   };
+
+  if (product.attributes.brand.data) {
+    productStructuredData.brand = {
+      '@type': 'Brand',
+      name: product.attributes.brand.data.attributes.name,
+      logo: product.attributes.brand.data.attributes.logo
+    }
+  }
 
   const BreadcrumbList = breadcrumbs.map((breabcrumb, i) => ({
     "@type": "ListItem",
@@ -196,7 +200,7 @@ export async function generateMetadata({ params }: MetadataProps,
   const product = data.products.data[0]
 
   let metadata: Metadata = {
-    title: `MagnetMarket-${product.attributes.name}`,
+    title: `MagnetMarket-${product.attributes.name.length > 53 ? product.attributes.name.slice(0, 53) : product.attributes.name}`,
     category: `${product.attributes.category.data.attributes.name}`,
     alternates: {
       canonical: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
@@ -212,7 +216,7 @@ export async function generateMetadata({ params }: MetadataProps,
       .replaceAll("\n", "")
       }`
   }
-  else {
+  else if (product.attributes.brand.data) {
     metadata.description = `To ${product.attributes.name} είναι ένα προϊόν της εταιρίας ${product.attributes.brand.data.attributes.name}`
   }
 
@@ -222,7 +226,7 @@ export async function generateMetadata({ params }: MetadataProps,
       siteName: "www.magnetmarket.gr",
       phoneNumbers: ["2221121657"],
       emails: ["info@magnetmarket.gr"],
-      countryName: 'Ελλάδα',      
+      countryName: 'Ελλάδα',
     }
   }
 

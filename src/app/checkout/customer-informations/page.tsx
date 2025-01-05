@@ -88,18 +88,19 @@ const CustomerInfo = () => {
                 <div className="bg-slate-200 rounded">
                     <CartSummary />
                 </div>
-                {/* <div className='max-w-sm'>
-                    <ApplyCoupon />
-                </div> */}
-            </div>
-
-            <button onClick={handleNextOnClik}
+                <button onClick={handleNextOnClik}
                 className="md:row-start-2 md:col-start-2 flex justify-center items-center px-4 py-2 w-full rounded border md:text-slate-100 text-lg font-semibold
                 bg-gradient-to-b from-siteColors-pink via-siteColors-purple to-siteColors-pink text-white
                 md:bg-gradient-to-br md:from-siteColors-lightblue md:to-siteColors-blue
                 hover:bg-gradient-to-b hover:from-siteColors-pink hover:via-siteColors-purple hover:to-siteColors-pink hover:text-white">Επόμενο</button>
 
-        </div>
+        
+                {/* <div className='max-w-sm'>
+                    <ApplyCoupon />
+                </div> */}
+            </div>
+
+            </div>
     )
 }
 

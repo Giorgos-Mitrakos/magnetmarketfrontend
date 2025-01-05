@@ -29,10 +29,10 @@ const DoubleBanner = ({ id, rightBanner,
     return (
         <div key={id} className='grid md:grid-cols-2 gap-4'>
             <Link href={rightHref} target={rightTarget}>
-                <NextImage media={rightBanner.data.attributes} height={512} width={1024} />
+                <NextImage media={rightBanner.data.attributes} height={360} width={720} />
             </Link>
             <Link href={leftHref} target={leftTarget}>
-                <NextImage media={leftBanner.data.attributes} height={512} width={1024} />
+                <NextImage media={leftBanner.data.attributes} height={360} width={720} />
             </Link>
         </div>
     )

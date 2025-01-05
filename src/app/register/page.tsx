@@ -28,7 +28,7 @@ interface ProviderProps {
     callbackUrl: string
 }
 
-export default function Login() {
+export default function Register() {
     const [csrfToken, setCsrfToken] = useState<string | undefined>();
     const [toggle, setToggle] = useState(false);
     const [providers, setProviders] = useState<Record<LiteralUnion<BuiltInProviderType, string>, ClientSafeProvider> | null>()
