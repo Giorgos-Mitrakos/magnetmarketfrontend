@@ -63,14 +63,17 @@ const ProductCard = (props: ProductCardProps) => {
                             // layout='responsive'
                             // width={product.image.data.attributes.width / 4}
                             // height={product.image.data.attributes.height / 4}
-                            fill
+                            // fill
                             src={getStrapiMedia(product.image.data.attributes.url)}
                             // src={`${process.env.NEXT_PUBLIC_API_URL}${props.prod.attributes.image.data.attributes.url}`}
                             alt={product.image.data.attributes.alternativeText || ""}
                             quality={75}
                             sizes="300px"
+                            width={300}
+                            height={216}
                             style={{
-                                objectFit: 'contain',
+                                width: 'auto',
+                                height: '216px',
                             }}
                         />
                         :
