@@ -85,7 +85,7 @@ const ProductCard = (props: ProductCardProps) => {
                     <Link href={`/product/${product.slug}`}
                         className="row-span-4"
                         aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${product.name}`}>
-                        <h2 className='w-full font-semibold xs:text-lg text-left line-clamp-3 text-siteColors-purple dark:text-slate-200 dark:hover:text-slate-100 hover:text-siteColors-pink'
+                        <h2 className='w-full font-semibold xs:text-lg text-left break-all line-clamp-3 text-siteColors-purple dark:text-slate-200 dark:hover:text-slate-100 hover:text-siteColors-pink'
                             aria-label="Τίτλος προϊόντος">{product.name}</h2>
                     </Link>
                     <p className="text-xs text-gray-500 dark:text-slate-300">Κωδ:{props.prod.id}</p>
