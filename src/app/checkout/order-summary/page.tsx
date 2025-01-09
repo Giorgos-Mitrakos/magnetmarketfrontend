@@ -126,12 +126,12 @@ const Confirm = () => {
                 // )
             }
 
-            // clearCart()
-            console.log(newOrder)
+            clearCart()
+            
             if (newOrder.orderId)
                 await saveCookies({
                     name: "magnet_market_order", value: {
-                        cartItems, shippingCost, paymentMethod, shippingMethod, paymentCost, addresses, newOrder
+                        orderId:newOrder.orderId
                     }
                 })
 
