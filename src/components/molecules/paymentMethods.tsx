@@ -3,7 +3,7 @@
 import { GET_PAYMENT_METHODS } from "@/lib/queries/shippingQuery"
 import { useQuery } from "@/repositories/clientRepository"
 import Radio from "../atoms/radio"
-import { forwardRef, useContext, useEffect, useImperativeHandle, useState } from "react"
+import { forwardRef, useContext, useEffect, useImperativeHandle } from "react"
 import { ShippingContext } from "@/context/shipping"
 import { useFormik } from "formik"
 import * as Yup from 'yup'

@@ -20,7 +20,7 @@ const OrderInfo = () => {
         paymentRef.current?.submitForm()
         setTimeout(() => {
             if (shippingRef.current?.isSubmitting && paymentRef.current?.isSubmitting) {
-                router.push('/checkout/confirm')
+                router.push('/checkout/order-summary')
             }
             else {
                 if (!shippingRef.current?.isSubmitting)

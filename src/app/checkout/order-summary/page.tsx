@@ -7,7 +7,7 @@ import { useContext, useState } from "react"
 import { useRouter } from 'next/navigation'
 import { CartContext } from "@/context/cart"
 import { toast } from "sonner"
-import CryptoJS from "crypto-js"
+import { saveCookies } from "@/lib/helpers/actions"
 
 interface IAddressSumary {
     firstname: string,
@@ -52,7 +52,7 @@ const AddressSummary = ({ address }: { address: IAddressSumary }) => {
 }
 
 const Confirm = () => {
-    const { paymentMethod, shippingMethod, addresses, createOrder } = useContext(ShippingContext)
+    const { cartItems, shippingCost, paymentMethod, shippingMethod, paymentCost, addresses, createOrder } = useContext(ShippingContext)
     const { clearCart } = useContext(CartContext)
     const router = useRouter()
 
@@ -63,70 +63,83 @@ const Confirm = () => {
     });
 
     const handleConfirmClik = async () => {
-        const newOrder = await createOrder()
-        if (newOrder && newOrder.status === "fail") {
-            toast.error(newOrder.message, {
-                position: 'top-right',
-            })
-        }
-
-        if (newOrder && paymentMethod.payment === "Κάρτα") {
-
-            // const myInit = {
-            //     method: "POST",
-            //     headers: { 'Content-Type': 'application/json', },
-            //     body: JSON.stringify(formData)
-            // };
-
-            if (newOrder.orderId && newOrder.amount) {
-
-
-                // const secretKey = process.env.ADMIN_JWT_SECRET;
-                // const dataToEncrypt = response.TransTicket;
-                // // Encrypt data 
-                // const encryptedData = CryptoJS.AES.encrypt(dataToEncrypt, secretKey).toString();
-                // console.log('Encrypted Data:', encryptedData);
-                // // Decrypt data 
-                // const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
-                // const decryptedData = decryptedBytes.toString(CryptoJS.enc.Utf8);
-                // console.log('Decrypted Data:', decryptedData);
-
-                const myHeaders = new Headers();
-                myHeaders.append('Content-Type', 'application/json')
-
-                const myInit = {
-                    method: "POST",
-                    headers: myHeaders,
-                    body: JSON.stringify({
-                        orderId: newOrder.orderId,
-                        amount: newOrder.amount,
-                        installments: newOrder.amount
-                    })
-                    // mode: "cors",
-                    // cache: "default",
-                };
-
-                await fetch(`${process.env.NEXT_URL}/api/checkout-piraeus-gateway`,
-                    myInit,
-                )
-
-
-                // const responseTicket = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/saveTicket`,
-                //     myInit,
-                // )
-
-                // console.log(responseTicket)
+        try {
+            const newOrder = await createOrder()
+            if (newOrder && newOrder.status === "fail") {
+                toast.error(newOrder.message, {
+                    position: 'top-right',
+                })
             }
 
+            if (newOrder && paymentMethod.payment === "Κάρτα") {
+
+                // const myInit = {
+                //     method: "POST",
+                //     headers: { 'Content-Type': 'application/json', },
+                //     body: JSON.stringify(formData)
+                // };
+
+                if (newOrder.orderId && newOrder.amount) {
 
 
-            // await fetch('https://paycenter.piraeusbank.gr/redirection/pay.aspx',
-            //     myInit
-            // )
+                    // const secretKey = process.env.ADMIN_JWT_SECRET;
+                    // const dataToEncrypt = response.TransTicket;
+                    // // Encrypt data 
+                    // const encryptedData = CryptoJS.AES.encrypt(dataToEncrypt, secretKey).toString();
+                    // console.log('Encrypted Data:', encryptedData);
+                    // // Decrypt data 
+                    // const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
+                    // const decryptedData = decryptedBytes.toString(CryptoJS.enc.Utf8);
+                    // console.log('Decrypted Data:', decryptedData);
+
+                    const myHeaders = new Headers();
+                    myHeaders.append('Content-Type', 'application/json')
+
+                    const myInit = {
+                        method: "POST",
+                        headers: myHeaders,
+                        body: JSON.stringify({
+                            orderId: newOrder.orderId,
+                            amount: newOrder.amount,
+                            installments: newOrder.amount
+                        })
+                        // mode: "cors",
+                        // cache: "default",
+                    };
+
+                    await fetch(`${process.env.NEXT_URL}/api/checkout-piraeus-gateway`,
+                        myInit,
+                    )
+
+
+                    // const responseTicket = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/saveTicket`,
+                    //     myInit,
+                    // )
+
+                    // console.log(responseTicket)
+                }
+
+
+
+                // await fetch('https://paycenter.piraeusbank.gr/redirection/pay.aspx',
+                //     myInit
+                // )
+            }
+
+            // clearCart()
+            console.log(newOrder)
+            if (newOrder.orderId)
+                await saveCookies({
+                    name: "Order", value: {
+                        cartItems, shippingCost, paymentMethod, shippingMethod, paymentCost, addresses, newOrder
+                    }
+                })
+
+            router.push('/checkout/confirm/success')
+
+        } catch (error) {
+            router.push('/checkout/confirm/fail')
         }
-
-        // clearCart()
-        // router.push('/')
     }
 
     return (
@@ -174,3 +187,4 @@ const Confirm = () => {
 }
 
 export default Confirm
+

@@ -3,7 +3,8 @@ import FooterSection from "../molecules/footerSection"
 import { GET_FOOTER, IfooterProps } from "@/lib/queries/footerQuery";
 import { FaRegClock } from "react-icons/fa";
 import { AiOutlineMail, AiOutlinePhone } from "react-icons/ai";
-import { FaLocationDot } from "react-icons/fa6";
+import { FaLocationDot, FaInstagram, FaFacebookF } from "react-icons/fa6";
+import Link from "next/link";
 
 async function getFooter(): Promise<IfooterProps> {
     const data = await requestSSR({
@@ -43,6 +44,15 @@ const Footer = async () => {
                         <AiOutlineMail className="text-2xl" aria-label="Φάκελος" />
                         <a href={`mailto:${data.email}`} className="break-all"
                             aria-label={`Email: ${data.email}`}>{data.email}</a>
+                    </li>
+                    <li key={5} className="flex items-start space-x-2 font-semibold hover:text-siteColors-pink">
+                        <h3>Ακολουθήστε μας</h3>
+                        <Link href="https://www.facebook.com/magnetmarket.gr/" target="_blank">
+                            <FaFacebookF className="text-2xl" aria-label="Instagram" />
+                        </Link>
+                        <Link href="https://www.instagram.com/magnetmarket.gr/" target="_blank">
+                            <FaInstagram className="text-2xl" aria-label="Facebook" />
+                        </Link>
                     </li>
                 </ul >
             </div>

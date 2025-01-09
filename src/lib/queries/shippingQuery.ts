@@ -2,7 +2,7 @@ import { gql } from "graphql-request";
 
 export const GET_SHIPPING_METHODS = gql`
 query getShippingMethods{
-    shippings {
+    shippings(filters:{isActive:{eq:true}}) {
     data {
       id
       attributes {
@@ -14,7 +14,7 @@ query getShippingMethods{
 
 export const GET_PAYMENT_METHODS = gql`
 query getPaymentMethods{
-    payments{
+    payments(filters:{isActive:{eq:true}}){
     data{
       id
       attributes{

@@ -97,7 +97,7 @@ export async function generateMetadata(
         title: `MagnetMarket-${response.categories.data[0].attributes.name}`,
         category: response.categories.data[0].attributes.name,
         alternates: {
-            canonical: `${process.env.NEXT_URL}/category/${params.category1}/${params.category2}`,
+            canonical: `${process.env.NEXT_URL}/category/${params.category1}/${params.category2}${searchParams.page ? `?page=${searchParams.page}` : ""}`,
         }
     }
 

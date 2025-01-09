@@ -26,6 +26,12 @@ const CartItem = ({ item }: { item: ICartItem }) => {
                             src={getStrapiMedia(item.image)}
                             alt={item.name}
                             quality={75}
+                            style={{
+                                width: 'auto',
+                                height: '100px',
+                            }}
+                            placeholder="blur"
+                            blurDataURL={getStrapiMedia(item.image)}
                         />
                     </div> : <div></div>}
                 <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-siteColors-pink border-2 border-white 
