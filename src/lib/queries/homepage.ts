@@ -57,6 +57,18 @@ export const GET_HOMEPAGE = gql`
                 attributes {
                   name
                   slug
+                  sku
+                  mpn
+                  barcode
+                  price
+                  sale_price
+                  is_sale
+                  is_hot
+                  weight
+                  height
+                  width
+                  length
+                  status
                   brand {
                     data {
                       attributes {
