@@ -130,7 +130,7 @@ const Confirm = () => {
             console.log(newOrder)
             if (newOrder.orderId)
                 await saveCookies({
-                    name: "Order", value: {
+                    name: "magnet_market_order", value: {
                         cartItems, shippingCost, paymentMethod, shippingMethod, paymentCost, addresses, newOrder
                     }
                 })

@@ -69,7 +69,7 @@ interface IOrderCookie {
 
 export default async function Success() {
 
-  const orderCookie = await getCookies({ name: 'Order' })
+  const orderCookie = await getCookies({ name: 'magnet_market_order' })
 
   console.log("orderCookie:", orderCookie)
   const order: IOrderCookie = orderCookie ? JSON.parse(orderCookie.value) : null

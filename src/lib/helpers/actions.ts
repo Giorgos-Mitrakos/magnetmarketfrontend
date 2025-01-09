@@ -8,7 +8,9 @@ export async function saveCookies({ name, value }: { name: string, value: object
         value: JSON.stringify(value),
         secure: true,
         expires: new Date(Date.now() + 60 * 60 * 24 * 30 * 1000),
-        sameSite: 'strict'
+        sameSite: 'lax',
+        httpOnly: true,
+        path: '/',
     })
 }
 
