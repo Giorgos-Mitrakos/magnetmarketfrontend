@@ -12,7 +12,7 @@ function SearchInput() {
 
     return (
         <div className="flex items-center w-full dark:text-slate-800">
-            <form onSubmit={()=>{ router.push(`/search?search=${text}`) }} className="flex w-full items-end border-b-2 bg-inherit border-siteColors-purple"
+            <form onSubmit={() => { router.push(`/search?search=${text}`) }} className="flex w-full items-end border-b-2 bg-inherit border-siteColors-purple"
                 aria-label="Αναζήτηση">
                 {hasRecognitionSupport &&
                     <button onClick={isListening ? stopListening : startListening}
@@ -31,7 +31,9 @@ function SearchInput() {
                     aria-label="Πεδίο αναζήτησης προϊόντων" />
                 <button type="submit"
                     aria-label="Αναζήτηση - Αναζητήστε ανά προϊόν, κατασκευαστή ή κατηγορία">
-                    <AiOutlineSearch className="text-3xl text-siteColors-purple dark:text-slate-200" />
+                    <AiOutlineSearch
+                        aria-label="Κουμπί αναζήτησης"
+                        className="text-3xl text-siteColors-purple dark:text-slate-200" />
                 </button>
             </form>
         </div>

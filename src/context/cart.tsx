@@ -95,20 +95,23 @@ export const CartProvider = ({ children }: any) => {
           <p className='mb-4'>Ένα προϊόν προστέθηκε στο καλάθι σας!</p>
         </>
       ), {
-        description: () => <div className='grid grid-cols-5 gap-2'>
-          <Image
-            width={48}
-            height={48}
-            src={getStrapiMedia(item.image)}
-            alt={item.name || ""}
-            quality={75}
-            aria-label={item.name || ""}
-            blurDataURL={getStrapiMedia(item.image)}
-            placeholder="blur"
-          />
-          <p className='col-span-3 line-clamp-3 font-semibold'>{item.name}</p>
-          <p className='text-center font-semibold text-lg'>{itemPrice} €</p>
-        </div>,
+        description: () =>
+          <div className='grid gap-2'>
+            <div className='grid grid-cols-5 gap-2'>
+              <Image
+                width={48}
+                height={48}
+                src={getStrapiMedia(item.image)}
+                alt={item.name || ""}
+                quality={75}
+                aria-label={item.name || ""}
+                blurDataURL={getStrapiMedia(item.image)}
+                placeholder="blur"
+              />
+              <p className='col-span-4 line-clamp-3 break-all font-semibold'>{item.name}</p>
+            </div>
+            <p className='text-right font-semibold text-lg'>{itemPrice} €</p>
+          </div>,
         position: 'top-right',
       })
 

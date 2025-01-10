@@ -30,7 +30,7 @@ export default function Header({ user }: { user: any }) {
                 <div className='hidden my-4 lg:flex relative w-full'>
                     <div className="flex max-w-fit items-center z-50 mb-2 ml-8 border-siteColors-lightblue text-lg cursor-pointer" onMouseEnter={() => setOpenMenu(true)}
                         onMouseLeave={() => setOpenMenu(false)}>
-                        <FaBarsStaggered className='mr-2' />
+                        <FaBarsStaggered aria-label="Κουμπί ανοιγματος κυρίως μενού!" className='mr-2' />
                         <span className=' font-bold'>ΠΡΟΙΟΝΤΑ</span>
                         <MainMenu isMenuOpen={openMenu} />
                     </div>
