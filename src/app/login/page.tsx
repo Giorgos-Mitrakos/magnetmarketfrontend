@@ -157,7 +157,7 @@ export default function Login() {
                     </div>
                 </div>
             </div>
-            <div className='w-full h-full'>
+            {callbackUrl && <div className='w-full h-full'>
                 <div className='flex flex-col w-full h-full text-xl sm:text-2xl md:text-3xl px-2 font-semibold'>
                     <h2 className='text-slate-800 dark:text-slate-200 text-center mb-2'>Γρήγορη Παραγγελία</h2>
                     <Link href='/checkout/customer-informations'
@@ -166,7 +166,7 @@ export default function Login() {
                         <p className='text-center px-8'>Ολοκλήρωση της παραγγελίας ως επισκέπτης</p>
                     </Link>
                 </div>
-            </div>
+            </div>}
         </div >
     )
 }

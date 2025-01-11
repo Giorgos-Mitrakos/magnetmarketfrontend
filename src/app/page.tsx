@@ -27,6 +27,9 @@ export default async function Home() {
 
   return (
     <>
+      <head>
+        <meta name="msvalidate.01" content="5F57CFA85BD6BCF4DE69C7AEDF67B332" />
+      </head>
       <Script
         id="structured-data"
         type="application/ld+json"
