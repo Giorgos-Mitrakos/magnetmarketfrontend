@@ -26,10 +26,7 @@ export default async function Home() {
   structuredData.push(organizationStructuredData)
 
   return (
-    <>
-      <head>
-        <meta name="msvalidate.01" content="5F57CFA85BD6BCF4DE69C7AEDF67B332" />
-      </head>
+    <>      
       <Script
         id="structured-data"
         type="application/ld+json"
@@ -53,6 +50,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: `${process.env.NEXT_URL}/`,
   },
+  verification:{other:{"msvalidate.01":"5F57CFA85BD6BCF4DE69C7AEDF67B332"}},
   openGraph: {
     url: 'www.magnetmarket.gr',
     type: 'website',
