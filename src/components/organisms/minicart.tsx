@@ -6,6 +6,7 @@ import { CartContext, ICartItem } from "@/context/cart"
 import Image from "next/image"
 import { getStrapiMedia } from "@/repositories/medias"
 import ProductCardPrice from "../atoms/productCardPrice"
+import { FaRegImage } from "react-icons/fa6"
 
 export default function Minicart() {
     const { cartItems } = useContext(CartContext)
@@ -29,7 +30,7 @@ export default function Minicart() {
                                     <div className="absolute top-0 left-0 w-6 h-6 z-40 inline-flex items-center justify-center text-xs font-bold text-white bg-siteColors-pink border-2 border-white rounded-full dark:border-gray-900">
                                         {item.quantity.toString()}
                                     </div>
-                                    <Image
+                                    {item.image ? <Image
                                         // layout='responsive'
                                         className="object-contain object-center"
                                         height={100}
@@ -37,7 +38,8 @@ export default function Minicart() {
                                         src={getStrapiMedia(item.image)}
                                         alt={item.name}
                                         quality={75}
-                                    />
+                                    /> :
+                                        <FaRegImage className='h-40 w-40 text-siteColors-purple dark:text-slate-200' />}
                                 </div> : <div></div>}
                         </div>
                         <Link href={`/product/${item.slug}`}

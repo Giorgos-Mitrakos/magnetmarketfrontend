@@ -1,7 +1,7 @@
 'use client'
 import { useApiRequest } from "@/repositories/clientRepository";
 import { useState } from "react";
-import { FaCaretUp, FaCaretDown, FaRegTrashCan } from "react-icons/fa6";
+import { FaCaretUp, FaCaretDown, FaRegTrashCan, FaRegImage } from "react-icons/fa6";
 import NextImage from "../atoms/nextImage";
 import { getStrapiMedia } from "@/repositories/medias";
 import Image from "next/image";
@@ -152,7 +152,7 @@ const Accordion = ({ order }: { order: IOrder }) => {
                             </li>
                             {order.products.map(product => (
                                 <li key={product.id} className="grid grid-cols-6 gap-1 mt-4 w-full items-center">
-                                    <Image
+                                    {product.image ? <Image
                                         // layout='responsive'
                                         className="object-scale-down "
                                         width={96}
@@ -163,7 +163,8 @@ const Accordion = ({ order }: { order: IOrder }) => {
                                         aria-label={product.name || ""}
                                         blurDataURL={getStrapiMedia(product.image)}
                                         placeholder="blur"
-                                    />
+                                    /> :
+                                        <FaRegImage className='h-40 w-40 text-siteColors-purple dark:text-slate-200' />}
                                     <p className="col-span-3 line-clamp-3">{product.name}</p>
                                     <p className="">{product.quantity}</p>
                                     <p className="">{product.sale_price ? product.sale_price : product.price} €</p>

@@ -1,21 +1,35 @@
 "use client"
-import { CartContext } from "@/context/cart"
+import { CartContext, ICartItem } from "@/context/cart"
 import { useContext } from "react"
 import { FaHeart, FaOpencart, FaRegEye } from "react-icons/fa"
+
+export interface IItem {
+    id: number,
+    name: string,
+    slug: string,
+    image: string,
+    price: number,
+    weight: number,
+    quantity: number
+    isAvailable: boolean
+}
 
 function ProductCardFoot({ product }: any) {
     const { cartItems, addToCart } = useContext(CartContext)
 
-    const item = {
+    const item: IItem = {
         id: product.id,
         name: product.attributes.name,
         slug: product.attributes.slug,
         image: product.attributes.image.data?.attributes.url || null,
         weight: product.attributes.weight,
-        price: product.attributes.price
+        price: product.attributes.price,
+        quantity: 1,
+        isAvailable: true
     }
 
-    const handleAddProductClick = (product: any) => {
+    const handleAddProductClick = (product: IItem) => {
+        console.log(product.image)
         product.quantity = 1
         addToCart(product)
     }
@@ -34,7 +48,7 @@ function ProductCardFoot({ product }: any) {
                     hover:bg-gradient-to-br hover:from-siteColors-pink hover:to-siteColors-purple hover:text-white"
                 aria-label="Επισκόπηση προϊόντος">
                 <FaRegEye
-                    aria-label="Επισκόπηση προϊόντος"/>
+                    aria-label="Επισκόπηση προϊόντος" />
             </button>
             <button
                 onClick={() => handleAddProductClick(item)}
@@ -44,7 +58,7 @@ function ProductCardFoot({ product }: any) {
                      rounded-md"
                 aria-label="Προσθήκη προϊόντος στο το καλάθι σου">
                 <FaOpencart
-                    aria-label="Καλάθι"/>
+                    aria-label="Καλάθι" />
             </button>
 
             {/* <button className='p-2 w-full mx-auto text-white mt-4 tracking-wide rounded-lg shadow-inner bg-gradient-to-t from-siteColors-lightblue via-siteColors-blue to-siteColors-lightblue hover:bg-gradient-to-tl'>Αγόρασε Τώρα</button> */}

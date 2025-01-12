@@ -4,6 +4,7 @@ import { GET_ORDER } from "@/lib/queries/shippingQuery";
 import { requestSSR } from "@/repositories/repository";
 import { Metadata } from "next"
 import Image from "next/image"
+import { FaRegImage } from "react-icons/fa6";
 
 // Function to Add days to current date
 function addDays(date: Date, days: number) {
@@ -94,14 +95,15 @@ export default async function Success() {
         {data && data.order.data.attributes.products.map(item => (
           <div key={item.id} className="grid grid-cols-5 shadow-md rounded-md bg-white">
             <div className="flex justify-center items-center p-4 col-span-2">
-              <Image
+              {item.image ? <Image
                 key={item.id}
                 src={`${process.env.NEXT_PUBLIC_API_URL}${item.image}`}
                 alt={item.name}
                 height={120}
                 width={120}
 
-              />
+              /> :
+                <FaRegImage className='h-40 w-40 text-siteColors-purple dark:text-slate-200' />}
             </div>
             <div className="flex flex-col justify-between col-span-3 p-4 space-y-2 text-gray-500">
               <h2 className="text-siteColors-purple font-semibold line-clamp-4 row-span-2">{item.name}</h2>

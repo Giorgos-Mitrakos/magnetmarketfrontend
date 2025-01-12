@@ -86,7 +86,7 @@ export async function generateMetadata(
     const response = data as IcategoryMetadataProps
 
     let metadata: Metadata = {
-        title: `MagnetMarket-${response.categories.data[0].attributes.name}`,
+        title: `Magnet Market-${response.categories.data[0].attributes.name}`,
         category: response.categories.data[0].attributes.name,
         alternates: {
             canonical: `${process.env.NEXT_URL}/category${params.category1}${searchParams.page ? `?page=${searchParams.page}` : ""}`,

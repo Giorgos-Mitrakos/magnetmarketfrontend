@@ -22,11 +22,32 @@ export default async function Home() {
 
   const data = await getHomepageData()
 
+  const breadcrumbs = [
+    {
+      title: "Home",
+      slug: "/"
+    }
+  ]
+
+  const BreadcrumbList = breadcrumbs.map((breabcrumb, i) => ({
+    "@type": "ListItem",
+    "position": i + 1,
+    "name": breabcrumb.title,
+    "item": `${process.env.NEXT_URL}${breabcrumb.slug}`
+  }))
+
+  const BreadcrumbStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": BreadcrumbList
+  }
+
   const structuredData = []
+  structuredData.push(BreadcrumbStructuredData)
   structuredData.push(organizationStructuredData)
 
   return (
-    <>      
+    <>
       <Script
         id="structured-data"
         type="application/ld+json"
@@ -44,13 +65,13 @@ export default async function Home() {
 }
 
 export const metadata: Metadata = {
-  title: 'Magnetmarket Η τεχνολογία στο δικό σου πεδίο!',
+  title: 'Magnet Μarket Η τεχνολογία στο δικό σου πεδίο!',
   description: 'Μην το ψάχνεις, εδώ θα βρείς τις καλύτερες τίμες και προσφορές σε υπολογιστές, laptop, smartwatch, κάμερες, εκτυπωτές, οθόνες, τηλεοράσεις και άλλα προϊόντα.',
   keywords: "Computers, Laptops, Notebooks, laptop, Computer, Hardware, Notebook, Peripherals, Greece, Technology, Mobile phones, Laptops, PCs, Scanners, Printers, Modems, Monitors, Software, Antivirus, Windows, Intel Chipsets, AMD, HP, LOGITECH, ACER, TOSHIBA, SAMSUNG, Desktop, Servers, Telephones, DVD, CD, DVDR, CDR, DVD-R, CD-R, periferiaka, Systems, MP3, Υπολογιστής, ΥΠΟΛΟΓΙΣΤΗΣ, ΠΕΡΙΦΕΡΕΙΑΚΑ, περιφερειακά, Χαλκίδα, ΧΑΛΚΙΔΑ, Ελλάδα, ΕΛΛΑΔΑ, Τεχνολογία, τεχνολογία, ΤΕΧΝΟΛΟΓΙΑ, κινητό, ΚΙΝΗΤΟ, κινητά, ΚΙΝΗΤΑ, οθόνη, ΟΘΟΝΗ, οθόνες, ΟΘΟΝΕΣ, ΕΚΤΥΠΩΤΕΣ, εκτυπωτές, σαρωτές, ΣΑΡΩΤΕΣ, εκτυπωτής",
   alternates: {
     canonical: `${process.env.NEXT_URL}/`,
   },
-  verification:{other:{"msvalidate.01":"5F57CFA85BD6BCF4DE69C7AEDF67B332"}},
+  verification: { other: { "msvalidate.01": "5F57CFA85BD6BCF4DE69C7AEDF67B332" } },
   openGraph: {
     url: 'www.magnetmarket.gr',
     type: 'website',

@@ -54,16 +54,12 @@ const AddressSummary = ({ address }: { address: IAddressSumary }) => {
 const Confirm = () => {
     const { cartItems, shippingCost, paymentMethod, shippingMethod, paymentCost, addresses, createOrder } = useContext(ShippingContext)
     const { clearCart } = useContext(CartContext)
+    const [processing, setProcessing] = useState(false)
     const router = useRouter()
-
-    const [formData, setFormData] = useState({
-        orderId: 115,
-        amount: 1170,
-        installments: 3
-    });
 
     const handleConfirmClik = async () => {
         try {
+            setProcessing(true)
             const newOrder = await createOrder()
             if (newOrder && newOrder.status === "fail") {
                 toast.error(newOrder.message, {
@@ -127,13 +123,15 @@ const Confirm = () => {
             }
 
             clearCart()
-            
+
             if (newOrder.orderId)
                 await saveCookies({
                     name: "magnet_market_order", value: {
-                        orderId:newOrder.orderId
+                        orderId: newOrder.orderId
                     }
                 })
+
+            setProcessing(false)
 
             router.push('/checkout/confirm/success')
 
@@ -175,11 +173,12 @@ const Confirm = () => {
                             <CartSummary />
                         </div>
                     </li>
-                    <button onClick={handleConfirmClik}
+                    <button onClick={handleConfirmClik} disabled={processing}
                         className="md:row-start-2 md:col-start-2 flex justify-center items-center px-4 py-2 w-full rounded border md:text-slate-100 text-lg font-semibold
                 bg-gradient-to-b from-siteColors-pink via-siteColors-purple to-siteColors-pink text-white
                 md:bg-gradient-to-br md:from-siteColors-lightblue md:to-siteColors-blue
-                hover:bg-gradient-to-b hover:from-siteColors-pink hover:via-siteColors-purple hover:to-siteColors-pink hover:text-white">Ολοκλήρωση</button>
+                hover:bg-gradient-to-b hover:from-siteColors-pink hover:via-siteColors-purple hover:to-siteColors-pink hover:text-white
+                disabled:bg-slate-400">{processing?"Περιμένετε...":'Ολοκλήρωση'}</button>
                 </ul>
             </div>
         </div>

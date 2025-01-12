@@ -5,6 +5,7 @@ import { getStrapiMedia } from '@/repositories/medias';
 import { fetcher } from '@/repositories/repository';
 import Image from 'next/image';
 import { createContext, useState, useEffect } from 'react'
+import { FaRegImage } from 'react-icons/fa6';
 import { toast } from 'sonner';
 
 export interface ICartItem {
@@ -14,6 +15,7 @@ export interface ICartItem {
   image: string,
   price: number,
   quantity: number,
+  weight: number,
   isAvailable: boolean
 }
 
@@ -72,6 +74,7 @@ export const CartProvider = ({ children }: any) => {
 
   const addToCart = async (item: ICartItem) => {
     try {
+      console.log(item)
       const isItemInCart = cartItems.find((cartItem) => cartItem.id === item.id);
       const query = GET_PRODUCT_PRICE
       const data = await fetcher({ query, variables: { id: item.id } })
@@ -98,7 +101,7 @@ export const CartProvider = ({ children }: any) => {
         description: () =>
           <div className='grid gap-2'>
             <div className='grid grid-cols-5 gap-2'>
-              <Image
+              {item.image ? <Image
                 width={48}
                 height={48}
                 src={getStrapiMedia(item.image)}
@@ -107,7 +110,8 @@ export const CartProvider = ({ children }: any) => {
                 aria-label={item.name || ""}
                 blurDataURL={getStrapiMedia(item.image)}
                 placeholder="blur"
-              />
+              /> :
+                <FaRegImage className='h-40 w-40 text-siteColors-purple dark:text-slate-200' />}
               <p className='col-span-4 line-clamp-3 break-all font-semibold'>{item.name}</p>
             </div>
             <p className='text-right font-semibold text-lg'>{itemPrice} €</p>

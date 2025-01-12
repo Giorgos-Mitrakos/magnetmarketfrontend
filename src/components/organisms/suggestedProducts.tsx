@@ -8,6 +8,7 @@ import { getStrapiMedia } from "@/repositories/medias";
 import ProductCardPrice from "../atoms/productCardPrice";
 import ProductCardFoot from "../molecules/productCardFoot";
 import { GET_SUGGESTED_PRODUCTS, IsuggestedProductsProps } from "@/lib/queries/productQuery";
+import { FaRegImage } from "react-icons/fa6";
 
 
 // async function getProductData(slug: string) {
@@ -104,7 +105,7 @@ const SuggestedProducts = async ({ product }: ProductProps) => {
                             <ProductCardHead brand={prod.attributes.brand} id={prod.id} />
                             <Link className="grid h-48 w-full place-content-center relative" href={`/product/${prod.attributes.slug}`}
                                 aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${prod.attributes.name}`}>
-                                {prod.attributes.image.data &&
+                                {prod.attributes.image.data ?
                                     <Image className="object-contain p-2"
                                         aria-label={`Φωτογραφία προϊόντος${prod.attributes.name}`}
                                         // layout='responsive'
@@ -116,7 +117,8 @@ const SuggestedProducts = async ({ product }: ProductProps) => {
                                         alt={prod.attributes.image.data.attributes.alternativeText || ""}
                                         quality={75}
                                         sizes="(max-width: 640px) 33vw, (max-width: 1024px) 17vw"
-                                    />}
+                                    /> :
+                                    <FaRegImage className='h-40 w-40 text-siteColors-purple dark:text-slate-200' />}
                             </Link>
                             <div className='mt-1 h-28 flex flex-col justify-between border-b pb-2 dark:bg-slate-700'>
                                 <Link href={`/product/${prod.attributes.slug}`}

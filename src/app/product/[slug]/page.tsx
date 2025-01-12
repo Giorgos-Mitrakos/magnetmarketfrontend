@@ -247,7 +247,7 @@ export async function generateMetadata({ params }: MetadataProps,
   const product = data.products.data[0]
 
   let metadata: Metadata = {
-    title: `MagnetMarket-${product.attributes.name.length > 53 ? product.attributes.name.slice(0, 53) : product.attributes.name}`,
+    title: `Magnet Market-${product.attributes.name.length > 53 ? product.attributes.name.slice(0, 53) : product.attributes.name}`,
     category: `${product.attributes.category.data.attributes.name}`,
     alternates: {
       canonical: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,

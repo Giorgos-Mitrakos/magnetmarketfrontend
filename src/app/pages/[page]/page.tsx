@@ -1,6 +1,8 @@
+import { organizationStructuredData } from "@/lib/helpers/structureData";
 import { GET_PAGE_DATA, IPageDataProps } from "@/lib/queries/pagesQuery";
 import { requestSSR } from "@/repositories/repository";
 import { Metadata, ResolvingMetadata } from 'next'
+import Script from "next/script";
 
 type Props = {
     params: { page: string }
@@ -21,12 +23,21 @@ export default async function Product({ params }: {
 
     const data = await getPageData(params.page)
 
+    const structuredData = []
+    structuredData.push(organizationStructuredData)
 
     return (
-        <div className="mx-4 py-12 px-4 bg-slate-50 rounded">
-            <h1 className="font-bold text-xl text-center mb-8">{data.pages.data[0].attributes.title}</h1>
-            <div className="lg:mx-20" dangerouslySetInnerHTML={{ __html: data.pages.data[0].attributes.mainText }} />
-        </div>
+        <>
+            <Script
+                id="structured-data"
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+            />
+            <div className="mx-4 py-12 px-4 bg-slate-50 rounded">
+                <h1 className="font-bold text-xl text-center mb-8">{data.pages.data[0].attributes.title}</h1>
+                <div className="lg:mx-20" dangerouslySetInnerHTML={{ __html: data.pages.data[0].attributes.mainText }} />
+            </div>
+        </>
     )
 }
 
@@ -39,7 +50,7 @@ export async function generateMetadata(
     const data = await getPageData(params.page)
 
     let metadata: Metadata = {
-        title: `MagnetMarket-${data.pages.data[0].attributes.title}`,
+        title: `Magnet Market-${data.pages.data[0].attributes.title}`,
         alternates: {
             canonical: `${process.env.NEXT_URL}/pages/${page}`,
         },
