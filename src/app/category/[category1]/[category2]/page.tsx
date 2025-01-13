@@ -115,7 +115,7 @@ export async function generateMetadata(
 
     if (response.categories.data[0].attributes.categories.data.length > 0) {
         const subCatTitles = response.categories.data[0].attributes.categories.data.map(cat => cat.attributes.name)
-        metadata.description = `Η κατηγορία ${response.categories.data[0].attributes.name} περιέχει τις υποκατηγορίες ${subCatTitles.join(',')}`
+        metadata.description = `Μην το ψάχνεις! Εδώ θα βρείς ${response.categories.data[0].attributes.name} ${subCatTitles.join(',')}`
     }
 
     return metadata
