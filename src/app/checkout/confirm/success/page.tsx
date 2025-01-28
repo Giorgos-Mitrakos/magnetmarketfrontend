@@ -93,15 +93,16 @@ export default async function Success() {
       <h1 className="text-xl mb-4 font-semibold text-slate-200 text-center">Αρ. {data.order.data.id}</h1>
       <div className="grid md:grid-cols-4 gap-4">
         {data && data.order.data.attributes.products.map(item => (
-          <div key={item.id} className="grid grid-cols-5 shadow-md rounded-md bg-white">
-            <div className="flex justify-center items-center p-4 col-span-2">
+          <div key={item.id} className="grid grid-cols-5 h-60 shadow-md rounded-md bg-white">
+            <div className="flex relative justify-center items-center p-4 col-span-2">
               {item.image ? <Image
+                className="object-contain py-4 pl-4"
                 key={item.id}
                 src={`${process.env.NEXT_PUBLIC_API_URL}${item.image}`}
                 alt={item.name}
-                height={120}
-                width={120}
-
+                // height={120}
+                // width={120}
+                fill
               /> :
                 <FaRegImage className='h-40 w-40 text-siteColors-purple dark:text-slate-200' />}
             </div>
