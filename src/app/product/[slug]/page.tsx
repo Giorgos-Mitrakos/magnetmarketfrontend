@@ -9,6 +9,7 @@ import { GET_PRODUCT_BY_SLUG, IProductProps } from '@/lib/queries/productQuery';
 import { requestSSR } from '@/repositories/repository';
 import { FaRegImage } from "react-icons/fa";
 import Script from 'next/script'
+import { notFound } from 'next/navigation'
 const ProductInfo = dynamic(() => import("@/components/organisms/productInfo"), {
   ssr: false,
   loading: () => <p>Loading...</p>
@@ -26,9 +27,13 @@ type MetadataProps = {
 
 
 async function getProductData(slug: string) {
-  const data = await requestSSR({
+  const data: IProductProps | any = await requestSSR({
     query: GET_PRODUCT_BY_SLUG, variables: { slug: slug }
   });
+
+  if (data.products.data.length === 0) {
+    notFound();
+  }
 
   return data as IProductProps
 }
