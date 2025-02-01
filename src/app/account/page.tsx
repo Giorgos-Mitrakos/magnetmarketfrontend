@@ -125,18 +125,18 @@ export default function Account() {
 
     return (
         <div className="flex">
-            <ul className=" text-siteColors-purple min-w-fit mr-2 lg:mr-4 bg-slate-100">
+            <ul className=" text-siteColors-purple min-w-fit mr-2 lg:mr-4 bg-slate-100 dark:bg-slate-700 dark:text-slate-200">
                 {state.tabs.map((tab, index) => (
                     <li
-                        className=" border-b-2 border-r-2 p-4 cursor-pointer"
+                        className=" border dark:border-slate-500 p-4 cursor-pointer"
                         key={index}
                         onClick={() => handleTabClick(index)}
                     >
                         <p className=" hidden text-left sm:block">{tab.title}</p>
                         <p className="flex text-2xl sm:hidden text-left">{tab.icon}</p>
                     </li>))}
-                <li className="border p-4 flex flex-col justify-start">
-                    <button className=" text-siteColors-lightblue justify-start" onClick={() => signOut()}>
+                <li className="border dark:border-slate-500 p-4 flex flex-col justify-start">
+                    <button className=" text-siteColors-lightblue dark:text-slate-200 justify-start" onClick={() => signOut()}>
                         <p className=" hidden sm:flex">Sign out</p>
                         <AiOutlineLogout className="sm:hidden text-2xl" />
                     </button>

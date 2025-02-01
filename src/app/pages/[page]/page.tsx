@@ -33,7 +33,7 @@ export default async function Product({ params }: {
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
             />
-            <div className="mx-4 py-12 px-4 bg-slate-50 rounded">
+            <div className="mx-4 py-12 px-4 bg-slate-50 dark:bg-slate-700 rounded">
                 <h1 className="font-bold text-xl text-center mb-8">{data.pages.data[0].attributes.title}</h1>
                 <div className="lg:mx-20" dangerouslySetInnerHTML={{ __html: data.pages.data[0].attributes.mainText }} />
             </div>

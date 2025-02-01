@@ -91,9 +91,9 @@ export default async function Success() {
     <section className="rounded-lg p-4 bg-gradient-to-tr from-siteColors-lightblue via-siteColors-blue to-siteColors-pink">
       <h1 className="text-2xl mb-4 font-semibold text-slate-200 text-center">Ευχαριστούμε για την παραγγελία!</h1>
       <h1 className="text-xl mb-4 font-semibold text-slate-200 text-center">Αρ. {data.order.data.id}</h1>
-      <div className="grid md:grid-cols-4 gap-4">
+      <div className="flex justify-center flex-wrap gap-4">
         {data && data.order.data.attributes.products.map(item => (
-          <div key={item.id} className="grid grid-cols-5 h-60 shadow-md rounded-md bg-white">
+          <div key={item.id} className="grid grid-cols-5 h-60 w-96 shadow-md rounded-md bg-white">
             <div className="flex relative justify-center items-center p-4 col-span-2">
               {item.image ? <Image
                 className="object-contain py-4 pl-4"

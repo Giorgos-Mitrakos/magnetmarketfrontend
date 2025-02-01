@@ -203,6 +203,40 @@ export const GET_HOMEPAGE = gql`
             title
             type
           }
+          ...on ComponentHomepageCategoriesBanner{
+            categories(pagination:{limit:-1}){
+              data{
+                id
+                attributes{
+                  name
+                  slug
+                  parents{
+                    data{
+                      attributes{
+                        slug
+                        parents{
+                          data{
+                            attributes{
+                              slug
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  image{
+                    data{
+                      attributes{
+                        url
+                        alternativeText
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        
         }
       }
     }

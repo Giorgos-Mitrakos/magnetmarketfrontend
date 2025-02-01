@@ -1,7 +1,7 @@
 "use client"
 
 import Addresses, { FormInputRef } from '@/components/organisms/addresses'
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useApiRequest } from '@/repositories/clientRepository';
 import { useSession } from 'next-auth/react';
 import CartAside from '@/components/organisms/cartItemsAside';
@@ -56,20 +56,23 @@ export interface IProfile {
 const CustomerInfo = () => {
     const router = useRouter()
 
+    const [processing, setProcessing] = useState(false)
+
     const { data: session, status } = useSession()
 
-    const { data, loading, error }: { data: IProfile, loading: boolean, error: any } = useApiRequest({method:"GET", api: "/api/user-address/getUser", jwt: `${session?.user?.jwt}` })
+    const { data, loading, error }: { data: IProfile, loading: boolean, error: any } = useApiRequest({ method: "GET", api: "/api/user-address/getUser", jwt: `${session?.user?.jwt}` })
 
     const formikRef = useRef<FormInputRef | null>(null);
 
     const handleNextOnClik = () => {
+        setProcessing(true)
         formikRef.current?.submitForm()
         setTimeout(() => {
             if (formikRef.current?.isSubmitting) {
                 router.push('/checkout/order-informations')
             }
         }, 100);
-
+        setProcessing(false)
     }
 
     return (
@@ -89,18 +92,19 @@ const CustomerInfo = () => {
                     <CartSummary />
                 </div>
                 <button onClick={handleNextOnClik}
-                className="md:row-start-2 md:col-start-2 flex justify-center items-center px-4 py-2 w-full rounded border md:text-slate-100 text-lg font-semibold
+                    className="md:row-start-2 md:col-start-2 flex justify-center items-center px-4 py-2 w-full rounded border md:text-slate-100 text-lg font-semibold
                 bg-gradient-to-b from-siteColors-pink via-siteColors-purple to-siteColors-pink text-white
                 md:bg-gradient-to-br md:from-siteColors-lightblue md:to-siteColors-blue
-                hover:bg-gradient-to-b hover:from-siteColors-pink hover:via-siteColors-purple hover:to-siteColors-pink hover:text-white">Επόμενο</button>
+                hover:bg-gradient-to-b hover:from-siteColors-pink hover:via-siteColors-purple hover:to-siteColors-pink hover:text-white">
+                    {processing ? "Περιμένετε..." : 'Επόμενο'}</button>
 
-        
+
                 {/* <div className='max-w-sm'>
                     <ApplyCoupon />
                 </div> */}
             </div>
 
-            </div>
+        </div>
     )
 }
 

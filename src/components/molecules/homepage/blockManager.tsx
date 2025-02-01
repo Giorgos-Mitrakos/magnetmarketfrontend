@@ -1,3 +1,4 @@
+import CategoriesBanner from "./categoriesBanner";
 import DoubleBanner from "./doubleBanner";
 import HotOrSale from "./hotOrSale";
 import ListProductsBanner from "./listProductsBanner";
@@ -23,6 +24,9 @@ const getBlockComponent = ({ __typename, ...rest }: { __typename: string }, inde
             break;
         case 'ComponentHomepageHotOrSale':
             Block = HotOrSale;
+            break;
+        case 'ComponentHomepageCategoriesBanner':
+            Block = CategoriesBanner;
             break;
     }
 

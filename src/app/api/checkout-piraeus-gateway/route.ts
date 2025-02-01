@@ -30,6 +30,8 @@ export async function POST(request: NextRequest) {
     installments: installments || 1
   })
 
+  console.log("responseGetTrans:", response)
+
   const myHeaders = new Headers();
   myHeaders.append('Content-Type', 'application/json')
 
@@ -52,13 +54,14 @@ export async function POST(request: NextRequest) {
   form.append('User', `${process.env.PEIRAIWS_USERNAME}`)
   form.append('LanguageCode', 'el-GR')
   form.append('MerchantReference', orderId)
-  form.append('ParamBackLink', 'magnetmarket.gr/checkout/confirm')
+  form.append('ParamBackLink', 'magnetmarket.gr/checkout/confirm/success')
 
   // Αποστολή δεδομένων με Fetch API 
-  await fetch('https://paycenter.winbank.gr/redirection/pay/aspx', { method: 'POST', body: form })
-    .then(response => response)
-    .then(data => console.log('Success:', data))
-    .catch(error => console.error('Error:', error));
+  const respone = await fetch('https://paycenter.winbank.gr/redirection/pay/aspx', { method: 'POST', headers: { 'Content-Type': 'application/form-data' }, body: form })
+  // .then(response => response)
+  // .then(data => console.log('Success:', data))
+  // .catch(error => console.error('Error:', error));
+  console.log("response from paycenter:",await respone.text())
 
   // const ticket = await getTransactionTicket({ orderId, amount, installments })
   const ticket = '4236ece6142b4639925eb6f80217122f'
@@ -96,6 +99,6 @@ export async function POST(request: NextRequest) {
 
   const peiraeus = request.nextUrl.searchParams.get('peiraeus')
 
-  redirect('/checkout/confirm')
-  return new Response(`Welcome to my Next application ${peiraeus}`);
+  redirect('/checkout/confirm/success')
+  // return new Response(`Welcome to my Next application ${peiraeus}`);
 }

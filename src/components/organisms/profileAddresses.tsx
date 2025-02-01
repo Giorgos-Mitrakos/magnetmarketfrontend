@@ -304,14 +304,14 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
     return (
         <section>
             <form onSubmit={formik.handleSubmit} className='space-y-8 w-full' >
-                <div className='grid space-y-2 p-4 rounded-lg shadow-md bg-slate-50'>
-                    <h2 className='uppercase font-semibold text-siteColors-blue'>Βασικά στοιχεία</h2>
+                <div className='grid space-y-2 p-4 rounded-lg shadow-md bg-slate-50 dark:bg-slate-700'>
+                    <h2 className='uppercase font-semibold text-siteColors-blue dark:text-slate-200'>Βασικά στοιχεία</h2>
                     <ul className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
                         <li className='grid space-y-1'>
                             <label className='labelForInputForms' htmlFor='username'>username</label>
                             <input
                                 disabled
-                                className='inputForms bg-gray-100'
+                                className='inputForms bg-slate-100 dark:bg-slate-600'
                                 type="text"
                                 id='username'
                                 name='username'
@@ -324,7 +324,7 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                             <label className='labelForInputForms' htmlFor='email'>Email</label>
                             <input
                                 disabled
-                                className='inputForms bg-gray-100'
+                                className='inputForms bg-slate-100 dark:bg-slate-600'
                                 type="email"
                                 id='email'
                                 name='email'
@@ -336,8 +336,8 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                         </li>
                     </ul>
                 </div>
-                <div className=" p-4 bg-slate-50 rounded-lg shadow-md">
-                    <h3 className='font-medium mt-8 mb-4 border-b text-left text-siteColors-purple'>Τύπος παραστατικού</h3>
+                <div className=" p-4 bg-slate-50 rounded-lg shadow-md  dark:bg-slate-700">
+                    <h3 className='font-medium mt-8 mb-4 border-b text-left text-siteColors-purple dark:text-slate-200'>Τύπος παραστατικού</h3>
                     <div className="flex gap-2 items-center">
                         <input type="radio" id="receipt" name="isInvoice" onChange={formik.handleChange}
                             className="w-4 h-4 border-2 border-blue-500 rounded-full" value="false"
@@ -352,9 +352,9 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                     </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-8">
-                    <ul className=" p-4 bg-slate-50 rounded-lg shadow-md">
+                    <ul className=" p-4 bg-slate-50 rounded-lg shadow-md dark:bg-slate-700">
                         <li>
-                            <h3 className='font-medium mt-8 mb-6 border-b text-siteColors-purple'>Διεύθυνση Χρέωσης</h3>
+                            <h3 className='font-medium mt-8 mb-6 border-b text-siteColors-purple dark:text-slate-200'>Διεύθυνση Χρέωσης</h3>
                             <ul className="space-y-4  p-4">
                                 {formik.values.isInvoice === "true" ?
                                     <>
@@ -479,11 +479,11 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                     <div>
                                         {!loading && <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
                                             <label htmlFor="country"
-                                                className="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent dark:bg-gray-900 px-2 
+                                                className="absolute text-sm text-gray-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
                                     peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
                                      peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Χώρα*</label>
                                             <select
-                                                className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
+                                                className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-slate-600 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
                                                 id='country'
                                                 name='country'
                                                 onChange={(e) => {
@@ -506,11 +506,11 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                     <div>
                                         <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
                                             <label htmlFor="state"
-                                                className="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent dark:bg-gray-900 px-2 
+                                                className="absolute text-sm text-gray-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
                                     peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
                                      peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Νομός*</label>
                                             <select
-                                                className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
+                                                className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-slate-600 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
                                                 id='state'
                                                 name='state'
                                                 onChange={(e) => {
@@ -534,11 +534,11 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                     <div>
                                         <div className="relative rounded-lg border border-1 border-gray-300  bg-white appearance-none">
                                             <label htmlFor="city"
-                                                className="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent dark:bg-gray-900 px-2 
+                                                className="absolute text-sm text-gray-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
                                     peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
                                      peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Πόλη*</label>
                                             <select
-                                                className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
+                                                className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-slate-600 dark:border-slate-600 dark:placeholder-slate-200 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
                                                 id='city'
                                                 name='city'
                                                 onChange={(e) => {
@@ -560,7 +560,7 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                     <div>
                                         <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
                                             <label htmlFor="zipCode"
-                                                className="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent dark:bg-gray-900 px-2 
+                                                className="absolute text-sm text-gray-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent  px-2 
                                     peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
                                      peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Τ.Κ*</label>
                                             <input
@@ -570,7 +570,7 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                                 id='zipCode'
                                                 name="zipCode"
                                                 list="postals-list"
-                                                className="block px-2.5 py-2.5 w-full text-sm text-gray-900 bg-transparent focus:outline-none focus:ring-0 peer focus:ring-blue-500 focus:border-blue-500" />
+                                                className="block px-2.5 py-2.5 w-full text-sm text-gray-900 dark:text-slate-200 dark:bg-slate-600 bg-transparent rounded-md focus:outline-none focus:ring-0 peer focus:ring-blue-500 focus:border-blue-500" />
                                             {!loadingPostals && postals !== undefined &&
                                                 <datalist id="postals-list">
                                                     {postals?.regions?.data[0]?.attributes.postal_codes.data.map(postal => (
@@ -622,13 +622,13 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                         <li>
                             <div className='flex my-4'>
                                 <input type='checkbox' id='different_shipping' name='different_shipping' checked={formik.values.different_shipping} onChange={formik.handleChange} />
-                                <label htmlFor='different_shipping' className="text-sm text-siteColors-purple ml-1">Θέλω να παραλάβω σε άλλη διεύθυνση.</label>
+                                <label htmlFor='different_shipping' className="text-sm text-siteColors-purple dark:text-slate-200 ml-1">Θέλω να παραλάβω σε άλλη διεύθυνση.</label>
                             </div>
                         </li>
                     </ul>
                     {formik.values.different_shipping &&
-                        <div className=" p-4 bg-slate-50 rounded-lg shadow-md">
-                            <h3 className='font-medium mt-8 mb-6 border-b text-siteColors-purple'>Διεύθυνση Αποστολής</h3>
+                        <div className=" p-4 bg-slate-50 dark:bg-slate-700 rounded-lg shadow-md">
+                            <h3 className='font-medium mt-8 mb-6 border-b text-siteColors-purple dark:text-slate-200'>Διεύθυνση Αποστολής</h3>
                             <ul className="space-y-4 p-4">
                                 <li className="grid sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
                                     <div>
@@ -684,11 +684,11 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                     <div>
                                         {!loading && <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
                                             <label htmlFor="ship_country"
-                                                className="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent dark:bg-gray-900 px-2 
+                                                className="absolute text-sm text-gray-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
                                     peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
                                      peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Χώρα*</label>
                                             <select
-                                                className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
+                                                className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-slate-600 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
                                                 id='ship_country'
                                                 name='ship_country'
                                                 onChange={formik.handleChange}
@@ -707,11 +707,11 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                     <div>
                                         <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
                                             <label htmlFor="ship_state"
-                                                className="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent dark:bg-gray-900 px-2 
+                                                className="absolute text-sm text-gray-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
                                     peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
                                      peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Νομός*</label>
                                             <select
-                                                className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
+                                                className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-slate-600 dark:border-gray-600 dark:placeholder-slate-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
                                                 id='ship_state'
                                                 name='ship_state'
                                                 onChange={formik.handleChange}
@@ -731,11 +731,11 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                     <div>
                                         <div className="relative rounded-lg border border-1 border-gray-300  bg-white appearance-none">
                                             <label htmlFor="ship_city"
-                                                className="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent dark:bg-gray-900 px-2 
+                                                className="absolute text-sm text-gray-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
                                     peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
                                      peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Πόλη*</label>
                                             <select
-                                                className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
+                                                className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-slate-600 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
                                                 id='ship_city'
                                                 name='ship_city'
                                                 onChange={formik.handleChange}
@@ -753,7 +753,7 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                     <div>
                                         <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
                                             <label htmlFor="ship_zipCode"
-                                                className="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent dark:bg-gray-900 px-2 
+                                                className="absolute text-sm text-gray-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparentpx-2 
                                     peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
                                      peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Τ.Κ*</label>
                                             <input
@@ -763,7 +763,7 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                                 id='ship_zipCode'
                                                 name="ship_zipCode"
                                                 list="ship-postals-list"
-                                                className="block px-2.5 py-2.5 w-full text-sm text-gray-900 bg-transparent focus:outline-none focus:ring-0 peer focus:ring-blue-500 focus:border-blue-500" />
+                                                className="block px-2.5 py-2.5 w-full text-sm text-gray-900 dark:bg-slate-600 rounded-md focus:outline-none focus:ring-0 peer focus:ring-blue-500 focus:border-blue-500" />
                                             {!loadingShipPostals && shipPostals !== undefined &&
                                                 <datalist id="ship-postals-list">
                                                     {shipPostals?.regions?.data[0]?.attributes.postal_codes.data.map(postal => (

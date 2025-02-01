@@ -27,9 +27,9 @@ const Αnnouncement = async () => {
         return null
 
     return (
-        <h1 className="p-4 bg-blue-100 dark:bg-sky-600 shadow-xl rounded-b-xl">
+        <h3 className="p-4 bg-blue-100 dark:bg-sky-600 shadow-xl rounded-b-xl">
             {announcement && announcement.announcement.data?.attributes.text}
-        </h1>
+        </h3>
     )
 }
 

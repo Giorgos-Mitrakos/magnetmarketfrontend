@@ -83,9 +83,13 @@ const Accordion = ({ order }: { order: IOrder }) => {
     const [open, setOpen] = useState(false)
     const time = new Date(order.createdAt);
 
+    const productsCost = order.products.reduce((total, item) => {
+        return total + item.price * item.quantity
+    }, 0)
+
     return (
         <div className="my-2">
-            <div className="flex  lg:grid lg:grid-cols-6 text-sm lg:text-base justify-between border-2 bg-slate-100 items-center hover:cursor-pointer" onClick={() => setOpen(!open)} >
+            <div className="flex  lg:grid lg:grid-cols-6 text-sm lg:text-base justify-between border-2 bg-slate-100 dark:bg-slate-700 items-center hover:cursor-pointer" onClick={() => setOpen(!open)} >
                 <p className="p-4">{open ? <FaCaretUp /> : <FaCaretDown />}</p>
                 <p className="grid">
                     <span className="lg:hidden font-semibold">Ημ/νία</span>
@@ -170,12 +174,30 @@ const Accordion = ({ order }: { order: IOrder }) => {
                                     <p className="">{product.sale_price ? product.sale_price : product.price} €</p>
                                 </li>
                             ))}
-                            <div className="text-right m-4 font-semibold">
-                                Σύνολο: {order.total} €
-                            </div>
                         </ul>
                     </div>
-
+                    <div className="flex justify-end col-span-3 text-right m-4 font-semibold">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>Υποσύνολο:</td>
+                                    <td className="pl-4">{productsCost} €</td>
+                                </tr>
+                                <tr>
+                                    <td>{order.shipping.name}:</td>
+                                    <td className="pl-4">{order.shipping.cost} €</td>
+                                </tr>
+                                <tr>
+                                    <td>{order.payment.name}:</td>
+                                    <td className="pl-4">{order.payment.cost} €</td>
+                                </tr>
+                                <tr>
+                                    <td>Σύνολο:</td>
+                                    <td className="pl-4">{order.total} €</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>}
         </div>
@@ -188,7 +210,7 @@ const UserOrders = ({ jwt }: { jwt: string }) => {
 
     return (
         <div className="space-y-4">
-            <h2 className="mb-4 text-xl text-siteColors-blue font-bold">Οι παραγγελίες μου</h2>
+            <h2 className="mb-4 text-xl text-siteColors-blue font-bold dark:text-slate-200">Οι παραγγελίες μου</h2>
             {loading && !data ? <div>Loading</div> :
                 <div>
                     <div className="hidden lg:grid lg:grid-cols-6 w-full font-semibold mb-2">

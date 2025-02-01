@@ -7,9 +7,6 @@ import { useFormik } from "formik";
 import { BuiltInProviderType } from 'next-auth/providers'
 import CustomInput from '@/components/atoms/input'
 import { useSearchParams } from 'next/navigation'
-import { organizationStructuredData } from '@/lib/helpers/structureData';
-import Script from 'next/script';
-import { Metadata } from 'next';
 
 
 export interface ILoginData {
@@ -92,86 +89,74 @@ export default function RegisterComp() {
         }
     });
 
-    const structuredData = []
-    structuredData.push(organizationStructuredData)
-
     return (
-        <>
-            <Script
-                id="structured-data"
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-            />
-            <div className='grid lg:grid-cols-3 gap-4 mt-4 justify-center'>
-                <div className='w-full h-full'>
-                    <div className='flex mb-2 text-xl sm:text-2xl md:text-3xl px-2 font-semibold justify-around'>
-                        <Link href='/login' className=' text-slate-500'>
-                            <h2>Είσοδος</h2>
-                        </Link>
-                        <Link href='/register'>
-                            <h2>Εγγραφή</h2>
+        <div className='grid lg:grid-cols-3 gap-4 mt-4'>
+            <div className='w-full'>
+                <form className='grid gap-4 p-4 md:border-2 dark:bg-slate-800 mx-auto rounded-md shadow-sm'
+                    onSubmit={formik.handleSubmit}>
+                    <h2 className='text-center text-xl font-medium'>Εγγραφείτε</h2>
+                    <div className='h-14'>
+                        <div className="flex relative rounded-lg border border-1 border-gray-300 appearance-none">
+                            <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
+                            <CustomInput
+                                aria_label="Φόρμα εισαγωγής Email"
+                                type="email"
+                                id='email'
+                                name='email'
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                value={formik.values.email}
+                                label="Email" />
+                        </div>
+                        {formik.touched.email && formik.errors.email ?
+                            <p className='formError text-sm text-red-600'>{formik.errors.email}</p>
+                            : null}
+                    </div>
+                    <div className='h-14'>
+                        <div className="flex relative rounded-lg border border-1 border-gray-300 appearance-none">
+                            <CustomInput
+                                aria_label="Φόρμα εισαγωγής Κωδικού"
+                                type={toggle ? "text" : "password"}
+                                id='password'
+                                name='password'
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                value={formik.values.password}
+                                label="Κωδικός" />
+                        </div>
+                        {formik.touched.password && formik.errors.password ?
+                            <p className='formError  text-sm text-red-600'>{formik.errors.password}</p>
+                            : null}
+                    </div>
+                    <div className='h-14'>
+                        <div className="flex relative rounded-lg border border-1 border-gray-300 appearance-none">
+                            <CustomInput
+                                aria_label="Φόρμα εισαγωγής Κωδικού"
+                                type={toggle ? "text" : "password"}
+                                id='confirmPassword'
+                                name='confirmPassword'
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                value={formik.values.confirmPassword}
+                                label="Επιβεβαίωση κωδικού" />
+                        </div>
+                        {formik.touched.confirmPassword && formik.errors.confirmPassword ?
+                            <p className='formError  text-sm text-red-600'>{formik.errors.confirmPassword}</p>
+                            : null}
+                    </div>
+                    <div>
+                        <Link href="/login" className=' text-sm text-center'>
+                            Είσοδος;
                         </Link>
                     </div>
-                    <form className='grid gap-4 w-full p-4 md:border-2 dark:bg-slate-800 mx-auto rounded-md shadow-sm'
-                        onSubmit={formik.handleSubmit}>
-                        <h2 className='text-center text-xl font-medium'>Εγγραφείτε</h2>
-                        <div className='h-14'>
-                            <div className="flex relative rounded-lg border border-1 border-gray-300 appearance-none">
-                                <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
-                                <CustomInput
-                                    aria_label="Φόρμα εισαγωγής Email"
-                                    type="email"
-                                    id='email'
-                                    name='email'
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
-                                    value={formik.values.email}
-                                    label="Email" />
-                            </div>
-                            {formik.touched.email && formik.errors.email ?
-                                <p className='formError text-sm text-red-600'>{formik.errors.email}</p>
-                                : null}
-                        </div>
-                        <div className='h-14'>
-                            <div className="flex relative rounded-lg border border-1 border-gray-300 appearance-none">
-                                <CustomInput
-                                    aria_label="Φόρμα εισαγωγής Κωδικού"
-                                    type={toggle ? "text" : "password"}
-                                    id='password'
-                                    name='password'
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
-                                    value={formik.values.password}
-                                    label="Κωδικός" />
-                            </div>
-                            {formik.touched.password && formik.errors.password ?
-                                <p className='formError  text-sm text-red-600'>{formik.errors.password}</p>
-                                : null}
-                        </div>
-                        <div className='h-14'>
-                            <div className="flex relative rounded-lg border border-1 border-gray-300 appearance-none">
-                                <CustomInput
-                                    aria_label="Φόρμα εισαγωγής Κωδικού"
-                                    type={toggle ? "text" : "password"}
-                                    id='confirmPassword'
-                                    name='confirmPassword'
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
-                                    value={formik.values.confirmPassword}
-                                    label="Επιβεβαίωση κωδικού" />
-                            </div>
-                            {formik.touched.confirmPassword && formik.errors.confirmPassword ?
-                                <p className='formError  text-sm text-red-600'>{formik.errors.confirmPassword}</p>
-                                : null}
-                        </div>
-                        <button
-                            type='submit'
-                            className='text-white rounded tracking-wide text-lg font-semibold h-12 bg-gradient-to-br from-siteColors-blue via-siteColors-lightblue to-siteColors-purple hover:bg-gradient-to-tl'>
-                            Εγγραφή
-                        </button>
-                    </form>
-                </div>
-                <div className='w-full h-full'>
+                    <button
+                        type='submit'
+                        className='text-white rounded tracking-wide text-lg font-semibold h-12 bg-gradient-to-br from-siteColors-blue via-siteColors-lightblue to-siteColors-purple hover:bg-gradient-to-tl'>
+                        Εγγραφή
+                    </button>
+                </form>
+            </div>
+            {/* <div className='w-full h-full'>
                     <div className='flex flex-col w-full h-full text-xl sm:text-2xl md:text-3xl px-2 font-semibold'>
                         <h2 className='text-slate-800 dark:text-slate-200 text-center mb-4'>Σύνδεση Μέσω Social</h2>
                         <div className='w-full h-full p-4 border border-slate-200 rounded-lg '>
@@ -187,8 +172,7 @@ export default function RegisterComp() {
                             ))}
                         </div>
                     </div>
-                </div>
-            </div>
-        </>
+                </div> */}
+        </div>
     )
 }

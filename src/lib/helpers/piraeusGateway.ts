@@ -27,13 +27,22 @@ export async function getTransactionTicket({ orderId, amount, installments }: { 
         })
     };
 
-    // const response = await fetch('https://paycenter.piraeusbank.gr/services/tickets/issuer.asmx',
-    //     myInit
-    // )
+    try {
+        const response = await fetch('https://paycenter.piraeusbank.gr/services/tickets/issuer.asmx',
+            myInit
+        )
 
-    // const data=await response.json()
+        // console.log("response:", response)
 
-    // console.log("response:", response)
+    const data=await response.text()
+
+    console.log("dataTicket:", data)
+    } catch (error) {
+        console.log(error)
+    }
+    
+
+    
 
     const responseData = {
         ResultCode: '0',

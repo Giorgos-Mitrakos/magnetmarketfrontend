@@ -5,7 +5,7 @@ import PaymentMethods, { PaymentMethodsRef } from "@/components/molecules/paymen
 import ShippingMethods, { ShippingMethodsRef } from "@/components/molecules/shippingMethods"
 import CartAside from "@/components/organisms/cartItemsAside"
 import { useRouter } from "next/navigation"
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import { toast } from "sonner"
 
 const OrderInfo = () => {
@@ -13,9 +13,10 @@ const OrderInfo = () => {
 
     const shippingRef = useRef<ShippingMethodsRef | null>(null);
     const paymentRef = useRef<PaymentMethodsRef | null>(null);
+        const [processing, setProcessing] = useState(false)
 
     const handleConfirmClick = () => {
-
+        setProcessing(true)
         shippingRef.current?.submitForm()
         paymentRef.current?.submitForm()
         setTimeout(() => {
@@ -34,6 +35,8 @@ const OrderInfo = () => {
                     })
             }
         }, 300);
+
+        setProcessing(false)
     }
 
     return (
@@ -59,7 +62,8 @@ const OrderInfo = () => {
                 className="md:row-start-2 md:col-start-2 flex justify-center items-center px-4 py-2 w-full rounded border md:text-slate-100 text-lg font-semibold
                 bg-gradient-to-b from-siteColors-pink via-siteColors-purple to-siteColors-pink text-white
                 md:bg-gradient-to-br md:from-siteColors-lightblue md:to-siteColors-blue
-                hover:bg-gradient-to-b hover:from-siteColors-pink hover:via-siteColors-purple hover:to-siteColors-pink hover:text-white">Επιβεβαίωση</button>
+                hover:bg-gradient-to-b hover:from-siteColors-pink hover:via-siteColors-purple hover:to-siteColors-pink hover:text-white">
+                    {processing?"Περιμένετε...":'Επιβεβαίωση'}</button>
         </div>
     )
 }
