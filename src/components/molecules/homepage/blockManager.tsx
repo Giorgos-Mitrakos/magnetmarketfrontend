@@ -1,3 +1,4 @@
+import BrandsBanner from "./brandsBanner";
 import CategoriesBanner from "./categoriesBanner";
 import DoubleBanner from "./doubleBanner";
 import HotOrSale from "./hotOrSale";
@@ -28,13 +29,16 @@ const getBlockComponent = ({ __typename, ...rest }: { __typename: string }, inde
         case 'ComponentHomepageCategoriesBanner':
             Block = CategoriesBanner;
             break;
+        case 'ComponentHomepageBrandsBanner':
+            Block = BrandsBanner;
+            break;
     }
 
     return Block ? <Block key={`index-${index}`} id={`index-${index}`} {...rest} /> : null;
 };
 
 const BlockManager = ({ blocks }: any) => {
-    return <div className="space-y-16">
+    return <div className="space-y-16 max-w-full">
         {blocks.map(getBlockComponent)}
     </div>;
 };

@@ -236,7 +236,27 @@ export const GET_HOMEPAGE = gql`
               }
             }
           }
-        
+          ...on ComponentHomepageBrandsBanner{
+            id
+            brands{
+              data{
+                id
+                attributes{
+                  name
+                  slug
+                  logo{
+                    data{
+                      attributes{
+                        name
+                        alternativeText
+                        url
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
