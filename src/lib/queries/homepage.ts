@@ -238,7 +238,7 @@ export const GET_HOMEPAGE = gql`
           }
           ...on ComponentHomepageBrandsBanner{
             id
-            brands{
+            brands(pagination:{limit:-1}){
               data{
                 id
                 attributes{
