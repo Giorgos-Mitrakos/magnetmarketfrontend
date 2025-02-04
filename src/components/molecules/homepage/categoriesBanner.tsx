@@ -63,7 +63,7 @@ const CategoriesBanner = ({ id,
             <div className="flex overflow-x-auto space-x-4 rounded-md">
                 {categories.data && categories.data.length > 0 &&
                     categories.data.map(cat => (
-                        <Link key={cat.id} href={cat.attributes.link} className="w-40">
+                        <Link key={cat.id} href={cat.attributes.link} className="w-40 pb-8">
                             <div className="flex flex-col justify-end items-center ">
                                 <p className="flex rounded-full p-8 w-36 h-36 bg-white border-4 border-siteColors-pink ">
                                     {cat.attributes.image.data ?
