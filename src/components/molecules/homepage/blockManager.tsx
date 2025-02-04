@@ -38,7 +38,7 @@ const getBlockComponent = ({ __typename, ...rest }: { __typename: string }, inde
 };
 
 const BlockManager = ({ blocks }: any) => {
-    return <div className="space-y-16 max-w-full">
+    return <div className="space-y-16 w-full">
         {blocks.map(getBlockComponent)}
     </div>;
 };

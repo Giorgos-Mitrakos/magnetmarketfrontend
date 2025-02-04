@@ -53,7 +53,7 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <main className="w-full grid space-y-16">
+      <main className="w-full space-y-16">
         <HeroBanners carousel={data.homepage.data.attributes.Carousel} fixed_hero_banners={data.homepage.data.attributes.fixed_hero_banners} />
         <SiteFeatures />
         {/* <ListProductsBanner props={data.homepage.data.attributes.body[0]} /> */}

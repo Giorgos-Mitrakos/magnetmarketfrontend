@@ -10,6 +10,7 @@ import { requestSSR } from '@/repositories/repository';
 import { FaRegImage } from "react-icons/fa";
 import Script from 'next/script'
 import { notFound } from 'next/navigation'
+import { url } from "inspector";
 const ProductInfo = dynamic(() => import("@/components/organisms/productInfo"), {
   ssr: false,
   loading: () => <p>Loading...</p>
@@ -84,6 +85,7 @@ export default async function Product({ params }:
   if (product.attributes.is_sale && product.attributes.sale_price) {
     structuredDataPrice = {
       "@type": "Offer",
+      url: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
       availability: "https://schema.org/InStock",
       itemCondition: 'https://schema.org/NewCondition',
       price: product.attributes.sale_price,
@@ -120,6 +122,15 @@ export default async function Product({ params }:
             "unitCode": "DAY"
           }
         }
+      },
+      "hasMerchantReturnPolicy": {
+        "@type": "MerchantReturnPolicy",
+        "applicableCountry": "GR",
+        "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+        "merchantReturnDays": 14,
+        "merchantReturnLink": `${process.env.NEXT_URL}pages/politiki-epistrofon`,
+        "returnMethod": "https://schema.org/ReturnByMail",
+        "returnFees": "https://schema.org/FreeReturn"
       }
     }
   }

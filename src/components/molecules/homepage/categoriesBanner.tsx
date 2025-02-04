@@ -59,15 +59,15 @@ const CategoriesBanner = ({ id,
 
     return (
         <section key={id} className="w-full pb-16 hidden md:block" >
-            <h2 className="text-center text-siteColors-purple xs:text-2xl md:text-3xl font-bold rounded">Κατηγορίες</h2>
-            <div className="flex flex-wrap justify-start rounded-md">
+            <h2 className="text-center mb-8 text-siteColors-purple xs:text-2xl md:text-3xl font-bold rounded">Κατηγορίες</h2>
+            <div className="flex overflow-x-auto space-x-4 rounded-md">
                 {categories.data && categories.data.length > 0 &&
                     categories.data.map(cat => (
-                        <Link key={cat.id} href={cat.attributes.link} className="w-40 mt-4">
-                            <div className="flex flex-col h-full justify-end items-center ">
+                        <Link key={cat.id} href={cat.attributes.link} className="w-40">
+                            <div className="flex flex-col justify-end items-center ">
                                 <p className="flex rounded-full p-8 w-36 h-36 bg-white border-4 border-siteColors-pink ">
                                     {cat.attributes.image.data ?
-                                        <NextImage media={cat.attributes.image.data.attributes} width={240} height={240} />
+                                        <NextImage media={cat.attributes.image.data.attributes} width={144} height={144} />
                                         : <FaRegImage className="w-16 h-16 self-center" />}
                                 </p>
                             </div>
