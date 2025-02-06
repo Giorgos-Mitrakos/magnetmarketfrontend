@@ -14,14 +14,14 @@ query getProductsSitemap{
 `
 
 export interface IProductsSitemapProps {
-    products: {
-        data: {
-            attributes: {
-                slug: string
-                updatedAt: Date
-            }
-        }[]
-    }
+  products: {
+    data: {
+      attributes: {
+        slug: string
+        updatedAt: Date
+      }
+    }[]
+  }
 }
 
 export const GET_CATEGORIES_SITEMAP = gql`
@@ -56,33 +56,33 @@ export const GET_CATEGORIES_SITEMAP = gql`
 }`
 
 export interface IcategoriesSiteMapProps {
-    categories: {
-        data: [{
+  categories: {
+    data: [{
+      attributes: {
+        name: string
+        slug: string
+        updatedAt: Date
+        categories: {
+          data: [{
             attributes: {
-                name: string
-                slug: string
-                updatedAt: Date
-                categories: {
-                    data: [{
-                        attributes: {
-                            name: string
-                            slug: string
-                            updatedAt: Date
-                            categories: {
-                                data: [{
-                                    attributes: {
-                                        name: string
-                                        slug: string
-                                        updatedAt: Date
-                                    }
-                                }]
-                            }
-                        }
-                    }]
-                }
+              name: string
+              slug: string
+              updatedAt: Date
+              categories: {
+                data: [{
+                  attributes: {
+                    name: string
+                    slug: string
+                    updatedAt: Date
+                  }
+                }]
+              }
             }
-        }]
-    }
+          }]
+        }
+      }
+    }]
+  }
 }
 
 export const GET_PAGES_SITEMAP = gql`
@@ -99,12 +99,46 @@ query getPagesSitemap{
 `
 
 export interface IPagesSitemapProps {
-    pages: {
-        data: {
-            attributes: {
-                titleSlug: string
-                updatedAt: Date
-            }
-        }[]
+  pages: {
+    data: {
+      attributes: {
+        titleSlug: string
+        updatedAt: Date
+      }
+    }[]
+  }
+}
+
+export const GET_BRANDS_SITEMAP = gql`
+query getBrandsSitemap{
+    brands(pagination:{limit:-1}){
+    data{
+      attributes{
+        name
+        updatedAt
+        products{
+          data{
+            id
+          }
+        }
+      }
     }
+  }
+}
+`
+
+export interface IBrandsSitemapProps {
+  brands: {
+    data: {
+      attributes: {
+        name: string
+        updatedAt: Date
+        products: {
+          data: {
+            id: number
+          }[]
+        }
+      }
+    }[]
+  }
 }

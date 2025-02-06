@@ -1,4 +1,4 @@
-import { GET_CATEGORIES_SITEMAP, GET_PAGES_SITEMAP, GET_PRODUCTS_SITEMAP, IcategoriesSiteMapProps, IPagesSitemapProps, IProductsSitemapProps } from '@/lib/queries/sitemapQueries';
+import { GET_BRANDS_SITEMAP, GET_CATEGORIES_SITEMAP, GET_PAGES_SITEMAP, GET_PRODUCTS_SITEMAP, IBrandsSitemapProps, IcategoriesSiteMapProps, IPagesSitemapProps, IProductsSitemapProps } from '@/lib/queries/sitemapQueries';
 import { requestSSR } from '@/repositories/repository';
 import { MetadataRoute } from 'next'
 
@@ -26,12 +26,21 @@ async function getPages() {
     return data as IPagesSitemapProps
 }
 
+async function getBrands() {
+    const data = await requestSSR({
+        query: GET_BRANDS_SITEMAP
+    });
+
+    return data as IBrandsSitemapProps
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
 
     const products = await getProducts()
     const categories = await getCategories()
     const pages = await getPages()
+    const brands = await getBrands()
 
     const sitemapArray: MetadataRoute.Sitemap = [{
         url: `${process.env.NEXT_URL}`,
@@ -40,49 +49,43 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
     },
     {
-        url: `${process.env.NEXT_URL}account`,
+        url: `${process.env.NEXT_URL}/account`,
         // lastModified: new Date(),
         changeFrequency: 'yearly',
         priority: 0.1,
     },
     {
-        url: `${process.env.NEXT_URL}checkout/confirm`,
+        url: `${process.env.NEXT_URL}/checkout/confirm`,
         // lastModified: new Date(),
         changeFrequency: 'yearly',
         priority: 0.1,
     },
     {
-        url: `${process.env.NEXT_URL}checkout/customer-informations`,
+        url: `${process.env.NEXT_URL}/checkout/customer-informations`,
         // lastModified: new Date(),
         changeFrequency: 'yearly',
         priority: 0.1,
     },
     {
-        url: `${process.env.NEXT_URL}checkout/order-informations`,
+        url: `${process.env.NEXT_URL}/checkout/order-informations`,
         // lastModified: new Date(),
         changeFrequency: 'yearly',
         priority: 0.1,
     },
     {
-        url: `${process.env.NEXT_URL}login`,
+        url: `${process.env.NEXT_URL}/login`,
         // lastModified: new Date(),
         changeFrequency: 'yearly',
         priority: 0.1,
     },
     {
-        url: `${process.env.NEXT_URL}register`,
+        url: `${process.env.NEXT_URL}/register`,
         // lastModified: new Date(),
         changeFrequency: 'yearly',
         priority: 0.1,
     },
     {
-        url: `${process.env.NEXT_URL}search`,
-        // lastModified: new Date(),
-        changeFrequency: 'yearly',
-        priority: 0.1,
-    },
-    {
-        url: `${process.env.NEXT_URL}shopping-cart`,
+        url: `${process.env.NEXT_URL}/shopping-cart`,
         // lastModified: new Date(),
         changeFrequency: 'yearly',
         priority: 0.1,
@@ -118,6 +121,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }
     })
 
+    const brandsSitemap: MetadataRoute.Sitemap = brands.brands.data.filter(x => x.attributes.products.data.length > 0).map(brand => ({
+        url: `${process.env.NEXT_URL}/search?search=${brand.attributes.name}`,
+        lastModified: brand.attributes.updatedAt.toString(),
+        changeFrequency: "daily",
+        priority: 0.6,
+    }))
+
     const pagesSitemap: MetadataRoute.Sitemap = pages.pages.data.map(page => ({
         url: `${process.env.NEXT_URL}pages/${page.attributes.titleSlug}`,
         lastModified: page.attributes.updatedAt.toString(),
@@ -132,7 +142,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 1,
     }))
 
-
+    sitemapArray.push(...brandsSitemap)
     sitemapArray.push(...pagesSitemap)
     sitemapArray.push(...categoriesSitemap)
     sitemapArray.push(...productsSitemap)
