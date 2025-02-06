@@ -50,7 +50,15 @@ query getOrder($id:ID!){
         billing_address
         different_shipping
         shipping_address
-        installments        
+        installments
+        payment {
+          name
+          cost
+        }
+        shipping{
+          name
+          cost
+        }       
       }
     }
   }

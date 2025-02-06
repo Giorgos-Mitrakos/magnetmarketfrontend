@@ -33,13 +33,13 @@ body {
   /* Track */
   ::-webkit-scrollbar-track {
     box-shadow: inset 0 0 5px rgb(208, 202, 192);
-    border-radius: 10px;
+    border-radius: 5px;
   }
 
   /* Handle */
   ::-webkit-scrollbar-thumb {
     background: grey;
-    border-radius: 10px;
+    border-radius: 5px;
   }
 }
 
@@ -49,12 +49,35 @@ body {
     scrollbar-color: gray rgb(208, 202, 192);
     scrollbar-width: thin;
   }
+
+  .scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar::-webkit-scrollbar-track {
+    border-radius: 100vh;
+    background: #eeedf7;
+    width: 10px;
+    height: 10px;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb {
+    background: #9b9fa9;
+    border-radius: 100vh;
+    border: 2px solid #edf1f7;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #246eb5;
+  }
 }
 
 @layer components {
   .labelForInputForms {
     @apply text-sm font-semibold text-left;
   }
+
   .inputForms {
     @apply border rounded-lg focus:ring-2 focus:outline-none p-2 w-full;
   }

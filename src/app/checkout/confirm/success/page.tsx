@@ -1,4 +1,5 @@
 
+import Banks from "@/components/atoms/banks";
 import { getCookies } from "@/lib/helpers/actions"
 import { GET_ORDER } from "@/lib/queries/shippingQuery";
 import { requestSSR } from "@/repositories/repository";
@@ -65,7 +66,15 @@ interface IOrder {
           telephone: string,
           mobilePhone: string,
         },
-        installments: number
+        installments: number,
+        payment: {
+          name: string;
+          cost: number;
+        },
+        shipping: {
+          name: string;
+          cost: number;
+        }
       },
     }
   }
@@ -90,7 +99,7 @@ export default async function Success() {
   return (
     <section className="rounded-lg p-4 bg-gradient-to-tr from-siteColors-lightblue via-siteColors-blue to-siteColors-pink">
       <h1 className="text-2xl mb-4 font-semibold text-slate-200 text-center">Ευχαριστούμε για την παραγγελία!</h1>
-      <h1 className="text-xl mb-4 font-semibold text-slate-200 text-center">Αρ. {data.order.data.id}</h1>
+      <h2 className="text-xl mb-4 font-semibold text-slate-200 text-center">Αρ. {data.order.data.id}</h2>
       <div className="flex justify-center flex-wrap gap-4">
         {data && data.order.data.attributes.products.map(item => (
           <div key={item.id} className="grid grid-cols-5 h-60 w-96 shadow-md rounded-md bg-white">
@@ -124,14 +133,26 @@ export default async function Success() {
       </div>
       <div className="rounded-lg shadow-md p-4 mt-4 text-gray-500 bg-white">
         <div className="flex space-x-4">
+          <h3>Τρόπος Πληρωμής:</h3>
+          <p>{data.order.data.attributes.payment.name}</p>
+        </div>
+        <div className="flex space-x-4">
+          <h3>Τρόπος Αποστολής:</h3>
+          <p>{data.order.data.attributes.shipping.name}</p>
+        </div>
+        <div className="flex space-x-4">
           <h3>Πιθανή ημ/νια παράδοσης:</h3>
           <p>{earlyDeviveryDate.toLocaleDateString()} - {lateDeviveryDate.toLocaleDateString()}</p>
         </div>
         <div className="flex space-x-4">
-          <h3>Πληρωμή:</h3>
+          <h3>Σύνολο:</h3>
           <p>{data.order.data.attributes.total.toFixed(2)} €</p>
         </div>
       </div>
+      {data.order.data.attributes.payment.name === "Τραπεζική κατάθεση" && <div className="rounded-lg shadow-md p-4 mt-4 text-gray-500 bg-white">
+        <h2 className="text-xl mb-4 font-semibold text-siteColors-purple text-center">Τραπεζικοί Λογαριασμοί</h2>
+        <Banks />
+      </div>}
     </section>
   )
 

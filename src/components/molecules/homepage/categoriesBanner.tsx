@@ -60,7 +60,7 @@ const CategoriesBanner = ({ id,
     return (
         <section key={id} className="w-full pb-16 hidden md:block" >
             <h2 className="text-center mb-8 text-siteColors-purple xs:text-2xl md:text-3xl font-bold rounded">Κατηγορίες</h2>
-            <div className="flex overflow-x-auto space-x-4 rounded-md">
+            <div className="flex overflow-x-auto scrollbar space-x-4 rounded-md">
                 {categories.data && categories.data.length > 0 &&
                     categories.data.map(cat => (
                         <Link key={cat.id} href={cat.attributes.link} className="w-40 pb-8">

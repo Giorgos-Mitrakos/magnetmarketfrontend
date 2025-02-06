@@ -7,6 +7,12 @@ import { forwardRef, useContext, useEffect, useImperativeHandle } from "react"
 import { ShippingContext } from "@/context/shipping"
 import { useFormik } from "formik"
 import * as Yup from 'yup'
+import piraeusLogo from "../../../public/piraeus-logo-2024.png";
+import alphaBankLogo from "../../../public/alphaBank_logo.svg";
+import eurobankLogo from "../../../public/eurobank_logo.svg";
+import nbgLogo from "../../../public/nbg-logo.svg";
+import Image from "next/image"
+import Banks from "../atoms/banks"
 
 export type PaymentMethodsRef = {
     submitForm: () => void;
@@ -100,12 +106,18 @@ const PaymentMethods = forwardRef<PaymentMethodsRef>((props, ref) => {
                     return true
                 }).map(method => (
                     <li key={method.id} className="flex items-center text-sm t space-x-2">
-                        <Radio name="payment"
-                            id={method.attributes.name}
-                            value={method.attributes.name}
-                            checked={formik.values.payment === method.attributes.name}
-                            onChange={formik.handleChange}
-                        ></Radio></li>
+                        <div className="flex flex-col">
+                            <Radio name="payment"
+                                id={method.attributes.name}
+                                value={method.attributes.name}
+                                checked={formik.values.payment === method.attributes.name}
+                                onChange={formik.handleChange}
+                            ></Radio>
+                            {method.attributes.name === "Τραπεζική κατάθεση" &&
+                                formik.values.payment === method.attributes.name &&
+                                <Banks />}
+                        </div>
+                    </li>
                 ))}
             </ul>
         </form >
