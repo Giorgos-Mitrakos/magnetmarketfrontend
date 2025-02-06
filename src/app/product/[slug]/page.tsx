@@ -167,6 +167,15 @@ export default async function Product({ params }:
             "unitCode": "DAY"
           }
         }
+      },
+      "hasMerchantReturnPolicy": {
+        "@type": "MerchantReturnPolicy",
+        "applicableCountry": "GR",
+        "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+        "merchantReturnDays": 14,
+        "merchantReturnLink": `${process.env.NEXT_URL}pages/politiki-epistrofon`,
+        "returnMethod": "https://schema.org/ReturnByMail",
+        "returnFees": "https://schema.org/FreeReturn"
       }
     }
   }
