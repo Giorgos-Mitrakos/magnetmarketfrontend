@@ -100,6 +100,12 @@ const PaymentMethods = forwardRef<PaymentMethodsRef>((props, ref) => {
                     if (shippingMethod.pickup && method.attributes.name === "Αντικαταβολή") {
                         return false
                     }
+                    if (!shippingMethod.pickup && method.attributes.name === "Μετρητά") {
+                        return false
+                    }
+                    if (shippingMethod.shipping==="Μεταφορική" && method.attributes.name === "Αντικαταβολή") {
+                        return false
+                    }
                     if (method.attributes.range && method.attributes.range.maximum < cartTotal)
                         return false
 

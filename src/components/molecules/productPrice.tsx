@@ -28,9 +28,9 @@ function ProductPrice(props: { id: number }) {
                                     : <span className="text-2xl font-bold"
                                         aria-label={`${data?.product.data.attributes.price.toFixed(2)} €`}>
                                         {data?.product.data.attributes.price.toFixed(2)} €</span>}
-                                <h4 className="text-base text-green-0 dark:text-slate-300"
-                                    aria-label={`${data?.product.data.attributes.status}`}>
-                                    {data?.product.data.attributes.status}</h4>
+                                <h4 className="text-base text-green-800 dark:text-green-400"
+                                    aria-label="Παράδοση σε 1–3 ημέρες">
+                                    Παράδοση σε 1 – 3 ημέρες</h4>
                             </div>
                         </div>
                         {!isLoading && discount && profit && isSale &&

@@ -13,7 +13,7 @@ const Bank = ({ image, alt, iban, width, height }: IbankProps) => {
 
     return (
         <div className="flex flex-col sm:flex-row items-center">
-            <p className="flex h-6 mr-4 align-baseline">
+            <p className="flex h-6 w-20 mr-4 align-baseline">
                 <Image
                     src={image}
                     alt={alt}
@@ -37,14 +37,14 @@ const Banks = () => {
                 image="/piraeus-logo-2024.png"
                 alt="Piraeus Logo"
                 iban="GR3701715790006579154658301"
-                width={80}
-                height={36} />
+                width={68}
+                height={24} />
             <Bank
                 image="/nbg-logo.svg"
                 alt="ΕΘΝΙΚΗ Logo"
                 iban="GR7601102660000026600449974"
                 width={80}
-                height={44} />
+                height={24} />
             <Bank
                 image="/eurobank_logo.svg"
                 alt="Eurobank Logo"

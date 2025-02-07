@@ -91,8 +91,8 @@ const ProductCard = (props: ProductCardProps) => {
                     <p className="text-xs text-gray-500 dark:text-slate-300">Κωδ:{props.prod.id}</p>
                 </div>
                 <div className="flex items-center justify-center">
-                    <p className="text-green-700 dark:text-green-400 text-sm font-semibold"
-                        aria-label="Διαθεσιμότητα">Διαθέσιμο</p>
+                    <p className="text-green-800 dark:text-green-400 text-sm font-semibold"
+                        aria-label="Διαθεσιμότητα">Παράδοση σε 1 – 3 ημέρες</p>
                 </div>
                 <ProductCardPrice id={props.prod.id} />
                 <ProductCardFoot product={props.prod} />

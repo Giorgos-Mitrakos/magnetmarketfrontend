@@ -94,7 +94,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     categories.categories.data.forEach(category => {
         categoriesSitemap.push({
-            url: `${process.env.NEXT_URL}category/${category.attributes.slug}`,
+            url: `${process.env.NEXT_URL}/category/${category.attributes.slug}`,
             lastModified: category.attributes.updatedAt.toString(),
             changeFrequency: 'daily',
             priority: 0.5,
@@ -102,7 +102,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         if (category.attributes.categories.data.length > 0) {
             category.attributes.categories.data.forEach(cat2 => {
                 categoriesSitemap.push({
-                    url: `${process.env.NEXT_URL}category/${category.attributes.slug}/${cat2.attributes.slug}`,
+                    url: `${process.env.NEXT_URL}/category/${category.attributes.slug}/${cat2.attributes.slug}`,
                     lastModified: cat2.attributes.updatedAt.toString(),
                     changeFrequency: 'daily',
                     priority: 0.5,
@@ -110,7 +110,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
                 if (cat2.attributes.categories.data.length > 0) {
                     cat2.attributes.categories.data.forEach(cat3 => {
                         categoriesSitemap.push({
-                            url: `${process.env.NEXT_URL}category/${category.attributes.slug}/${cat2.attributes.slug}/${cat3.attributes.slug}`,
+                            url: `${process.env.NEXT_URL}/category/${category.attributes.slug}/${cat2.attributes.slug}/${cat3.attributes.slug}`,
                             lastModified: cat3.attributes.updatedAt.toString(),
                             changeFrequency: 'daily',
                             priority: 0.5,
@@ -129,14 +129,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
 
     const pagesSitemap: MetadataRoute.Sitemap = pages.pages.data.map(page => ({
-        url: `${process.env.NEXT_URL}pages/${page.attributes.titleSlug}`,
+        url: `${process.env.NEXT_URL}/pages/${page.attributes.titleSlug}`,
         lastModified: page.attributes.updatedAt.toString(),
         changeFrequency: "daily",
         priority: 0.6,
     }))
 
     const productsSitemap: MetadataRoute.Sitemap = products.products.data.map(product => ({
-        url: `${process.env.NEXT_URL}product/${product.attributes.slug}`,
+        url: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
         lastModified: product.attributes.updatedAt.toString(),
         changeFrequency: "daily",
         priority: 1,
