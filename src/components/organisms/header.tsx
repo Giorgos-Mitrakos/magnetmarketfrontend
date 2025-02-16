@@ -18,10 +18,10 @@ export default function Header({ user }: { user: any }) {
 
     return (
         <div>            
-            <header className="flex justify-center xs:flex-row p-2 w-full h-auto lg:justify-between dark:bg-black"
+            <header className="grid lg:grid-cols-3 p-2 w-full h-auto dark:bg-black"
                 aria-label="Κεφαλίδα">
                 <Logo />
-                <div className="hidden lg:flex items-center">
+                <div className="hidden place-self-center w-2/3 lg:flex items-center justify-center">
                     <SearchInput />
                 </div>
                 <HeaderActions user={user} />

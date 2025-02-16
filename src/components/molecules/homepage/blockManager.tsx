@@ -42,7 +42,7 @@ const getBlockComponent = ({ __typename, ...rest }: { __typename: string }, inde
             break;
     }
 
-    return Block ? <Block key={`index-${index}`} id={`index-${index}`} {...rest} /> : null;
+    return Block ? <Block tabIndex={index + 1} key={`index-${index}`} id={`index-${index}`} {...rest} /> : null;
 };
 
 const BlockManager = ({ blocks }: any) => {

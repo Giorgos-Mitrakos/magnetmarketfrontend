@@ -37,7 +37,8 @@ const BrandsBanner = async ({ id, brands }: {
                 {brands.data && brands.data.length > 0 &&
                     brands.data.map(brand => (brand.attributes.logo.data &&
                         <div key={brand.id} className='shrink-0'>
-                            <Link href={`/search?search=${brand.attributes.name}&Κατασκευαστές=${brand.attributes.name}`}>
+                            <Link href={`/search?search=${brand.attributes.name}&Κατασκευαστές=${brand.attributes.name}`}
+                                aria-label={`Link σε προϊόντα του κατασκευάστή ${brand.attributes.name}`}>
                                 {brand.attributes.logo.data.attributes.formats ?
                                     <Image
                                         // className='object-contain'
@@ -65,7 +66,7 @@ const BrandsBanner = async ({ id, brands }: {
                                         placeholder="blur"
                                     />
                                     // <NextImage media={brand.attributes.logo.data.attributes} width={240} height={240} />
-                                  }
+                                }
                             </Link>
                         </div>
                     ))}

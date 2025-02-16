@@ -225,6 +225,8 @@ export const GET_HOMEPAGE = gql`
                 data{
                   attributes{
                     url
+                    name
+                    alternativeText
                   }
                 }
               }

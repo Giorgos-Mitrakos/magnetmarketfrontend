@@ -10,8 +10,8 @@ import { useEffect, useRef } from 'react';
 
 const HeroCarousel = ({ carousel }) => {
 
-  
-  console.log("carousel:",carousel)
+
+  console.log("carousel:", carousel)
 
 
   const swiperRef = useRef(null);
@@ -44,7 +44,7 @@ const HeroCarousel = ({ carousel }) => {
       class="mySwiper flex w-full h-[12rem] sm:h-[18rem] md:h-[25rem] lg:h-[30rem]"
       ref={swiperRef}
       // class="flex w-full h-full"
-      space-between="4"
+      // space-between="4"
       slides-per-view="1"
       // watch-slides-progress="true"
       autoplay-delay="3500"
@@ -52,16 +52,16 @@ const HeroCarousel = ({ carousel }) => {
       effect="fade"
     >
       {carousel.map((banner, i) =>
-        <swiper-slide key={i} lazy="true" class="w-full h-full">{
+        <swiper-slide key={i} lazy={false} class={`w-full h-full bg-white`}>{
           <Link href={banner.href} aria-label={banner.link_label} className={`cursor-pointer flex h-full w-full relative`}>
             {/* <NextImage media={banner.image.data.attributes} height={480} width={1280} /> */}
             <Image
-              // layout='responsive'
-              className={`object-contain ${banner.backgroundColor ? `bg-[${banner.backgroundColor}]` : "bg-white dark:bg-slate-800"} `}
+              // layout='responsive' 
+              className={`object-contain px-1`}
               width={1980}
               height={600}
               // fill
-              priority
+              priority={i === 1 ? true : false}
               src={getStrapiMedia(banner.image.data.attributes.url)}
               alt={banner.image.data.attributes.alternativeText || ""}
               quality={75}

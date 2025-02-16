@@ -11,12 +11,13 @@ function SearchInput() {
     const { text, setText, isListening, startListening, stopListening, hasRecognitionSupport } = useSpeechRecognition()
 
     return (
-        <div className="flex items-center w-full dark:text-slate-800">
-            <form onSubmit={() => { router.push(`/search?search=${text}`) }} className="flex w-full items-end border-b-2 bg-inherit border-siteColors-purple"
+        <div className="flex place-self-center w-full dark:text-slate-800">
+            <form onSubmit={() => { router.push(`/search?search=${text}`) }}
+                className="flex w-full justify-between border-b-2 bg-inherit border-siteColors-purple"
                 aria-label="Αναζήτηση">
                 {hasRecognitionSupport &&
                     <button onClick={isListening ? stopListening : startListening}
-                        className="flex items-end text-siteColors-purple dark:text-slate-200 text-lg xs:text-xl md:text-2xl"
+                        className="flex text-siteColors-purple dark:text-slate-200 text-lg xs:text-xl md:text-2xl"
                         aria-label="Ενεργοποίηση φωνητικής αναζήτησης"
                     >
                         {isListening ?
@@ -26,8 +27,8 @@ function SearchInput() {
                             <FaMicrophoneSlash
                                 className='text-siteColors-purple dark:text-slate-800 text-2xl mb-1' />}
                     </button>}
-                <input type="search" placeholder="Αναζήτηση" value={text} onChange={(e) => setText(e.target.value)}
-                    className="pl-2 bg-inherit outline-none border-none"
+                <input type="search" tabIndex={0} placeholder="Αναζήτηση" value={text} onChange={(e) => setText(e.target.value)}
+                    className="pl-2 bg-inherit outline-none border-none flex-grow"
                     aria-label="Πεδίο αναζήτησης προϊόντων" />
                 <button type="submit"
                     aria-label="Αναζήτηση - Αναζητήστε ανά προϊόν, κατασκευαστή ή κατηγορία">

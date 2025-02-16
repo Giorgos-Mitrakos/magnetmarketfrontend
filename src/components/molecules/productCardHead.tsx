@@ -44,7 +44,7 @@ function ProductCardHead(props: ProductCardHeadProps) {
                     fill
                     // width={36}
                     // height={36}
-                    alt="Test"
+                    alt={`Λογότυπο ${props.brand.data.attributes.name}`}
                 />}
             </div>
             {!isLoading && discount && profit && isSale &&

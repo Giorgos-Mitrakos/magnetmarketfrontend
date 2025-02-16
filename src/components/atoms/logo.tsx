@@ -4,7 +4,7 @@ import logo from '../../../public/MARKET MAGNET-LOGO.svg'
 
 export default function Logo() {
     return (
-        <Link href="/" className='flex justify-start xs:h-full w-full xs:w-auto xs:max-w-xs'
+        <Link href="/" className='flex place-self-center lg:place-self-start justify-center lg:justify-start xs:h-full w-full xs:w-auto xs:max-w-xs'
             aria-label='Σύνδεσμος προς αρχική σελίδα'>
             <Image
                 priority
