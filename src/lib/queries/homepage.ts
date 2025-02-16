@@ -208,6 +208,7 @@ export const GET_HOMEPAGE = gql`
                   logo{
                     data{
                       attributes{
+                        url
                         name
                         alternativeText
                         formats
