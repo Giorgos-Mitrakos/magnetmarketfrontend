@@ -186,10 +186,10 @@ export const GET_HOMEPAGE = gql`
                   image{
                     data{
                       attributes{
-                      url
+                        url
                         name
-                        formats
                         alternativeText
+                        formats
                       }
                     }
                   }
