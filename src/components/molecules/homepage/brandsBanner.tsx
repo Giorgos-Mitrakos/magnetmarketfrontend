@@ -38,37 +38,34 @@ const BrandsBanner = async ({ id, brands }: {
                     brands.data.map(brand => (brand.attributes.logo.data &&
                         <div key={brand.id} className='shrink-0'>
                             <Link href={`/search?search=${brand.attributes.name}&Κατασκευαστές=${brand.attributes.name}`}>
-                                {brand.attributes.logo.data ? brand.attributes.logo.data.attributes.formats ?
-                                    <p>
-                                        <Image
-                                            // className='object-contain'
-                                            // fill
-                                            height={36}
-                                            width={96}
-                                            src={getStrapiMedia(brand.attributes.logo.data.attributes.formats.small.url)}
-                                            alt={brand.attributes.logo.data.attributes.alternativeText}
-                                            quality={75}
-                                            aria-label={brand.attributes.logo.data.attributes.alternativeText || ""}
-                                            blurDataURL={getStrapiMedia(brand.attributes.logo.data.attributes.formats.small.url)}
-                                            placeholder="blur"
-                                        />
-                                    </p>
-                                    : <p>
-                                        <Image
-                                            // className='object-contain'
-                                            // fill
-                                            height={36}
-                                            width={96}
-                                            src={getStrapiMedia(brand.attributes.logo.data.attributes.url)}
-                                            alt={brand.attributes.logo.data.attributes.alternativeText}
-                                            quality={75}
-                                            aria-label={brand.attributes.logo.data.attributes.alternativeText || ""}
-                                            blurDataURL={getStrapiMedia(brand.attributes.logo.data.attributes.url)}
-                                            placeholder="blur"
-                                        />
-                                    </p>
+                                {brand.attributes.logo.data.attributes.formats ?
+                                    <Image
+                                        // className='object-contain'
+                                        // fill
+                                        height={36}
+                                        width={96}
+                                        src={getStrapiMedia(brand.attributes.logo.data.attributes.formats.thumbnail.url)}
+                                        alt={brand.attributes.logo.data.attributes.alternativeText}
+                                        quality={75}
+                                        aria-label={brand.attributes.logo.data.attributes.alternativeText || ""}
+                                        blurDataURL={getStrapiMedia(brand.attributes.logo.data.attributes.formats.thumbnail.url)}
+                                        placeholder="blur"
+                                    />
+                                    :
+                                    <Image
+                                        // className='object-contain'
+                                        // fill
+                                        height={36}
+                                        width={96}
+                                        src={getStrapiMedia(brand.attributes.logo.data.attributes.url)}
+                                        alt={brand.attributes.logo.data.attributes.alternativeText}
+                                        quality={75}
+                                        aria-label={brand.attributes.logo.data.attributes.alternativeText || ""}
+                                        blurDataURL={getStrapiMedia(brand.attributes.logo.data.attributes.url)}
+                                        placeholder="blur"
+                                    />
                                     // <NextImage media={brand.attributes.logo.data.attributes} width={240} height={240} />
-                                    : <FaRegImage className="w-ayto h-20 self-center" />}
+                                  }
                             </Link>
                         </div>
                     ))}
