@@ -127,6 +127,7 @@ export interface IcategoryProductsProps {
             data: {
               attributes: {
                 name: string
+                url: string
                 alternativeText: string
                 formats: {
                   thumbnail: IimageProps,
