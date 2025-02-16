@@ -73,7 +73,7 @@ const CategoriesBanner = ({ id,
                         <Link key={cat.id} href={cat.attributes.link} className="w-40">
                             <div className="flex flex-col justify-end items-center ">
                                 <p className="flex rounded-full p-8 w-36 h-36 bg-white border-4 border-siteColors-pink ">
-                                    {cat.attributes.image.data ? cat.attributes.image.data.attributes.formats.thumbnail ?
+                                    {cat.attributes.image.data ? cat.attributes.image.data.attributes.formats ?
                                         <Image
                                             // className='object-contain'
                                             // fill

@@ -38,7 +38,7 @@ const BrandsBanner = async ({ id, brands }: {
                     brands.data.map(brand => (brand.attributes.logo.data &&
                         <div key={brand.id} className='shrink-0'>
                             <Link href={`/search?search=${brand.attributes.name}&Κατασκευαστές=${brand.attributes.name}`}>
-                                {brand.attributes.logo.data ? brand.attributes.logo.data.attributes.formats.small ?
+                                {brand.attributes.logo.data ? brand.attributes.logo.data.attributes.formats ?
                                     <p>
                                         <Image
                                             // className='object-contain'
