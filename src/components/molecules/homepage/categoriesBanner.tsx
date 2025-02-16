@@ -1,4 +1,6 @@
-import NextImage from "@/components/atoms/nextImage";
+import { IimageProps } from "@/lib/queries/categoryQuery";
+import { getStrapiMedia } from "@/repositories/medias";
+import Image from "next/image";
 import Link from "next/link";
 import { FaRegImage } from "react-icons/fa";
 
@@ -29,8 +31,12 @@ const CategoriesBanner = ({ id,
                     image: {
                         data: {
                             attributes: {
-                                url: string
+                                name: string,
                                 alternativeText: string
+                                formats: {
+                                    thumbnail: IimageProps,
+                                    small: IimageProps
+                                }
                             }
                         }
                     }
@@ -67,7 +73,19 @@ const CategoriesBanner = ({ id,
                             <div className="flex flex-col justify-end items-center ">
                                 <p className="flex rounded-full p-8 w-36 h-36 bg-white border-4 border-siteColors-pink ">
                                     {cat.attributes.image.data ?
-                                        <NextImage media={cat.attributes.image.data.attributes} width={144} height={144} />
+                                        <Image
+                                            // className='object-contain'
+                                            // fill
+                                            height={144}
+                                            width={144}
+                                            src={getStrapiMedia(cat.attributes.image.data.attributes.formats.thumbnail.url)}
+                                            alt={cat.attributes.image.data.attributes.alternativeText}
+                                            quality={75}
+                                            aria-label={cat.attributes.image.data.attributes.alternativeText || ""}
+                                            blurDataURL={getStrapiMedia(cat.attributes.image.data.attributes.formats.thumbnail.url)}
+                                            placeholder="blur"
+                                        />
+                                        // <NextImage media={cat.attributes.image.data.attributes} width={144} height={144} />
                                         : <FaRegImage className="w-16 h-16 self-center" />}
                                 </p>
                             </div>

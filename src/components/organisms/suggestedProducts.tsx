@@ -110,10 +110,10 @@ const SuggestedProducts = async ({ product }: ProductProps) => {
                                         <Image className="object-contain p-2"
                                             aria-label={`Φωτογραφία προϊόντος${prod.attributes.name}`}
                                             // layout='responsive'
-                                            // width={150}
-                                            // height={150}
-                                            fill
-                                            src={getStrapiMedia(prod.attributes.image.data.attributes.url)}
+                                            width={200}
+                                            height={200}
+                                            // fill
+                                            src={getStrapiMedia(prod.attributes.image.data.attributes.formats.small.url)}
                                             // src={`${process.env.NEXT_PUBLIC_API_URL}${props.prod.attributes.image.data.attributes.url}`}
                                             alt={prod.attributes.image.data.attributes.alternativeText || ""}
                                             quality={75}

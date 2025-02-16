@@ -94,7 +94,15 @@ export interface ProductProps {
             logo: {
               data: {
                 attributes: {
-                  url: string
+                  formats: {
+                    thumbnail: {
+                      url: string
+                      width: number
+                      height: number
+                    }
+                  }
+                  name: string
+                  alternativeText: string
                 }
               }
             }
@@ -156,7 +164,7 @@ const ProductBasicFeatures = ({ product }: ProductProps) => {
             {
               product.attributes.brand.data.attributes.logo.data !== null ? <Image className="flex object-contain object-left"
                 aria-label={`Λογότυπο της εταιρίας ${product.attributes.brand.data.attributes.name}`}
-                src={getStrapiMedia(product.attributes.brand.data.attributes.logo.data.attributes.url)}
+                src={getStrapiMedia(product.attributes.brand.data.attributes.logo.data.attributes.formats.thumbnail.url)}
                 fill
                 // width={36}
                 // height={36}

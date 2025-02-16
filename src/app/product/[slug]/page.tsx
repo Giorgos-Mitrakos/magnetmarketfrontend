@@ -10,7 +10,6 @@ import { requestSSR } from '@/repositories/repository';
 import { FaRegImage } from "react-icons/fa";
 import Script from 'next/script'
 import { notFound } from 'next/navigation'
-import { url } from "inspector";
 const ProductInfo = dynamic(() => import("@/components/organisms/productInfo"), {
   ssr: false,
   loading: () => <p>Loading...</p>

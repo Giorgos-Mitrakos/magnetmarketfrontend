@@ -36,7 +36,14 @@ export interface ProductCardProps {
             image: {
                 data: {
                     attributes: {
-                        url: string
+                        formats: {
+                            small: {
+                                url: string
+                                width: number
+                                height: number
+                            }
+                        }
+                        name: string
                         alternativeText: string
                     }
                 }
@@ -64,7 +71,7 @@ const ProductCard = (props: ProductCardProps) => {
                             // width={product.image.data.attributes.width / 4}
                             // height={product.image.data.attributes.height / 4}
                             // fill
-                            src={getStrapiMedia(product.image.data.attributes.url)}
+                            src={getStrapiMedia(product.image.data.attributes.formats.small.url)}
                             // src={`${process.env.NEXT_PUBLIC_API_URL}${props.prod.attributes.image.data.attributes.url}`}
                             alt={product.image.data.attributes.alternativeText || ""}
                             quality={75}

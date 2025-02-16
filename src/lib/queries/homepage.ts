@@ -1,5 +1,4 @@
 import { gql } from "graphql-request";
-import { string } from "yup";
 import { IimageProps } from "./categoryQuery";
 
 export const GET_HOMEPAGE = gql`
@@ -50,10 +49,8 @@ export const GET_HOMEPAGE = gql`
                     data {
                       attributes {
                         name
-                        url
+                        formats
                         alternativeText
-                        width
-                        height
                       }
                     }
                   }
@@ -189,7 +186,9 @@ export const GET_HOMEPAGE = gql`
                   image{
                     data{
                       attributes{
-                        url
+                      url
+                        name
+                        formats
                         alternativeText
                       }
                     }
@@ -211,7 +210,7 @@ export const GET_HOMEPAGE = gql`
                       attributes{
                         name
                         alternativeText
-                        url
+                        formats
                       }
                     }
                   }
@@ -270,8 +269,8 @@ export interface IHomepageProps {
                       logo: {
                         data: {
                           attributes: {
-                            name: string
-                            url: string
+                            name: string,
+                            alternativeText: string
                             formats: {
                               thumbnail: IimageProps,
                               small: IimageProps
@@ -285,8 +284,12 @@ export interface IHomepageProps {
                 image: {
                   data: {
                     attributes: {
-                      url: string
+                      name: string,
                       alternativeText: string
+                      formats: {
+                        thumbnail: IimageProps,
+                        small: IimageProps
+                      }
                     }
                   }
                 }
@@ -307,7 +310,10 @@ export interface IHomepageProps {
                 attributes: {
                   name: string
                   alternativeText: string
-                  url: string
+                  formats: {
+                    thumbnail: IimageProps,
+                    small: IimageProps
+                  }
                 }
               }
             }

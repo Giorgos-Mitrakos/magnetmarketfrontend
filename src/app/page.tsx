@@ -1,9 +1,6 @@
 
 import BlockManager from '@/components/molecules/homepage/blockManager';
-import ListProductsBanner from '@/components/molecules/homepage/listProductsBanner';
 import Newsletter from '@/components/molecules/newsletter'
-import HeroBanners from '@/components/organisms/heroBanners';
-import SiteFeatures from '@/components/organisms/siteFeatures'
 import { organizationStructuredData } from '@/lib/helpers/structureData';
 import { GET_HOMEPAGE, IHomepageProps } from '@/lib/queries/homepage';
 import { requestSSR } from '@/repositories/repository';

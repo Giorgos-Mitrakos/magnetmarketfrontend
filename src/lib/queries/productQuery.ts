@@ -271,7 +271,10 @@ query getCategoryProducts($slug:String!){
               logo{
                 data{
                   attributes{
+                    name
+                    alternativeText
                     url
+                    formats
                   }
                 }
               }
@@ -417,7 +420,14 @@ export interface IProductProps {
               logo: {
                 data: {
                   attributes: {
+                    name: string
+                    alternativeText: string
                     url: string
+                    formats: {
+                      thumbnail: IimageProps
+                      medium: IimageProps
+                      small: IimageProps
+                    }
                   }
                 }
               }
@@ -511,7 +521,9 @@ query getCategoryProducts($filters:ProductFiltersInput!){
             image{
                 data{
                     attributes{
+                    name
                     url
+                    formats
                     alternativeText
                     }
                 }
@@ -564,7 +576,12 @@ export interface IsuggestedProductsProps {
         image: {
           data: {
             attributes: {
+              name: string
               url: string
+              formats: {
+                thumbnail: IimageProps,
+                small: IimageProps
+              }
               alternativeText: string
             }
           }
@@ -695,10 +712,9 @@ query getProductPrice($filters:ProductFiltersInput!,$sort:[String!]){
           image{
             data {
               attributes {
-                url
+                name
+                formats
                 alternativeText
-                width
-                height
               }
             }
           }
@@ -734,8 +750,8 @@ export interface IGetHotOrDealsProductsProps {
               logo: {
                 data: {
                   attributes: {
-                    name: string,
-                    url: string,
+                    name: string
+                    url: string
                     formats: {
                       thumbnail: IimageProps,
                       small: IimageProps
@@ -749,10 +765,16 @@ export interface IGetHotOrDealsProductsProps {
         image: {
           data: {
             attributes: {
-              url: string
+              formats: {
+                small: {
+                  url: string
+                  width: number
+                  height: number
+                }
+              }
+              name: string
               alternativeText: string
-              width: number
-              height: number
+
             }
           }
         }

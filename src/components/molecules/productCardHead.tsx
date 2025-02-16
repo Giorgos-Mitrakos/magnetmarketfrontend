@@ -3,10 +3,6 @@
 import Image from "next/image"
 import { getStrapiMedia } from "@/repositories/medias"
 import { IimageProps } from "@/lib/queries/categoryQuery"
-import useSWR from "swr"
-import { GET_PRODUCT_PRICE, IProductPriceProps } from "@/lib/queries/productQuery"
-import { fetcher } from "@/repositories/repository"
-import { useEffect, useState } from "react"
 import useProductPrice from "@/hooks/useProductPrice"
 
 export interface ProductCardHeadProps {
@@ -37,7 +33,7 @@ function ProductCardHead(props: ProductCardHeadProps) {
     const { profit, discount, isSale, isLoading } = useProductPrice(props.id)
 
     const brandName = props.brand.data?.attributes.name
-    const logo = props.brand.data?.attributes.logo.data?.attributes.url
+    const logo = props.brand.data?.attributes.logo.data?.attributes.formats.thumbnail.url
 
     return (
         <div className="grid grid-cols-2 h-full pb-2">

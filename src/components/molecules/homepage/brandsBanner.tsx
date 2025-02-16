@@ -1,4 +1,4 @@
-import NextImage from '@/components/atoms/nextImage';
+import { IimageProps } from '@/lib/queries/categoryQuery';
 import { getStrapiMedia } from '@/repositories/medias';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -15,9 +15,12 @@ const BrandsBanner = async ({ id, brands }: {
                 logo: {
                     data: {
                         attributes: {
-                            name: string
+                            name: string,
                             alternativeText: string
-                            url: string
+                            formats: {
+                                thumbnail: IimageProps,
+                                small: IimageProps
+                            }
                         }
                     }
                 }
@@ -33,7 +36,7 @@ const BrandsBanner = async ({ id, brands }: {
                 {brands.data && brands.data.length > 0 &&
                     brands.data.map(brand => (brand.attributes.logo.data &&
                         <div key={brand.id} className='shrink-0'>
-                            <Link href={`/search?search=${brand.attributes.name}&κατεσκευαστής=${brand.attributes.name}`}>
+                            <Link href={`/search?search=${brand.attributes.name}&κατασκευαστής=${brand.attributes.name}`}>
                                 {brand.attributes.logo.data ?
                                     <p>
                                         <Image
@@ -41,11 +44,11 @@ const BrandsBanner = async ({ id, brands }: {
                                             // fill
                                             height={36}
                                             width={96}
-                                            src={getStrapiMedia(brand.attributes.logo.data.attributes.url)}
+                                            src={getStrapiMedia(brand.attributes.logo.data.attributes.formats.small.url)}
                                             alt={brand.attributes.logo.data.attributes.alternativeText}
                                             quality={75}
                                             aria-label={brand.attributes.logo.data.attributes.alternativeText || ""}
-                                            blurDataURL={getStrapiMedia(brand.attributes.logo.data.attributes.url)}
+                                            blurDataURL={getStrapiMedia(brand.attributes.logo.data.attributes.formats.small.url)}
                                             placeholder="blur"
                                         />
                                     </p>
