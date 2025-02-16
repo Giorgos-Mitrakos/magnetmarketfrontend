@@ -137,8 +137,12 @@ export interface IcategoryProductsProps {
     image: {
       data: {
         attributes: {
-          url: string
+          name: string
           alternativeText: string
+          formats: {
+            thumbnail: IimageProps,
+            small: IimageProps
+          }
         }
       }
     }
