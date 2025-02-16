@@ -29,6 +29,8 @@ const BrandsBanner = async ({ id, brands }: {
     },
 }) => {
 
+    console.log("brands:",brands.data.map(brand=>brand.attributes.logo))
+
     return (
         <section key={id} className='w-full '>
             <h2 className="text-center text-siteColors-purple dark:text-slate-200 xs:text-2xl md:text-3xl font-bold">Brands</h2>

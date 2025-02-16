@@ -87,7 +87,9 @@ query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationAr
             image{
                 data{
                     attributes{
+                    name
                     url
+                    formats
                     alternativeText
                     }
                 }
