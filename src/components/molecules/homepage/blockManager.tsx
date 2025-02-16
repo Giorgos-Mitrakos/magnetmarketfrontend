@@ -1,12 +1,14 @@
-import SiteFeatures from "@/components/organisms/siteFeatures";
-import BrandsBanner from "./brandsBanner";
-import CategoriesBanner from "./categoriesBanner";
-import DoubleBanner from "./doubleBanner";
-import HotOrSale from "./hotOrSale";
-import ListProductsBanner from "./listProductsBanner";
-import SingleBanner from "./singleBanner";
-import TripleBanner from "./tripleBanner";
-import HeroBanners from "@/components/organisms/heroBanners";
+import dynamic from "next/dynamic";
+
+const BrandsBanner = dynamic(() => import("./brandsBanner"));
+const CategoriesBanner = dynamic(() => import("./categoriesBanner"));
+const DoubleBanner = dynamic(() => import( "./doubleBanner"));
+const HotOrSale = dynamic(() => import( "./hotOrSale"));
+const ListProductsBanner = dynamic(() => import( "./listProductsBanner"));
+const SingleBanner = dynamic(() => import( "./singleBanner"));
+const TripleBanner = dynamic(() => import( "./tripleBanner"));
+const HeroBanners = dynamic(() => import( "@/components/organisms/heroBanners"));
+const SiteFeatures = dynamic(() => import('@/components/organisms/siteFeatures'), { ssr: false })
 
 
 const getBlockComponent = ({ __typename, ...rest }: { __typename: string }, index: string) => {

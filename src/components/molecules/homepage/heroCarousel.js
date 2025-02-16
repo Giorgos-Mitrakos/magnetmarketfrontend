@@ -61,6 +61,7 @@ const HeroCarousel = ({ carousel }) => {
               width={1980}
               height={600}
               // fill
+              priority
               src={getStrapiMedia(banner.image.data.attributes.url)}
               alt={banner.image.data.attributes.alternativeText || ""}
               quality={75}
