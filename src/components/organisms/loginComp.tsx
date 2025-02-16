@@ -149,7 +149,7 @@ export default function LoginComp() {
                     </div>
                 </div>
             </div>
-            {callbackUrl && <div className='w-full h-full'>
+            {callbackUrl && callbackUrl==="/checkout/customer-informations" && <div className='w-full h-full'>
                 <div className='flex flex-col w-full h-full text-xl sm:text-2xl md:text-3xl px-2 font-semibold'>
                     <h2 className='text-slate-800 dark:text-slate-200 text-center mb-2'>Γρήγορη Παραγγελία</h2>
                     <Link href='/checkout/customer-informations'

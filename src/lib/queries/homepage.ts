@@ -7,45 +7,7 @@ export const GET_HOMEPAGE = gql`
     homepage {
     data {
       attributes {
-        Carousel {
-          __typename
-          ... on ComponentGlobalBanner {
-            id
-            image {
-              data {
-                attributes {
-                  name
-                  alternativeText
-                  url
-                  width
-                  height
-                }
-              }
-            }
-            link_label
-            href
-            target
-          }
-        }
-        fixed_hero_banners {
-          __typename
-          ... on ComponentGlobalBanner {
-            image {
-              data {
-                attributes {
-                  name
-                  alternativeText
-                  url
-                  width
-                  height
-                }
-              }
-            }
-            link_label
-            href
-            target
-          }
-        }
+        
         body {
           __typename
           ... on ComponentHomepageBannerListProducts {
@@ -257,6 +219,23 @@ export const GET_HOMEPAGE = gql`
               }
             }
           }
+          ...on ComponentGlobalCarousel{
+            Banner{
+              image{
+                data{
+                  attributes{
+                    url
+                  }
+                }
+              }
+              backgroundColor
+              link_label
+              href
+              target
+              title
+              text_body
+            }
+          }
         }
       }
     }
@@ -267,7 +246,7 @@ export interface IHomepageProps {
   homepage: {
     data: {
       attributes: {
-        Carousel: ICarousel[]
+        // Carousel: ICarousel[]
         fixed_hero_banners: IFixedHeroBanners[]
         body: {
           __typename: string

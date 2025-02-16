@@ -15,14 +15,14 @@ function ProductPrice(props: { id: number }) {
                 </div>
                 : error ? <div>Error...</div> :
                     <div className="flex space-x-12">
-                        <div className="flex justify-start items-center text-siteColors-purple xs:text-xl font-semibold">
+                        <div className="flex justify-start items-center text-siteColors-purple dark:text-slate-200 xs:text-xl font-semibold">
                             <div className="flex flex-col">
                                 <h5 className="text-sm  text-slate-500 dark:text-slate-300" aria-label="Τιμή">Τιμή</h5>
                                 {data?.product.data.attributes.is_sale && data?.product.data.attributes.sale_price ?
                                     <div className="flex flex-col">
                                         <h3 className="text-sm line-through align-top mr-1 text-gray-500 dark:text-slate-400"
                                             aria-label={`${data?.product.data.attributes.price.toFixed(2)} €`}>{data?.product.data.attributes.price.toFixed(2)} €</h3>
-                                        <h2 className="text-2xl font-bold dark:text-slate-300"
+                                        <h2 className="text-2xl font-bold dark:text-slate-200"
                                             aria-label={`${data?.product.data.attributes.sale_price.toFixed(2)} €`}>{data?.product.data.attributes.sale_price.toFixed(2)} €</h2>
                                     </div>
                                     : <span className="text-2xl font-bold"

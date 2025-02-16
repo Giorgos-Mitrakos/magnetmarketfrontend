@@ -1,22 +1,22 @@
 'use client'
 import Image from "next/image"
 // import HeroCarousel from "../molecules/heroCarousel"
-import HeroFixedBanners from "../molecules/homepage/heroFixedBanners"
 import dynamic from 'next/dynamic'
 import { ICarousel, IFixedHeroBanners } from "@/lib/queries/homepage"
+import HeroFixedBanners from "../molecules/homepage/heroFixedBanners"
 
-const HeroCarousel = dynamic(() => import('../molecules/homepage/heroCarousel'))
+const HeroCarousel = dynamic(() => import('../molecules/homepage/heroCarousel'), { ssr: false })
 
 
-const HeroBanners = ({ carousel, fixed_hero_banners }: { carousel: ICarousel[], fixed_hero_banners: IFixedHeroBanners[] }) => {
+const HeroBanners = ({ Banner, sideBanner }: { Banner: ICarousel[], sideBanner: ICarousel[] }) => {
     return (
-        <section className="grid w-full grid-cols-1 gap-4 md:grid-cols-3 my-4">
-            <div className="md:col-span-2 h-full w-full">
-                <HeroCarousel carousel={carousel} />
+        <section className="flex w-full h-[12rem] sm:h-[18rem] md:h-[25rem] lg:h-[30rem]">
+            <div className="h-full w-full">
+                <HeroCarousel carousel={Banner} />
             </div>
-            <div className="md:col-span-1 h-full">
-                <HeroFixedBanners fixed_hero_banners={fixed_hero_banners} />
-            </div>
+            {/* <div className="h-full">
+                <HeroFixedBanners sideBanner={sideBanner} />
+            </div> */}
         </section>
     )
 }

@@ -41,7 +41,7 @@ const HotOrSale = async ({ id, title, type }: {
     const data = await response as IGetHotOrDealsProductsProps
 
     return (
-        <section key={id} className="space-y-4 relative w-full" >
+        <section key={id} className="space-y-4 relative w-full h-[42rem]" >
             <h2 className="p-4 text-center text-white bg-siteColors-lightblue xs:text-2xl md:text-3xl font-bold rounded">{title}</h2>
             <Carousel products={data.products} />
         </section>

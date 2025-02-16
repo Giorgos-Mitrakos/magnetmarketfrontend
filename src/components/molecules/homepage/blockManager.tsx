@@ -1,3 +1,4 @@
+import SiteFeatures from "@/components/organisms/siteFeatures";
 import BrandsBanner from "./brandsBanner";
 import CategoriesBanner from "./categoriesBanner";
 import DoubleBanner from "./doubleBanner";
@@ -5,6 +6,7 @@ import HotOrSale from "./hotOrSale";
 import ListProductsBanner from "./listProductsBanner";
 import SingleBanner from "./singleBanner";
 import TripleBanner from "./tripleBanner";
+import HeroBanners from "@/components/organisms/heroBanners";
 
 
 const getBlockComponent = ({ __typename, ...rest }: { __typename: string }, index: string) => {
@@ -31,6 +33,12 @@ const getBlockComponent = ({ __typename, ...rest }: { __typename: string }, inde
             break;
         case 'ComponentHomepageBrandsBanner':
             Block = BrandsBanner;
+            break;
+        case 'ComponentGlobalSiteFeatures':
+            Block = SiteFeatures;
+            break;
+        case 'ComponentGlobalCarousel':
+            Block = HeroBanners;
             break;
     }
 

@@ -54,7 +54,7 @@ const ProductCard = (props: ProductCardProps) => {
         <div className="relative py-2 px-1 max-w-xss: overflow-hidden">
             <div className="grid h-full grid-rows-cardLayout shadow-md hover:shadow-lg dark:shadow-slate-500 dark:hover:shadow-slate-600 bg-white dark:bg-slate-700 rounded-lg m-1 p-4">
                 <ProductCardHead brand={brand} id={props.prod.id} />
-                <Link className="grid w-full place-content-center relative" href={`/product/${product.slug}`}
+                <Link className="grid w-full place-content-center bg-white relative" href={`/product/${product.slug}`}
                     aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${product.name}`}>
                     {product.image.data ?
                         <Image className="object-contain p-2"

@@ -40,7 +40,7 @@ function ProductCardHead(props: ProductCardHeadProps) {
     const logo = props.brand.data?.attributes.logo.data?.attributes.url
 
     return (
-        <div className="grid grid-cols-2 h-full">
+        <div className="grid grid-cols-2 h-full pb-2">
             <div className="relative w-full h-full">
                 {logo && <Image className="flex object-contain object-left"
                     aria-label={`Λογότυπο της εταιρίας ${brandName}`}
