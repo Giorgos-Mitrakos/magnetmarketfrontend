@@ -71,7 +71,7 @@ const ProductCard = (props: ProductCardProps) => {
                 <Link className="grid w-full place-content-center bg-white relative" href={`/product/${product.slug}`}
                     aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${product.name}`}>
                     {product.image.data ?
-                        product.image.data.attributes.formats ?
+                        product.image.data.attributes.formats.small ?
                             <Image className="object-contain p-2"
                                 aria-label={`Φωτογραφία προϊόντος${product.name}`}
                                 loading="lazy"
