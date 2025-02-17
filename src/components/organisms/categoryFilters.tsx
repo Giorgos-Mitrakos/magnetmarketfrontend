@@ -93,7 +93,6 @@ const CategoryFilters = (props: CategoryFiltersProps) => {
         data: FilterProps[], loading: boolean, error: any
     } = useApiRequest({ method: 'POST', api: "/api/category/categoryFilter", variables: ({ name: category, searchParams: searchParamsArray }), jwt: "" })
 
-    console.log(brands)
     return (
         <div className='mt-4 space-y-4'>
             {loadingBrands && !brands ? <div>Loading</div> :
