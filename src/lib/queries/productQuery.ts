@@ -79,6 +79,7 @@ query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationAr
                       data{
                         attributes{
                           name
+                          alternativeText
                           url
                           formats
                         }
@@ -144,6 +145,7 @@ export interface IcategoryProductsProps {
       data: {
         attributes: {
           name: string
+          url: string
           alternativeText: string
           formats: {
             thumbnail: IimageProps,

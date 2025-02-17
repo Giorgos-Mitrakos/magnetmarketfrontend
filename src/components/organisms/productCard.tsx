@@ -43,6 +43,11 @@ export interface ProductCardProps {
                                 width: number
                                 height: number
                             }
+                            thumbnail: {
+                                url: string
+                                width: number
+                                height: number
+                            }
                         }
                         name: string
                         alternativeText: string
