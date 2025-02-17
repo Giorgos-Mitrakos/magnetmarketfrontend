@@ -111,9 +111,9 @@ const SuggestedProducts = async ({ product }: ProductProps) => {
                                             <Image className="object-contain p-2"
                                                 aria-label={`Φωτογραφία προϊόντος${prod.attributes.name}`}
                                                 // layout='responsive'
-                                                width={200}
-                                                height={200}
-                                                // fill
+                                                // width={200}
+                                                // height={200}
+                                                fill
                                                 src={getStrapiMedia(prod.attributes.image.data.attributes.formats.small.url)}
                                                 blurDataURL={getStrapiMedia(prod.attributes.image.data.attributes.formats.small.url)}
                                                 // src={`${process.env.NEXT_PUBLIC_API_URL}${props.prod.attributes.image.data.attributes.url}`}
@@ -122,11 +122,11 @@ const SuggestedProducts = async ({ product }: ProductProps) => {
                                                 sizes="(max-width: 640px) 33vw, (max-width: 1024px) 17vw"
                                             /> :
                                             <Image className="object-contain p-2"
-                                                aria-label={`Φωτογραφία προϊόντος${prod.attributes.name}`}
-                                                // layout='responsive'
-                                                width={200}
-                                                height={200}
-                                                // fill
+                                                // aria-label={`Φωτογραφία προϊόντος${prod.attributes.name}`}
+                                                // // layout='responsive'
+                                                // width={200}
+                                                // height={200}
+                                                fill
                                                 src={getStrapiMedia(prod.attributes.image.data.attributes.url)}
                                                 blurDataURL={getStrapiMedia(prod.attributes.image.data.attributes.url)}
                                                 // src={`${process.env.NEXT_PUBLIC_API_URL}${props.prod.attributes.image.data.attributes.url}`}

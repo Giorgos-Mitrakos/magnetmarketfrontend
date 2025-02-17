@@ -4,6 +4,8 @@ import { useRef, useEffect, useState } from 'react';
 import NextImage from '../atoms/nextImage';
 import { register } from 'swiper/element/bundle';
 import { FaRegImage } from 'react-icons/fa6';
+import { getStrapiMedia } from '@/repositories/medias';
+import Image from 'next/image';
 
 register();
 
@@ -26,9 +28,37 @@ const ProductImageWidget = ({ images }) => {
                     {images.length > 0 &&
                         images.map((item, i) => (
                             <swiper-slide key={i} className='w-full overflow-hidden' lazy="true">
-                                <div className="swiper-zoom-container max-h-96">
+                                <div className="swiper-zoom-container h-96">
                                     {item.attributes ?
-                                        <NextImage media={item.attributes.formats.small} height={400} width={400} />
+                                        // <NextImage media={item.attributes.formats.small.formats.small} height={360} width={360} />
+                                        item.attributes.formats?
+                                        <Image
+                                            // layout='responsive'
+                                            className="object-contain"
+                                            //   width={width}
+                                            //   height={height}
+                                            fill
+                                            src={getStrapiMedia(item.attributes.formats.small.url)}
+                                            alt={item.attributes.alternativeText || ""}
+                                            quality={75}
+                                            aria-label={item.attributes.alternativeText || ""}
+                                            blurDataURL={getStrapiMedia(item.attributes.formats.small.url)}
+                                            placeholder="blur"
+                                        />
+                                        :
+                                        <Image
+                                            // layout='responsive'
+                                            className="object-contain"
+                                            //   width={width}
+                                            //   height={height}
+                                            fill
+                                            src={getStrapiMedia(item.attributes.url)}
+                                            alt={item.attributes.alternativeText || ""}
+                                            quality={75}
+                                            aria-label={item.attributes.alternativeText || ""}
+                                            blurDataURL={getStrapiMedia(item.attributes.url)}
+                                            placeholder="blur"
+                                        />
                                         : <FaRegImage className='h-60 w-60' />}
                                 </div>
                             </swiper-slide>
@@ -47,8 +77,21 @@ const ProductImageWidget = ({ images }) => {
                 >
                     {images.map((item, i) => (
                         <swiper-slide key={i} >
-                            {<div className={`${indexThumb === 0} ? 'border-siteColors-blue' : ''} cursor-pointer dark:border-black bg-white hover:border-siteColors-blue border-2 w-20 h-20 flex items-center`}>
-                                <NextImage media={item?.attributes.formats.thumbnail} height={80} width={80} />
+                            {<div className={`${indexThumb === 0} ? 'border-siteColors-blue' : ''} cursor-pointer dark:border-black bg-white hover:border-siteColors-blue border-2 w-20 h-20 flex items-center relative`}>
+                                {/* <NextImage media={item?.attributes.formats.thumbnail} height={76} width={76} /> */}
+                                <Image
+                                    // layout='responsive'
+                                    className="object-contain"
+                                    //   width={width}
+                                    //   height={height}
+                                    fill
+                                    src={getStrapiMedia(item.attributes.url)}
+                                    alt={item.attributes.alternativeText || ""}
+                                    quality={75}
+                                    aria-label={item.attributes.alternativeText || ""}
+                                    blurDataURL={getStrapiMedia(item.attributes.url)}
+                                    placeholder="blur"
+                                />
                             </div>}
                         </swiper-slide>
                     ))}

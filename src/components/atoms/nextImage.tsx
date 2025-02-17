@@ -22,7 +22,7 @@ const NextImage = (props: IProps) => {
   return (
     <Image
       // layout='responsive'
-      // className="object-contain"
+      className="object-contain"
       width={width}
       height={height}
       src={getStrapiMedia(url)}
