@@ -22,6 +22,7 @@ export interface ProductCardProps {
                             data: {
                                 attributes: {
                                     name: string
+                                    alternativeText: string
                                     url: string
                                     formats: {
                                         thumbnail: IimageProps,
@@ -45,6 +46,7 @@ export interface ProductCardProps {
                         }
                         name: string
                         alternativeText: string
+                        url: string
                     }
                 }
             }
@@ -64,25 +66,48 @@ const ProductCard = (props: ProductCardProps) => {
                 <Link className="grid w-full place-content-center bg-white relative" href={`/product/${product.slug}`}
                     aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${product.name}`}>
                     {product.image.data ?
-                        <Image className="object-contain p-2"
-                            aria-label={`Φωτογραφία προϊόντος${product.name}`}
-                            loading="lazy"
-                            // layout='responsive'
-                            // width={product.image.data.attributes.width / 4}
-                            // height={product.image.data.attributes.height / 4}
-                            // fill
-                            src={getStrapiMedia(product.image.data.attributes.formats.small.url)}
-                            // src={`${process.env.NEXT_PUBLIC_API_URL}${props.prod.attributes.image.data.attributes.url}`}
-                            alt={product.image.data.attributes.alternativeText || ""}
-                            quality={75}
-                            sizes="300px"
-                            width={300}
-                            height={216}
-                            style={{
-                                width: 'auto',
-                                height: '216px',
-                            }}
-                        />
+                        product.image.data.attributes.formats ?
+                            <Image className="object-contain p-2"
+                                aria-label={`Φωτογραφία προϊόντος${product.name}`}
+                                loading="lazy"
+                                // layout='responsive'
+                                // width={product.image.data.attributes.width / 4}
+                                // height={product.image.data.attributes.height / 4}
+                                // fill
+                                src={getStrapiMedia(product.image.data.attributes.formats.small.url)}
+                                blurDataURL={getStrapiMedia(product.image.data.attributes.formats.small.url)}
+                                // src={`${process.env.NEXT_PUBLIC_API_URL}${props.prod.attributes.image.data.attributes.url}`}
+                                alt={product.image.data.attributes.alternativeText || ""}
+                                quality={75}
+                                sizes="300px"
+                                width={300}
+                                height={216}
+                                style={{
+                                    width: 'auto',
+                                    height: '216px',
+                                }}
+                            />
+                            :
+                            <Image className="object-contain p-2"
+                                aria-label={`Φωτογραφία προϊόντος${product.name}`}
+                                loading="lazy"
+                                // layout='responsive'
+                                // width={product.image.data.attributes.width / 4}
+                                // height={product.image.data.attributes.height / 4}
+                                // fill
+                                src={getStrapiMedia(product.image.data.attributes.url)}
+                                blurDataURL={getStrapiMedia(product.image.data.attributes.url)}
+                                // src={`${process.env.NEXT_PUBLIC_API_URL}${props.prod.attributes.image.data.attributes.url}`}
+                                alt={product.image.data.attributes.alternativeText || ""}
+                                quality={75}
+                                sizes="300px"
+                                width={300}
+                                height={216}
+                                style={{
+                                    width: 'auto',
+                                    height: '216px',
+                                }}
+                            />
                         :
                         <FaRegImage className='h-40 w-40 text-siteColors-purple dark:text-slate-200' />}
 

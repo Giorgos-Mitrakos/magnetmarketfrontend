@@ -107,18 +107,34 @@ const SuggestedProducts = async ({ product }: ProductProps) => {
                                 <Link className="grid h-48 w-full place-content-center bg-white relative" href={`/product/${prod.attributes.slug}`}
                                     aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${prod.attributes.name}`}>
                                     {prod.attributes.image.data ?
-                                        <Image className="object-contain p-2"
-                                            aria-label={`Φωτογραφία προϊόντος${prod.attributes.name}`}
-                                            // layout='responsive'
-                                            width={200}
-                                            height={200}
-                                            // fill
-                                            src={getStrapiMedia(prod.attributes.image.data.attributes.formats.small.url)}
-                                            // src={`${process.env.NEXT_PUBLIC_API_URL}${props.prod.attributes.image.data.attributes.url}`}
-                                            alt={prod.attributes.image.data.attributes.alternativeText || ""}
-                                            quality={75}
-                                            sizes="(max-width: 640px) 33vw, (max-width: 1024px) 17vw"
-                                        /> :
+                                        prod.attributes.image.data.attributes.formats ?
+                                            <Image className="object-contain p-2"
+                                                aria-label={`Φωτογραφία προϊόντος${prod.attributes.name}`}
+                                                // layout='responsive'
+                                                width={200}
+                                                height={200}
+                                                // fill
+                                                src={getStrapiMedia(prod.attributes.image.data.attributes.formats.small.url)}
+                                                blurDataURL={getStrapiMedia(prod.attributes.image.data.attributes.formats.small.url)}
+                                                // src={`${process.env.NEXT_PUBLIC_API_URL}${props.prod.attributes.image.data.attributes.url}`}
+                                                alt={prod.attributes.image.data.attributes.alternativeText || ""}
+                                                quality={75}
+                                                sizes="(max-width: 640px) 33vw, (max-width: 1024px) 17vw"
+                                            /> :
+                                            <Image className="object-contain p-2"
+                                                aria-label={`Φωτογραφία προϊόντος${prod.attributes.name}`}
+                                                // layout='responsive'
+                                                width={200}
+                                                height={200}
+                                                // fill
+                                                src={getStrapiMedia(prod.attributes.image.data.attributes.url)}
+                                                blurDataURL={getStrapiMedia(prod.attributes.image.data.attributes.url)}
+                                                // src={`${process.env.NEXT_PUBLIC_API_URL}${props.prod.attributes.image.data.attributes.url}`}
+                                                alt={prod.attributes.image.data.attributes.alternativeText || ""}
+                                                quality={75}
+                                                sizes="(max-width: 640px) 33vw, (max-width: 1024px) 17vw"
+                                            />
+                                        :
                                         <FaRegImage className='h-40 w-40 text-siteColors-purple dark:text-slate-200' />}
                                 </Link>
                                 <div className='mt-1 h-28 flex flex-col justify-between border-b pb-2 dark:bg-slate-700'>

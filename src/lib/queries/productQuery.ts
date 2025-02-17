@@ -23,6 +23,7 @@ query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationAr
                       data{
                         attributes{
                           name
+                          alternativeText
                           url
                           formats
                         }
