@@ -120,8 +120,10 @@ query getCategory($category:String!){
             image{
                 data{
                   attributes{
-                    formats
+                    name
+                    alternativeText
                     url
+                    formats
                   }
                 }
             }
@@ -371,8 +373,10 @@ export const GET_MENU = gql`
             image{
                 data{
                     attributes{
-                        url
+                        name
                         alternativeText
+                        url
+                        formats
                     }
                 }
             }
@@ -384,7 +388,10 @@ export const GET_MENU = gql`
                     image{
                         data{
                             attributes{
+                                name
+                                alternativeText
                                 url
+                                formats
                             }
                         }
                     }
@@ -396,7 +403,10 @@ export const GET_MENU = gql`
                             image{
                                 data{
                                     attributes{
+                                        name
+                                        alternativeText
                                         url
+                                        formats
                                     }
                                 }
                             }

@@ -35,10 +35,10 @@ query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationAr
             image{
                 data{
                     attributes{
-                    name
-                    url
-                    alternativeText
-                    formats
+                      name
+                      alternativeText
+                      url
+                      formats
                     }
                 }
             }
@@ -315,7 +315,9 @@ query getCategoryProducts($slug:String!){
               data{
                 attributes{
                   name
+                  alternativeText
                   url
+                  formats
                 }
               }
             }
@@ -522,6 +524,7 @@ query getCategoryProducts($filters:ProductFiltersInput!){
                       data{
                         attributes{
                           name
+                          alternativeText
                           url
                           formats
                         }
@@ -674,8 +677,10 @@ query getProductPrice($filters:ProductFiltersInput!){
           image{
             data {
               attributes {
-                url
+                name
                 alternativeText
+                url
+                formats
               }
             }
           }
@@ -726,8 +731,9 @@ query getProductPrice($filters:ProductFiltersInput!,$sort:[String!]){
             data {
               attributes {
                 name
-                formats
                 alternativeText
+                url
+                formats
               }
             }
           }

@@ -9,11 +9,6 @@ import { useEffect, useRef } from 'react';
 // register();
 
 const HeroCarousel = ({ carousel }) => {
-
-
-  console.log("carousel:", carousel)
-
-
   const swiperRef = useRef(null);
 
   useEffect(() => {
