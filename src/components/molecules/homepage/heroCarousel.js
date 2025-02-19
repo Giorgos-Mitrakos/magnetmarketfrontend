@@ -47,7 +47,7 @@ const HeroCarousel = ({ carousel }) => {
       effect="fade"
     >
       {carousel.map((banner, i) =>
-        <swiper-slide key={i} lazy={false} class={`w-full h-full bg-white`}>{
+        <swiper-slide key={i} lazy={i === 0 ? false : true} class={`w-full h-full bg-white`}>{
           <Link href={banner.href} aria-label={banner.link_label} className={`cursor-pointer flex h-full w-full relative`}>
             {/* <NextImage media={banner.image.data.attributes} height={480} width={1280} /> */}
             <Image

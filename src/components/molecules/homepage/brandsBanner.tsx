@@ -31,7 +31,7 @@ const BrandsBanner = async ({ id, brands }: {
 }) => {
 
     return (
-        <section key={id} className='w-full'>
+        <section key={id} className='w-full h-60 py-8'>
             <h2 className="text-center text-siteColors-purple dark:text-slate-200 xs:text-2xl md:text-3xl font-bold">Brands</h2>
             <div className='flex h-28 items-center space-x-4 w-full overflow-x-auto bg-slate-200 rounded-md mt-4 p-4'>
                 {brands.data && brands.data.length > 0 &&

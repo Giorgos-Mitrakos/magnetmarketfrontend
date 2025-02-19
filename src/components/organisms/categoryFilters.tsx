@@ -83,15 +83,16 @@ const CategoryFilters = (props: CategoryFiltersProps) => {
         }));
 
     const category = props.category3 ? props.category3 : props.category2 ? props.category2 : props.category1
+    const level = props.category3 ? 3 : props.category2 ? 2 : 1
 
     const { data: brands, loading: loadingBrands, error: errorBrands }: { data: any, loading: boolean, error: any } = useApiRequest({
         method: 'POST', api: "/api/category/brandFilter",
-        variables: ({ name: category, searchParams: searchParamsArray }), jwt: ""
+        variables: ({ name: category, level: level, searchParams: searchParamsArray }), jwt: ""
     })
 
     const { data: filters, loading: loadingFilters, error: errorFilters }: {
         data: FilterProps[], loading: boolean, error: any
-    } = useApiRequest({ method: 'POST', api: "/api/category/categoryFilter", variables: ({ name: category, searchParams: searchParamsArray }), jwt: "" })
+    } = useApiRequest({ method: 'POST', api: "/api/category/categoryFilter", variables: ({ name: category, level: level, searchParams: searchParamsArray }), jwt: "" })
 
     return (
         <div className='mt-4 space-y-4'>

@@ -65,7 +65,7 @@ const CategoriesBanner = ({ id,
     })
 
     return (
-        <section key={id} className="w-full" >
+        <section key={id} className="w-full h-96 py-8" >
             <h2 className="text-center mb-8 text-siteColors-purple dark:text-slate-200 xs:text-2xl md:text-3xl font-bold rounded">Κατηγορίες</h2>
             <div className="flex overflow-x-auto scrollbar space-x-4 rounded-md px-4 py-6 dark:bg-siteColors-purple">
                 {categories.data && categories.data.length > 0 &&
