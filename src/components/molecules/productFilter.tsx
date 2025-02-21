@@ -27,7 +27,7 @@ const ProductFilter = (props: FilterProps) => {
         return filters
     })
 
-    useEffect(()=>{
+    useEffect(() => {
         const filters: string[] = []
         if (search) {
             search.forEach(filter => {
@@ -36,7 +36,7 @@ const ProductFilter = (props: FilterProps) => {
         }
 
         setSelectedFilters(filters)
-    },[searchParams])
+    }, [searchParams])
 
     const handleItemClick = (filter: string) => {
         const params = new URLSearchParams(searchParams)
@@ -56,13 +56,13 @@ const ProductFilter = (props: FilterProps) => {
     return (
         <div>
             <h2 className='border-b-2 border-black dark:border-slate-300 py-2 uppercase'>{props.title}</h2>
-            <ul className='mt-4 max-h-32 overflow-y-auto p-4 scrollbar cursor-pointer border shadow-sm rounded-sm bg-white dark:bg-slate-700'>
+            <ul className='mt-4 max-h-32 overflow-y-auto p-4 scrollbar cursor-pointer border shadow-sm rounded-md bg-white dark:bg-slate-700'>
                 {props.filters.map(filter => (
                     <li key={filter.slug ? filter.slug : filter.name} >
                         <input id={`${filter.name}-checkbox`} type="checkbox"
-                            checked={selectedFilters.includes(filter.name.toLowerCase())}
+                            checked={selectedFilters.includes(filter.slug ? filter.slug.toLowerCase() : filter.name.toLowerCase())}
                             disabled={filter.numberOfItems === 0}
-                            onChange={() => handleItemClick(filter.name)}
+                            onChange={() => handleItemClick(filter.slug ? filter.slug : filter.name)}
                             className="w-4 h-4 text-gray-500 bg-gray-100 border-gray-300 rounded focus:ring-gray-300 
                         dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                             aria-label={`${selectedFilters.includes(filter.name.toLowerCase()) ? 'Αποεπιλογή' : 'Επιλογή'} φίλτρου ${filter.name}`} />

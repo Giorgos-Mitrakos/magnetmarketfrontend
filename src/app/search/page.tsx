@@ -37,11 +37,11 @@ async function getFilteredProducts(searchParams: ({ [key: string]: string | stri
     if (Κατηγορίες) {
         if (typeof Κατηγορίες !== "string") {
             for (let category of Κατηγορίες) {
-                filterCategoriesString.push({ name: { eq: `${category}` } })
+                filterCategoriesString.push({ slug: { eq: `${category}` } })
             }
         }
         else {
-            filterCategoriesString.push({ name: { eq: `${Κατηγορίες}` } })
+            filterCategoriesString.push({ slug: { eq: `${Κατηγορίες}` } })
         }
     }
 

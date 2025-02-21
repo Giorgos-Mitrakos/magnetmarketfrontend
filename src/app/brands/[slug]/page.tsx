@@ -1,10 +1,11 @@
 
 import Breadcrumb from "@/components/molecules/breadcrumb"
 import PaginationBar from "@/components/molecules/pagination"
+import BrandFilters from "@/components/organisms/brandFilters"
 import CategoryPageHeader from "@/components/organisms/categoryPageHeader"
+import MobileBrandFilters from "@/components/organisms/mobileBrandFilters"
 import MobileSearchFilters from "@/components/organisms/mobileSearchFilters"
 import ProductCard from "@/components/organisms/productCard"
-import SearchFilters from "@/components/organisms/searchFilters"
 import { organizationStructuredData } from "@/lib/helpers/structureData"
 import { GET_BRAND_PRODUCTS } from "@/lib/queries/brandsQuery"
 import { IimageProps } from "@/lib/queries/categoryQuery"
@@ -27,13 +28,30 @@ async function getBrandProducts({ brand, searchParams }: {
     searchParams: SearchParamsProps
 }) {
 
-    const { sort, page, pageSize } = searchParams
-    console.log(brand, searchParams)
+    const { sort, page, pageSize, Κατηγορίες } = searchParams
 
     let sortedBy: string = sort ? sort.toString() : 'price:asc'
 
     let filters: ({ [key: string]: object }) = {}
-    filters = { brand: { name: { eq: brand } } }
+    if (Κατηγορίες) {
+        if (typeof Κατηγορίες !== "string") {
+            filters = {
+                and: [
+                    { brand: { name: { eq: brand } } },
+                    { category: { slug: { in: Κατηγορίες } } }
+                ]
+            }
+        }
+        else {
+            filters = {
+                and: [
+                    { brand: { name: { eq: brand } } },
+                    { category: { slug: { eq: `${Κατηγορίες}` } } }
+                ]
+            }
+        }
+    }
+    else { filters = { brand: { name: { eq: brand } } } }
 
     const data = await requestSSR({
         query: GET_BRAND_PRODUCTS, variables: { filters: filters, pagination: { page: page ? Number(page) : 1, pageSize: pageSize ? Number(pageSize) : 12 }, sort: sortedBy }
@@ -148,9 +166,7 @@ export default async function SearchPage({ params, searchParams }:
             <div className="grid pt-4 w-full bg-white dark:bg-slate-800">
                 <div className="grid lg:grid-cols-4 gap-4">
                     <div className="hidden lg:flex lg:flex-col bg-slate-100 dark:bg-slate-700 p-4 rounded">
-                        {/* <Menu category1={category1} category2={category2 ? category2 : null} category3={category3 ? category3 : null} /> */}
-                        {/* <CategoryFilters category1={category1} category2={category2} category3={category3} searchParams={searchParams} /> */}
-                        <SearchFilters searchParams={searchParams} />
+                        <BrandFilters searchParams={searchParams} brand={params.slug} />
                     </div>
                     <div className="flex flex-col pr-4 col-span-3 w-full">
                         <CategoryPageHeader totalItems={response.products.meta.pagination.total} />
@@ -161,6 +177,8 @@ export default async function SearchPage({ params, searchParams }:
                                 </div>
                             ))}
                         </section>
+                        <MobileBrandFilters searchParams={searchParams} brand={params.slug} />
+                        {/* <MobileSearchFilters searchParams={searchParams} /> */}
                         {/* <MobileFilters category1={category1} category2={category2} category3={category3} searchParams={searchParams} /> */}
                         <PaginationBar totalItems={response.products.meta.pagination.total}
                             currentPage={response.products.meta.pagination.page}

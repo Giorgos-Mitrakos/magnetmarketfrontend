@@ -19,7 +19,7 @@ interface FilterProps {
     title: string,
     filterValues: {
         name: string,
-        slug?: string,
+        slug: string,
         numberOfItems: number
     }[]
 }

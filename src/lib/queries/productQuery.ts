@@ -280,6 +280,7 @@ query getCategoryProducts($slug:String!){
           data{
             attributes{
               name
+              slug
               logo{
                 data{
                   attributes{
@@ -431,6 +432,7 @@ export interface IProductProps {
             id: number
             attributes: {
               name: string
+              slug: string
               logo: {
                 data: {
                   attributes: {

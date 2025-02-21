@@ -18,6 +18,7 @@ export interface ProductCardProps {
                 data: {
                     attributes: {
                         name: string
+                        slug: string,
                         logo: {
                             data: {
                                 attributes: {

@@ -122,7 +122,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
 
     const brandsSitemap: MetadataRoute.Sitemap = brands.brands.data.filter(x => x.attributes.products.data.length > 0).map(brand => ({
-        url: `${process.env.NEXT_URL}/search?search=${brand.attributes.name}`,
+        url: `${process.env.NEXT_URL}/brands/${brand.attributes.slug}`,
         lastModified: brand.attributes.updatedAt.toString(),
         changeFrequency: "daily",
         priority: 0.6,

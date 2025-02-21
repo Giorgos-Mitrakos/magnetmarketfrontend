@@ -11,13 +11,13 @@ import Minicart from "./minicart";
 const SearchInput = dynamic(() => import('@/components/molecules/searchInput'), {
     ssr: false,
     loading: () => <p>Loading...</p>
-})
+  })
 
 export default function Header({ user }: { user: any }) {
     const [openMenu, setOpenMenu] = useState(false)
 
     return (
-        <div>
+        <div>            
             <header className="grid lg:grid-cols-3 p-2 w-full h-auto dark:bg-black"
                 aria-label="Κεφαλίδα">
                 <Logo />

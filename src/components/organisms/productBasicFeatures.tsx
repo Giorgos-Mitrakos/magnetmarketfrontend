@@ -2,6 +2,7 @@ import { getStrapiMedia } from "@/repositories/medias"
 import Image from "next/image"
 import ProductPrice from "../molecules/productPrice"
 import ProductAddToCart from "../molecules/productAddToCart"
+import Link from "next/link"
 
 export interface ProductProps {
   product: {
@@ -90,7 +91,8 @@ export interface ProductProps {
         data: {
           id: number
           attributes: {
-            name: string
+            name: string,
+            slug: string,
             logo: {
               data: {
                 attributes: {
@@ -162,14 +164,15 @@ const ProductBasicFeatures = ({ product }: ProductProps) => {
         {product.attributes.brand.data &&
           <div>
             {
-              product.attributes.brand.data.attributes.logo.data !== null ? <Image className="flex object-contain object-left"
-                aria-label={`Λογότυπο της εταιρίας ${product.attributes.brand.data.attributes.name}`}
-                src={getStrapiMedia(product.attributes.brand.data.attributes.logo.data.attributes.formats.thumbnail.url)}
-                fill
-                // width={36}
-                // height={36}
-                alt="Test"
-              /> :
+              product.attributes.brand.data.attributes.logo.data !== null ?
+                <Link className="h-full w-f" href={`/brands/${product.attributes.brand.data.attributes.slug}`}> <Image className="flex object-contain object-left"
+                  aria-label={`Λογότυπο της εταιρίας ${product.attributes.brand.data.attributes.name}`}
+                  src={getStrapiMedia(product.attributes.brand.data.attributes.logo.data.attributes.formats.thumbnail.url)}
+                  fill
+                  // width={36}
+                  // height={36}
+                  alt="Test"
+                /></Link> :
                 <h2 className="text-xl text-slate-500 dark:text-slate-300 font-bold uppercase"
                   aria-label={`Εταιρία: ${product.attributes.brand.data.attributes.name}`}>{product.attributes.brand.data.attributes.name}</h2>
             }</div>}

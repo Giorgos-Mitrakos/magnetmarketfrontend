@@ -5,8 +5,7 @@ export const GET_HOMEPAGE = gql`
 {
     homepage {
     data {
-      attributes {
-        
+      attributes {        
         body {
           __typename
           ... on ComponentHomepageBannerListProducts {
@@ -33,6 +32,8 @@ export const GET_HOMEPAGE = gql`
                   brand {
                     data {
                       attributes {
+                        name
+                        slug
                         logo {
                           data {
                             attributes {

@@ -115,6 +115,7 @@ query getBrandsSitemap{
     data{
       attributes{
         name
+        slug
         updatedAt
         products{
           data{
@@ -132,6 +133,7 @@ export interface IBrandsSitemapProps {
     data: {
       attributes: {
         name: string
+        slug: string
         updatedAt: Date
         products: {
           data: {

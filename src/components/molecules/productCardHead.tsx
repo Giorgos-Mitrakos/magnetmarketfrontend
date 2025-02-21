@@ -4,12 +4,14 @@ import Image from "next/image"
 import { getStrapiMedia } from "@/repositories/medias"
 import { IimageProps } from "@/lib/queries/categoryQuery"
 import useProductPrice from "@/hooks/useProductPrice"
+import Link from "next/link"
 
 export interface ProductCardHeadProps {
     brand: {
         data: {
             attributes: {
-                name: string
+                name: string,
+                slug: string,
                 logo: {
                     data: {
                         attributes: {
@@ -38,14 +40,16 @@ function ProductCardHead(props: ProductCardHeadProps) {
     return (
         <div className="grid grid-cols-2 h-full pb-2">
             <div className="relative w-full h-full">
-                {logo && <Image className="flex object-contain object-left"
-                    aria-label={`Λογότυπο της εταιρίας ${brandName}`}
-                    src={getStrapiMedia(logo)}
-                    fill
-                    // width={36}
-                    // height={36}
-                    alt={`Λογότυπο ${props.brand.data.attributes.name}`}
-                />}
+                {logo &&
+                    <Link className="h-full w-f" href={`/brands/${props.brand.data.attributes.slug}`}>
+                        <Image className="flex object-contain object-left"
+                            aria-label={`Λογότυπο της εταιρίας ${brandName}`}
+                            src={getStrapiMedia(logo)}
+                            fill
+                            // width={36}
+                            // height={36}
+                            alt={`Λογότυπο ${props.brand.data.attributes.name}`}
+                        /></Link>}
             </div>
             {!isLoading && discount && profit && isSale &&
                 <div className="absolute -top-4 -right-9 z-50 w-44 h-44">

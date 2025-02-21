@@ -3,8 +3,6 @@ import { GET_CATEGORY_BRANDS, GET_CATEGORY_FILTERS, GET_CATEGORY_INITIAL_FILTER_
 import { requestSSR } from '@/repositories/repository';
 import ProductFilter from '../molecules/productFilter';
 import { useApiRequest } from '@/repositories/clientRepository';
-import { json } from 'stream/consumers';
-import { string } from 'yup';
 
 interface SearchFiltersProps {
     searchParams: { [key: string]: string | string[] | undefined }
