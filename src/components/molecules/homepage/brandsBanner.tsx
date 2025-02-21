@@ -41,6 +41,7 @@ const BrandsBanner = async ({ id, brands }: {
                                 aria-label={`Link σε προϊόντα του κατασκευάστή ${brand.attributes.name}`}>
                                 {brand.attributes.logo.data.attributes.formats ?
                                     <Image
+                                        // className='opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500 ease-in-out'
                                         // className='object-contain'
                                         // fill
                                         height={36}
