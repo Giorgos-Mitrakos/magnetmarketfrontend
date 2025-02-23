@@ -18,7 +18,7 @@ export default function Header({ user }: { user: any }) {
 
     return (
         <div>            
-            <header className="grid lg:grid-cols-3 p-2 w-full h-auto dark:bg-black"
+            <header className="grid lg:grid-cols-3 p-2 w-full h-auto bg-white dark:bg-black"
                 aria-label="Κεφαλίδα">
                 <Logo />
                 <div className="hidden place-self-center w-2/3 lg:flex items-center justify-center">

@@ -10,7 +10,7 @@ query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationAr
             name
             slug
             weight
-            prod_chars {
+            prod_chars (pagination:{limit:-1}){
               name
               value
             }
@@ -66,7 +66,7 @@ query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationAr
             name
             slug
             weight
-            prod_chars {
+            prod_chars (pagination:{limit:-1}){
               name
               value
             }
@@ -327,7 +327,7 @@ query getCategoryProducts($slug:String!){
           metaRobots
           structuredData
         }
-        prod_chars{
+        prod_chars(pagination:{limit:-1}){
           id
           name
           value

@@ -27,7 +27,7 @@ export default function CartComp() {
         }
     ]
     return (
-        <div className=''>
+        <div className='mb-16'>
             <SiteFeatures />
             <Breadcrumb breadcrumbs={breadcrumbs} />
             <h1 className="text-xl sm:text-3xl my-4 lg:my-8 text-center font-bold text-slate-700 dark:text-slate-200">Καλάθι αγορών</h1>

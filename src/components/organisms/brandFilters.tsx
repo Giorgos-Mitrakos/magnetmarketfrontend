@@ -25,7 +25,7 @@ const BrandFilters = (props: SearchFiltersProps) => {
     return (
         <div className='space-y-4 p-4 rounded'>
             {loadingFilters && !filters ? <div>Loading</div> :
-                filters && filters.map(filter => (
+                filters && filters.length>0 && filters.map(filter => (
                     <ProductFilter key={filter.title} title={filter.title} filterBy={filter.title} filters={filter.filterValues} />
                 ))
 

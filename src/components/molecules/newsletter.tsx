@@ -33,10 +33,6 @@ const Newsletter = () => {
         onSubmit: async (values, { setErrors }) => {
             try {
                 let date = new Date()
-                // const variables = {
-                //     email: values.email,
-                //     publishedAt: date
-                // }
 
                 const myHeaders = new Headers();
 

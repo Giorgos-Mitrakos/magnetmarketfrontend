@@ -14,6 +14,7 @@ import EpayIcons from '@/components/molecules/epayIcons'
 import { Toaster } from 'sonner';
 import SessionProviders from '@/components/molecules/sessionProvider'
 import { getSession } from './api/auth/[...nextauth]/options'
+import Copyright from '@/components/atoms/copyright'
 
 const inter = Inter({ subsets: ['greek'] })
 
@@ -56,6 +57,7 @@ export default async function RootLayout({
               </main>
               <Footer />
               <EpayIcons />
+              <Copyright/>
               <CookieBanner />
               <MenuProvider>
                 <MobileTabMenu />
