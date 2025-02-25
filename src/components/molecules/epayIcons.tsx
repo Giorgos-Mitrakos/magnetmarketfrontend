@@ -5,7 +5,7 @@ import Maestro from "../../../public//ms_vrt_opt_pos_73_3x.png"
 
 const EpayIcons = () => {
     return (
-        <div className="flex justify-center items-center space-x-4 px-8 py-8">
+        <div className="flex justify-center bg-[#559be3] items-center space-x-4 px-8 ">
             <Image src={Visa} alt="Visa" 
                 height={32} />
             <Image src={Mastercard} alt="Mastercard" 

@@ -15,7 +15,7 @@ export interface FooterSectionProps {
 
 const FooterSection = (props: FooterSectionProps) => {
     return (
-        <div className='flex flex-col space-y-4 mr-8 mb-8 text-siteColors-purple dark:text-slate-300'>
+        <div className='flex flex-col space-y-4 mr-8 mb-8 text-white'>
             <h2 className='text-lg uppercase font-semibold'
             aria-label={props.label}>{props.label}</h2>
             <ul>
@@ -23,7 +23,7 @@ const FooterSection = (props: FooterSectionProps) => {
                     <li key={link.id} className='w-auto'>
                         {link.isLink ?
                             <Link href={link.href} target={link.target} className='relative after:duration-300
-                            after:absolute after:content-[""] after:h-[1px] after:bg-siteColors-purple  dark:after:bg-slate-300 after:w-0 hover:after:w-full
+                            after:absolute after:content-[""] after:h-[1px] after:bg-white dark:after:bg-slate-300 after:w-0 hover:after:w-full
                             after:left-0 after:-bottom-[2px] after:rounded-xl'
                             aria-label={link.label}>
                                 {link.label}

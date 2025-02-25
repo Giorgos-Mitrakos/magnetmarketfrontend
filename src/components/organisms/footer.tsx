@@ -21,8 +21,8 @@ const Footer = async () => {
     const data = response.footer.data.attributes
 
     return (
-        <footer className="flex flex-wrap border-t-2 py-4 justify-between m-2 xs:m-4 sm:m-6 md:m-8">
-            <div className=" text-siteColors-purple dark:text-slate-300 space-y-4 mr-8 mb-8">
+        <footer className="flex flex-wrap border-t-2 py-4 bg-siteColors-lightblue justify-between px-2 xs:px-4 sm:px-6 md:px-8">
+            <div className=" text-white space-y-4 mr-8 mb-8">
                 <h2 className='text-lg uppercase font-semibold'
                     aria-label="Επικοινωνία">Επικοινωνία</h2>
                 <ul className="space-y-4">
