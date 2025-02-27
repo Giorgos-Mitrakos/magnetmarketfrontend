@@ -65,9 +65,9 @@ const CategoriesBanner = ({ id,
     })
 
     return (
-        <section key={id} className="w-full h-[23rem] py-8 bg-gradient-to-b from-siteColors-lightblue from-20% via-siteColors- via-50% to-siteColors-lightblue to-80% dark:bg-siteColors-purple rounded-md" >
+        <section key={id} className="w-full h-[23rem] py-8 bg-gradient-to-b from-siteColors-lightblue from-20% via-siteColors-blue via-50% to-siteColors-lightblue to-80% dark:from-siteColors-purple dark:from-10% dark:via-siteColors-pink dark:via-50% dark:to-siteColors-purple dark:to-90% rounded-md" >
             <h2 className="text-center mb-8 text-white dark:text-slate-200 xs:text-2xl md:text-3xl font-bold">Κατηγορίες</h2>
-            <div className="flex overflow-x-auto scrollbar space-x-4 x-4 p-8 dark:bg-siteColors-purple">
+            <div className="flex overflow-x-auto scrollbar space-x-4 x-4 p-8">
                 {categories.data && categories.data.length > 0 &&
                     categories.data.map(cat => (
                         <Link key={cat.id} href={cat.attributes.link} className="w-40">
