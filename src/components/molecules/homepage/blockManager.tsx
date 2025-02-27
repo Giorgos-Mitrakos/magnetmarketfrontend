@@ -1,12 +1,12 @@
 import SiteFeatures from "@/components/organisms/siteFeatures";
 import BrandsBanner from "./brandsBanner";
-import CategoriesBanner from "./categoriesBanner";
 import DoubleBanner from "./doubleBanner";
 import HotOrSale from "./hotOrSale";
 import ListProductsBanner from "./listProductsBanner";
 import SingleBanner from "./singleBanner";
 import TripleBanner from "./tripleBanner";
 import HeroBanners from "@/components/organisms/heroBanners";
+import CategoriesBanner from "./categoriesBanner";
 
 
 const getBlockComponent = ({ __typename, ...rest }: { __typename: string }, index: string) => {

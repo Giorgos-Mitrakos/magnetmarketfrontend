@@ -65,9 +65,9 @@ const CategoriesBanner = ({ id,
     })
 
     return (
-        <section key={id} className="w-full h-[25rem] py-8  bg-siteColors-lightblue rounded-md p" >
-            <h2 className="text-center mb-8 text-white dark:text-slate-200 xs:text-2xl md:text-3xl font-bold">Κατηγορίες</h2>
-            <div className="flex overflow-x-auto scrollbar space-x-4 x-4 p-8">
+        <section key={id} className="w-full h-[23rem] py-8 bg-gradient-to-b from-siteColors-lightblue from-20% via-siteColors- via-50% to-siteColors-lightblue to-90% dark:bg-siteColors-purple rounded-md" >
+            <h2 className="text-center mb-8 text-slate-200 dark:text-slate-200 xs:text-2xl md:text-3xl font-bold">Κατηγορίες</h2>
+            <div className="flex overflow-x-auto scrollbar space-x-4 x-4 p-8 dark:bg-siteColors-purple">
                 {categories.data && categories.data.length > 0 &&
                     categories.data.map(cat => (
                         <Link key={cat.id} href={cat.attributes.link} className="w-40">
@@ -102,7 +102,7 @@ const CategoriesBanner = ({ id,
                                         : <FaRegImage className="w-16 h-16 self-center" />}
                                 </p>
                             </div>
-                            <h2 className="break-words mt-4 text-wrap text-center text-sm text-white dark:text-slate-200 ">{cat.attributes.name}</h2>
+                            <h2 className="break-words mt-4 text-wrap text-center text-sm text-slate-200 dark:text-slate-200 ">{cat.attributes.name}</h2>
                         </Link>))}
             </div>
         </section>
