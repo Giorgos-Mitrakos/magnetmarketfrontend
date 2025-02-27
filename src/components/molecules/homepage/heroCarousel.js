@@ -47,15 +47,15 @@ const HeroCarousel = ({ carousel }) => {
       effect="fade"
     >
       {carousel.map((banner, i) =>
-        <swiper-slide key={i} lazy={i === 0 ? false : true} class={`w-full h-full  bg-slate-50`}>{
+        <swiper-slide key={i} lazy={i === 0 ? false : true} class={`w-full h-full bg-white`}>{
           <Link href={banner.href} aria-label={banner.link_label} className={`cursor-pointer flex h-full w-full relative`}>
             {/* <NextImage media={banner.image.data.attributes} height={480} width={1280} /> */}
             <Image
               // layout='responsive' 
               className={`object-contain px-1`}
-              width={1980}
-              height={600}
-              // fill
+              // width={1980}
+              // height={600}
+              fill
               priority={i === 1 ? true : false}
               src={getStrapiMedia(banner.image.data.attributes.url)}
               alt={banner.image.data.attributes.alternativeText || ""}

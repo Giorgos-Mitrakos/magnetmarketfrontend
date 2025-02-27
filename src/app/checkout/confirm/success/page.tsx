@@ -97,7 +97,7 @@ export default async function Success() {
   const lateDeviveryDate = addDays(deliveryDate, 6)
 
   return (
-    <section className="rounded-lg p-4 bg-gradient-to-tr from-siteColors-lightblue via-siteColors-blue to-siteColors-pink">
+    <section className="rounded-lg p-4 bg-gradient-to-tr from-siteColors-lightblue via-siteColors-blue to-siteColors-pink mb-16">
       <h1 className="text-2xl mb-4 font-semibold text-slate-200 text-center">Ευχαριστούμε για την παραγγελία!</h1>
       <h2 className="text-xl mb-4 font-semibold text-slate-200 text-center">Αρ. {data.order.data.id}</h2>
       <div className="flex justify-center flex-wrap gap-4">
