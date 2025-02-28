@@ -25,7 +25,7 @@ const HeaderActions = ({ user }: any) => {
     const { cartItems } = useContext(CartContext)
 
     return (
-        <div className="hidden place-self-end lg:flex lg:flex-col h-full w-40 mx-6">
+        <div className="hidden place-self-end lg:flex lg:flex-col h-full w-40">
             {status !== "loading" && <div className="flex flex-row-reverse w-full justify-between xs:grid xs:grid-cols-2">
                 <div className="flex flex-col group relative h-auto w-auto justify-start items-start">
                     <IconLink icon={<AiOutlineUser
