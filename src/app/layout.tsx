@@ -52,7 +52,7 @@ export default async function RootLayout({
                 }} />
               <Αnnouncement />
               <Header user={session?.user?.name?.split('@')[0]} />
-              <main className='mx-2 xs:mx-4 sm:mx-6 md:mx-8'>
+              <main className='mx-2 sm:mx-6 md:mx-8'>
                 {children}
               </main>
               <Footer />

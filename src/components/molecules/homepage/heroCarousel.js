@@ -1,6 +1,5 @@
 'use client'
 import Link from 'next/link';
-import NextImage from '../../atoms/nextImage';
 import { register } from 'swiper/element/bundle';
 import Image from 'next/image';
 import { getStrapiMedia } from '@/repositories/medias';
