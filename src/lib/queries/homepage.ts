@@ -228,6 +228,7 @@ export const GET_HOMEPAGE = gql`
                     url
                     name
                     alternativeText
+                    formats
                   }
                 }
               }

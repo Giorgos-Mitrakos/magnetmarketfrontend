@@ -1,12 +1,23 @@
-import SiteFeatures from "@/components/organisms/siteFeatures";
-import BrandsBanner from "./brandsBanner";
-import DoubleBanner from "./doubleBanner";
-import HotOrSale from "./hotOrSale";
-import ListProductsBanner from "./listProductsBanner";
-import SingleBanner from "./singleBanner";
-import TripleBanner from "./tripleBanner";
-import HeroBanners from "@/components/organisms/heroBanners";
-import CategoriesBanner from "./categoriesBanner";
+import dynamic from 'next/dynamic'
+// import SiteFeatures from "@/components/organisms/siteFeatures";
+// import BrandsBanner from "./brandsBanner";
+// import DoubleBanner from "./doubleBanner";
+// import HotOrSale from "./hotOrSale";
+// import ListProductsBanner from "./listProductsBanner";
+// import SingleBanner from "./singleBanner";
+// import TripleBanner from "./tripleBanner";
+// import HeroBanners from "@/components/organisms/heroBanners";
+// import CategoriesBanner from "./categoriesBanner";
+
+const HeroBanners = dynamic(() => import('@/components/organisms/heroBanners'), { loading: () => <p>Loading...</p>, })
+const BrandsBanner = dynamic(() => import('./brandsBanner'), { loading: () => <p>Loading...</p>, })
+const CategoriesBanner = dynamic(() => import('./categoriesBanner'), { loading: () => <p>Loading...</p>, })
+const SiteFeatures = dynamic(() => import('@/components/organisms/siteFeatures'), { loading: () => <p>Loading...</p>, })
+const DoubleBanner = dynamic(() => import('./doubleBanner'), { loading: () => <p>Loading...</p>, })
+const HotOrSale = dynamic(() => import('./hotOrSale'), { loading: () => <p>Loading...</p>, })
+const ListProductsBanner = dynamic(() => import('./listProductsBanner'), { loading: () => <p>Loading...</p>, })
+const SingleBanner = dynamic(() => import('./singleBanner'), { loading: () => <p>Loading...</p>, })
+const TripleBanner = dynamic(() => import('./tripleBanner'), { loading: () => <p>Loading...</p>, })
 
 
 const getBlockComponent = ({ __typename, ...rest }: { __typename: string }, index: string) => {

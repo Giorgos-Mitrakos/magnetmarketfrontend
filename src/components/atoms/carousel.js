@@ -14,7 +14,7 @@ const Carousel = ({ products }) => {
                 
                 // ref={swiperRef}
                 // class="flex w-full h-full"
-                space-between="4"
+                spaceBetween={4}
                 breakpoints={{
                     0: {
                         slidesPerView: 1,
@@ -34,8 +34,8 @@ const Carousel = ({ products }) => {
                     },
                 }}
                 // slides-per-view="4"
-                watch-slides-progress="true"
-                autoplay-delay="3500"
+                watchSlidesProgress
+                autoplay={{delay:3500}}
             // autoplay-disable-on-interaction="false"
             // navigation
             >
