@@ -41,7 +41,7 @@ const HeroCarousel = ({ carousel }) => {
               aria-label={banner.image.data.attributes.alternativeText || ""}
               blurDataURL={getStrapiMedia(banner.image.data.attributes.url)}
               placeholder="blur"
-              sizes="(max-width: 980px) 20vw,(max-width: 1400px) 25vw, 50vw"
+              sizes="(max-width: 980px) 50vw,(max-width: 1400px) 25vw, 50vw"
             ></Image>
           </Link>}
         </SwiperSlide>
