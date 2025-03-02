@@ -33,22 +33,25 @@ export default function MobileTabMenu() {
                 <SearchInput />
             </div>
             <div className='flex lg:hidden px-2 xs:px-4 text-2xl justify-between z-30 fixed bottom-0 w-full left-0 bg-siteColors-lightblue text-white shadow-topShadow'>
-                <Link href="/" className='py-4 xs:px-4' onClick={() => closeMenu()}>
-                    <AiOutlineHome />
+                <Link href="/" className='py-4 xs:px-4' onClick={() => closeMenu()}
+                aria-label="Σύνδεσμος ανακατεύθυνσης στην αρχική σελίδα">
+                    <AiOutlineHome aria-label="Κουμπί επιστροφής στην αρχική σελίδα"/>
                 </Link>
                 <button className='py-4 xs:px-4' onClick={toggleSearchDrawer}>
-                    <AiOutlineSearch />
+                    <AiOutlineSearch aria-label="Κουμπί εμφάνισης της αναζήτησης"/>
                 </button>
                 <button className='py-4 xs:px-4' onClick={toggleMenuDrawer}>
-                    <AiOutlineMenu />
+                    <AiOutlineMenu aria-label="Κύριο Μενού"/>
                 </button>
 
-                <Link href="/account" className='py-4 xs:px-4' onClick={() => closeMenu()}>
-                    <AiOutlineUser />
+                <Link href="/account" className='py-4 xs:px-4' onClick={() => closeMenu()}
+                aria-label="Σύνδεσμος ανακατεύθυνσης στο λογαριασμό σας">
+                    <AiOutlineUser aria-label="Κουμπί ανακατεύθυνσης στο λογαριασμό σας"/>
                 </Link>
                 <div className="inline-flex items-center group relative">
-                    <Link href="/shopping-cart/" className='py-4 xs:px-4' onClick={() => closeMenu()}>
-                        <FaOpencart />
+                    <Link href="/shopping-cart/" className='py-4 xs:px-4' onClick={() => closeMenu()}
+                    aria-label="Σύνδεσμος ανακατεύθυνσης στο καλάθι σας">
+                        <FaOpencart aria-label="Κουμπί ανακατεύθυνσης στο καλάθι σας"/>
                     </Link>
                     <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-siteColors-pink border-2 border-white rounded-full top-1 right-1 dark:border-gray-900">
                         {cartItems.reduce((previousValue, currentValue, currentIndex) => { return previousValue + currentValue.quantity }, 0)}

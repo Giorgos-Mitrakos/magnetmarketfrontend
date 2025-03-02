@@ -45,10 +45,10 @@ export default function CookieBanner() {
                         <p className="text-center">Χρησιμοποιούμε cookies για να κάνουμε ακόμα καλύτερη την εμπειρία σας στο site μας και για να διασφαλιστεί η αποτελεσματική λειτουργία της ιστοσελίδα μας. Επιλέγοντας «Αποδοχή» παρέχετε τη συγκατάθεση σας για τη χρήση των cookies, σύμφωνα με την πολιτική μας.</p>
                     </div>
                     <div className="flex mt-4 gap-2">
-                        <button className="px-4 py-2 text-white bg-red-400 hover:shadow-md" onClick={() => setCookieConsent(false)}>
+                        <button className="px-4 py-2 text-white font-semibold bg-red-600 hover:shadow-md" onClick={() => setCookieConsent(false)}>
                             Απόρριψη
                         </button>
-                        <button className="px-4 py-2 text-white bg-green-400 hover:shadow-md" onClick={() => setCookieConsent(true)}>
+                        <button className="px-4 py-2 text-white font-semibold bg-green-700 hover:shadow-md" onClick={() => setCookieConsent(true)}>
                             Αποδοχή
                         </button>
                     </div>

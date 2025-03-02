@@ -72,7 +72,8 @@ const CategoriesBanner = ({ id,
 
     return (
         <section key={id} className="w-full pt-8 bg-gradient-to-b from-siteColors-lightblue from-20% via-siteColors-blue via-50% to-siteColors-lightblue to-80% dark:from-siteColors-purple dark:from-10% dark:via-siteColors-pink dark:via-50% dark:to-siteColors-purple dark:to-90% rounded-md" >
-            <h2 className="text-center mb-8 text-white dark:text-slate-200 xs:text-2xl md:text-3xl font-bold">Κατηγορίες</h2>
+            <h2 className="text-center mb-8 text-white dark:text-slate-200 xs:text-2xl md:text-3xl font-bold"
+            aria-label="Κατηγορίες">Κατηγορίες</h2>
             <Swiper
                 init={false}
                 className="mySwiper h-64 p-8 rounded-md"
@@ -145,7 +146,7 @@ const CategoriesBanner = ({ id,
                                             : <FaRegImage className="w-16 h-16 self-center" />}
                                     </p>
                                 </div>
-                                <h2 className="break-words mt-4 text-wrap text-center text-sm text-slate-200 dark:text-slate-200 ">{cat.attributes.name}</h2>
+                                <h2 className="break-words mt-4 text-wrap text-center  text-sm text-white dark:text-slate-200 ">{cat.attributes.name}</h2>
                             </Link>
                         </SwiperSlide>))}
             </Swiper>
