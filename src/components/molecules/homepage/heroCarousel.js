@@ -7,10 +7,15 @@ import { EffectFade } from 'swiper/modules';
 
 import 'swiper/css';
 import 'swiper/css/effect-fade';
+import Head from 'next/head';
 
 const HeroCarousel = ({ carousel }) => {
 
   return (
+    <>
+    <Head>
+      <Link rel='preload' href={carousel[0].image.data.attributes.url}/>
+    </Head>
     <Swiper
       init={true}
       className="mySwiper h-full"
@@ -42,6 +47,7 @@ const HeroCarousel = ({ carousel }) => {
         </SwiperSlide>
       )}
     </Swiper>
+    </>
   );
 
 }
