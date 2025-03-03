@@ -76,7 +76,7 @@ const CustomerInfo = () => {
     }
 
     return (
-        <div className='grid mx-auto max-w-lg space-y-8 md:max-w-none md:grid-cols-2 md:space-y-0 md:gap-8'>
+        <div className='grid mb-8 mx-auto max-w-lg space-y-8 md:max-w-none md:grid-cols-2 md:space-y-0 md:gap-8'>
             <div className='mt-8'>
                 {loading ?
                     <div>Loading...</div>

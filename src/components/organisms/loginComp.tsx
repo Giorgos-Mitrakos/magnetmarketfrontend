@@ -74,9 +74,9 @@ export default function LoginComp() {
     });
 
     return (
-        <div className='grid lg:grid-cols-3 gap-4 mt-4'>
-            <div className='w-full h-full mt-11'>
-                <form className='grid gap-6 p-4 md:border-2 bg-white dark:bg-slate-700 mx-auto rounded-md shadow-sm'
+        <div className='grid mb-8 lg:grid-cols-3 gap-4'>
+            <div className='w-full h-full'>
+                <form className='grid gap-6 p-4 md:border-2 bg-white dark:bg-slate-800 mx-auto rounded-md shadow-sm'
                     method="post" action="/api/auth/callback/credentials">
                     <h2 className='text-center text-xl font-medium'>Συνδεθείτε</h2>
                     <div className='h-14'>

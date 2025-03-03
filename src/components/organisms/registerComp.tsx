@@ -90,9 +90,9 @@ export default function RegisterComp() {
     });
 
     return (
-        <div className='grid lg:grid-cols-3 gap-4 mt-4'>
-            <div className='w-full'>
-                <form className='grid gap-4 p-4 md:border-2 dark:bg-slate-800 mx-auto rounded-md shadow-sm'
+        <div className='flex justify-center gap-4 mb-8'>
+            <div className='w-full max-w-96 '>
+                <form className='grid gap-4 p-4 lg:border-2 dark:bg-slate-800 mx-auto rounded-md shadow-sm'
                     onSubmit={formik.handleSubmit}>
                     <h2 className='text-center text-xl font-medium'>Εγγραφείτε</h2>
                     <div className='h-14'>

@@ -76,7 +76,7 @@ export default async function Product({ params }:
   })
 
   const product = data.products.data[0]
-
+  
   const structuredDataImages = images.map(x => `${process.env.NEXT_PUBLIC_API_URL}${x.attributes.url}`)
 
   let structuredDataPrice = {}

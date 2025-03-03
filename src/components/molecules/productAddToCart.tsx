@@ -54,7 +54,7 @@ function ProductAddToCart({ product }: ProductProps) {
                         aria-label={`${data?.product.data.attributes.price} €`}>{data?.product.data.attributes.price} €</span>}
                 <h4 className="hidden xs:inline-block text-base text-lime-700 dark:text-lime-400"
                     aria-label={`${data?.product.data.attributes.status} €`}>{data?.product.data.attributes.status}</h4>
-                {product.attributes.image.data?<Image className="object-contain p-2"
+                {product.attributes.image.data?<Image className="object-contain p-2 h-16 w-16"
                     height={72}
                     width={72}
                     src={getStrapiMedia(product.attributes.image.data.attributes.url)}

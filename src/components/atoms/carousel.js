@@ -1,6 +1,7 @@
 'use client'
 import { Swiper, SwiperSlide } from 'swiper/react';
 import ProductCard from '../organisms/productCard';
+import { Autoplay } from 'swiper/modules';
 
 // Import Swiper styles
 import 'swiper/css';
@@ -9,11 +10,8 @@ const Carousel = ({ products }) => {
 
     return (
         <div>
-            <Swiper init={false}
+            <Swiper init={true}
                 className="mySwiper"
-                
-                // ref={swiperRef}
-                // class="flex w-full h-full"
                 spaceBetween={4}
                 breakpoints={{
                     0: {
@@ -33,11 +31,11 @@ const Carousel = ({ products }) => {
                         spaceBetween: 10
                     },
                 }}
-                // slides-per-view="4"
-                watchSlidesProgress
-                autoplay={{delay:3500}}
-            // autoplay-disable-on-interaction="false"
-            // navigation
+                autoplay={{
+                    delay: 3500,
+                    disableOnInteraction: false,
+                }}
+                modules={[Autoplay]}
             >
                 {products.data.map((product, i) =>
                     <SwiperSlide key={i}>

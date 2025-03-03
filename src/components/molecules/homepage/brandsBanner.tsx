@@ -4,9 +4,11 @@ import { IimageProps } from '@/lib/queries/categoryQuery';
 import { getStrapiMedia } from '@/repositories/medias';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Autoplay, Pagination } from 'swiper/modules';
 
 // Import Swiper styles
 import 'swiper/css';
+import 'swiper/css/pagination';
 
 const BrandsBanner = ({ id, brands }: {
     id: string,
@@ -38,7 +40,6 @@ const BrandsBanner = ({ id, brands }: {
         <section key={id} className='w-full '>
             <h2 className="text-center text-siteColors-purple mb-4 dark:text-slate-200 xs:text-2xl md:text-3xl font-bold">Brands</h2>
             <Swiper
-                init={false}
                 className="mySwiper h-36 p-8 rounded-md bg-slate-100"
                 breakpoints={{
                     0: {
@@ -72,7 +73,14 @@ const BrandsBanner = ({ id, brands }: {
                         slidesPerView: 10,
                     },
                 }}
-                autoplay
+                pagination={{
+                    clickable: true,
+                }}
+                autoplay={{
+                    delay: 3500,
+                    disableOnInteraction: false,
+                }}
+                modules={[Autoplay, Pagination]}
             >
                 {brands.data && brands.data.length > 0 &&
                     brands.data.map(brand => (brand.attributes.logo.data &&
