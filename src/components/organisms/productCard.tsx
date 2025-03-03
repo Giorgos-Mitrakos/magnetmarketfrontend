@@ -14,6 +14,18 @@ export interface ProductCardProps {
         attributes: {
             name: string
             slug: string
+            sku: string
+            mpn: string
+            barcode: string
+            price: number,
+            sale_price: number,
+            is_sale: boolean,
+            is_hot: boolean,
+            weight: number,
+            height: number,
+            width: number,
+            length: number,
+            status: string,
             brand: {
                 data: {
                     attributes: {
@@ -64,6 +76,8 @@ const ProductCard = (props: ProductCardProps) => {
 
     const product = props.prod.attributes
     const brand = product.brand
+
+    console.log(product)
 
     return (
         <div className="relative py-2 px-1 max-w-96 overflow-hidden">
@@ -132,7 +146,18 @@ const ProductCard = (props: ProductCardProps) => {
                     <p className="text-green-800 dark:text-green-400 text-sm font-semibold"
                         aria-label="Διαθεσιμότητα">Παράδοση σε 1 – 3 ημέρες</p>
                 </div>
-                <ProductCardPrice id={props.prod.id} />
+                <div className="flex justify-end items-center text-siteColors-purple xs:text-xl font-semibold mt-4">
+                    {product.is_sale && product.sale_price ?
+                        <div>
+                            <span className="text-sm line-through align-top mr-1 text-gray-500 dark:text-slate-300"
+                                aria-label={`${product.price.toFixed(2)} €`}>{product.price.toFixed(2)} €</span>
+                            <span className="dark:text-slate-200"
+                                aria-label={`${product.sale_price.toFixed(2)} €`}
+                            >{product.sale_price.toFixed(2)} €</span>
+                        </div>
+                        : <span className="dark:text-slate-200">{product.price.toFixed(2)} €</span>}
+                </div>
+                {/* <ProductCardPrice id={props.prod.id} /> */}
                 <ProductCardFoot product={props.prod} />
             </div>
 
