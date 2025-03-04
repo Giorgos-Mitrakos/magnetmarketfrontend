@@ -4,11 +4,11 @@ import { IimageProps } from '@/lib/queries/categoryQuery';
 import { getStrapiMedia } from '@/repositories/medias';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Autoplay, Pagination } from 'swiper/modules';
+import { Autoplay, Navigation } from 'swiper/modules';
 
 // Import Swiper styles
 import 'swiper/css';
-import 'swiper/css/pagination';
+import 'swiper/css/navigation';
 
 const BrandsBanner = ({ id, brands }: {
     id: string,
@@ -73,14 +73,12 @@ const BrandsBanner = ({ id, brands }: {
                         slidesPerView: 10,
                     },
                 }}
-                pagination={{
-                    clickable: true,
-                }}
+                navigation={true}
                 autoplay={{
-                    delay: 3500,
+                    delay: 1500,
                     disableOnInteraction: false,
                 }}
-                modules={[Autoplay, Pagination]}
+                modules={[Autoplay, Navigation]}
             >
                 {brands.data && brands.data.length > 0 &&
                     brands.data.map(brand => (brand.attributes.logo.data &&
