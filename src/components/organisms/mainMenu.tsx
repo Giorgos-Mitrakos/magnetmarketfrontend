@@ -1,5 +1,6 @@
 'use client'
-import { GET_MENU, IMenuProps } from "@/lib/queries/categoryQuery";
+import { IMenuProps } from "@/lib/interfaces/category";
+import { GET_MENU } from "@/lib/queries/categoryQuery";
 import { useNoRevalideteQuery } from "@/repositories/clientRepository";
 import Link from "next/link";
 import { useState } from "react";

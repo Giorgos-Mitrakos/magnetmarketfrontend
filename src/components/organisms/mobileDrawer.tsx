@@ -1,26 +1,21 @@
 "use client"
 
-import { GET_MENU, IMenuProps, IMenuSub2CategoryProps } from "@/lib/queries/categoryQuery"
+import { GET_MENU } from "@/lib/queries/categoryQuery"
 import { useNoRevalideteQuery } from "@/repositories/clientRepository"
 import Link from "next/link"
-import { SetStateAction, useContext, useEffect, useState } from "react"
+import {  useContext,  useState } from "react"
 import NextImage from "../atoms/nextImage"
 import { FaArrowLeftLong, FaRegImage } from "react-icons/fa6";
 import { MenuContext } from "@/context/menu"
 import { useRouter } from "next/navigation"
+import { IMenuProps, IMenuSub2CategoryProps } from "@/lib/interfaces/category"
+import { IImageAttr } from "@/lib/interfaces/image"
 
 interface IMenuCategoryProps {
     attributes: {
         name: string
         slug: string
-        image: {
-            data: {
-                attributes: {
-                    url: string
-                    alternativeText: string
-                }
-            }
-        }
+        image: { data: IImageAttr }
         categories: { data: IMenuSubCategoryProps[] }
     }
 }
@@ -29,14 +24,7 @@ interface IMenuSubCategoryProps {
     attributes: {
         name: string
         slug: string
-        image: {
-            data: {
-                attributes: {
-                    url: string
-                    alternativeText: string
-                }
-            }
-        }
+        image: { data: IImageAttr }
         categories: IMenuSub2CategoryProps
     }
 }

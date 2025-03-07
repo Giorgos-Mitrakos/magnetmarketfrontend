@@ -1,7 +1,6 @@
 import { requestSSR } from "@/repositories/repository"
-import { GET_CATEGORY_CHILDS, IcategoryChildsProps } from "../queries/categoryQuery"
-import { IBrandsData } from "../interfaces/brands"
-import { IImageAttr } from "../interfaces/image"
+import { GET_CATEGORY_CHILDS } from "../queries/categoryQuery"
+import { IcategoryChildsProps } from "../interfaces/category"
 
 function findCategoryChilds(categoryData: any, categoriesSlug: { slugs: string[] }) {
     for (let category of categoryData) {

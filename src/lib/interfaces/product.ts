@@ -117,6 +117,20 @@ export interface IProducts {
     }
 }
 
+export interface IProductPriceProps {
+  product: {
+    data: {
+      attributes: {
+        price: number
+        sale_price: number
+        is_hot: boolean
+        is_sale: boolean
+        status: string
+      }
+    }
+  }
+}
+
 
 export type TProductAttr = IProductAttr & Timage & TadditionalImages
     & IProductBrand & IProdChar & IProductCategory & ISeo & ISupplier

@@ -7,10 +7,10 @@ import SiteFeatures from "../organisms/siteFeatures";
 import MobileFilters from "../organisms/mobileFilters";
 import Script from 'next/script'
 import { requestSSR } from "@/repositories/repository";
-import { GET_CATEGORY_NAME, IcategoryNameProps } from "@/lib/queries/categoryQuery";
+import { GET_CATEGORY_NAME } from "@/lib/queries/categoryQuery";
 import Breadcrumb from "../molecules/breadcrumb";
 import { organizationStructuredData } from "@/lib/helpers/structureData";
-import { IcategoryProductsProps } from "@/lib/interfaces/category";
+import { IcategoryNameProps, IcategoryProductsProps } from "@/lib/interfaces/category";
 
 type pageProps = {
     params: {

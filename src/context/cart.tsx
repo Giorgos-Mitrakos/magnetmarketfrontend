@@ -1,13 +1,13 @@
 'use client'
 import { sendGAEvent } from '@next/third-parties/google'
-import { GET_CART_PRODUCTS, GET_PRODUCT_PRICE, IProductPriceProps } from '@/lib/queries/productQuery';
+import { GET_CART_PRODUCTS, GET_PRODUCT_PRICE } from '@/lib/queries/productQuery';
 import { getStrapiMedia } from '@/repositories/medias';
 import { fetcher } from '@/repositories/repository';
 import Image from 'next/image';
 import { createContext, useState, useEffect } from 'react'
 import { FaRegImage } from 'react-icons/fa6';
 import { toast } from 'sonner';
-import { IProducts } from '@/lib/interfaces/product';
+import { IProductPriceProps, IProducts } from '@/lib/interfaces/product';
 
 export interface ICartItem {
   id: number,

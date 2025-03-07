@@ -1,6 +1,7 @@
 "use client"
 
-import { GET_PRODUCT_PRICE, IProductPriceProps } from "@/lib/queries/productQuery";
+import { IProductPriceProps } from "@/lib/interfaces/product";
+import { GET_PRODUCT_PRICE } from "@/lib/queries/productQuery";
 import { fetcher } from "@/repositories/repository";
 import useSWR from 'swr'
 

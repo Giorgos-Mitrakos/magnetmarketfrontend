@@ -112,17 +112,6 @@ query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationAr
   }
 }`
 
-// export interface IcategoryProductsProps {
-//   id: number
-//   attributes: {
-//     name: string
-//     slug: string
-//     prod_chars: IProdChar[]
-//     brand: IProductBrand
-//     image: { data: IImageAttr }
-//   }
-// }
-
 export const GET_PRODUCT_PRICE = gql`
 query getProductPrice($id:ID!){
     product(id:$id){
@@ -137,20 +126,6 @@ query getProductPrice($id:ID!){
       }
     }
   }`
-
-export interface IProductPriceProps {
-  product: {
-    data: {
-      attributes: {
-        price: number
-        sale_price: number
-        is_hot: boolean
-        is_sale: boolean
-        status: string
-      }
-    }
-  }
-}
 
 export const GET_PRODUCT_BY_SLUG = gql`
 query getCategoryProducts($slug:String!){
@@ -308,15 +283,6 @@ query getCategoryProducts($slug:String!){
   }
 }`
 
-// export interface IProductProps {
-//   products: {
-//     data: {
-//       id: number
-//       attributes: IProduct
-//     }[]
-//   }
-// }
-
 export const GET_SUGGESTED_PRODUCTS = gql`
 query getCategoryProducts($filters:ProductFiltersInput!){
   products(filters: $filters,pagination:{limit:-1}){
@@ -370,32 +336,6 @@ query getCategoryProducts($filters:ProductFiltersInput!){
     }
   }
 }`
-
-// export interface IsuggestedProductsProps {
-//   products: {
-//     data: [{
-//       id: number
-//       attributes: {
-//         name: string
-//         slug: string
-//         price: number
-//         sale_price: number
-//         is_sale: boolean
-//         is_hot: boolean
-//         supplierInfo: {
-//           name: string
-//           wholesale: number
-//           in_stock: boolean
-//         }[]
-//         prod_chars: IProdChar[]
-//         brand: IProductBrand
-//         image: { data: IImageAttr }
-//       }
-//     }]
-//   }
-// }
-
-
 
 export const GET_CART_PRODUCTS = gql`
 query getProductPrice($filters:ProductFiltersInput!){
@@ -515,57 +455,4 @@ query getProductPrice($filters:ProductFiltersInput!,$sort:[String!]){
       }
     }
 }`
-
-// export interface IGetHotOrDealsProductsProps {
-//   products: {
-//     data: [{
-//       id: number
-//       attributes: {
-//         name: string
-//         slug: string
-//         sku: string
-//         mpn: string
-//         barcode: string
-//         price: number
-//         sale_price: number
-//         is_sale: boolean
-//         is_hot: boolean
-//         weight: number
-//         height: number
-//         width: number
-//         length: number
-//         status: string
-//         brand: IProductBrand
-//         image: { data: IImageAttr }
-//         category: {
-//           data: {
-//             attributes: {
-//               name: string
-//               slug: string
-//               filters: {
-//                 name: string
-//               }[]
-//               parents: {
-//                 data: {
-//                   attributes: {
-//                     name: string
-//                     slug: string
-//                     parents: {
-//                       data: {
-//                         attributes: {
-//                           name: string
-//                           slug: string
-//                         }
-//                       }[]
-//                     }
-//                   }
-//                 }[]
-//               }
-//             }
-//           }
-//         }
-//       }
-//     }]
-//   }
-// }
 

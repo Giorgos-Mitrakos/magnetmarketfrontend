@@ -3,7 +3,6 @@ export interface SiteFeatureProps {
     header: string;
     content: string;
     "aria-label": string;
-    // "aria-description": string;
 }
 
 const SiteFeature = (props: SiteFeatureProps) => {

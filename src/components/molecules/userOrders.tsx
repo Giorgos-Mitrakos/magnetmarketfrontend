@@ -2,7 +2,6 @@
 import { useApiRequest } from "@/repositories/clientRepository";
 import { useState } from "react";
 import { FaCaretUp, FaCaretDown, FaRegTrashCan, FaRegImage } from "react-icons/fa6";
-import NextImage from "../atoms/nextImage";
 import { getStrapiMedia } from "@/repositories/medias";
 import Image from "next/image";
 

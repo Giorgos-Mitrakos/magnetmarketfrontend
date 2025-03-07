@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { FaFilter } from "react-icons/fa6"
-import SearchFilters from "./searchFilters"
 import { useApiRequest } from "@/repositories/clientRepository"
 import ProductFilter from "../molecules/productFilter"
 

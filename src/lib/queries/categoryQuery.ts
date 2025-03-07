@@ -30,33 +30,6 @@ export const GET_CATEGORIES_MAPPING = gql`
     }
 }`
 
-export interface IcategoriesMappingProps {
-    categories: {
-        data: {
-            attributes: {
-                name: string
-                slug: string
-                categories: {
-                    data: {
-                        attributes: {
-                            name: string
-                            slug: string
-                            categories: {
-                                data: {
-                                    attributes: {
-                                        name: string
-                                        slug: string
-                                    }
-                                }[]
-                            }
-                        }
-                    }[]
-                }
-            }
-        }[]
-    }
-}
-
 export const GET_CATEGORY_CHILDS = gql`
 query getCategoryChilds($slug:String!){
     categories(filters:{slug:{eq:$slug}},pagination:{limit:-1}){
@@ -84,33 +57,6 @@ query getCategoryChilds($slug:String!){
         }
     }
 }`
-
-export interface IcategoryChildsProps {
-    categories: {
-        data: [{
-            attributes: {
-                name: string
-                slug: string
-                categories: {
-                    data: [{
-                        attributes: {
-                            name: string
-                            slug: string
-                            categories: {
-                                data: [{
-                                    attributes: {
-                                        name: string
-                                        slug: string
-                                    }
-                                }]
-                            }
-                        }
-                    }]
-                }
-            }
-        }]
-    }
-}
 
 export const GET_CATEGORY_METADATA = gql`
 query getCategory($category:String!){
@@ -140,26 +86,6 @@ query getCategory($category:String!){
         }
     }
 }`
-
-
-export interface IcategoryMetadataProps {
-    categories: {
-        data: [{
-            attributes: {
-                name: string
-                slug: string
-                image: { data: IImageAttr }
-                categories: {
-                    data: {
-                        attributes: {
-                            name: string
-                        }
-                    }[]
-                }
-            }
-        }]
-    }
-}
 
 export const GET_CATEGORY = gql`
 query getCategory($category:String!){
@@ -203,17 +129,6 @@ query getCategory($category:String!){
     }
 }`
 
-export interface IcategoryNameProps {
-    categories: {
-        data: {
-            attributes: {
-                name: string
-                slug: string
-            }
-        }[]
-    }
-}
-
 export const GET_CATEGORY_BRANDS = gql`
 query getCategoryBrands($filters:BrandFiltersInput!){
     brands(filters:$filters,sort:"name",pagination:{limit:-1}){
@@ -251,18 +166,6 @@ query getCategoryFilters($category:String!){
     
 }`
 
-export interface IcategoryFiltersProps {
-    categories: {
-        data: [{
-            attributes: {
-                filters: [{
-                    name: string
-                }]
-            }
-        }]
-    }
-}
-
 export const GET_CATEGORY_INITIAL_FILTER_VALUES = gql`
 query getCategoryFilters($filters:ProductFiltersInput!){
     products(filters:$filters,pagination: { limit: -1 }){
@@ -283,14 +186,6 @@ query getCategoryFilters($filters:ProductFiltersInput!){
             }
     }    
 }`
-
-export interface IcategoryFilterValuesProps {
-    products: {
-        data: {
-            attributes: IProductBrand & IProdChar[]
-        }[]
-    }
-}
 
 export const GET_MENU = gql`
 {
@@ -349,58 +244,3 @@ export const GET_MENU = gql`
         }
     }
 }`
-
-export interface IMenuSub2CategoryProps {
-    data: {
-        attributes: {
-            name: string
-            slug: string
-            image: {
-                data: {
-                    attributes: {
-                        url: string
-                        alternativeText: string
-                    }
-                }
-            }
-        }
-    }[]
-}
-
-export interface IMenuSubCategoryProps {
-    data: {
-        attributes: {
-            name: string
-            slug: string
-            image: {
-                data: {
-                    attributes: {
-                        url: string
-                        alternativeText: string
-                    }
-                }
-            }
-            categories: IMenuSub2CategoryProps
-        }
-    }[]
-}
-
-export interface IMenuProps {
-    categories: {
-        data: {
-            attributes: {
-                name: string
-                slug: string
-                image: {
-                    data: {
-                        attributes: {
-                            url: string
-                            alternativeText: string
-                        }
-                    }
-                }
-                categories: IMenuSubCategoryProps
-            }
-        }[]
-    }
-}

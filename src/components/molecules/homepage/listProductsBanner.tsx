@@ -1,4 +1,5 @@
 import Carousel from "@/components/atoms/carousel";
+import { IImageAttr } from "@/lib/interfaces/image";
 import { IProdChar, IProductBrand } from "@/lib/interfaces/product";
 
 const ListProductsBanner = ({ id, title, subtitle, products }: {
@@ -15,14 +16,7 @@ const ListProductsBanner = ({ id, title, subtitle, products }: {
         brand: {
           data: IProductBrand
         }
-        image: {
-          data: {
-            attributes: {
-              url: string
-              alternativeText: string
-            }
-          }
-        }
+        image: { data: IImageAttr }
       }
     }]
   }

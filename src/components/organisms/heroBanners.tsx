@@ -1,7 +1,5 @@
 // 'use client'
-import Image from "next/image"
 import HeroCarousel from "../molecules/homepage/heroCarousel"
-import dynamic from 'next/dynamic'
 import { ICarousel, IFixedHeroBanners } from "@/lib/queries/homepage"
 import HeroFixedBanners from "../molecules/homepage/heroFixedBanners"
 

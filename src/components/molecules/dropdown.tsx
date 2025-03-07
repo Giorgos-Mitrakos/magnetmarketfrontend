@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { DropdownFilter, DropdownItem } from '../organisms/categoryPageHeader';
 import { FaCaretDown } from 'react-icons/fa';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';

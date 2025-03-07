@@ -1,15 +1,11 @@
 "use client"
 import * as Yup from 'yup'
 import { ClientSafeProvider, LiteralUnion, getProviders, getCsrfToken, signIn } from "next-auth/react"
-import { getServerSession } from "next-auth/next"
 import Link from "next/link"
 import { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import { BuiltInProviderType } from 'next-auth/providers'
-import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai"
-import Credentials from 'next-auth/providers/credentials'
 import CustomInput from '@/components/atoms/input'
-// import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { useSearchParams } from 'next/navigation'
 import { FaBagShopping } from 'react-icons/fa6'
 

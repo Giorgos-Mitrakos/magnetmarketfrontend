@@ -50,17 +50,5 @@ export interface IfooterProps {
         }]
       }
     }
-    // attributes: {
-    //   Section: [{
-    //     id: string
-    //     label: string
-    //     links: [{
-    //       id: string
-    //       Label: string
-    //       url: string
-    //       isLink: boolean
-    //     }]
-    //   }]
-    // }
   }
 }

@@ -4,7 +4,6 @@ import Image from "next/image"
 import { getStrapiMedia } from "@/repositories/medias"
 import useProductPrice from "@/hooks/useProductPrice"
 import Link from "next/link"
-import { IImageAttr } from "@/lib/interfaces/image"
 import { IProductBrand } from "@/lib/interfaces/product"
 
 export interface ProductCardHeadProps extends IProductBrand {

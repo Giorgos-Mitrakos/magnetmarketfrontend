@@ -1,5 +1,5 @@
 "use client"
-import { FaHome, FaOpencart, FaSearch, } from 'react-icons/fa'
+import {  FaOpencart  } from 'react-icons/fa'
 import Link from "next/link";
 import { AiOutlineHome, AiOutlineMenu, AiOutlineSearch, AiOutlineUser } from 'react-icons/ai';
 import { useSession } from 'next-auth/react';

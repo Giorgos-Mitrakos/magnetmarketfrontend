@@ -1,9 +1,6 @@
 'use client'
-import { GET_CATEGORY_BRANDS, GET_CATEGORY_FILTERS, GET_CATEGORY_INITIAL_FILTER_VALUES, GET_NUMBER_OF_CATEGORY_BRAND_PRODUCTS, IcategoryFilterValuesProps, IcategoryFiltersProps } from '@/lib/queries/categoryQuery';
-import { requestSSR } from '@/repositories/repository';
 import ProductFilter from '../molecules/productFilter';
 import { useApiRequest } from '@/repositories/clientRepository';
-import { IProductBrand } from '@/lib/interfaces/product';
 
 interface SearchFiltersProps {
     searchParams: { [key: string]: string | string[] | undefined }
@@ -16,39 +13,6 @@ interface FilterProps {
         slug?: string,
         numberOfItems: number
     }[]
-}
-
-interface ProductProps {
-    id: number
-    attributes: {
-        name: string
-        slug: string
-        prod_chars: {
-            name: string
-            value: string
-        }[]
-        brand: {
-            data: IProductBrand
-        }
-        image: {
-            data: {
-                attributes: {
-                    url: string
-                    alternativeText: string
-                }
-            }
-        }
-    }
-}
-
-interface metaProps {
-    products: {
-        meta: {
-            pagination: {
-                total: number
-            }
-        }
-    }
 }
 
 const SearchFilters = (props: SearchFiltersProps) => {

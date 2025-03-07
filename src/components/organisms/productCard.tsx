@@ -5,8 +5,6 @@ import ProductCardPrice from "../atoms/productCardPrice"
 import ProductCardHead from "../molecules/productCardHead"
 import ProductCardFoot from "../molecules/productCardFoot"
 import { FaRegImage } from "react-icons/fa6"
-import { IImageAttr, Timage } from "@/lib/interfaces/image"
-import { IProductAttr, IProductBrand, IProductCategory } from "@/lib/interfaces/product"
 import { IcategoryProductsProps } from "@/lib/interfaces/category"
 
 

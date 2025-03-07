@@ -4,7 +4,6 @@ import Logo from "../atoms/logo";
 import { useState } from "react";
 import { FaBarsStaggered } from "react-icons/fa6";
 import MainMenu from "./mainMenu";
-// import SearchInput from "../molecules/searchInput";
 import dynamic from "next/dynamic";
 import Minicart from "./minicart";
 

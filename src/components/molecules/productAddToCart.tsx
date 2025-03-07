@@ -1,7 +1,7 @@
 "use client"
 
-import { useContext, useState } from "react"
-import { FaHeart, FaOpencart, } from "react-icons/fa"
+import { useContext } from "react"
+import {  FaOpencart, } from "react-icons/fa"
 import useProductPrice from "@/hooks/useProductPrice"
 import Image from "next/image"
 import { getStrapiMedia } from "@/repositories/medias"

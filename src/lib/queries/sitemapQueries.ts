@@ -57,31 +57,31 @@ export const GET_CATEGORIES_SITEMAP = gql`
 
 export interface IcategoriesSiteMapProps {
   categories: {
-    data: [{
+    data: {
       attributes: {
         name: string
         slug: string
         updatedAt: Date
         categories: {
-          data: [{
+          data: {
             attributes: {
               name: string
               slug: string
               updatedAt: Date
               categories: {
-                data: [{
+                data: {
                   attributes: {
                     name: string
                     slug: string
                     updatedAt: Date
                   }
-                }]
+                }[]
               }
             }
-          }]
+          }[]
         }
       }
-    }]
+    }[]
   }
 }
 

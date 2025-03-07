@@ -1,6 +1,5 @@
 'use client'
 
-import { fetcher } from "@/repositories/repository";
 import { useFormik } from "formik";
 import * as Yup from 'yup';
 import CustomInput from "../atoms/input";
