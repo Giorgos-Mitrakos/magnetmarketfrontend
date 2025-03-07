@@ -7,9 +7,10 @@ import MobileBrandFilters from "@/components/organisms/mobileBrandFilters"
 import MobileSearchFilters from "@/components/organisms/mobileSearchFilters"
 import ProductCard from "@/components/organisms/productCard"
 import { organizationStructuredData } from "@/lib/helpers/structureData"
+import { IImageAttr } from "@/lib/interfaces/image"
+import { IProduct } from "@/lib/interfaces/product"
 import { GET_BRAND_PRODUCTS } from "@/lib/queries/brandsQuery"
-import { IimageProps } from "@/lib/queries/categoryQuery"
-import { GET_FILTERED_PRODUCTS, IcategoryProductsProps } from "@/lib/queries/productQuery"
+import { GET_FILTERED_PRODUCTS } from "@/lib/queries/productQuery"
 import { requestSSR } from "@/repositories/repository"
 import { Metadata, ResolvingMetadata } from "next"
 import Script from "next/script"
@@ -59,47 +60,7 @@ async function getBrandProducts({ brand, searchParams }: {
 
     const res = data as {
         products: {
-            data: {
-                id: number
-                attributes: {
-                    name: string
-                    slug: string
-                    brand: {
-                        data: {
-                            attributes: {
-                                name: string
-                                slug: string
-                                logo: {
-                                    data: {
-                                        attributes: {
-                                            name: string
-                                            url: string
-                                            alternativeText: string
-                                            formats: {
-                                                thumbnail: IimageProps,
-                                                small: IimageProps
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    image: {
-                        data: {
-                            attributes: {
-                                name: string
-                                alternativeText: string
-                                url: string
-                                formats: {
-                                    thumbnail: IimageProps,
-                                    small: IimageProps
-                                }
-                            }
-                        }
-                    }
-                }
-            }[],
+            data: IProduct[],
             meta: {
                 pagination: {
                     total: number,
@@ -173,13 +134,11 @@ export default async function SearchPage({ params, searchParams }:
                         <section className="grid gap-1 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 place-content-center">
                             {response.products.data.map(product => (
                                 <div key={product.id}>
-                                    <ProductCard key={product.id} prod={product} />
+                                    <ProductCard key={product.id} product={product} />
                                 </div>
                             ))}
                         </section>
                         <MobileBrandFilters searchParams={searchParams} brand={params.slug} />
-                        {/* <MobileSearchFilters searchParams={searchParams} /> */}
-                        {/* <MobileFilters category1={category1} category2={category2} category3={category3} searchParams={searchParams} /> */}
                         <PaginationBar totalItems={response.products.meta.pagination.total}
                             currentPage={response.products.meta.pagination.page}
                             itemsPerPage={response.products.meta.pagination.pageSize} />

@@ -8,13 +8,14 @@ import { CartProvider } from '@/context/cart'
 import { ShippingProvider } from '@/context/shipping'
 import { MenuProvider } from '@/context/menu'
 import { Suspense } from 'react'
-import GoogleAnalytics from '@/components/molecules/homepage/google-analytics'
+// import GoogleAnalytics from '@/components/molecules/homepage/google-analytics'
 import CookieBanner from '@/components/molecules/homepage/cookie-banner'
 import EpayIcons from '@/components/molecules/epayIcons'
 import { Toaster } from 'sonner';
 import SessionProviders from '@/components/molecules/sessionProvider'
 import { getSession } from './api/auth/[...nextauth]/options'
 import Copyright from '@/components/atoms/copyright'
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 const inter = Inter({ subsets: ['greek'] })
 
@@ -35,7 +36,8 @@ export default async function RootLayout({
   return (
     <html lang="el">
       <Suspense fallback={null}>
-        <GoogleAnalytics GA_MEASUREMENT_ID={GA_MEASUREMENT_ID} />
+        <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />
+        {/* <GoogleAnalytics GA_MEASUREMENT_ID={GA_MEASUREMENT_ID} /> */}
       </Suspense>
       <body className={`${inter.className} h-full dark:bg-slate-800`}>
         <SessionProviders session={session}>
@@ -57,7 +59,7 @@ export default async function RootLayout({
               </main>
               <Footer />
               <EpayIcons />
-              <Copyright/>
+              <Copyright />
               <CookieBanner />
               <MenuProvider>
                 <MobileTabMenu />

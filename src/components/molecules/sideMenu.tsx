@@ -1,4 +1,5 @@
-import { GET_CATEGORY, IcategoryProps } from '@/lib/queries/categoryQuery';
+import { IcategoryProps } from '@/lib/interfaces/category';
+import { GET_CATEGORY } from '@/lib/queries/categoryQuery';
 import { requestSSR } from '@/repositories/repository';
 import Link from 'next/link';
 

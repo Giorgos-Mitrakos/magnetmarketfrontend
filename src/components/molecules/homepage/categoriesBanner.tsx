@@ -1,6 +1,5 @@
 'use client'
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { IimageProps } from "@/lib/queries/categoryQuery";
 import { getStrapiMedia } from "@/repositories/medias";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,6 +10,7 @@ import { Autoplay, Pagination } from 'swiper/modules';
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/pagination';
+import { IImageAttr } from '@/lib/interfaces/image';
 
 const CategoriesBanner = ({ id,
     categories }: {
@@ -36,19 +36,7 @@ const CategoriesBanner = ({ id,
                             }
                         }[]
                     }
-                    image: {
-                        data: {
-                            attributes: {
-                                url: string,
-                                name: string,
-                                alternativeText: string
-                                formats: {
-                                    thumbnail: IimageProps,
-                                    small: IimageProps
-                                }
-                            }
-                        }
-                    }
+                    image: { data: IImageAttr }
                 }
             }[]
         }

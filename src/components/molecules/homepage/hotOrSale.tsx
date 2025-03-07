@@ -1,5 +1,6 @@
 // import Carousel from "@/components/atoms/carousel";
-import { GET_HOT_OR_DEALS_PRODUCTS, IGetHotOrDealsProductsProps } from "@/lib/queries/productQuery";
+import { IProducts } from "@/lib/interfaces/product";
+import { GET_HOT_OR_DEALS_PRODUCTS } from "@/lib/queries/productQuery";
 import { fetcher } from "@/repositories/repository";
 import dynamic from 'next/dynamic'
 
@@ -38,7 +39,7 @@ const HotOrSale = async ({ id, title, type }: {
 
 
     const response = await fetcher({ query, variables: { filters, sort: sorted } })
-    const data = await response as IGetHotOrDealsProductsProps
+    const data = await response as IProducts
 
     return (
         <section key={id} className="space-y-4 relative w-full h-[42rem]" >

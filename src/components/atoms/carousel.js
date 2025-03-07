@@ -39,7 +39,7 @@ const Carousel = ({ products }) => {
             >
                 {products.data.map((product, i) =>
                     <SwiperSlide key={i}>
-                        <ProductCard prod={product} />
+                        <ProductCard product={product} />
                     </SwiperSlide>)
                 }
             </Swiper>

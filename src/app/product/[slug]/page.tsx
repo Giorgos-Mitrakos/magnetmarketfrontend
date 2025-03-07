@@ -5,11 +5,12 @@ import Newsletter from '@/components/molecules/newsletter';
 import ProductBasicFeatures from '@/components/organisms/productBasicFeatures';
 import SiteFeatures from '@/components/organisms/siteFeatures';
 import SuggestedProducts from '@/components/organisms/suggestedProducts';
-import { GET_PRODUCT_BY_SLUG, IProductProps } from '@/lib/queries/productQuery';
+import { GET_PRODUCT_BY_SLUG } from '@/lib/queries/productQuery';
 import { requestSSR } from '@/repositories/repository';
 import { FaRegImage } from "react-icons/fa";
 import Script from 'next/script'
 import { notFound } from 'next/navigation'
+import { IProducts } from "@/lib/interfaces/product";
 const ProductInfo = dynamic(() => import("@/components/organisms/productInfo"), {
   ssr: false,
   loading: () => <p>Loading...</p>
@@ -27,7 +28,7 @@ type MetadataProps = {
 
 
 async function getProductData(slug: string) {
-  const data: IProductProps | any = await requestSSR({
+  const data: IProducts | any = await requestSSR({
     query: GET_PRODUCT_BY_SLUG, variables: { slug: slug }
   });
 
@@ -35,7 +36,7 @@ async function getProductData(slug: string) {
     notFound();
   }
 
-  return data as IProductProps
+  return data as IProducts
 }
 
 export default async function Product({ params }:
@@ -214,8 +215,6 @@ export default async function Product({ params }:
     "@type": "BreadcrumbList",
     "itemListElement": breadcrumbList
   }
-
-
 
   const structuredData = []
   structuredData.push(productStructuredData)

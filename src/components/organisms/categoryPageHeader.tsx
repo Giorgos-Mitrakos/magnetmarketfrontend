@@ -1,5 +1,4 @@
 'use client'
-import { IcategoryProductsProps } from "@/lib/queries/productQuery";
 import Dropdown from "../molecules/dropdown";
 
 export interface DropdownItem {

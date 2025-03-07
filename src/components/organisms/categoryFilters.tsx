@@ -1,10 +1,11 @@
 'use client'
-import { GET_CATEGORY_BRANDS, GET_CATEGORY_FILTERS, GET_CATEGORY_INITIAL_FILTER_VALUES, GET_NUMBER_OF_CATEGORY_BRAND_PRODUCTS, IcategoryBrandsProps, IcategoryFilterValuesProps, IcategoryFiltersProps, IimageProps } from '@/lib/queries/categoryQuery';
+import { GET_CATEGORY_BRANDS, GET_CATEGORY_FILTERS, GET_CATEGORY_INITIAL_FILTER_VALUES, GET_NUMBER_OF_CATEGORY_BRAND_PRODUCTS, IcategoryFilterValuesProps, IcategoryFiltersProps } from '@/lib/queries/categoryQuery';
 import { requestSSR } from '@/repositories/repository';
 import ProductFilter from '../molecules/productFilter';
 import { useApiRequest } from '@/repositories/clientRepository';
 import { json } from 'stream/consumers';
 import { string } from 'yup';
+import { IProductBrand } from '@/lib/interfaces/product';
 
 export interface CategoryFiltersProps {
     category1: string,
@@ -33,26 +34,7 @@ interface ProductProps {
             name: string
             value: string
         }[]
-        brand: {
-            data: {
-                attributes: {
-                    name: string,
-                    slug: string,
-                    logo: {
-                        data: {
-                            attributes: {
-                                name: string
-                                url: string
-                                formats: {
-                                    thumbnail: IimageProps,
-                                    small: IimageProps
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        brand: { data: IProductBrand }
         image: {
             data: {
                 attributes: {

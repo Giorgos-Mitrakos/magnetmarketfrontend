@@ -1,46 +1,7 @@
 import { requestSSR } from "@/repositories/repository"
-import { GET_CATEGORY_CHILDS, IcategoryChildsProps, IimageProps } from "../queries/categoryQuery"
-import { IcategoryProductsProps } from "../queries/productQuery"
-
-interface ProductProps {
-    id: number
-    attributes: {
-        name: string
-        slug: string
-        prod_chars: {
-            name: string
-            value: string
-        }[]
-        brand: {
-            data: {
-                attributes: {
-                    name: string,
-                    slug: string,
-                    logo: {
-                        data: {
-                            attributes: {
-                                name: string
-                                url: string
-                                formats: {
-                                    thumbnail: IimageProps,
-                                    small: IimageProps
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        image: {
-            data: {
-                attributes: {
-                    url: string
-                    alternativeText: string
-                }
-            }
-        }
-    }
-}
+import { GET_CATEGORY_CHILDS, IcategoryChildsProps } from "../queries/categoryQuery"
+import { IBrandsData } from "../interfaces/brands"
+import { IImageAttr } from "../interfaces/image"
 
 function findCategoryChilds(categoryData: any, categoriesSlug: { slugs: string[] }) {
     for (let category of categoryData) {
@@ -126,41 +87,3 @@ export async function createFiltersForDbQuery({ category, categoryLevel, brands,
 
     return filters
 }
-
-// export function filtersProducts(products: IcategoryProductsProps, searchParams: ({ [key: string]: string | string[] })) {
-
-//     const { pageSize, page } = searchParams
-
-//     const itemsPerPage: number = pageSize ? Number(pageSize.toString()) : 12
-
-//     let currentPage: number = page && Number(page) > 1 ? Number(page) : 1
-
-//     let offset: number = (currentPage - 1) * itemsPerPage
-
-//     let filteredProducts: ProductProps[] = products.products.data
-
-//     for (const [key, value] of Object.entries(searchParams)) {
-//         if (key !== "sort" && key !== "pageSize" && key !== "page") {
-//             if (key === "brands") {
-//                 filteredProducts = filteredProducts.filter(product => value.includes(product.attributes.brand.data?.attributes.slug))
-
-//             }
-//             else {
-//                 filteredProducts = filteredProducts.filter(product => product.attributes.prod_chars.some(x =>
-//                     value.includes(x.value.toLowerCase())
-//                 ))
-//             }
-//         }
-//     }
-
-//     const pageProducts = filteredProducts.slice(offset, offset + itemsPerPage)
-
-//     return {
-//         allProducts: products.products.data,
-//         products: filteredProducts,
-//         pageProducts,
-//         totalItems: filteredProducts.length,
-//         currentPage,
-//         itemsPerPage
-//     }
-// }

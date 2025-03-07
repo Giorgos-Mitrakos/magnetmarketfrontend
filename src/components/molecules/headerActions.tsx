@@ -8,7 +8,6 @@ import { signIn, signOut, useSession } from "next-auth/react"
 import { useContext } from "react";
 import { CartContext } from "@/context/cart";
 import Minicart from "../organisms/minicart";
-import { toast } from "sonner";
 
 const SearchInput = dynamic(() => import('./searchInput'), { ssr: false })
 

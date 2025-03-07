@@ -1,5 +1,6 @@
 import { gql } from "graphql-request";
-import { IimageProps } from "./categoryQuery";
+import { IImageAttr } from "../interfaces/image";
+import { IProdChar, IProduct,  IProductBrand} from "../interfaces/product";
 
 export const GET_CATEGORY_PRODUCTS = gql`
 query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationArg!,$sort:[String!]){
@@ -111,51 +112,16 @@ query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationAr
   }
 }`
 
-export interface IcategoryProductsProps {
-  id: number
-  attributes: {
-    name: string
-    slug: string
-    prod_chars: {
-      name: string
-      value: string
-    }[]
-    brand: {
-      data: {
-        attributes: {
-          name: string,
-          slug: string,
-          logo: {
-            data: {
-              attributes: {
-                name: string
-                url: string
-                alternativeText: string
-                formats: {
-                  thumbnail: IimageProps,
-                  small: IimageProps
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    image: {
-      data: {
-        attributes: {
-          name: string
-          url: string
-          alternativeText: string
-          formats: {
-            thumbnail: IimageProps,
-            small: IimageProps
-          }
-        }
-      }
-    }
-  }
-}
+// export interface IcategoryProductsProps {
+//   id: number
+//   attributes: {
+//     name: string
+//     slug: string
+//     prod_chars: IProdChar[]
+//     brand: IProductBrand
+//     image: { data: IImageAttr }
+//   }
+// }
 
 export const GET_PRODUCT_PRICE = gql`
 query getProductPrice($id:ID!){
@@ -342,159 +308,14 @@ query getCategoryProducts($slug:String!){
   }
 }`
 
-export interface IProductProps {
-  products: {
-    data: {
-      id: number
-      attributes: {
-        name: string
-        slug: string
-        sku: string
-        mpn: string
-        barcode: string
-        description: string
-        short_description: string
-        price: number
-        sale_price: number
-        is_sale: boolean
-        is_hot: boolean
-        publishedAt: Date
-        supplierInfo: {
-          name: string
-          wholesale: number
-          in_stock: boolean
-        }[]
-        image: {
-          data: {
-            attributes: {
-              name: string
-              url: string
-              previewUrl: string
-              alternativeText: string
-              caption: string
-              formats: any
-              width: number
-              height: number
-              hash: string
-              ext: string
-              mime: string
-              size: string
-            }
-          }
-        }
-        additionalImages: {
-          data: {
-            attributes: {
-              name: string
-              url: string
-              previewUrl: string
-              alternativeText: string
-              caption: string
-              formats: any
-              width: number
-              height: number
-              hash: string
-              ext: string
-              mime: string
-              size: string
-            }
-          }[]
-        }
-        category: {
-          data: {
-            attributes: {
-              name: string
-              slug: string
-              filters: {
-                name: string
-              }[]
-              parents: {
-                data: {
-                  attributes: {
-                    name: string
-                    slug: string
-                    parents: {
-                      data: {
-                        attributes: {
-                          name: string
-                          slug: string
-                        }
-                      }[]
-                    }
-                  }
-                }[]
-              }
-            }
-          }
-        }
-        brand: {
-          data: {
-            id: number
-            attributes: {
-              name: string
-              slug: string
-              logo: {
-                data: {
-                  attributes: {
-                    name: string
-                    alternativeText: string
-                    url: string
-                    formats: {
-                      thumbnail: IimageProps
-                      medium: IimageProps
-                      small: IimageProps
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        status: string
-        seo: {
-          metaTitle: string
-          metaDescription: string
-          metaImage: {
-            data: {
-              attributes: {
-                name: string
-                alternativeText: string
-                url: string
-                formats: string
-              }
-            }
-          }
-          metaSocial: {
-            socialNetwork: string
-            title: string
-            description: string
-            image: {
-              data: {
-                attributes: {
-                  name: string
-                  url: string
-                }
-              }
-            }
-          }
-          keywords: string
-          metaRobots: string
-          structuredData: string
-        }
-        prod_chars: {
-          id: number
-          name: string
-          value: string
-        }[]
-        weight: number
-        height: number
-        width: number
-        length: number
-
-      }
-    }[]
-  }
-}
+// export interface IProductProps {
+//   products: {
+//     data: {
+//       id: number
+//       attributes: IProduct
+//     }[]
+//   }
+// }
 
 export const GET_SUGGESTED_PRODUCTS = gql`
 query getCategoryProducts($filters:ProductFiltersInput!){
@@ -550,103 +371,31 @@ query getCategoryProducts($filters:ProductFiltersInput!){
   }
 }`
 
-export interface IsuggestedProductsProps {
-  products: {
-    data: [{
-      id: number
-      attributes: {
-        name: string
-        slug: string
-        price: number
-        sale_price: number
-        is_sale: boolean
-        is_hot: boolean
-        supplierInfo: {
-          name: string
-          wholesale: number
-          in_stock: boolean
-        }[]
-        prod_chars: {
-          name: string
-          value: string
-        }[]
-        brand: {
-          data: {
-            attributes: {
-              name: string,
-              slug: string,
-              logo: {
-                data: {
-                  attributes: {
-                    name: string
-                    url: string
-                    formats: {
-                      thumbnail: IimageProps,
-                      small: IimageProps
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        image: {
-          data: {
-            attributes: {
-              name: string
-              url: string
-              formats: {
-                thumbnail: IimageProps,
-                small: IimageProps
-              }
-              alternativeText: string
-            }
-          }
-        }
-      }
-    }]
-  }
-}
+// export interface IsuggestedProductsProps {
+//   products: {
+//     data: [{
+//       id: number
+//       attributes: {
+//         name: string
+//         slug: string
+//         price: number
+//         sale_price: number
+//         is_sale: boolean
+//         is_hot: boolean
+//         supplierInfo: {
+//           name: string
+//           wholesale: number
+//           in_stock: boolean
+//         }[]
+//         prod_chars: IProdChar[]
+//         brand: IProductBrand
+//         image: { data: IImageAttr }
+//       }
+//     }]
+//   }
+// }
 
-export interface IGetCartProductsProps {
-  products: {
-    data: [{
-      id: number
-      attributes: {
-        name: string
-        slug: string
-        sku: string
-        mpn: string
-        barcode: string
-        price: number
-        sale_price: number
-        is_sale: boolean
-        is_hot: boolean
-        weight: number
-        height: number
-        width: number
-        length: number
-        status: string
-        brand: {
-          data: {
-            attributes: {
-              name: string,
-              slug: string
-            }
-          }
-        }
-        image: {
-          data: {
-            attributes: {
-              url: string
-              alternativeText: string
-            }
-          }
-        }
-      }
-    }]
-  }
-}
+
 
 export const GET_CART_PRODUCTS = gql`
 query getProductPrice($filters:ProductFiltersInput!){
@@ -711,6 +460,29 @@ query getProductPrice($filters:ProductFiltersInput!,$sort:[String!]){
           width
           length
           status
+          category {
+            data {
+              attributes {
+                name
+                parents {
+                  data {
+                    attributes {
+                      name
+                      slug                    
+                      parents {
+                        data {
+                          attributes {
+                            name
+                            slug
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
           brand {
             data{
                   attributes{
@@ -744,63 +516,56 @@ query getProductPrice($filters:ProductFiltersInput!,$sort:[String!]){
     }
 }`
 
-export interface IGetHotOrDealsProductsProps {
-  products: {
-    data: [{
-      id: number
-      attributes: {
-        name: string
-        slug: string
-        sku: string
-        mpn: string
-        barcode: string
-        price: number
-        sale_price: number
-        is_sale: boolean
-        is_hot: boolean
-        weight: number
-        height: number
-        width: number
-        length: number
-        status: string
-        brand: {
-          data: {
-            attributes: {
-              name: string,
-              slug: string
-              logo: {
-                data: {
-                  attributes: {
-                    name: string
-                    url: string
-                    formats: {
-                      thumbnail: IimageProps,
-                      small: IimageProps
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        image: {
-          data: {
-            attributes: {
-              formats: {
-                small: {
-                  url: string
-                  width: number
-                  height: number
-                }
-              }
-              name: string
-              alternativeText: string
-
-            }
-          }
-        }
-      }
-    }]
-  }
-}
+// export interface IGetHotOrDealsProductsProps {
+//   products: {
+//     data: [{
+//       id: number
+//       attributes: {
+//         name: string
+//         slug: string
+//         sku: string
+//         mpn: string
+//         barcode: string
+//         price: number
+//         sale_price: number
+//         is_sale: boolean
+//         is_hot: boolean
+//         weight: number
+//         height: number
+//         width: number
+//         length: number
+//         status: string
+//         brand: IProductBrand
+//         image: { data: IImageAttr }
+//         category: {
+//           data: {
+//             attributes: {
+//               name: string
+//               slug: string
+//               filters: {
+//                 name: string
+//               }[]
+//               parents: {
+//                 data: {
+//                   attributes: {
+//                     name: string
+//                     slug: string
+//                     parents: {
+//                       data: {
+//                         attributes: {
+//                           name: string
+//                           slug: string
+//                         }
+//                       }[]
+//                     }
+//                   }
+//                 }[]
+//               }
+//             }
+//           }
+//         }
+//       }
+//     }]
+//   }
+// }
 

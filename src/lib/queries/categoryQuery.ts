@@ -1,4 +1,6 @@
 import { gql } from "graphql-request";
+import { IImageAttr } from "../interfaces/image";
+import { IProdChar, IProductBrand } from "../interfaces/product";
 
 export const GET_CATEGORIES_MAPPING = gql`
 {
@@ -30,28 +32,28 @@ export const GET_CATEGORIES_MAPPING = gql`
 
 export interface IcategoriesMappingProps {
     categories: {
-        data: [{
+        data: {
             attributes: {
                 name: string
                 slug: string
                 categories: {
-                    data: [{
+                    data: {
                         attributes: {
                             name: string
                             slug: string
                             categories: {
-                                data: [{
+                                data: {
                                     attributes: {
                                         name: string
                                         slug: string
                                     }
-                                }]
+                                }[]
                             }
                         }
-                    }]
+                    }[]
                 }
             }
-        }]
+        }[]
     }
 }
 
@@ -139,17 +141,6 @@ query getCategory($category:String!){
     }
 }`
 
-export interface IimageProps {
-    name: string
-    hash: string
-    ext: string
-    mime: string
-    path: string
-    width: number
-    height: number
-    size: number
-    url: string
-}
 
 export interface IcategoryMetadataProps {
     categories: {
@@ -157,18 +148,7 @@ export interface IcategoryMetadataProps {
             attributes: {
                 name: string
                 slug: string
-                image: {
-                    data: {
-                        attributes: {
-                            formats: {
-                                thumbnail: IimageProps
-                                medium: IimageProps
-                                small: IimageProps
-                            }
-                            url: string
-                        }
-                    }
-                }
+                image: { data: IImageAttr }
                 categories: {
                     data: {
                         attributes: {
@@ -210,33 +190,6 @@ query getCategory($category:String!){
     }
 }`
 
-export interface IcategoryProps {
-    categories: {
-        data: [{
-            attributes: {
-                name: string
-                slug: string
-                categories: {
-                    data: [{
-                        attributes: {
-                            name: string
-                            slug: string
-                            categories: {
-                                data: [{
-                                    attributes: {
-                                        name: string
-                                        slug: string
-                                    }
-                                }]
-                            }
-                        }
-                    }]
-                }
-            }
-        }]
-    }
-}
-
 export const GET_CATEGORY_NAME = gql`
 query getCategory($category:String!){
     categories(filters:{slug:{eq:$category}},pagination:{limit:-1}){
@@ -252,12 +205,12 @@ query getCategory($category:String!){
 
 export interface IcategoryNameProps {
     categories: {
-        data: [{
+        data: {
             attributes: {
                 name: string
-                slug: string                
+                slug: string
             }
-        }]
+        }[]
     }
 }
 
@@ -272,18 +225,6 @@ query getCategoryBrands($filters:BrandFiltersInput!){
         }
       }
 }`
-
-export interface IcategoryBrandsProps {
-    brands: {
-        data: [{
-            attributes: {
-                name: string
-                slug: string
-                numberOfItems: number
-            }
-        }]
-    }
-}
 
 export const GET_NUMBER_OF_CATEGORY_BRAND_PRODUCTS = gql`
 query getNumberOfCategoryBrandProducts($filters:ProductFiltersInput!){
@@ -345,21 +286,9 @@ query getCategoryFilters($filters:ProductFiltersInput!){
 
 export interface IcategoryFilterValuesProps {
     products: {
-        data: [{
-            attributes: {
-                brand: {
-                    data: {
-                        attributes: {
-                            slug: string
-                        }
-                    }
-                }
-                prod_chars: [{
-                    name: string
-                    value: string
-                }]
-            }
-        }]
+        data: {
+            attributes: IProductBrand & IProdChar[]
+        }[]
     }
 }
 

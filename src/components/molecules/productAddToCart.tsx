@@ -5,37 +5,29 @@ import { FaHeart, FaOpencart, } from "react-icons/fa"
 import useProductPrice from "@/hooks/useProductPrice"
 import Image from "next/image"
 import { getStrapiMedia } from "@/repositories/medias"
-import { CartContext } from "@/context/cart"
-import { ProductProps } from "../organisms/productBasicFeatures"
+import { CartContext, ICartItem } from "@/context/cart"
 import { FaRegImage } from "react-icons/fa6"
+import { IProduct } from "@/lib/interfaces/product"
 
 
-function ProductAddToCart({ product }: ProductProps) {
+function ProductAddToCart({ product }: {product:IProduct}) {
     const { profit, discount, isSale, isLoading, error, data } = useProductPrice(product.id)
     const { cartItems, addToCart } = useContext(CartContext)
 
-    interface IItem {
-        id: number,
-        name: string,
-        slug: string,
-        image: string,
-        weight: number,
-        price: number,
-    }
-
-    const item = {
+    const item: ICartItem = {
         id: product.id,
         name: product.attributes.name,
         slug: product.attributes.slug,
         image: product.attributes.image.data?.attributes.url,
         weight: product.attributes.weight,
-        price: product.attributes.price
+        price: product.attributes.price,
+        brand: product.attributes.brand.data?.attributes.name || null,
+        quantity: 1,
+        isAvailable: true,
+        category: product.attributes.category
     }
-    const [qty, setQty] = useState(1)
 
-    const handleAddProductClick = (product: any) => {
-        product.quantity = qty
-        product.isAvailable = true
+    const handleAddProductClick = (product: ICartItem) => {
         addToCart(product)
     }
 
@@ -54,13 +46,13 @@ function ProductAddToCart({ product }: ProductProps) {
                         aria-label={`${data?.product.data.attributes.price} €`}>{data?.product.data.attributes.price} €</span>}
                 <h4 className="hidden xs:inline-block text-base text-lime-700 dark:text-lime-400"
                     aria-label={`${data?.product.data.attributes.status} €`}>{data?.product.data.attributes.status}</h4>
-                {product.attributes.image.data?<Image className="object-contain p-2 h-16 w-16"
+                {product.attributes.image.data ? <Image className="object-contain p-2"
                     height={72}
                     width={72}
                     src={getStrapiMedia(product.attributes.image.data.attributes.url)}
                     alt={product.attributes.image.data.attributes.name || "Φωτογραφία Προϊόντος"}
                     aria-label={product.attributes.image.data.attributes.name || "Φωτογραφία Προϊόντος"}
-                    quality={75} />:
+                    quality={75} /> :
                     <FaRegImage className='h-16 w-16' />}
             </div>
             <div className="w-full rounded-lg px-2 flex">

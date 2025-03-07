@@ -1,22 +1,45 @@
 'use client'
-import NextImage from '@/components/atoms/nextImage';
-import { GET_CART_PRODUCTS, GET_PRODUCT_PRICE, IGetCartProductsProps, IProductPriceProps } from '@/lib/queries/productQuery';
+import { sendGAEvent } from '@next/third-parties/google'
+import { GET_CART_PRODUCTS, GET_PRODUCT_PRICE, IProductPriceProps } from '@/lib/queries/productQuery';
 import { getStrapiMedia } from '@/repositories/medias';
 import { fetcher } from '@/repositories/repository';
 import Image from 'next/image';
 import { createContext, useState, useEffect } from 'react'
 import { FaRegImage } from 'react-icons/fa6';
 import { toast } from 'sonner';
+import { IProducts } from '@/lib/interfaces/product';
 
 export interface ICartItem {
   id: number,
   name: string,
+  brand: string | null,
   slug: string,
-  image: string,
+  image: string | null,
   price: number,
   quantity: number,
   weight: number,
-  isAvailable: boolean
+  isAvailable: boolean,
+  category: {
+    data: {
+      attributes: {
+        name: string
+        parents: {
+          data: {
+            attributes: {
+              name: string
+              parents: {
+                data: {
+                  attributes: {
+                    name: string
+                  }
+                }[]
+              }
+            }
+          }[]
+        }
+      }
+    }
+  }
 }
 
 interface ICartItemsContext {
@@ -60,7 +83,8 @@ export const CartProvider = ({ children }: any) => {
 
     if (itemIds.length > 0) {
       const response = await fetcher({ query, variables: { filters } })
-      const data = await response as IGetCartProductsProps
+      
+      const data = await response as IProducts
       const dbIds = data.products.data.map(item => item.id)
 
       const test = cart.map((cartItem) =>
@@ -74,13 +98,14 @@ export const CartProvider = ({ children }: any) => {
 
   const addToCart = async (item: ICartItem) => {
     try {
-      console.log(item)
+      console.log(item.category)
       const isItemInCart = cartItems.find((cartItem) => cartItem.id === item.id);
       const query = GET_PRODUCT_PRICE
       const data = await fetcher({ query, variables: { id: item.id } })
       const product = data as IProductPriceProps
       let itemPrice = product.product.data.attributes.is_sale && product.product.data.attributes.sale_price ? product.product.data.attributes.sale_price : product.product.data.attributes.price
       const addedQuantity = item.quantity | 1
+      const discount = product.product.data.attributes.is_sale && product.product.data.attributes.sale_price ? (product.product.data.attributes.price - product.product.data.attributes.sale_price).toFixed(2) : 0
 
       if (isItemInCart) {
         setCartItems(
@@ -93,6 +118,45 @@ export const CartProvider = ({ children }: any) => {
       } else {
         setCartItems([...cartItems, { ...item, quantity: addedQuantity, price: itemPrice, isAvailable: true }]);
       }
+
+      let categories: {
+        item_category?: string,
+        item_category2?: string,
+        item_category3?: string
+      } = {}
+
+      if (item.category.data?.attributes.parents.data[0]?.attributes.parents.data[0]?.attributes.name) {
+        categories.item_category = item.category.data?.attributes.parents.data[0]?.attributes.parents.data[0]?.attributes.name
+        categories.item_category2 = item.category.data?.attributes.parents.data[0]?.attributes.name
+        categories.item_category3 = item.category.data?.attributes.name
+      }
+      else if (item.category.data?.attributes.parents.data[0]?.attributes.name) {
+        categories.item_category = item.category.data?.attributes.parents.data[0]?.attributes.name
+        categories.item_category2 = item.category.data?.attributes.name
+      }
+      else if (item.category.data?.attributes.name) {
+        categories.item_category = item.category.data?.attributes.name
+      }
+
+      sendGAEvent('event', 'add_to_cart', {
+        value: {
+          currency: "EUR",
+          value: itemPrice * addedQuantity,
+          items: [
+            {
+              item_id: item.id,
+              item_name: item.name,
+              item_brand: item.brand,
+              discount: discount,
+              item_category: categories.item_category,
+              item_category2: categories.item_category2,
+              item_category3: categories.item_category3,
+              price: itemPrice,
+              quantity: addedQuantity
+            }
+          ]
+        }
+      })
       toast.success(() => (
         <>
           <p className='mb-4'>Ένα προϊόν προστέθηκε στο καλάθι σας!</p>

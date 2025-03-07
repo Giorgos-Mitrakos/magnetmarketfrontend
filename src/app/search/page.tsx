@@ -5,7 +5,8 @@ import MobileSearchFilters from "@/components/organisms/mobileSearchFilters"
 import ProductCard from "@/components/organisms/productCard"
 import SearchFilters from "@/components/organisms/searchFilters"
 import { organizationStructuredData } from "@/lib/helpers/structureData"
-import { GET_FILTERED_PRODUCTS, IcategoryProductsProps } from "@/lib/queries/productQuery"
+import { IcategoryProductsProps } from "@/lib/interfaces/category"
+import { GET_FILTERED_PRODUCTS } from "@/lib/queries/productQuery"
 import { requestSSR } from "@/repositories/repository"
 import { Metadata } from "next"
 import Script from "next/script"
@@ -153,7 +154,7 @@ export default async function SearchPage({ searchParams }: SearchProps) {
                             {response && response.products.data.map(product => (
                                 <div key={product.id}>
                                     {/* {JSON.stringify(product)} */}
-                                    <ProductCard key={product.id} prod={product} />
+                                    <ProductCard key={product.id} product={product} />
                                 </div>
                             ))}
                         </section>

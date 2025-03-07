@@ -1,8 +1,9 @@
 'use client'
-import { GET_CATEGORY_BRANDS, GET_CATEGORY_FILTERS, GET_CATEGORY_INITIAL_FILTER_VALUES, GET_NUMBER_OF_CATEGORY_BRAND_PRODUCTS, IcategoryBrandsProps, IcategoryFilterValuesProps, IcategoryFiltersProps, IimageProps } from '@/lib/queries/categoryQuery';
+import { GET_CATEGORY_BRANDS, GET_CATEGORY_FILTERS, GET_CATEGORY_INITIAL_FILTER_VALUES, GET_NUMBER_OF_CATEGORY_BRAND_PRODUCTS, IcategoryFilterValuesProps, IcategoryFiltersProps } from '@/lib/queries/categoryQuery';
 import { requestSSR } from '@/repositories/repository';
 import ProductFilter from '../molecules/productFilter';
 import { useApiRequest } from '@/repositories/clientRepository';
+import { IProductBrand } from '@/lib/interfaces/product';
 
 interface SearchFiltersProps {
     searchParams: { [key: string]: string | string[] | undefined }
@@ -27,24 +28,7 @@ interface ProductProps {
             value: string
         }[]
         brand: {
-            data: {
-                attributes: {
-                    name: string,
-                    slug: string,
-                    logo: {
-                        data: {
-                            attributes: {
-                                name: string
-                                url: string
-                                formats: {
-                                    thumbnail: IimageProps,
-                                    small: IimageProps
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            data: IProductBrand
         }
         image: {
             data: {

@@ -4,13 +4,14 @@ import { organizationStructuredData } from '@/lib/helpers/structureData'
 import { Metadata } from 'next'
 import { requestSSR } from '@/repositories/repository';
 import { notFound } from 'next/navigation';
-import { GET_BRANDS, IbrandsProps } from '@/lib/queries/brandsQuery';
+import { GET_BRANDS } from '@/lib/queries/brandsQuery';
 import NextImage from '@/components/atoms/nextImage';
 import Image from 'next/image';
 import Link from 'next/link';
+import { IBrands } from '@/lib/interfaces/brands';
 
 async function getBrandsData() {
-    const data: IbrandsProps | any = await requestSSR({
+    const data: IBrands | any = await requestSSR({
         query: GET_BRANDS
     });
 
@@ -18,7 +19,7 @@ async function getBrandsData() {
         notFound();
     }
 
-    return data as IbrandsProps
+    return data as IBrands
 }
 
 export default async function BrandsPage() {

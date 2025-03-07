@@ -1,5 +1,6 @@
 import { gql } from "graphql-request";
-import { IimageProps } from "./categoryQuery";
+import { IImageAttr } from "../interfaces/image";
+import { IProdChar } from "../interfaces/product";
 
 export const GET_HOMEPAGE = gql`
 {
@@ -29,6 +30,29 @@ export const GET_HOMEPAGE = gql`
                   width
                   length
                   status
+                  category {
+                    data {
+                      attributes {
+                        name
+                        parents {
+                          data {
+                            attributes {
+                              name
+                              slug                    
+                              parents {
+                                data {
+                                  attributes {
+                                    name
+                                    slug
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                   brand {
                     data {
                       attributes {
@@ -39,6 +63,7 @@ export const GET_HOMEPAGE = gql`
                             attributes {
                               name
                               url
+                              alternativeText
                               formats
                             }
                           }
@@ -262,42 +287,17 @@ export interface IHomepageProps {
               attributes: {
                 name: string
                 slug: string
-                prod_chars: {
-                  name: string
-                  value: string
-                }[]
+                prod_chars: IProdChar[]
                 brand: {
                   data: {
                     attributes: {
                       name: string,
                       slug: string,
-                      logo: {
-                        data: {
-                          attributes: {
-                            name: string,
-                            alternativeText: string
-                            formats: {
-                              thumbnail: IimageProps,
-                              small: IimageProps
-                            }
-                          }
-                        }
-                      }
+                      logo: { data: IImageAttr }
                     }
                   }
                 }
-                image: {
-                  data: {
-                    attributes: {
-                      name: string,
-                      alternativeText: string
-                      formats: {
-                        thumbnail: IimageProps,
-                        small: IimageProps
-                      }
-                    }
-                  }
-                }
+                image: { data: IImageAttr }
               }
             }]
           }
@@ -310,18 +310,7 @@ export interface IHomepageProps {
             }
             title: string
             subtitle: string
-            image: {
-              data: {
-                attributes: {
-                  name: string
-                  alternativeText: string
-                  formats: {
-                    thumbnail: IimageProps,
-                    small: IimageProps
-                  }
-                }
-              }
-            }
+            image: { data: IImageAttr }
           }
         }
       }

@@ -1,5 +1,6 @@
 import { gql } from "graphql-request";
-import { IimageProps } from "./categoryQuery";
+import { IImageAttr } from "../interfaces/image";
+import { IProductBrand } from "../interfaces/product";
 
 export const GET_BRAND_PRODUCTS = gql`
 query getBrandProducts($filters:ProductFiltersInput!,$pagination:PaginationArg!,$sort:[String!]){
@@ -7,8 +8,43 @@ query getBrandProducts($filters:ProductFiltersInput!,$pagination:PaginationArg!,
     data {
         id
         attributes {
-        name
-        slug
+          name
+          slug
+          sku
+          mpn
+          barcode
+          price
+          sale_price
+          is_sale
+          is_hot
+          weight
+          height
+          width
+          length
+          status
+          category {
+            data {
+              attributes {
+                name
+                parents {
+                  data {
+                    attributes {
+                      name
+                      slug                    
+                      parents {
+                        data {
+                          attributes {
+                            name
+                            slug
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         brand{
             data{
                 attributes{
@@ -72,25 +108,3 @@ query getBrands{
     }
   }
 }`
-
-export interface IbrandsProps {
-  brands: {
-    data: {
-      id: number
-      attributes: {
-        name: string
-        slug: string
-        logo: {
-          data: {
-            attributes: {
-              url: string
-              name: string
-              alternativeText: string
-              formats: { small: IimageProps }
-            }
-          }
-        }
-      }
-    }[]
-  }
-}

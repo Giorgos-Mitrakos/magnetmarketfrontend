@@ -1,25 +1,15 @@
-import ProductCard from "./productCard";
 import { requestSSR } from "@/repositories/repository";
-import { ProductProps } from "./productBasicFeatures";
 import ProductCardHead from "../molecules/productCardHead";
 import Image from "next/image";
 import Link from "next/link";
 import { getStrapiMedia } from "@/repositories/medias";
 import ProductCardPrice from "../atoms/productCardPrice";
-import ProductCardFoot from "../molecules/productCardFoot";
-import { GET_SUGGESTED_PRODUCTS, IsuggestedProductsProps } from "@/lib/queries/productQuery";
+import { GET_SUGGESTED_PRODUCTS } from "@/lib/queries/productQuery";
 import { FaRegImage } from "react-icons/fa6";
+import { IProduct, IProducts } from "@/lib/interfaces/product";
 
 
-// async function getProductData(slug: string) {
-//     const data = await requestSSR({
-//       query: GET_PRODUCT_BY_SLUG, variables: { slug: slug }
-//     });
-
-//     return data as IProductProps
-//   }
-
-const SuggestedProducts = async ({ product }: ProductProps) => {
+const SuggestedProducts = async ({ product }: { product: IProduct }) => {
 
     const categoryFilters = product.attributes.category.data.attributes.filters.map(x => x.name)
     const attributesFilter = product.attributes.prod_chars.filter(x => categoryFilters.includes(x.name))
@@ -80,7 +70,7 @@ const SuggestedProducts = async ({ product }: ProductProps) => {
     });
 
 
-    const sProducts = data as IsuggestedProductsProps
+    const sProducts = data as IProducts
     const suggestedProducts = sProducts.products.data.filter(x => x.id !== product.id).sort((a, b) => {
         return (b.attributes.price / 1.24 - b.attributes.supplierInfo.reduce((prev, current) => {
             return (prev.wholesale < current.wholesale) ? prev : current
@@ -88,12 +78,6 @@ const SuggestedProducts = async ({ product }: ProductProps) => {
             return (prev.wholesale < current.wholesale) ? prev : current
         }).wholesale)
     }).slice(0, 3)
-
-    // console.log(suggestedProducts.map(x=>x.attributes.price/1.24-x.attributes.supplierInfo.reduce((prev, current) => {
-    //     return (prev.wholesale < current.wholesale) ? prev : current
-    // }).wholesale))
-
-    // console.log(suggestedProducts.map(x=>x.attributes.price))
 
     return (
         <>

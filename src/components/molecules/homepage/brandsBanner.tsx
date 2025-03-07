@@ -1,6 +1,5 @@
 'use client'
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { IimageProps } from '@/lib/queries/categoryQuery';
 import { getStrapiMedia } from '@/repositories/medias';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -9,31 +8,11 @@ import { Autoplay, Navigation } from 'swiper/modules';
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/navigation';
+import { IBrandsData } from '@/lib/interfaces/brands';
 
 const BrandsBanner = ({ id, brands }: {
     id: string,
-    brands: {
-        data: {
-            id: string
-            attributes: {
-                name: string
-                slug: string
-                logo: {
-                    data: {
-                        attributes: {
-                            url: string
-                            name: string,
-                            alternativeText: string
-                            formats: {
-                                thumbnail: IimageProps,
-                                small: IimageProps
-                            }
-                        }
-                    }
-                }
-            }
-        }[]
-    },
+    brands: IBrandsData,
 }) => {
 
     return (

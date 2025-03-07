@@ -2,31 +2,12 @@
 
 import Image from "next/image"
 import { getStrapiMedia } from "@/repositories/medias"
-import { IimageProps } from "@/lib/queries/categoryQuery"
 import useProductPrice from "@/hooks/useProductPrice"
 import Link from "next/link"
+import { IImageAttr } from "@/lib/interfaces/image"
+import { IProductBrand } from "@/lib/interfaces/product"
 
-export interface ProductCardHeadProps {
-    brand: {
-        data: {
-            attributes: {
-                name: string,
-                slug: string,
-                logo: {
-                    data: {
-                        attributes: {
-                            name: string
-                            url: string
-                            formats: {
-                                thumbnail: IimageProps,
-                                small: IimageProps
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+export interface ProductCardHeadProps extends IProductBrand {
     id: number
 }
 

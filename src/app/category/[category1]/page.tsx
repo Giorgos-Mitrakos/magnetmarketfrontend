@@ -1,7 +1,8 @@
 import CategoryPageTemplate from "@/components/templates/categoryPage";
 import { createFiltersForDbQuery } from "@/lib/helpers/helpers";
-import { GET_CATEGORIES_MAPPING, GET_CATEGORY, GET_CATEGORY_METADATA, IcategoriesMappingProps, IcategoryMetadataProps, IcategoryProps } from "@/lib/queries/categoryQuery";
-import { GET_CATEGORY_PRODUCTS, IcategoryProductsProps } from "@/lib/queries/productQuery";
+import { IcategoryProductsProps } from "@/lib/interfaces/category";
+import { GET_CATEGORIES_MAPPING, GET_CATEGORY, GET_CATEGORY_METADATA, IcategoriesMappingProps, IcategoryMetadataProps } from "@/lib/queries/categoryQuery";
+import { GET_CATEGORY_PRODUCTS } from "@/lib/queries/productQuery";
 import { requestSSR } from "@/repositories/repository";
 import { Metadata, ResolvingMetadata } from 'next'
 

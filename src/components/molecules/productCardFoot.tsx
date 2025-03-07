@@ -2,35 +2,26 @@
 import { CartContext, ICartItem } from "@/context/cart"
 import { useContext } from "react"
 import { FaHeart, FaOpencart, FaRegEye } from "react-icons/fa"
+import { ProductCardProps } from "../organisms/productCard"
 
-export interface IItem {
-    id: number,
-    name: string,
-    slug: string,
-    image: string,
-    price: number,
-    weight: number,
-    quantity: number
-    isAvailable: boolean
-}
 
-function ProductCardFoot({ product }: any) {
+function ProductCardFoot({ product }: ProductCardProps) {
     const { cartItems, addToCart } = useContext(CartContext)
 
-    const item: IItem = {
+    const item: ICartItem = {
         id: product.id,
         name: product.attributes.name,
         slug: product.attributes.slug,
         image: product.attributes.image.data?.attributes.url || null,
         weight: product.attributes.weight,
         price: product.attributes.price,
+        brand: product.attributes.brand.data?.attributes.name || null,
         quantity: 1,
-        isAvailable: true
+        isAvailable: true,
+        category:product.attributes.category
     }
 
-    const handleAddProductClick = (product: IItem) => {
-        console.log(product.image)
-        product.quantity = 1
+    const handleAddProductClick = (product: ICartItem) => {
         addToCart(product)
     }
 
