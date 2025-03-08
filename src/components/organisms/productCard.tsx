@@ -16,7 +16,7 @@ const ProductCard = (props: ProductCardProps) => {
 
     const product = props.product.attributes
     const brand = product.brand
-    console.log("product:",product)
+    
     return (
         <div className="relative py-2 px-1 max-w-96 overflow-hidden">
             <div className="grid h-full grid-rows-cardLayout shadow-md hover:shadow-lg dark:shadow-slate-500 dark:hover:shadow-slate-600 bg-white dark:bg-slate-700 rounded-lg m-1 p-4">
