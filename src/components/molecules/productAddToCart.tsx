@@ -18,7 +18,7 @@ function ProductAddToCart({ product }: {product:IProduct}) {
         id: product.id,
         name: product.attributes.name,
         slug: product.attributes.slug,
-        image: product.attributes.image.data?.attributes.url,
+        image: product.attributes.image,
         weight: product.attributes.weight,
         price: product.attributes.price,
         brand: product.attributes.brand.data?.attributes.name || null,

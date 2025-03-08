@@ -133,7 +133,7 @@ export const CartProvider = ({ children }: any) => {
   }
 
   const addToCart = (item: ICartItem) => {
-    try {console.log(item)
+    try {
       const { isItemInCart, itemPrice, discount } = checkIfItemIsInCart(item)
       const addedQuantity = item.quantity | 1
 

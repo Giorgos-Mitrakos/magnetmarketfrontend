@@ -78,7 +78,7 @@ const CartItemTemplate = ({ item }: { item: ICartItem }) => {
                             // height={100}
                             // width={100}
                             fill
-                            src={getStrapiMedia(item.image)}
+                            src={getStrapiMedia(item.image.data.attributes.formats.thumbnail.url)}
                             alt={item.name}
                             quality={75}
                         />
