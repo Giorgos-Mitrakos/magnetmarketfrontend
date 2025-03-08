@@ -4,6 +4,7 @@ import { AiOutlineSearch } from "react-icons/ai";
 import { FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
 import useSpeechRecognition from "@/hooks/useSpeechRecognition";
 import { useRouter } from "next/navigation";
+import { sendGAEvent } from "@next/third-parties/google";
 
 function SearchInput() {
     const router = useRouter();
@@ -12,7 +13,12 @@ function SearchInput() {
 
     return (
         <div className="flex place-self-center w-full dark:text-slate-800">
-            <form onSubmit={() => { router.push(`/search?search=${text}`) }}
+            <form onSubmit={() => {
+                sendGAEvent('event', 'search', {
+                    text
+                });
+                router.push(`/search?search=${text}`)
+            }}
                 className="flex w-full justify-between border-b-2 bg-inherit border-siteColors-purple"
                 aria-label="Αναζήτηση">
                 {hasRecognitionSupport &&

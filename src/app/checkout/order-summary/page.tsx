@@ -122,14 +122,17 @@ const Confirm = () => {
                 // )
             }
 
-            clearCart()
-
-            if (newOrder.orderId)
+            if (newOrder.orderId) {
                 await saveCookies({
                     name: "magnet_market_order", value: {
                         orderId: newOrder.orderId
                     }
                 })
+
+                
+            }
+
+            clearCart()
 
             setProcessing(false)
 
@@ -178,7 +181,7 @@ const Confirm = () => {
                 bg-gradient-to-b from-siteColors-pink via-siteColors-purple to-siteColors-pink text-white
                 md:bg-gradient-to-br md:from-siteColors-lightblue md:to-siteColors-blue
                 hover:bg-gradient-to-b hover:from-siteColors-pink hover:via-siteColors-purple hover:to-siteColors-pink hover:text-white
-                disabled:bg-slate-400">{processing?"Περιμένετε...":'Ολοκλήρωση'}</button>
+                disabled:bg-slate-400">{processing ? "Περιμένετε..." : 'Ολοκλήρωση'}</button>
                 </ul>
             </div>
         </div>

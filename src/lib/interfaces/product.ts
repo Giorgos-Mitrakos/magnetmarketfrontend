@@ -24,6 +24,7 @@ interface IProdCharAttr {
     name: string
     value: string
 }
+
 export interface IProdChar {
     prod_chars: IProdCharAttr[]
 }

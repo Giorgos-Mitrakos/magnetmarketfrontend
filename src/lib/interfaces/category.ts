@@ -6,6 +6,8 @@ interface IcategoryProductsAttr {
     slug: string
     weight: number
     price: number
+    sale_price: number
+    is_sale: boolean
 }
 
 export type IcategoryProductsProps = {

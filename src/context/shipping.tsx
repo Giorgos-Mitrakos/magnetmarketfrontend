@@ -1,7 +1,8 @@
 'use client'
 import { createContext, useContext, useEffect, useState } from "react";
-import { CartContext, ICartItem } from "./cart";
+import { CartContext, createCategories, ICartItem } from "./cart";
 import { useSession } from "next-auth/react";
+import { sendGAEvent } from "@next/third-parties/google";
 
 interface IAddresses {
     different_shipping: boolean,
@@ -265,7 +266,81 @@ export const ShippingProvider = ({ children }: any) => {
     const savePaymentMethod = (payment: IPaymentMethod) => {
         setPaymentMethod(payment)
         localStorage.setItem("paymentMethod", JSON.stringify(payment));
+        sendPaymentEvent('add_payment_info')
     }
+
+    const sendPaymentEvent = (payment: string) => {
+        let items: any = []
+        cartItems.forEach((item) => {
+
+            let itemPrice = item.is_sale && item.sale_price ? item.sale_price : item.price
+
+            const discount = item.is_sale && item.sale_price ? (item.price - item.sale_price).toFixed(2) : 0
+
+            const categories = createCategories(item)
+
+            items.push({
+                item_id: item.id,
+                item_name: item.name,
+                item_brand: item.brand,
+                discount: discount,
+                item_category: categories.item_category,
+                item_category2: categories.item_category2,
+                item_category3: categories.item_category3,
+                price: itemPrice,
+                quantity: item.quantity
+            })
+        })
+        let eventValue = {
+            value: {
+                currency: "EUR",
+                value: cartTotal,
+                payment_type: payment,
+                items: items
+            }
+        }
+
+        sendGAEvent('event', 'add_payment_info', {
+            eventValue
+        })
+    };
+
+    const sendPurchaseEvent = (orderId: number) => {
+        let items: any = []
+        cartItems.forEach((item) => {
+
+            let itemPrice = item.is_sale && item.sale_price ? item.sale_price : item.price
+
+            const discount = item.is_sale && item.sale_price ? (item.price - item.sale_price).toFixed(2) : 0
+
+            const categories = createCategories(item)
+
+            items.push({
+                item_id: item.id,
+                item_name: item.name,
+                item_brand: item.brand,
+                discount: discount,
+                item_category: categories.item_category,
+                item_category2: categories.item_category2,
+                item_category3: categories.item_category3,
+                price: itemPrice,
+                quantity: item.quantity
+            })
+        })
+        let eventValue = {
+            value: {
+                currency: "EUR",
+                value: cartTotal,
+                transaction_id: orderId,
+                shipping: shippingCost,
+                items: items
+            }
+        }
+
+        sendGAEvent('event', 'purchase', {
+            eventValue
+        })
+    };
 
     const createOrder = async () => {
         if (!addresses)
@@ -303,6 +378,8 @@ export const ShippingProvider = ({ children }: any) => {
             }
 
             const json = await response.json()
+
+            sendPurchaseEvent(json.orderId)
 
             return {
                 status: json.status,

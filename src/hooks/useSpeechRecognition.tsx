@@ -1,3 +1,4 @@
+import { sendGAEvent } from '@next/third-parties/google';
 import { redirect, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react'
 
@@ -16,8 +17,13 @@ const useSpeechRecognition = () => {
 
     useEffect(() => {
         const getData = setTimeout(() => {
-            if (text !== "" && text.length > 2)
+            if (text !== "" && text.length > 2) {
+                sendGAEvent('event', 'search', {
+                    text
+                })
+
                 router.push(`/search?search=${text}`)
+            }
         }, 2000)
 
         return () => clearTimeout(getData)

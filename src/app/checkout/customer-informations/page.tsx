@@ -1,13 +1,14 @@
 "use client"
 
 import Addresses, { FormInputRef } from '@/components/organisms/addresses'
-import { useRef, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { useApiRequest } from '@/repositories/clientRepository';
 import { useSession } from 'next-auth/react';
 import CartAside from '@/components/organisms/cartItemsAside';
 import ApplyCoupon from '@/components/atoms/discountCoupon';
 import CartSummary from '@/components/atoms/cartSummary';
 import { useRouter } from 'next/navigation';
+import { CartContext } from '@/context/cart';
 
 
 export interface IProfile {
@@ -55,7 +56,7 @@ export interface IProfile {
 
 const CustomerInfo = () => {
     const router = useRouter()
-
+    const { sendEvent } = useContext(CartContext)
     const [processing, setProcessing] = useState(false)
 
     const { data: session, status } = useSession()
@@ -73,6 +74,7 @@ const CustomerInfo = () => {
             }
         }, 100);
         setProcessing(false)
+        sendEvent('add_shipping_info')
     }
 
     return (

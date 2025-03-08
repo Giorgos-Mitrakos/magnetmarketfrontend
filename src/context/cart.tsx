@@ -19,6 +19,8 @@ export interface ICartItem {
   quantity: number,
   weight: number,
   isAvailable: boolean,
+  is_sale: boolean
+  sale_price: number
   category: {
     data: {
       attributes: {
@@ -49,6 +51,7 @@ interface ICartItemsContext {
   increaseQuantity: (cartItem: ICartItem) => void;
   decreaseQuantity: (cartItem: ICartItem) => void;
   clearCart: () => void;
+  sendEvent: (event: string) => void;
   cartTotal: number;
 }
 
@@ -59,13 +62,45 @@ export const CartContext = createContext<ICartItemsContext>({
   increaseQuantity: () => { },
   decreaseQuantity: () => { },
   clearCart: () => { },
+  sendEvent: () => { },
   cartTotal: 0
 })
+
+export const createCategories = (item: ICartItem) => {
+  let categories: {
+    item_category?: string,
+    item_category2?: string,
+    item_category3?: string
+  } = {}
+
+  if (item.category.data?.attributes.parents.data[0]?.attributes.parents.data[0]?.attributes.name) {
+    categories.item_category = item.category.data?.attributes.parents.data[0]?.attributes.parents.data[0]?.attributes.name
+    categories.item_category2 = item.category.data?.attributes.parents.data[0]?.attributes.name
+    categories.item_category3 = item.category.data?.attributes.name
+  }
+  else if (item.category.data?.attributes.parents.data[0]?.attributes.name) {
+    categories.item_category = item.category.data?.attributes.parents.data[0]?.attributes.name
+    categories.item_category2 = item.category.data?.attributes.name
+  }
+  else if (item.category.data?.attributes.name) {
+    categories.item_category = item.category.data?.attributes.name
+  }
+
+  return categories
+}
 
 export const CartProvider = ({ children }: any) => {
   const [firstRender, setFirstRender] = useState(true);
   const [cartItems, setCartItems] = useState<ICartItem[]>([])
   const [cartTotal, setCartTotal] = useState(0);
+
+  const checkIfItemIsInCart = (item: ICartItem) => {
+    const isItemInCart = cartItems.find((cartItem) => cartItem.id === item.id);
+    let itemPrice = item.is_sale && item.sale_price ? item.sale_price : item.price
+    const discount = item.is_sale && item.sale_price ? (item.price - item.sale_price).toFixed(2) : 0
+
+    return { isItemInCart, itemPrice, discount }
+  }
 
   const synchronizeCart = async (cart: ICartItem[]) => {
 
@@ -83,7 +118,7 @@ export const CartProvider = ({ children }: any) => {
 
     if (itemIds.length > 0) {
       const response = await fetcher({ query, variables: { filters } })
-      
+
       const data = await response as IProducts
       const dbIds = data.products.data.map(item => item.id)
 
@@ -96,16 +131,10 @@ export const CartProvider = ({ children }: any) => {
     }
   }
 
-  const addToCart = async (item: ICartItem) => {
+  const addToCart = (item: ICartItem) => {
     try {
-      console.log(item.category)
-      const isItemInCart = cartItems.find((cartItem) => cartItem.id === item.id);
-      const query = GET_PRODUCT_PRICE
-      const data = await fetcher({ query, variables: { id: item.id } })
-      const product = data as IProductPriceProps
-      let itemPrice = product.product.data.attributes.is_sale && product.product.data.attributes.sale_price ? product.product.data.attributes.sale_price : product.product.data.attributes.price
+      const { isItemInCart, itemPrice, discount } = checkIfItemIsInCart(item)
       const addedQuantity = item.quantity | 1
-      const discount = product.product.data.attributes.is_sale && product.product.data.attributes.sale_price ? (product.product.data.attributes.price - product.product.data.attributes.sale_price).toFixed(2) : 0
 
       if (isItemInCart) {
         setCartItems(
@@ -116,47 +145,11 @@ export const CartProvider = ({ children }: any) => {
           )
         );
       } else {
-        setCartItems([...cartItems, { ...item, quantity: addedQuantity, price: itemPrice, isAvailable: true }]);
+        setCartItems([...cartItems, { ...item, quantity: addedQuantity, price: itemPrice, is_sale: item.is_sale, sale_price: item.sale_price, isAvailable: true }]);
       }
 
-      let categories: {
-        item_category?: string,
-        item_category2?: string,
-        item_category3?: string
-      } = {}
+      const categories = createCategories(item)
 
-      if (item.category.data?.attributes.parents.data[0]?.attributes.parents.data[0]?.attributes.name) {
-        categories.item_category = item.category.data?.attributes.parents.data[0]?.attributes.parents.data[0]?.attributes.name
-        categories.item_category2 = item.category.data?.attributes.parents.data[0]?.attributes.name
-        categories.item_category3 = item.category.data?.attributes.name
-      }
-      else if (item.category.data?.attributes.parents.data[0]?.attributes.name) {
-        categories.item_category = item.category.data?.attributes.parents.data[0]?.attributes.name
-        categories.item_category2 = item.category.data?.attributes.name
-      }
-      else if (item.category.data?.attributes.name) {
-        categories.item_category = item.category.data?.attributes.name
-      }
-
-      sendGAEvent('event', 'add_to_cart', {
-        value: {
-          currency: "EUR",
-          value: itemPrice * addedQuantity,
-          items: [
-            {
-              item_id: item.id,
-              item_name: item.name,
-              item_brand: item.brand,
-              discount: discount,
-              item_category: categories.item_category,
-              item_category2: categories.item_category2,
-              item_category3: categories.item_category3,
-              price: itemPrice,
-              quantity: addedQuantity
-            }
-          ]
-        }
-      })
       toast.success(() => (
         <>
           <p className='mb-4'>Ένα προϊόν προστέθηκε στο καλάθι σας!</p>
@@ -183,6 +176,29 @@ export const CartProvider = ({ children }: any) => {
         position: 'top-right',
       })
 
+      let eventValue = {
+        value: {
+          currency: "EUR",
+          value: itemPrice * addedQuantity,
+          items: [
+            {
+              item_id: item.id,
+              item_name: item.name,
+              item_brand: item.brand,
+              discount: discount,
+              item_category: categories.item_category,
+              item_category2: categories.item_category2,
+              item_category3: categories.item_category3,
+              price: itemPrice,
+              quantity: addedQuantity
+            }
+          ]
+        }
+      }
+
+      sendGAEvent('event', 'add_to_cart', {
+        eventValue
+      })
     } catch (error) {
       toast.error("Κάτι πήγε στραβά!", {
         position: 'top-right',
@@ -194,7 +210,7 @@ export const CartProvider = ({ children }: any) => {
 
   const removeFromCart = (item: ICartItem) => {
     try {
-      const isItemInCart = cartItems.find((cartItem) => cartItem.id === item.id);
+      const { isItemInCart, itemPrice, discount } = checkIfItemIsInCart(item)
 
       if (isItemInCart) {
         setCartItems(cartItems.filter((cartItem) => cartItem.id !== item.id));
@@ -203,6 +219,33 @@ export const CartProvider = ({ children }: any) => {
       toast.success("Ένα προϊόν αφαιρέθηκε από το καλάθι σας!", {
         position: 'top-right',
       })
+
+      const categories = createCategories(item)
+
+      let eventValue = {
+        value: {
+          currency: "EUR",
+          value: itemPrice * item.quantity,
+          items: [
+            {
+              item_id: item.id,
+              item_name: item.name,
+              item_brand: item.brand,
+              discount: discount,
+              item_category: categories.item_category,
+              item_category2: categories.item_category2,
+              item_category3: categories.item_category3,
+              price: itemPrice,
+              quantity: item.quantity
+            }
+          ]
+        }
+      }
+
+      sendGAEvent('event', 'remove_from_cart', {
+        eventValue
+      })
+
     } catch (error) {
       toast.error("Κάτι πήγε στραβά!", {
         position: 'top-right',
@@ -211,7 +254,7 @@ export const CartProvider = ({ children }: any) => {
   };
 
   const increaseQuantity = (item: ICartItem) => {
-    const isItemInCart = cartItems.find((cartItem) => cartItem.id === item.id);
+    const { isItemInCart, itemPrice, discount } = checkIfItemIsInCart(item)
 
     if (isItemInCart) {
       setCartItems(
@@ -221,11 +264,38 @@ export const CartProvider = ({ children }: any) => {
             : cartItem
         )
       );
+
+
+      const categories = createCategories(item)
+
+      let eventValue = {
+        value: {
+          currency: "EUR",
+          value: itemPrice,
+          items: [
+            {
+              item_id: item.id,
+              item_name: item.name,
+              item_brand: item.brand,
+              discount: discount,
+              item_category: categories.item_category,
+              item_category2: categories.item_category2,
+              item_category3: categories.item_category3,
+              price: itemPrice,
+              quantity: 1
+            }
+          ]
+        }
+      }
+
+      sendGAEvent('event', 'add_to_cart', {
+        eventValue
+      })
     }
   };
 
   const decreaseQuantity = (item: ICartItem) => {
-    const isItemInCart = cartItems.find((cartItem) => cartItem.id === item.id);
+    const { isItemInCart, itemPrice, discount } = checkIfItemIsInCart(item)
 
     if (isItemInCart) {
       setCartItems(
@@ -235,7 +305,70 @@ export const CartProvider = ({ children }: any) => {
             : cartItem
         )
       );
+
+      const categories = createCategories(item)
+
+      let eventValue = {
+        value: {
+          currency: "EUR",
+          value: itemPrice,
+          items: [
+            {
+              item_id: item.id,
+              item_name: item.name,
+              item_brand: item.brand,
+              discount: discount,
+              item_category: categories.item_category,
+              item_category2: categories.item_category2,
+              item_category3: categories.item_category3,
+              price: itemPrice,
+              quantity: 1
+            }
+          ]
+        }
+      }
+
+      sendGAEvent('event', 'remove_from_cart', {
+        eventValue
+      })
+
     }
+  };
+
+  const sendEvent = (event: string) => {
+    let items: any = []
+    cartItems.forEach((item) => {
+
+      let itemPrice = item.is_sale && item.sale_price ? item.sale_price : item.price
+
+      const discount = item.is_sale && item.sale_price ? (item.price - item.sale_price).toFixed(2) : 0
+
+      const categories = createCategories(item)
+
+      items.push({
+        item_id: item.id,
+        item_name: item.name,
+        item_brand: item.brand,
+        discount: discount,
+        item_category: categories.item_category,
+        item_category2: categories.item_category2,
+        item_category3: categories.item_category3,
+        price: itemPrice,
+        quantity: item.quantity
+      })
+    })
+    let eventValue = {
+      value: {
+        currency: "EUR",
+        value: cartTotal,
+        items: items
+      }
+    }
+
+    sendGAEvent('event', event, {
+      eventValue
+    })
+
   };
 
   const clearCart = () => {
@@ -307,6 +440,7 @@ export const CartProvider = ({ children }: any) => {
         increaseQuantity,
         decreaseQuantity,
         clearCart,
+        sendEvent,
         cartTotal,
       }}
     >

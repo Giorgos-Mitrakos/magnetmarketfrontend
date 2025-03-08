@@ -4,17 +4,18 @@ import CartSummary from "@/components/atoms/cartSummary"
 import ApplyCoupon from "@/components/atoms/discountCoupon"
 import Breadcrumb from "@/components/molecules/breadcrumb"
 import SiteFeatures from "@/components/organisms/siteFeatures"
-import { CartContext, ICartItem } from "@/context/cart"
+import { CartContext, createCategories, ICartItem } from "@/context/cart"
 import useProductPrice from "@/hooks/useProductPrice"
 import { getStrapiMedia } from "@/repositories/medias"
 import Image from "next/image"
 import Link from "next/link"
-import { useContext } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import { FaRegTrashCan } from "react-icons/fa6";
 import { useSession } from "next-auth/react"
 
 export default function CartComp() {
-    const { cartItems } = useContext(CartContext)
+    const hasPageBeenRendered = useRef(false)
+    const { cartItems, cartTotal, sendEvent } = useContext(CartContext)
     const { data: session, status } = useSession()
     const breadcrumbs = [
         {
@@ -26,6 +27,14 @@ export default function CartComp() {
             slug: `/shopping-cart`
         }
     ]
+
+    useEffect(() => {
+        if (cartItems.length > 0 && cartTotal > 0 && !hasPageBeenRendered.current) {
+            sendEvent('add_to_cart')
+            hasPageBeenRendered.current=(true)
+        }
+    }, [])
+
     return (
         <div className='mb-16'>
             <SiteFeatures />
@@ -41,7 +50,7 @@ export default function CartComp() {
                     <div className="flex flex-col space-y-2 border rounded">
                         {/* <ApplyCoupon /> */}
                         <CartSummary />
-                        <Link href={`${status === "authenticated" ? "/checkout/customer-informations" : "/login?callbackUrl=/checkout/customer-informations"}`}
+                        <Link onClick={()=>sendEvent('begin_checkout')} href={`${status === "authenticated" ? "/checkout/customer-informations" : "/login?callbackUrl=/checkout/customer-informations"}`}
                             className="flex justify-center items-center px-4 py-2 w-full rounded border md:text-slate-100 text-lg font-semibold
                         bg-gradient-to-b from-siteColors-pink via-siteColors-purple to-siteColors-pink text-white
                         md:bg-gradient-to-br md:from-siteColors-lightblue md:to-siteColors-blue

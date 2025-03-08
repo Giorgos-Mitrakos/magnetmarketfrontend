@@ -18,6 +18,8 @@ function ProductCardFoot({ product }: ProductCardProps) {
         brand: product.attributes.brand.data?.attributes.name || null,
         quantity: 1,
         isAvailable: true,
+        is_sale:product.attributes.is_sale,
+        sale_price:product.attributes.sale_price,
         category:product.attributes.category
     }
 
