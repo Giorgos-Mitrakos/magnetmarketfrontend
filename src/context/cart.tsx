@@ -7,14 +7,15 @@ import Image from 'next/image';
 import { createContext, useState, useEffect } from 'react'
 import { FaRegImage } from 'react-icons/fa6';
 import { toast } from 'sonner';
-import { IProductPriceProps, IProducts } from '@/lib/interfaces/product';
+import {  IProducts } from '@/lib/interfaces/product';
+import { IImageAttr } from '@/lib/interfaces/image';
 
 export interface ICartItem {
   id: number,
   name: string,
   brand: string | null,
   slug: string,
-  image: string | null,
+  image: { data: IImageAttr },
   price: number,
   quantity: number,
   weight: number,
@@ -132,7 +133,7 @@ export const CartProvider = ({ children }: any) => {
   }
 
   const addToCart = (item: ICartItem) => {
-    try {
+    try {console.log(item)
       const { isItemInCart, itemPrice, discount } = checkIfItemIsInCart(item)
       const addedQuantity = item.quantity | 1
 
@@ -161,11 +162,11 @@ export const CartProvider = ({ children }: any) => {
               {item.image ? <Image
                 width={48}
                 height={48}
-                src={getStrapiMedia(item.image)}
+                src={getStrapiMedia(item.image.data.attributes.formats.thumbnail.url)}
                 alt={item.name || ""}
                 quality={75}
                 aria-label={item.name || ""}
-                blurDataURL={getStrapiMedia(item.image)}
+                blurDataURL={getStrapiMedia(item.image.data.attributes.formats.thumbnail.url)}
                 placeholder="blur"
               /> :
                 <FaRegImage className='h-40 w-40 text-siteColors-purple dark:text-slate-200' />}
@@ -200,6 +201,7 @@ export const CartProvider = ({ children }: any) => {
         eventValue
       })
     } catch (error) {
+      console.log(error)
       toast.error("Κάτι πήγε στραβά!", {
         position: 'top-right',
       })

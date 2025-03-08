@@ -75,6 +75,7 @@ export const GET_HOMEPAGE = gql`
                     data {
                       attributes {
                         name
+                        url
                         formats
                         alternativeText
                       }

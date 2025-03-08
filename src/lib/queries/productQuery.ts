@@ -43,6 +43,29 @@ query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationAr
                     }
                 }
             }
+            category {
+              data {
+                attributes {
+                  name
+                  parents {
+                    data {
+                      attributes {
+                        name
+                        slug                    
+                        parents {
+                          data {
+                            attributes {
+                              name
+                              slug
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
         }
     }
     meta{
@@ -98,6 +121,29 @@ query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationAr
                     alternativeText
                     }
                 }
+            }
+            category {
+              data {
+                attributes {
+                  name
+                  parents {
+                    data {
+                      attributes {
+                        name
+                        slug                    
+                        parents {
+                          data {
+                            attributes {
+                              name
+                              slug
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
         }
     }

@@ -22,6 +22,8 @@ const ListProductsBanner = ({ id, title, subtitle, products }: {
   }
 }) => {
 
+  // console.log(products.data.map(x=>x.attributes.image.data.attributes.formats))
+
   return (
     <section key={id} className='my-4 py-4 rounded bg-gradient-to-b from-siteColors-purple via-siteColors-pink to-siteColors-lightblue px-2 sm:px-2'>
       <h2 className="  py-4 text-center text-white text-xs xs:text-lg md:text-3xl font-bold">{title}</h2>
