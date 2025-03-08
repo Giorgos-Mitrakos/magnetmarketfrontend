@@ -7,6 +7,8 @@ export default function CartSummary() {
     const { cartItems, cartTotal } = useContext(CartContext)
     const { shippingCost, paymentMethod, paymentCost,shippingMethod } = useContext(ShippingContext)
 
+    console.log(cartItems,cartTotal)
+
     const calculateTotalCosts = () => {
         
             const productsCost = cartTotal

@@ -405,7 +405,7 @@ export const CartProvider = ({ children }: any) => {
 
     if (cartItems)
       getCartTotal()
-  }, [cartItems])
+  }, [])
 
 
   useEffect(() => {
