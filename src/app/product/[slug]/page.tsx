@@ -221,8 +221,6 @@ export default async function Product({ params }:
   structuredData.push(productStructuredData)
   structuredData.push(breadcrumbStructuredData)
 
-  console.log(structuredData)
-
   return (
     <>
       <Script

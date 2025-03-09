@@ -1,4 +1,5 @@
 import './globals.css'
+import dynamic from "next/dynamic";
 import { Inter } from 'next/font/google'
 import Header from '@/components/organisms/header'
 import Footer from '@/components/organisms/footer'
@@ -7,8 +8,6 @@ import MobileTabMenu from '@/components/organisms/mobileTabMenu'
 import { CartProvider } from '@/context/cart'
 import { ShippingProvider } from '@/context/shipping'
 import { MenuProvider } from '@/context/menu'
-import { Suspense } from 'react'
-// import GoogleAnalytics from '@/components/molecules/homepage/google-analytics'
 import CookieBanner from '@/components/molecules/homepage/cookie-banner'
 import EpayIcons from '@/components/molecules/epayIcons'
 import { Toaster } from 'sonner';
@@ -16,6 +15,7 @@ import SessionProviders from '@/components/molecules/sessionProvider'
 import { getSession } from './api/auth/[...nextauth]/options'
 import Copyright from '@/components/atoms/copyright'
 import { GoogleAnalytics } from '@next/third-parties/google'
+const PixelTracker = dynamic(() => import("../components/atoms/pixelTracker"), { ssr: false });
 
 const inter = Inter({ subsets: ['greek'] })
 
@@ -35,6 +35,26 @@ export default async function RootLayout({
 
   return (
     <html lang="el">
+      <head>
+        <script dangerouslySetInnerHTML={{
+          __html: `
+          !function(f,b,e,v,n,t,s)
+          {if(f.fbq)return;n=f.fbq=function(){n.callMethod ?
+            n.callMethod.apply(n, arguments) : n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', '1151339979478836');
+          fbq('track', 'PageView');
+        `,
+        }}
+        />
+        <noscript><img height="1" width="1" className="display:none"
+          src="https://www.facebook.com/tr?id=1151339979478836&ev=PageView&noscript=1"
+        /></noscript>
+      </head>
       <body className={`${inter.className} h-full dark:bg-slate-800`}>
         <SessionProviders session={session}>
           <CartProvider>
@@ -51,6 +71,7 @@ export default async function RootLayout({
               <Αnnouncement />
               <Header user={session?.user?.name?.split('@')[0]} />
               <main className='mx-2 sm:mx-6 md:mx-8'>
+                <PixelTracker />
                 {children}
               </main>
               <Footer />
