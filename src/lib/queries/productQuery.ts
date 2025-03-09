@@ -100,7 +100,18 @@ query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationAr
         attributes{
             name
             slug
+            sku
+            mpn
+            barcode
+            price
+            sale_price
+            is_sale
+            is_hot
             weight
+            height
+            width
+            length
+            status
             prod_chars (pagination:{limit:-1}){
               name
               value
