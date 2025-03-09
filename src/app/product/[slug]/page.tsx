@@ -137,6 +137,7 @@ export default async function Product({ params }:
   else {
     structuredDataPrice = {
       "@type": "Offer",
+      url: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
       availability: "https://schema.org/InStock",
       itemCondition: 'https://schema.org/NewCondition',
       price: product.attributes.price,
@@ -219,6 +220,8 @@ export default async function Product({ params }:
   const structuredData = []
   structuredData.push(productStructuredData)
   structuredData.push(breadcrumbStructuredData)
+
+  console.log(structuredData)
 
   return (
     <>
