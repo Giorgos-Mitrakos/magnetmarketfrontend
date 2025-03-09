@@ -92,9 +92,9 @@ export default async function Product({ params }:
       priceCurrency: "EUR",
       priceSpecification: {
         "@type": "UnitPriceSpecification",
-        "priceType": "https://schema.org/ListPrice",
+        "priceType": "https://schema.org/StrikethroughPrice",
         "price": product.attributes.price,
-        "priceCurrency": "GBP"
+        "priceCurrency": "EUR"
       },
       "shippingDetails": {
         "@type": "OfferShippingDetails",
