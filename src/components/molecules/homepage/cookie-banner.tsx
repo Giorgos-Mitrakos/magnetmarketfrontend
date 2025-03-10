@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getLocalStorage, setLocalStorage } from "@/lib/helpers/storage-helper";
+import ReactPixel from "react-facebook-pixel";
 
 // CookieBanner component that displays a banner for cookie consent.
 export default function CookieBanner() {
@@ -48,7 +49,7 @@ export default function CookieBanner() {
                         <button className="px-4 py-2 text-white font-semibold bg-red-600 hover:shadow-md" onClick={() => setCookieConsent(false)}>
                             Απόρριψη
                         </button>
-                        <button className="px-4 py-2 text-white font-semibold bg-green-700 hover:shadow-md" onClick={() => setCookieConsent(true)}>
+                        <button className="px-4 py-2 text-white font-semibold bg-green-700 hover:shadow-md" onClick={() =>{ setCookieConsent(true)}}>
                             Αποδοχή
                         </button>
                     </div>

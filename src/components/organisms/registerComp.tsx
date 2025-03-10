@@ -72,7 +72,6 @@ export default function RegisterComp() {
                 .required("*Επιβεβαιώστε τον κωδικό σας!"),
         }),
         onSubmit: async (values) => {
-            console.log("values:", values)
             const newUser = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/local/register`, {
                 method: "POST",
                 headers: { 'Content-Type': 'application/json' },
@@ -83,7 +82,6 @@ export default function RegisterComp() {
                 })
             })
 
-            console.log("newUser:", await newUser.json())
             const csrf = await getCsrfToken()
             signIn('Credentials', { email: values.email, password: values.password, csrf }, { callbackUrl: '/' })
         }

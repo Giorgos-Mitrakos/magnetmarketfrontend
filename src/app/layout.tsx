@@ -15,6 +15,7 @@ import SessionProviders from '@/components/molecules/sessionProvider'
 import { getSession } from './api/auth/[...nextauth]/options'
 import Copyright from '@/components/atoms/copyright'
 import { GoogleAnalytics } from '@next/third-parties/google'
+import Script from 'next/script';
 const PixelTracker = dynamic(() => import("../components/atoms/pixelTracker"), { ssr: false });
 
 const inter = Inter({ subsets: ['greek'] })
@@ -36,7 +37,7 @@ export default async function RootLayout({
   return (
     <html lang="el">
       <head>
-        <script dangerouslySetInnerHTML={{
+        <Script strategy='afterInteractive' dangerouslySetInnerHTML={{
           __html: `
           !function(f,b,e,v,n,t,s)
           {if(f.fbq)return;n=f.fbq=function(){n.callMethod ?

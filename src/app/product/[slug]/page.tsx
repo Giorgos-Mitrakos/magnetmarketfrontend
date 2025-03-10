@@ -88,19 +88,21 @@ export default async function Product({ params }:
       url: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
       availability: "https://schema.org/InStock",
       itemCondition: 'https://schema.org/NewCondition',
-      price: product.attributes.sale_price,
-      priceCurrency: "EUR",
-      priceSpecification: {
+      priceSpecification: [{
+        "@type": "UnitPriceSpecification",
+        "price": product.attributes.sale_price,
+        "priceCurrency": "EUR"
+      }, {
         "@type": "UnitPriceSpecification",
         "priceType": "https://schema.org/StrikethroughPrice",
         "price": product.attributes.price,
         "priceCurrency": "EUR"
-      },
+      }],
       "shippingDetails": {
         "@type": "OfferShippingDetails",
         "shippingRate": {
           "@type": "MonetaryAmount",
-          "value": 3.49,
+          "value": 4.5,
           "currency": "EUR"
         },
         "shippingDestination": {
@@ -136,17 +138,20 @@ export default async function Product({ params }:
   }
   else {
     structuredDataPrice = {
-      "@type": "Offer",
+      "@type": "Offer",      
       url: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
       availability: "https://schema.org/InStock",
       itemCondition: 'https://schema.org/NewCondition',
-      price: product.attributes.price,
-      priceCurrency: "EUR",
+      "priceSpecification": {
+        "@type": "UnitPriceSpecification",
+        "price": product.attributes.price,
+        "priceCurrency": "EUR"
+      },
       "shippingDetails": {
         "@type": "OfferShippingDetails",
         "shippingRate": {
           "@type": "MonetaryAmount",
-          "value": 3.49,
+          "value": 4.5,
           "currency": "EUR"
         },
         "shippingDestination": {
@@ -221,6 +226,7 @@ export default async function Product({ params }:
   structuredData.push(productStructuredData)
   structuredData.push(breadcrumbStructuredData)
 
+  console.log(structuredData)
   return (
     <>
       <Script
