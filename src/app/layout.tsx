@@ -37,7 +37,7 @@ export default async function RootLayout({
   return (
     <html lang="el">
       <head>
-        <Script strategy='afterInteractive' dangerouslySetInnerHTML={{
+        <Script id="pixel-script" strategy='afterInteractive' dangerouslySetInnerHTML={{
           __html: `
           !function(f,b,e,v,n,t,s)
           {if(f.fbq)return;n=f.fbq=function(){n.callMethod ?
