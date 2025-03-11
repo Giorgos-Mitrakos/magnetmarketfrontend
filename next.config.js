@@ -8,7 +8,7 @@ const nextConfig = {
     STRAPI_CUSTOM_TOKEN: '3a6d77289ec18e648526934ef4b8c960a6181a0d636cd7f9a11d90e6c272a783ab772aab6e547ea0843e07cc657d2fc4d3e1e41acd24b2391ade4c81dcb4e073249ce0b0d3e8cb94e0b23429050783d703581ebc3d038cc5b67458136e762c9c21828f5218e98f68be42c00ed8855aefdc93a6f930f12a2ea0112e02a007a420',
     GOOGLE_CLIENT_ID: '1013147080834-kk07ufs7vfbbuj01ftht9idqgm8n500e.apps.googleusercontent.com',
     GOOGLE_CLIENT_SECRET: '2ZCoq03s9HlbbMY36VardIgA',
-    FACEBOOK_PIXEL: '1151339979478836',
+    FACEBOOK_PIXEL: '',//'1151339979478836',
     NEXTAUTH_SECRET: '2ZCoq03s9HlbbMY36VardIgA',
     NEXTAUTH_URL: 'http://localhost:3000',
     // GA_MEASUREMENT_ID: 'G-0DL7SDZL7E',
@@ -28,20 +28,6 @@ const nextConfig = {
       },
     ],
   },
-  async headers() {
-    return [
-      {
-        // matching all API routes
-        source: "/api/:path*",
-        headers: [
-          { key: "Access-Control-Allow-Credentials", value: "true" },
-          { key: "Access-Control-Allow-Origin", value: "*" }, // replace this your actual origin
-          { key: "Access-Control-Allow-Methods", value: "GET,DELETE,PATCH,POST,PUT" },
-          { key: "Access-Control-Allow-Headers", value: "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" },
-        ]
-      }
-    ]
-  }
 }
 
 module.exports = nextConfig

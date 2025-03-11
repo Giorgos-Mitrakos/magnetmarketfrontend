@@ -61,11 +61,14 @@ const Confirm = () => {
         try {
             setProcessing(true)
             const newOrder = await createOrder()
+            console.log("newOrder.payment:", newOrder)
             if (newOrder && newOrder.status === "fail") {
                 toast.error(newOrder.message, {
                     position: 'top-right',
                 })
             }
+
+            console.log("paymentMethod.payment:", paymentMethod.payment)
 
             if (newOrder && paymentMethod.payment === "Κάρτα") {
                 if (newOrder.orderId && newOrder.amount) {
@@ -83,7 +86,7 @@ const Confirm = () => {
 
                     const myHeaders = new Headers();
                     myHeaders.append('Content-Type', 'application/json')
-                    myHeaders.append('Access-Control-Allow-Origin', 'https://www.magnetmarket.gr//api/checkout-piraeus-gateway')
+                    // myHeaders.append('Access-Control-Allow-Origin', 'https://www.magnetmarket.gr/api/checkout-piraeus-gateway')
 
                     const myInit = {
                         method: "POST",
@@ -97,7 +100,7 @@ const Confirm = () => {
                         // cache: "default",
                     };
 
-                    await fetch(`${process.env.NEXT_URL}api/checkout-piraeus-gateway`,
+                    await fetch(`${process.env.NEXT_URL}/api/checkout-piraeus-gateway`,
                         myInit,
                     )
 
@@ -136,6 +139,7 @@ const Confirm = () => {
 
 
         } catch (error) {
+            console.log(error)
             router.push('/checkout/confirm/fail')
         }
     }
