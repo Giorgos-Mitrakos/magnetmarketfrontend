@@ -35,9 +35,33 @@ export async function getTransactionTicket({ orderId, amount, installments }: { 
         // console.log("response:", response)
 
     const data=await response.text()
+    const myInitData = {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json', },
+        body: JSON.stringify({
+            to:'giorgos_mitrakos@yahoo.com',
+                 subject:"Επίτυχημένο request",
+                 text:data
+        })        
+    };
 
-    console.log("dataTicket:", data)
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/sendEmail`,
+        myInitData,
+    )
     } catch (error) {
+        const myInitData = {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json', },
+            body: JSON.stringify({
+                to:'giorgos_mitrakos@yahoo.com',
+                 subject:"Αποτυχημένο request",
+                 text:error
+            })        
+        };
+    
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/sendEmail`,
+            myInitData,
+        )
         console.log(error)
     }
     

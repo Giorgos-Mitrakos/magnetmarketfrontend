@@ -133,7 +133,7 @@ export const CartProvider = ({ children }: any) => {
   }
 
   const addToCart = (item: ICartItem) => {
-    try {
+    try {console.log(item.price)
       const { isItemInCart, itemPrice, discount } = checkIfItemIsInCart(item)
       const addedQuantity = item.quantity | 1
 
@@ -146,7 +146,7 @@ export const CartProvider = ({ children }: any) => {
           )
         );
       } else {
-        setCartItems([...cartItems, { ...item, quantity: addedQuantity, price: itemPrice, is_sale: item.is_sale, sale_price: item.sale_price, isAvailable: true }]);
+        setCartItems([...cartItems, { ...item, quantity: addedQuantity, price: item.price, is_sale: item.is_sale, sale_price: item.sale_price, isAvailable: true }]);
       }
 
       const categories = createCategories(item)

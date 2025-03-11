@@ -47,7 +47,7 @@ export default async function RootLayout({
           t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window, document,'script',
           'https://connect.facebook.net/en_US/fbevents.js');
-          fbq('init', '1151339979478836');
+          fbq('init', ${process.env.FACEBOOK_PIXEL});
           fbq('track', 'PageView');
         `,
         }}

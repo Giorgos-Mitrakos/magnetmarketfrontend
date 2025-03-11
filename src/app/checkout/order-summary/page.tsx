@@ -68,13 +68,6 @@ const Confirm = () => {
             }
 
             if (newOrder && paymentMethod.payment === "Κάρτα") {
-
-                // const myInit = {
-                //     method: "POST",
-                //     headers: { 'Content-Type': 'application/json', },
-                //     body: JSON.stringify(formData)
-                // };
-
                 if (newOrder.orderId && newOrder.amount) {
 
 
@@ -115,28 +108,31 @@ const Confirm = () => {
                     // console.log(responseTicket)
                 }
 
-
+                setProcessing(false)
 
                 // await fetch('https://paycenter.piraeusbank.gr/redirection/pay.aspx',
                 //     myInit
                 // )
             }
+            else {
+                if (newOrder.orderId) {
+                    await saveCookies({
+                        name: "magnet_market_order", value: {
+                            orderId: newOrder.orderId
+                        }
+                    })
 
-            if (newOrder.orderId) {
-                await saveCookies({
-                    name: "magnet_market_order", value: {
-                        orderId: newOrder.orderId
-                    }
-                })
 
-                
+                }
+
+                clearCart()
+
+                setProcessing(false)
+
+                router.push('/checkout/confirm/success')
             }
 
-            clearCart()
 
-            setProcessing(false)
-
-            router.push('/checkout/confirm/success')
 
         } catch (error) {
             router.push('/checkout/confirm/fail')
