@@ -83,6 +83,7 @@ const Confirm = () => {
 
                     const myHeaders = new Headers();
                     myHeaders.append('Content-Type', 'application/json')
+                    myHeaders.append('Access-Control-Allow-Origin', 'https://www.magnetmarket.gr//api/checkout-piraeus-gateway')
 
                     const myInit = {
                         method: "POST",
@@ -90,13 +91,13 @@ const Confirm = () => {
                         body: JSON.stringify({
                             orderId: newOrder.orderId,
                             amount: newOrder.amount,
-                            installments: newOrder.amount
+                            installments: 1
                         })
                         // mode: "cors",
                         // cache: "default",
                     };
 
-                    await fetch(`${process.env.NEXT_URL}/api/checkout-piraeus-gateway`,
+                    await fetch(`${process.env.NEXT_URL}api/checkout-piraeus-gateway`,
                         myInit,
                     )
 
