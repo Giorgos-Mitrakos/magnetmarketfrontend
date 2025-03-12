@@ -100,7 +100,7 @@ const Confirm = () => {
                         // cache: "default",
                     };
 
-                    await fetch(`${process.env.NEXT_URL}/api/checkout-piraeus-gateway`,
+                    await fetch(`/api/checkout-piraeus-gateway`,
                         myInit,
                     )
 

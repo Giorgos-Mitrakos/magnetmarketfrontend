@@ -2,18 +2,17 @@
 
 import { HmacSHA512 } from 'crypto-js';
 import HmacSha256 from 'crypto-js/hmac-sha256'
+import {env} from 'process'
 const soap = require('soap');
 
 export async function getTransactionTicket({ orderId, amount, installments }: { orderId: number, amount: number, installments: number }) {
 
-    const { env } = process
-
     const soapTicketData = {        
-            AcquirerId: env.AcquirerId,
-            MerchantId: env.MerchantId ? parseInt(env.MerchantId) : 2141425445,
-            PosId: env.PosId ? parseInt(env.PosId) : 2138072006,
-            Username: env.PEIRAIWS_USERNAME,
-            Password: env.PEIRAIWS_PASSWORD,
+            AcquirerId: process.env.AcquirerId,
+            MerchantId: process.env.MerchantId ? parseInt(process.env.MerchantId) : 2141425445,
+            PosId: process.env.PosId ? parseInt(process.env.PosId) : 2138072006,
+            Username: process.env.PEIRAIWS_USERNAME?process.env.PEIRAIWS_USERNAME:'MA312637',
+            Password: process.env.PEIRAIWS_PASSWORD?process.env.PEIRAIWS_PASSWORD:'TE212132',
             RequestType: '02',
             CurrencyCode: 978,
             MerchantReference: orderId,
@@ -36,7 +35,7 @@ export async function getTransactionTicket({ orderId, amount, installments }: { 
                 client.IssueNewTicket(soapTicketData,async function(err:any, result:any) {
                     console.log('Last SOAP Request:', client.lastRequest);
                     if (err) {
-                        console.error("ERRORRRR:",err);
+                        // console.error("ERRORRRR:",err);
                         const data=await err.toString()
                         const myInitData = {
                             method: "POST",
