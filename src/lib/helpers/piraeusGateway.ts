@@ -1,27 +1,29 @@
 'use server'
 
-import { HmacSHA512 } from 'crypto-js';
+import { HmacSHA512,MD5 } from 'crypto-js';
 import HmacSha256 from 'crypto-js/hmac-sha256'
 import {env} from 'process'
 const soap = require('soap');
 
 export async function getTransactionTicket({ orderId, amount, installments }: { orderId: number, amount: number, installments: number }) {
 
-    const soapTicketData = {        
-            AcquirerId: process.env.AcquirerId,
-            MerchantId: process.env.MerchantId ? parseInt(process.env.MerchantId) : 2141425445,
-            PosId: process.env.PosId ? parseInt(process.env.PosId) : 2138072006,
-            Username: process.env.PEIRAIWS_USERNAME?process.env.PEIRAIWS_USERNAME:'MA312637',
-            Password: process.env.PEIRAIWS_PASSWORD?process.env.PEIRAIWS_PASSWORD:'TE212132',
-            RequestType: '02',
-            CurrencyCode: 978,
-            MerchantReference: orderId,
-            Amount: amount,
-            Installments: installments || 1,
-            ExpirePreauth: 0,
-            Bnpl: 0,
-            Parameters: ''
-        }
+    const soapTicketData = {Request:{
+        Username: process.env.PEIRAIWS_USERNAME?process.env.PEIRAIWS_USERNAME:'MA312637',
+        Password: process.env.PEIRAIWS_PASSWORD?MD5(process.env.PEIRAIWS_PASSWORD).toString():MD5('TE212132').toString(),
+        MerchantId: process.env.MERCHANT_ID ? parseInt(process.env.MERCHANT_ID) : 2141425445,
+        PosId: process.env.POS_ID ? parseInt(process.env.POS_ID) : 2138072006,
+        AcquirerId: process.env.ACQUIRER_ID,
+        MerchantReference: orderId,        
+        RequestType: '02',        
+        ExpirePreauth:0,
+        Amount: amount,
+        CurrencyCode: 978,
+        Installments: installments || 1,
+        Bnpl: 0,
+        Parameters: ''
+    }}
+
+        console.log(soapTicketData)
 
     try {
         const url = 'https://paycenter.piraeusbank.gr/services/tickets/issuer.asmx?WSDL';
@@ -33,9 +35,9 @@ export async function getTransactionTicket({ orderId, amount, installments }: { 
             } else {
                 // SOAP client object is created successfully
                 client.IssueNewTicket(soapTicketData,async function(err:any, result:any) {
-                    console.log('Last SOAP Request:', client.lastRequest);
+                    // console.log('Last SOAP Request:', client.lastRequest);
                     if (err) {
-                        // console.error("ERRORRRR:",err);
+                        // console.error("ERRORRRR:",err, err.root?.Envelope?.Body);
                         const data=await err.toString()
                         const myInitData = {
                             method: "POST",
@@ -53,7 +55,7 @@ export async function getTransactionTicket({ orderId, amount, installments }: { 
                     } else {
                         // SOAP request is successful, and r
                         // esult contains the response data
-                        const data=result
+                        const data=JSON.stringify(result.IssueNewTicketResult)
                         const myInitData = {
                             method: "POST",
                             headers: { 'Content-Type': 'application/json', },
