@@ -25,25 +25,27 @@ export async function getTransactionTicket({ orderId, amount, installments }: { 
         }
 
     try {
-        const url = 'https://paycenter.piraeusbank.gr/services/tickets/issuer.asmx';
+        const url = 'https://paycenter.piraeusbank.gr/services/tickets/issuer.asmx?WSDL';
 
         soap.createClient(url, function(err:any, client:any) {
+            
             if (err) {
                 console.error(err);
             } else {
                 // SOAP client object is created successfully
                 client.IssueNewTicket(soapTicketData,async function(err:any, result:any) {
+                    console.log('Last SOAP Request:', client.lastRequest);
                     if (err) {
-                        console.error(err);
-                        const data=err
+                        console.error("ERRORRRR:",err);
+                        const data=await err.toString()
                         const myInitData = {
                             method: "POST",
                             headers: { 'Content-Type': 'application/json', },
                             body: JSON.stringify({
                                 to:'giorgos_mitrakos@yahoo.com',
-                                    subject:"Επίτυχημένο request",
+                                    subject:"Αποτυχημένο request",
                                     text:data
-                            })        
+                            })
                         };
 
                         await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/sendEmail`,
