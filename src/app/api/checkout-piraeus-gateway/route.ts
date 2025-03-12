@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   // we will use params to access the data passed to the dynamic route
   // const user = params.user;
-  console.log("Hello from api")
+  
   const data = await request.json()
 
   const { orderId, amount, installments } = data
