@@ -1,9 +1,10 @@
 // import { useSearchParams } from "next/navigation";
 
-import { getTransactionTicket } from "@/lib/helpers/piraeusGateway";
+import { getTransactionTicket, ITicketResponse, saveTicket, sendEmail } from "@/lib/helpers/piraeusGateway";
 const CryptoJS = require('crypto-js');
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
+
 
 export async function GET(request: NextRequest) {
   // we will use params to access the data passed to the dynamic route
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   // we will use params to access the data passed to the dynamic route
   // const user = params.user;
-  
+
   const data = await request.json()
 
   const { orderId, amount, installments } = data
@@ -31,38 +32,36 @@ export async function POST(request: NextRequest) {
     installments: installments || 1
   })
 
-  // console.log("responseGetTrans:", response)
+  const ticketResponse = response as ITicketResponse
+  console.log("responseGetTrans:", response)
 
-  // const myHeaders = new Headers();
-  // myHeaders.append('Content-Type', 'application/json')
+  if (parseInt(ticketResponse.ResultCode) === 0) {
+    await saveTicket({ orderId: orderId, TranTicket: ticketResponse.TranTicket })
 
-  // // αποθηκέυω το τικετ στην παραγγελία του πελάτη στη βαση δεδομένων
-  // await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/saveTicket`,
-  //   {
-  //     method: "POST",
-  //     headers: myHeaders,
-  //     body: JSON.stringify({
-  //       orderId: orderId,
-  //       TransTicket: response.TransTicket
-  //     })
-  //   },
-  // )
+    await sendEmail({ title: "Επίτυχημένο request", data: JSON.stringify(ticketResponse) })
 
-  // const form = new FormData()
-  // form.append('AcquirerId', '14')
-  // form.append('MerchantId', 'Test')
-  // form.append('PosId', '99999999')
-  // form.append('User', `${process.env.PEIRAIWS_USERNAME}`)
-  // form.append('LanguageCode', 'el-GR')
-  // form.append('MerchantReference', orderId)
-  // form.append('ParamBackLink', 'magnetmarket.gr/checkout/confirm/success')
+    const form = new FormData()
+    form.append('AcquirerId', `${process.env.ACQUIRER_ID}`)
+    form.append('MerchantId', `${process.env.MERCHANT_ID}`)
+    form.append('PosId', `${parseInt(`${process.env.POS_ID}`)}`)
+    form.append('User', `${process.env.PEIRAIWS_USERNAME}`)
+    form.append('LanguageCode', 'el-GR')
+    form.append('MerchantReference', orderId)
+    form.append('ParamBackLink', 'magnetmarket.gr/checkout/confirm/success')
 
-  // // Αποστολή δεδομένων με Fetch API 
-  // const respone = await fetch('https://paycenter.winbank.gr/redirection/pay/aspx', { method: 'POST', headers: { 'Content-Type': 'application/form-data' }, body: form })
-  // // .then(response => response)
-  // // .then(data => console.log('Success:', data))
-  // // .catch(error => console.error('Error:', error));
-  // console.log("response from paycenter:", await respone.text())
+
+
+    // Αποστολή δεδομένων με Fetch API 
+    const responseFromRedirect = await fetch('https://paycenter.winbank.gr/redirection/pay/aspx', { method: 'POST', headers: { 'Content-Type': 'application/form-data' }, body: form })
+    // .then(response => response)
+    // .then(data => console.log('Success:', data))
+    // .catch(error => console.error('Error:', error));
+    console.log("response from paycenter:", await responseFromRedirect.text())
+
+  }
+  else {
+    await sendEmail({ title: "Αποτυχημένο request", data: JSON.stringify(ticketResponse) })
+  }
 
   // // const ticket = await getTransactionTicket({ orderId, amount, installments })
   // const ticket = '4236ece6142b4639925eb6f80217122f'
