@@ -52,11 +52,19 @@ export async function POST(request: NextRequest) {
 
 
     // Αποστολή δεδομένων με Fetch API 
-    const responseFromRedirect = await fetch('https://paycenter.winbank.gr/redirection/pay/aspx', { method: 'POST', headers: { 'Content-Type': 'application/form-data' }, body: form })
+    const responseFromRedirect = await fetch('https://paycenter.winbank.gr/redirection/pay/aspx', { method: 'POST', body: form })
     // .then(response => response)
     // .then(data => console.log('Success:', data))
     // .catch(error => console.error('Error:', error));
-    console.log("response from paycenter:", await responseFromRedirect.text())
+
+
+    if (responseFromRedirect.ok) {
+      console.log('Η αίτηση στάλθηκε με επιτυχία!');
+      await sendEmail({ title: "Η αίτηση στάλθηκε με επιτυχία!", data: JSON.stringify(responseFromRedirect.statusText) })
+    } else {
+      await sendEmail({ title: "Σφάλμα κατά την αίτηση:", data: JSON.stringify(responseFromRedirect.statusText) })
+      console.error('Σφάλμα κατά την αίτηση:', responseFromRedirect.statusText);
+    }
 
   }
   else {
