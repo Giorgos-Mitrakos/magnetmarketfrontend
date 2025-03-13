@@ -82,7 +82,7 @@ export async function getTransactionTicket({ orderId, amount, installments }: { 
                         // esult contains the response data
                         const data=JSON.stringify(result.IssueNewTicketResult)
 
-                        if(result.IssueNewTicketResult.ResultCode===0)
+                        if(parseInt(result.IssueNewTicketResult.ResultCode)===0)
                         {
                             await saveTicket({orderId:orderId,TranTicket:result.IssueNewTicketResult.TranTicket})
 
