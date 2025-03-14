@@ -3,7 +3,7 @@
 import { getTransactionTicket, ITicketResponse, saveTicket, sendEmail } from "@/lib/helpers/piraeusGateway";
 const CryptoJS = require('crypto-js');
 import { redirect } from "next/navigation";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 
 export async function GET(request: NextRequest) {
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   return new Response(`Welcome to my Next application ${peiraeus}`);
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest,res:NextResponse) {
   // we will use params to access the data passed to the dynamic route
   // const user = params.user;
 
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
 
 
     if (responseFromRedirect.ok) {
-      await sendEmail({ title: "Η αίτηση στάλθηκε με επιτυχία!", data: JSON.stringify(responseFromRedirect.statusText) })
+      await sendEmail({ title: "Η αίτηση στάλθηκε με επιτυχία!", data: JSON.stringify(responseFromRedirect.json()) })
       redirect('https://paycenter.piraeusbank.gr/redirection/pay.aspx')
     } else {
       await sendEmail({ title: "Σφάλμα κατά την αίτηση:", data: JSON.stringify(responseFromRedirect.statusText) })
