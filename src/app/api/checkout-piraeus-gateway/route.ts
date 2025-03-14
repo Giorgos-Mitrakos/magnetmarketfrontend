@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
 
 
     if (responseFromRedirect.ok) {
-      await sendEmail({ title: "Η αίτηση στάλθηκε με επιτυχία!", data: JSON.stringify(responseFromRedirect) })
+      await sendEmail({ title: "Η αίτηση στάλθηκε με επιτυχία!", data: JSON.stringify(responseFromRedirect.text()) })
       redirect('https://paycenter.piraeusbank.gr/redirection/pay.aspx')
     } else {
       await sendEmail({ title: "Σφάλμα κατά την αίτηση:", data: JSON.stringify(responseFromRedirect.statusText) })
