@@ -100,9 +100,29 @@ const Confirm = () => {
                         // cache: "default",
                     };
 
-                    await fetch(`/api/checkout-piraeus-gateway`,
+                    const formdata = await fetch(`/api/checkout-piraeus-gateway`,
                         myInit,
                     )
+
+                    const paymentData = await formdata.json();
+                    console.log("formdata:", await paymentData)
+
+                    // Δημιουργία και υποβολή φόρμας για το redirection
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = 'https://paycenter.piraeusbank.gr/redirection/pay.aspx'; // URL πληρωμής
+
+                    // Προσθήκη των παραμέτρων ως hidden inputs
+                    for (const key in paymentData) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = key;
+                        input.value = paymentData[key];
+                        form.appendChild(input);
+                    }
+
+                    document.body.appendChild(form);
+                    form.submit(); // Υποβολή της φόρμας
 
 
                     // const responseTicket = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/saveTicket`,
