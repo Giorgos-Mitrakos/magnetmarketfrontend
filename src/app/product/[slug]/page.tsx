@@ -142,11 +142,11 @@ export default async function Product({ params }:
       url: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
       availability: "https://schema.org/InStock",
       itemCondition: 'https://schema.org/NewCondition',
-      "priceSpecification": {
+      "priceSpecification": [{
         "@type": "UnitPriceSpecification",
         "price": product.attributes.price,
         "priceCurrency": "EUR"
-      },
+      }],
       "shippingDetails": {
         "@type": "OfferShippingDetails",
         "shippingRate": {
@@ -226,7 +226,6 @@ export default async function Product({ params }:
   structuredData.push(productStructuredData)
   structuredData.push(breadcrumbStructuredData)
 
-  console.log(structuredData)
   return (
     <>
       <Script
