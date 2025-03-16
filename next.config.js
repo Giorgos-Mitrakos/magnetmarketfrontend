@@ -13,7 +13,7 @@ const nextConfig = {
     NEXTAUTH_URL: 'http://localhost:3000',
     // GA_MEASUREMENT_ID: 'G-0DL7SDZL7E',
     //#Peiraiws Bank
-    ACQUIRER_ID: '14',
+    ACQUIRER_ID: 14,
     MERCHANT_ID: '2141425445',
     POS_ID: '2138072006',
     PEIRAIWS_USERNAME: 'MA312637',
