@@ -40,11 +40,11 @@ export async function POST(request: NextRequest) {
             sendEmail({ title: "authenticated", data: `authenticated:${isResponseAuth}, ticket: ${ticket}, resposeFromBank: ${res}` })
         }
         
-        return NextResponse.redirect(new URL(`${process.env.NEXTAUTH_URL}/checkout/thank-you`));
+        return NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/thank-you`));
 
     } catch (error) {
         // console.log(error)
         sendEmail({ title: "Error in Respone", data: `Error: ${error}` })
-        return NextResponse.redirect(new URL(`${process.env.NEXTAUTH_URL}`));
+        return NextResponse.redirect(new URL(`${process.env.NEXT_URL}`));
     }
 }

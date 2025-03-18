@@ -74,8 +74,6 @@ const Confirm = () => {
                         orderId: newOrder.orderId
                     }
                 })
-
-
             }
 
             if (newOrder && paymentMethod.payment === "Κάρτα") {
@@ -131,8 +129,6 @@ const Confirm = () => {
 
                 router.push('/checkout/thank-you')
             }
-
-
 
         } catch (error) {
             console.log(error)

@@ -1,13 +1,11 @@
-'use client'
+
 import Banks from "@/components/atoms/banks";
-import { CartContext } from "@/context/cart";
 import { getCookies } from "@/lib/helpers/actions"
 import { IImageAttr } from "@/lib/interfaces/image";
 import { GET_ORDER } from "@/lib/queries/shippingQuery";
 import { requestSSR } from "@/repositories/repository";
 import { Metadata } from "next"
 import Image from "next/image"
-import { useContext } from "react";
 import { FaRegImage } from "react-icons/fa6";
 
 // Function to Add days to current date
@@ -83,12 +81,8 @@ interface IOrder {
     }
 }
 
-export default async function Thankyou() {
+export default async function Success() {
 
-    const { clearCart } = useContext(CartContext)
-
-    clearCart()
-    
     const orderCookie = await getCookies({ name: 'magnet_market_order' })
 
     const order: IOrderCookie = orderCookie ? JSON.parse(orderCookie.value) : null
@@ -165,20 +159,20 @@ export default async function Thankyou() {
 
 }
 
-// export const metadata: Metadata = {
-//     title: 'Magnetmarket - Ευχαριστούμε για την παραγγελία',
-//     description: 'Μην το ψάχνεις, εδώ θα βρείς τις καλύτερες τίμες και προσφορές σε υπολογιστές, laptop, smartwatch, κάμερες, εκτυπωτές, οθόνες, τηλεοράσεις και άλλα προϊόντα.',
-//     keywords: "Computers, Laptops, Notebooks, laptop, Computer, Hardware, Notebook, Peripherals, Greece, Technology, Mobile phones, Laptops, PCs, Scanners, Printers, Modems, Monitors, Software, Antivirus, Windows, Intel Chipsets, AMD, HP, LOGITECH, ACER, TOSHIBA, SAMSUNG, Desktop, Servers, Telephones, DVD, CD, DVDR, CDR, DVD-R, CD-R, periferiaka, Systems, MP3, Υπολογιστής, ΥΠΟΛΟΓΙΣΤΗΣ, ΠΕΡΙΦΕΡΕΙΑΚΑ, περιφερειακά, Χαλκίδα, ΧΑΛΚΙΔΑ, Ελλάδα, ΕΛΛΑΔΑ, Τεχνολογία, τεχνολογία, ΤΕΧΝΟΛΟΓΙΑ, κινητό, ΚΙΝΗΤΟ, κινητά, ΚΙΝΗΤΑ, οθόνη, ΟΘΟΝΗ, οθόνες, ΟΘΟΝΕΣ, ΕΚΤΥΠΩΤΕΣ, εκτυπωτές, σαρωτές, ΣΑΡΩΤΕΣ, εκτυπωτής",
-//     alternates: {
-//         canonical: `${process.env.NEXT_URL}/checkout/confirm/success`,
-//     },
-//     openGraph: {
-//         url: 'www.magnetmarket.gr',
-//         type: 'website',
-//         images: [`${process.env.NEXT_URL}/_next/static/media/MARKET MAGNET-LOGO.79db5357.svg`],
-//         siteName: "www.magnetmarket.gr",
-//         emails: ["info@magnetmarket.gr"],
-//         phoneNumbers: ['2221121657'],
-//         countryName: 'Ελλάδα',
-//     }
-// }
+export const metadata: Metadata = {
+    title: 'Magnetmarket - Ευχαριστούμε για την παραγγελία',
+    description: 'Μην το ψάχνεις, εδώ θα βρείς τις καλύτερες τίμες και προσφορές σε υπολογιστές, laptop, smartwatch, κάμερες, εκτυπωτές, οθόνες, τηλεοράσεις και άλλα προϊόντα.',
+    keywords: "Computers, Laptops, Notebooks, laptop, Computer, Hardware, Notebook, Peripherals, Greece, Technology, Mobile phones, Laptops, PCs, Scanners, Printers, Modems, Monitors, Software, Antivirus, Windows, Intel Chipsets, AMD, HP, LOGITECH, ACER, TOSHIBA, SAMSUNG, Desktop, Servers, Telephones, DVD, CD, DVDR, CDR, DVD-R, CD-R, periferiaka, Systems, MP3, Υπολογιστής, ΥΠΟΛΟΓΙΣΤΗΣ, ΠΕΡΙΦΕΡΕΙΑΚΑ, περιφερειακά, Χαλκίδα, ΧΑΛΚΙΔΑ, Ελλάδα, ΕΛΛΑΔΑ, Τεχνολογία, τεχνολογία, ΤΕΧΝΟΛΟΓΙΑ, κινητό, ΚΙΝΗΤΟ, κινητά, ΚΙΝΗΤΑ, οθόνη, ΟΘΟΝΗ, οθόνες, ΟΘΟΝΕΣ, ΕΚΤΥΠΩΤΕΣ, εκτυπωτές, σαρωτές, ΣΑΡΩΤΕΣ, εκτυπωτής",
+    alternates: {
+        canonical: `${process.env.NEXT_URL}/checkout/confirm/success`,
+    },
+    openGraph: {
+        url: 'www.magnetmarket.gr',
+        type: 'website',
+        images: [`${process.env.NEXT_URL}/_next/static/media/MARKET MAGNET-LOGO.79db5357.svg`],
+        siteName: "www.magnetmarket.gr",
+        emails: ["info@magnetmarket.gr"],
+        phoneNumbers: ['2221121657'],
+        countryName: 'Ελλάδα',
+    }
+}
