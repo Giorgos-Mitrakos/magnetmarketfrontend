@@ -6,16 +6,6 @@ import { redirect } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 
 
-export async function GET(request: NextRequest) {
-  // we will use params to access the data passed to the dynamic route
-  // const user = params.user;
-
-  const peiraeus = request.nextUrl.searchParams.get('peiraeus')
-  console.log(request)
-  redirect('/checkout/confirm')
-  return new Response(`Welcome to my Next application ${peiraeus}`);
-}
-
 export async function POST(request: NextRequest, res: NextResponse) {
   // we will use params to access the data passed to the dynamic route
   // const user = params.user;
@@ -44,62 +34,10 @@ export async function POST(request: NextRequest, res: NextResponse) {
     ParamBackLink: 'https://magnetmarket.gr/checkout/confirm/success',
   };
 
-  // const form = new FormData()
-  // form.append('AcquirerId', `${process.env.ACQUIRER_ID}`)
-  // form.append('MerchantId', `${process.env.MERCHANT_ID}`)
-  // form.append('PosId', `${parseInt(`${process.env.POS_ID}`)}`)
-  // form.append('User', `${process.env.PEIRAIWS_USERNAME}`)
-  // form.append('LanguageCode', 'el-GR')
-  // form.append('MerchantReference', orderId)
-  // form.append('ParamBackLink', 'magnetmarket.gr/checkout/confirm/success')
 
-
-
-  // Αποστολή δεδομένων με Fetch API 
-  // const responseFromRedirect = await fetch('https://paycenter.piraeusbank.gr/redirection/pay.aspx', { method: 'POST', body: form })
-  // // .then(response => response)
-  // // .then(data => console.log('Success:', data))
-  // // .catch(error => console.error('Error:', error));
-
-  // console.log(await responseFromRedirect)
-  // // await sendEmail({ title: "Σφάλμα κατά την αίτηση:", data: await responseFromRedirect.text()})
-
-  // redirect('https://paycenter.piraeusbank.gr/redirection/pay.aspx')
-
-  // if (parseInt(ticketResponse.ResultCode) === 0) {
-  //   await saveTicket({ orderId: orderId, TranTicket: ticketResponse.TranTicket })
-
-  //   await sendEmail({ title: "Επίτυχημένο request", data: JSON.stringify(ticketResponse) })
-
-  //   const form = new FormData()
-  //   form.append('AcquirerId', `${process.env.ACQUIRER_ID}`)
-  //   form.append('MerchantId', `${process.env.MERCHANT_ID}`)
-  //   form.append('PosId', `${parseInt(`${process.env.POS_ID}`)}`)
-  //   form.append('User', `${process.env.PEIRAIWS_USERNAME}`)
-  //   form.append('LanguageCode', 'el-GR')
-  //   form.append('MerchantReference', orderId)
-  //   form.append('ParamBackLink', 'magnetmarket.gr/checkout/confirm/success')
-
-
-
-  //   // Αποστολή δεδομένων με Fetch API 
-  //   const responseFromRedirect = await fetch('https://paycenter.piraeusbank.gr/redirection/pay.aspx', { method: 'POST', body: form })
-  //   // .then(response => response)
-  //   // .then(data => console.log('Success:', data))
-  //   // .catch(error => console.error('Error:', error));
-
-
-  //   if (responseFromRedirect.ok) {
-  //     await sendEmail({ title: "Η αίτηση στάλθηκε με επιτυχία!", data: JSON.stringify(responseFromRedirect.body) })
-  //     redirect('https://paycenter.piraeusbank.gr/redirection/pay.aspx')
-  //   } else {
-  //     await sendEmail({ title: "Σφάλμα κατά την αίτηση:", data: JSON.stringify(responseFromRedirect.statusText) })
-  //   }
-
-  // }
-  // else {
-  //   await sendEmail({ title: "Αποτυχημένο request", data: JSON.stringify(ticketResponse) })
-  // }
+  if (parseInt(ticketResponse.ResultCode) === 0) {
+    await saveTicket({ orderId: orderId, TranTicket: ticketResponse.TranTicket })
+  }
 
   // // const ticket = await getTransactionTicket({ orderId, amount, installments })
   // const ticket = '4236ece6142b4639925eb6f80217122f'

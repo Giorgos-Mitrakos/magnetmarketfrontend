@@ -1,10 +1,9 @@
 import { NextRequest } from "next/server";
 import { redirect } from 'next/navigation'
-import { sendEmail } from "@/lib/helpers/piraeusGateway";
-import { title } from "process";
+import { checkAuthResponse, getTicket, sendEmail } from "@/lib/helpers/piraeusGateway";
 
 export async function POST(request: NextRequest) {
-    
+
     const transactionData = await request.formData();
 
     const response = {
@@ -29,10 +28,16 @@ export async function POST(request: NextRequest) {
         TraceID: transactionData.get('TraceID'),
     }
 
-    console.log(response)
+    const res = JSON.stringify(response)
+
+    const ticket = await getTicket({bankResponse:JSON.parse(res)})
     
-    sendEmail({ title: "Response from bank", data: JSON.stringify(response) })
-    redirect('/checkout/thank-you')
+    const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(res), ticket: ticket.TranTicket.TranTicket })
+
+    if (isResponseAuth) {
+        sendEmail({ title: "authenticated", data: "authenticated" })
+    }
+    // redirect('/checkout/thank-you')
     return new Response(JSON.stringify({ message: 'Payment processed successfully' }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
