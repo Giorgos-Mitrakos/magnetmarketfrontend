@@ -1,5 +1,5 @@
-import { NextRequest } from "next/server";
-import { redirect } from 'next/navigation'
+import { NextRequest, NextResponse } from "next/server";
+import { redirect, RedirectType } from 'next/navigation'
 import { checkAuthResponse, getTicket, sendEmail } from "@/lib/helpers/piraeusGateway";
 
 export async function POST(request: NextRequest) {
@@ -36,17 +36,15 @@ export async function POST(request: NextRequest) {
 
         const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(res), ticket: ticket.TranTicket.TranTicket })
 
-        // if (isResponseAuth) {
-        sendEmail({ title: "authenticated", data: `authenticated:${isResponseAuth}, ticket: ${ticket}, resposeFromBank: ${res}` })
-        // }
-        redirect('/checkout/thank-you')
-        return new Response(JSON.stringify({ message: 'Payment processed successfully' }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-        });
-
+        if (isResponseAuth) {
+            sendEmail({ title: "authenticated", data: `authenticated:${isResponseAuth}, ticket: ${ticket}, resposeFromBank: ${res}` })
+        }
+        
+        return NextResponse.redirect(new URL(`${process.env.NEXTAUTH_URL}/checkout/thank-you`));
 
     } catch (error) {
+        // console.log(error)
         sendEmail({ title: "Error in Respone", data: `Error: ${error}` })
+        return NextResponse.redirect(new URL(`${process.env.NEXTAUTH_URL}`));
     }
 }
