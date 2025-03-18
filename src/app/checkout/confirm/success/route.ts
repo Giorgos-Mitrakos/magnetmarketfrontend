@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     if (isResponseAuth) {
         sendEmail({ title: "authenticated", data: "authenticated" })
     }
-    // redirect('/checkout/thank-you')
+    redirect('/checkout/thank-you')
     return new Response(JSON.stringify({ message: 'Payment processed successfully' }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
