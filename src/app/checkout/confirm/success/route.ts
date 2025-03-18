@@ -30,13 +30,13 @@ export async function POST(request: NextRequest) {
 
     const res = JSON.stringify(response)
 
-    const ticket = await getTicket({bankResponse:JSON.parse(res)})
-    
+    const ticket = await getTicket({ bankResponse: JSON.parse(res) })
+
     const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(res), ticket: ticket.TranTicket.TranTicket })
 
-    if (isResponseAuth) {
-        sendEmail({ title: "authenticated", data: "authenticated" })
-    }
+    // if (isResponseAuth) {
+    sendEmail({ title: "authenticated", data: `authenticated:${isResponseAuth}, ticket: ${ticket}, resposeFromBank: ${res}` })
+    // }
     redirect('/checkout/thank-you')
     return new Response(JSON.stringify({ message: 'Payment processed successfully' }), {
         status: 200,
