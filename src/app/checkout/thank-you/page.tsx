@@ -1,11 +1,13 @@
-
+'use client'
 import Banks from "@/components/atoms/banks";
+import { CartContext } from "@/context/cart";
 import { getCookies } from "@/lib/helpers/actions"
 import { IImageAttr } from "@/lib/interfaces/image";
 import { GET_ORDER } from "@/lib/queries/shippingQuery";
 import { requestSSR } from "@/repositories/repository";
 import { Metadata } from "next"
 import Image from "next/image"
+import { useContext } from "react";
 import { FaRegImage } from "react-icons/fa6";
 
 // Function to Add days to current date
@@ -81,8 +83,12 @@ interface IOrder {
     }
 }
 
-export default async function Success() {
+export default async function Thankyou() {
 
+    const { clearCart } = useContext(CartContext)
+
+    clearCart()
+    
     const orderCookie = await getCookies({ name: 'magnet_market_order' })
 
     const order: IOrderCookie = orderCookie ? JSON.parse(orderCookie.value) : null

@@ -61,28 +61,25 @@ const Confirm = () => {
         try {
             setProcessing(true)
             const newOrder = await createOrder()
-            console.log("newOrder.payment:", newOrder)
+            
             if (newOrder && newOrder.status === "fail") {
                 toast.error(newOrder.message, {
                     position: 'top-right',
                 })
             }
 
-            console.log("paymentMethod.payment:", paymentMethod.payment)
+            if (newOrder.orderId) {
+                await saveCookies({
+                    name: "magnet_market_order", value: {
+                        orderId: newOrder.orderId
+                    }
+                })
+
+
+            }
 
             if (newOrder && paymentMethod.payment === "Κάρτα") {
                 if (newOrder.orderId && newOrder.amount) {
-
-
-                    // const secretKey = process.env.ADMIN_JWT_SECRET;
-                    // const dataToEncrypt = response.TransTicket;
-                    // // Encrypt data 
-                    // const encryptedData = CryptoJS.AES.encrypt(dataToEncrypt, secretKey).toString();
-                    // console.log('Encrypted Data:', encryptedData);
-                    // // Decrypt data 
-                    // const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
-                    // const decryptedData = decryptedBytes.toString(CryptoJS.enc.Utf8);
-                    // console.log('Decrypted Data:', decryptedData);
 
                     const myHeaders = new Headers();
                     myHeaders.append('Content-Type', 'application/json')
@@ -105,7 +102,6 @@ const Confirm = () => {
                     )
 
                     const paymentData = await formdata.json();
-                    console.log("formdata:", await paymentData)
 
                     // Δημιουργία και υποβολή φόρμας για το redirection
                     const form = document.createElement('form');
@@ -123,37 +119,17 @@ const Confirm = () => {
 
                     document.body.appendChild(form);
                     form.submit(); // Υποβολή της φόρμας
-
-
-                    // const responseTicket = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/saveTicket`,
-                    //     myInit,
-                    // )
-
-                    // console.log(responseTicket)
                 }
 
                 setProcessing(false)
-
-                // await fetch('https://paycenter.piraeusbank.gr/redirection/pay.aspx',
-                //     myInit
-                // )
             }
-            else {
-                if (newOrder.orderId) {
-                    await saveCookies({
-                        name: "magnet_market_order", value: {
-                            orderId: newOrder.orderId
-                        }
-                    })
-
-
-                }
+            else {               
 
                 clearCart()
 
                 setProcessing(false)
 
-                router.push('/checkout/confirm/success')
+                router.push('/checkout/thank-you')
             }
 
 
