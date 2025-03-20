@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
         const ticket = await getTicket({ bankResponse: JSON.parse(res) })
 
         if (ticket.Flag !== "success") {
-            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/trans-fail`));
+            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/failure`));
         }
 
         const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(res), ticket: ticket.ticket })
