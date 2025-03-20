@@ -14,25 +14,25 @@ export interface ITicketResponse {
 }
 
 interface IBankResponse {
-    SupportReferenceID: FormDataEntryValue  | null,
-    ResultCode: FormDataEntryValue  | null,
-    ResultDescription: FormDataEntryValue  | null,
-    StatusFlag: FormDataEntryValue  | null,
-    ResponseCode: FormDataEntryValue  | null,
-    ResponseDescription: FormDataEntryValue  | null,
-    LanguageCode: FormDataEntryValue  | null,
-    MerchantReference: FormDataEntryValue  | null,
-    TransactionDateTime: FormDataEntryValue  | null,
-    TransactionId: FormDataEntryValue  | null,
-    CardType: FormDataEntryValue  | null,
-    PackageNo: FormDataEntryValue  | null,
-    ApprovalCode: FormDataEntryValue  | null,
-    RetrievalRef: FormDataEntryValue  | null,
-    AuthStatus: FormDataEntryValue  | null,
-    Parameters: FormDataEntryValue  | null,
-    HashKey: FormDataEntryValue  | null,
-    PaymentMethod: FormDataEntryValue  | null,
-    TraceID: FormDataEntryValue  | null,
+    SupportReferenceID: FormDataEntryValue | null,
+    ResultCode: FormDataEntryValue | null,
+    ResultDescription: FormDataEntryValue | null,
+    StatusFlag: FormDataEntryValue | null,
+    ResponseCode: FormDataEntryValue | null,
+    ResponseDescription: FormDataEntryValue | null,
+    LanguageCode: FormDataEntryValue | null,
+    MerchantReference: FormDataEntryValue | null,
+    TransactionDateTime: FormDataEntryValue | null,
+    TransactionId: FormDataEntryValue | null,
+    CardType: FormDataEntryValue | null,
+    PackageNo: FormDataEntryValue | null,
+    ApprovalCode: FormDataEntryValue | null,
+    RetrievalRef: FormDataEntryValue | null,
+    AuthStatus: FormDataEntryValue | null,
+    Parameters: FormDataEntryValue | null,
+    HashKey: FormDataEntryValue | null,
+    PaymentMethod: FormDataEntryValue | null,
+    TraceID: FormDataEntryValue | null,
 }
 
 
@@ -111,14 +111,16 @@ export async function saveBankResponse({ bankResponse }: { bankResponse: IBankRe
                     Authorization: `Bearer ${process.env.ADMIN_JWT_SECRET}`,
                 },
                 body: JSON.stringify({
-                    SupportReferenceID: bankResponse.SupportReferenceID,
-                    MerchantReference: bankResponse.MerchantReference,
-                    StatusFlag: bankResponse.StatusFlag,
-                    ResponseCode: bankResponse.ResponseCode,
-                    ResponseDescription: bankResponse.ResponseDescription,
-                    ApprovalCode: bankResponse.ApprovalCode,
-                    PackageNo: bankResponse.PackageNo,
-                    AuthStatus: bankResponse.AuthStatus
+                    "bankResponse": {
+                        SupportReferenceID: bankResponse.SupportReferenceID,
+                        MerchantReference: bankResponse.MerchantReference,
+                        StatusFlag: bankResponse.StatusFlag,
+                        ResponseCode: bankResponse.ResponseCode,
+                        ResponseDescription: bankResponse.ResponseDescription,
+                        ApprovalCode: bankResponse.ApprovalCode,
+                        PackageNo: bankResponse.PackageNo,
+                        AuthStatus: bankResponse.AuthStatus
+                    }
                 })
             }
         )

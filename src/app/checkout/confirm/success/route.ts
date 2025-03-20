@@ -42,31 +42,30 @@ export async function POST(request: NextRequest) {
         if (!isResponseAuth)
             return NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/failure`));
 
-        if (isResponseAuth) {
-            if (response.StatusFlag === 'Success') {
-                await saveBankResponse({ bankResponse: response })
-                const res = NextResponse.redirect((new URL(`${process.env.NEXT_URL}checkout/thank-you`)))
+        if (response.StatusFlag === 'Success') {
+            await saveBankResponse({ bankResponse: response })
+            const res = NextResponse.redirect((new URL(`${process.env.NEXT_URL}checkout/thank-you`)))
 
-                if (response.ApprovalCode) {
-                    res.cookies.set("ApprovalCode", response.ApprovalCode?.toString(), {
-                        path: "/", // Cookie is available on all paths
-                        httpOnly: true, // Can't be accessed via JavaScript
-                        secure: true, // Only sent over HTTPS
-                        sameSite: "strict", // Prevents CSRF attacks 
-                        maxAge: 30 * 60
-                    });
-                }
-
-                return res
-                //  NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/thank-you`));
-            }
-            else {
-                await saveBankResponse({ bankResponse: response })
-                return NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/failure`));
+            if (response.ApprovalCode) {
+                res.cookies.set("ApprovalCode", response.ApprovalCode?.toString(), {
+                    path: "/", // Cookie is available on all paths
+                    httpOnly: true, // Can't be accessed via JavaScript
+                    secure: true, // Only sent over HTTPS
+                    sameSite: "strict", // Prevents CSRF attacks 
+                    maxAge: 30 * 60
+                });
             }
 
-            // sendEmail({ title: "authenticated", data: `authenticated:${isResponseAuth}, ticket: ${ticket}, resposeFromBank: ${res}` })
+            return res
+            //  NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/thank-you`));
         }
+        else {
+            await saveBankResponse({ bankResponse: response })
+            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/failure`));
+        }
+
+        // sendEmail({ title: "authenticated", data: `authenticated:${isResponseAuth}, ticket: ${ticket}, resposeFromBank: ${res}` })
+
 
     } catch (error) {
         // console.log(error)
