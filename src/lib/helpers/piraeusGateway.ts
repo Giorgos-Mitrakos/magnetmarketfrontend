@@ -14,25 +14,25 @@ export interface ITicketResponse {
 }
 
 interface IBankResponse {
-    SupportReferenceID: number | null,
-    ResultCode: string | null,
-    ResultDescription: string | null,
-    StatusFlag: string | null,
-    ResponseCode: string | null,
-    ResponseDescription: string | null,
-    LanguageCode: string | null,
-    MerchantReference: string | null,
-    TransactionDateTime: string | null,
-    TransactionId: number | null,
-    CardType: number | null,
-    PackageNo: number | null,
-    ApprovalCode: string | null,
-    RetrievalRef: string | null,
-    AuthStatus: string | null,
-    Parameters: string | null,
-    HashKey: string | null,
-    PaymentMethod: string | null,
-    TraceID: string | null,
+    SupportReferenceID: FormDataEntryValue  | null,
+    ResultCode: FormDataEntryValue  | null,
+    ResultDescription: FormDataEntryValue  | null,
+    StatusFlag: FormDataEntryValue  | null,
+    ResponseCode: FormDataEntryValue  | null,
+    ResponseDescription: FormDataEntryValue  | null,
+    LanguageCode: FormDataEntryValue  | null,
+    MerchantReference: FormDataEntryValue  | null,
+    TransactionDateTime: FormDataEntryValue  | null,
+    TransactionId: FormDataEntryValue  | null,
+    CardType: FormDataEntryValue  | null,
+    PackageNo: FormDataEntryValue  | null,
+    ApprovalCode: FormDataEntryValue  | null,
+    RetrievalRef: FormDataEntryValue  | null,
+    AuthStatus: FormDataEntryValue  | null,
+    Parameters: FormDataEntryValue  | null,
+    HashKey: FormDataEntryValue  | null,
+    PaymentMethod: FormDataEntryValue  | null,
+    TraceID: FormDataEntryValue  | null,
 }
 
 
@@ -101,7 +101,7 @@ export async function getTicket({ bankResponse }: { bankResponse: IBankResponse 
     }
 }
 
-export async function saveBankResponse({ orderId, TranTicket }: { orderId: number, TranTicket: string }) {
+export async function saveBankResponse({ bankResponse }: { bankResponse: IBankResponse }) {
     try {
         await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/saveTicket`,
             {
@@ -111,8 +111,14 @@ export async function saveBankResponse({ orderId, TranTicket }: { orderId: numbe
                     Authorization: `Bearer ${process.env.ADMIN_JWT_SECRET}`,
                 },
                 body: JSON.stringify({
-                    orderId: orderId,
-                    TransTicket: TranTicket,
+                    SupportReferenceID: bankResponse.SupportReferenceID,
+                    MerchantReference: bankResponse.MerchantReference,
+                    StatusFlag: bankResponse.StatusFlag,
+                    ResponseCode: bankResponse.ResponseCode,
+                    ResponseDescription: bankResponse.ResponseDescription,
+                    ApprovalCode: bankResponse.ApprovalCode,
+                    PackageNo: bankResponse.PackageNo,
+                    AuthStatus: bankResponse.AuthStatus
                 })
             }
         )

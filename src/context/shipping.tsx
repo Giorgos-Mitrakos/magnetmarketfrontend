@@ -359,7 +359,7 @@ export const ShippingProvider = ({ children }: any) => {
             const myHeaders = new Headers();
             myHeaders.append('Content-Type', 'application/json')
             if (session && session.user)
-                myHeaders.append("authorization", `Bearer ${session.user.jwt}`)
+                myHeaders.append("authorization", `Bearer ${process.env.ADMIN_JWT_SECRET}`)
 
             const myInit = {
                 method: "POST",

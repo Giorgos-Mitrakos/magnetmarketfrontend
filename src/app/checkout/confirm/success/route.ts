@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { redirect, RedirectType } from 'next/navigation'
-import { checkAuthResponse, getTicket, sendEmail } from "@/lib/helpers/piraeusGateway";
+import { checkAuthResponse, getTicket, saveBankResponse, sendEmail } from "@/lib/helpers/piraeusGateway";
 
 export async function POST(request: NextRequest) {
 
@@ -34,13 +33,40 @@ export async function POST(request: NextRequest) {
 
         const ticket = await getTicket({ bankResponse: JSON.parse(res) })
 
-        const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(res), ticket: ticket.TranTicket.TranTicket })
+        if (ticket.Flag !== "success") {
+            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/trans-fail`));
+        }
+
+        const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(res), ticket: ticket.ticket })
+
+        if (!isResponseAuth)
+            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/failure`));
 
         if (isResponseAuth) {
-            sendEmail({ title: "authenticated", data: `authenticated:${isResponseAuth}, ticket: ${ticket}, resposeFromBank: ${res}` })
+            if (response.StatusFlag === 'Success') {
+                await saveBankResponse({ bankResponse: response })
+                const res = NextResponse.redirect((new URL(`${process.env.NEXT_URL}checkout/thank-you`)))
+
+                if (response.ApprovalCode) {
+                    res.cookies.set("ApprovalCode", response.ApprovalCode?.toString(), {
+                        path: "/", // Cookie is available on all paths
+                        httpOnly: true, // Can't be accessed via JavaScript
+                        secure: true, // Only sent over HTTPS
+                        sameSite: "strict", // Prevents CSRF attacks 
+                        maxAge: 30 * 60
+                    });
+                }
+
+                return res
+                //  NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/thank-you`));
+            }
+            else {
+                await saveBankResponse({ bankResponse: response })
+                return NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/failure`));
+            }
+
+            // sendEmail({ title: "authenticated", data: `authenticated:${isResponseAuth}, ticket: ${ticket}, resposeFromBank: ${res}` })
         }
-        
-        return NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/thank-you`));
 
     } catch (error) {
         // console.log(error)

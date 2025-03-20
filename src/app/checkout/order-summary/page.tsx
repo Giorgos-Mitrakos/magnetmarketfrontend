@@ -132,7 +132,7 @@ const Confirm = () => {
 
         } catch (error) {
             console.log(error)
-            router.push('/checkout/confirm/fail')
+            router.push('/checkout/failure')
         }
     }
 
