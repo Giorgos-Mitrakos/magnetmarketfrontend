@@ -27,26 +27,26 @@ export async function POST(req: NextRequest) {
             PaymentMethod: transactionData.get('PaymentMethod'),
             TraceID: transactionData.get('TraceID'),
         }
-        
+
         const resTransactionData = JSON.stringify(responseTransactionData)
 
         const ticket = await getTicket({ bankResponse: JSON.parse(resTransactionData) })
 
         if (ticket.Flag !== "success") {
-            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`));
+            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`));
         }
 
         const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(resTransactionData), ticket: ticket.ticket })
 
         if (!isResponseAuth) {
             const bankresp = await saveBankResponse({ bankResponse: responseTransactionData })
-            
-            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`));
+
+            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`));
         }
 
         if (responseTransactionData.StatusFlag === 'Success') {
             const bankresp = await saveBankResponse({ bankResponse: responseTransactionData })
-            const res = NextResponse.redirect((new URL(`${process.env.NEXT_URL}/checkout/thank-you`)))
+            const res = NextResponse.redirect((new URL(`/checkout/thank-you`, `${process.env.NEXT_URL}`)))
 
             if (responseTransactionData.ApprovalCode) {
                 res.cookies.set("ApprovalCode", responseTransactionData.ApprovalCode?.toString(), {
@@ -69,19 +69,19 @@ export async function POST(req: NextRequest) {
                 });
 
             return res
-            //  NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/thank-you`));
+            //  NextResponse.redirect(new URL(`${ process.env.NEXT_URL }checkout / thank - you`));
         }
         else {
             await saveBankResponse({ bankResponse: responseTransactionData })
-            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`));
+            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`));
         }
 
-        // sendEmail({ title: "authenticated", data: `authenticated:${isResponseAuth}, ticket: ${ticket}, resposeFromBank: ${res}` })
+        // sendEmail({ title: "authenticated", data: `authenticated: ${ isResponseAuth }, ticket: ${ ticket }, resposeFromBank: ${ res }` })
 
 
     } catch (error) {
         console.log(error)
-        // sendEmail({ title: "Error in Respone", data: `Error: ${error}` })
+        // sendEmail({ title: "Error in Respone", data: `Error: ${ error }` })
         return NextResponse.redirect(new URL(`${process.env.NEXT_URL}`));
     }
 }
