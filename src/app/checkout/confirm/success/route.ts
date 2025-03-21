@@ -33,20 +33,21 @@ export async function POST(request: NextRequest) {
         const ticket = await getTicket({ bankResponse: JSON.parse(res) })
 
         if (ticket.Flag !== "success") {
-            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`));
+            sendEmail({ title: "No success", data: `ticket:${ticket.toString()}` })
+            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`,`${process.env.NEXT_URL}`));
         }
 
         const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(res), ticket: ticket.ticket })
 
         if (!isResponseAuth) {
             await saveBankResponse({ bankResponse: response })
-            
-            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`));
+            sendEmail({ title: "isResponseAuth", data: `ticket:${isResponseAuth?.toString()}` })
+            return NextResponse.redirect(new URL(`/checkout/failure`,`${process.env.NEXT_URL}`));
         }
 
         if (response.StatusFlag === 'Success') {
             await saveBankResponse({ bankResponse: response })
-            const res = NextResponse.redirect((new URL(`${process.env.NEXT_URL}/checkout/thank-you`)))
+            const res = NextResponse.redirect((new URL(`/checkout/thank-you`,`${process.env.NEXT_URL}`)))
 
             if (response.ApprovalCode) {
                 res.cookies.set("ApprovalCode", response.ApprovalCode?.toString(), {
@@ -68,12 +69,15 @@ export async function POST(request: NextRequest) {
                     maxAge: 30 * 60
                 });
 
+                sendEmail({ title: "Success", data: `orderId:${response.MerchantReference?.toString()}` })
             return res
             //  NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/thank-you`));
         }
         else {
             await saveBankResponse({ bankResponse: response })
-            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`));
+            sendEmail({ title: "No Success", data: `orderId:${response.MerchantReference?.toString()}` })
+
+            return NextResponse.redirect(new URL(`/checkout/failure`,`${process.env.NEXT_URL}`));
         }
 
         // sendEmail({ title: "authenticated", data: `authenticated:${isResponseAuth}, ticket: ${ticket}, resposeFromBank: ${res}` })
@@ -81,7 +85,7 @@ export async function POST(request: NextRequest) {
 
     } catch (error) {
         console.log(error)
-        // sendEmail({ title: "Error in Respone", data: `Error: ${error}` })
+        sendEmail({ title: "Error in Respone", data: `Error: ${error}` })
         return NextResponse.redirect(new URL(`${process.env.NEXT_URL}`));
     }
 }

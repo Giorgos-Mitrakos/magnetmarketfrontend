@@ -223,7 +223,7 @@ export async function getTransactionTicket({ orderId, amount, installments }: { 
 export async function checkAuthResponse({ bankResponse, ticket }: { bankResponse: IBankResponse, ticket: string }) {
     try {
         const message = [
-            '4236ece6142b4639925eb6f80217122f',
+            ticket,
             process.env.POS_ID,
             process.env.ACQUIRER_ID,
             bankResponse.MerchantReference,
