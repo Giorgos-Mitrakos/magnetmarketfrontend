@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkAuthResponse, getTicket, saveBankResponse, sendEmail } from "@/lib/helpers/piraeusGateway";
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
 
     try {
-        const transactionData = await request.formData();
+        const transactionData = await req.formData();
 
-        const response = {
+        const responseTransactionData = {
             SupportReferenceID: transactionData.get('SupportReferenceID'),
             ResultCode: transactionData.get('ResultCode'),
             ResultDescription: transactionData.get('ResultDescription'),
@@ -27,29 +27,29 @@ export async function POST(request: NextRequest) {
             PaymentMethod: transactionData.get('PaymentMethod'),
             TraceID: transactionData.get('TraceID'),
         }
+        
+        const resTransactionData = JSON.stringify(responseTransactionData)
 
-        const res = JSON.stringify(response)
-
-        const ticket = await getTicket({ bankResponse: JSON.parse(res) })
+        const ticket = await getTicket({ bankResponse: JSON.parse(resTransactionData) })
 
         if (ticket.Flag !== "success") {
             return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`));
         }
 
-        const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(res), ticket: ticket.ticket })
+        const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(resTransactionData), ticket: ticket.ticket })
 
         if (!isResponseAuth) {
-            await saveBankResponse({ bankResponse: response })
+            const bankresp = await saveBankResponse({ bankResponse: responseTransactionData })
             
             return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`));
         }
 
-        if (response.StatusFlag === 'Success') {
-            await saveBankResponse({ bankResponse: response })
+        if (responseTransactionData.StatusFlag === 'Success') {
+            const bankresp = await saveBankResponse({ bankResponse: responseTransactionData })
             const res = NextResponse.redirect((new URL(`${process.env.NEXT_URL}/checkout/thank-you`)))
 
-            if (response.ApprovalCode) {
-                res.cookies.set("ApprovalCode", response.ApprovalCode?.toString(), {
+            if (responseTransactionData.ApprovalCode) {
+                res.cookies.set("ApprovalCode", responseTransactionData.ApprovalCode?.toString(), {
                     path: "/", // Cookie is available on all paths
                     httpOnly: true, // Can't be accessed via JavaScript
                     secure: true, // Only sent over HTTPS
@@ -57,9 +57,9 @@ export async function POST(request: NextRequest) {
                     maxAge: 30 * 60
                 });
             }
-            if (response.MerchantReference)
+            if (responseTransactionData.MerchantReference)
                 res.cookies.set("magnet_market_order", JSON.stringify({
-                    orderId: response.MerchantReference?.toString()
+                    orderId: responseTransactionData.MerchantReference?.toString()
                 }), {
                     path: "/", // Cookie is available on all paths
                     httpOnly: true, // Can't be accessed via JavaScript
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
             //  NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/thank-you`));
         }
         else {
-            await saveBankResponse({ bankResponse: response })
+            await saveBankResponse({ bankResponse: responseTransactionData })
             return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`));
         }
 

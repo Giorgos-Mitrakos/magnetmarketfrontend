@@ -103,7 +103,7 @@ export async function getTicket({ bankResponse }: { bankResponse: IBankResponse 
 
 export async function saveBankResponse({ bankResponse }: { bankResponse: IBankResponse }) {
     try {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/saveTicket`,
+        const response=await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/saveBankResponse`,
             {
                 method: "POST",
                 headers: {
@@ -111,8 +111,9 @@ export async function saveBankResponse({ bankResponse }: { bankResponse: IBankRe
                     Authorization: `Bearer ${process.env.ADMIN_JWT_SECRET}`,
                 },
                 body: JSON.stringify({
-                    "bankResponse": {
+                    bankResponse: {
                         SupportReferenceID: bankResponse.SupportReferenceID,
+                        ResultCode: bankResponse.ResultCode,
                         MerchantReference: bankResponse.MerchantReference,
                         StatusFlag: bankResponse.StatusFlag,
                         ResponseCode: bankResponse.ResponseCode,
@@ -124,6 +125,10 @@ export async function saveBankResponse({ bankResponse }: { bankResponse: IBankRe
                 })
             }
         )
+
+        const res=response.json()
+
+        return res
     } catch (error) {
         console.log(error)
     }
@@ -218,7 +223,7 @@ export async function getTransactionTicket({ orderId, amount, installments }: { 
 export async function checkAuthResponse({ bankResponse, ticket }: { bankResponse: IBankResponse, ticket: string }) {
     try {
         const message = [
-            ticket,
+            '4236ece6142b4639925eb6f80217122f',
             process.env.POS_ID,
             process.env.ACQUIRER_ID,
             bankResponse.MerchantReference,
