@@ -19,7 +19,7 @@ function SearchInput() {
                 });
                 router.push(`/search?search=${text}`)
             }}
-                className="flex w-full justify-between border-b-2 bg-inherit border-siteColors-purple"
+                className="flex w-full justify-between border-b-2 border p-2 rounded-sm bg-inherit dark:bg-slate-800 border-siteColors-purple"
                 aria-label="Αναζήτηση">
                 {hasRecognitionSupport &&
                     <button onClick={isListening ? stopListening : startListening}
@@ -34,7 +34,7 @@ function SearchInput() {
                                 className='text-siteColors-purple dark:text-slate-800 text-2xl mb-1' />}
                     </button>}
                 <input type="search" tabIndex={0} placeholder="Αναζήτηση" value={text} onChange={(e) => setText(e.target.value)}
-                    className="pl-2 bg-inherit outline-none border-none flex-grow"
+                    className="pl-2 bg-inherit  dark:text-slate-100 outline-none border-none flex-grow"
                     aria-label="Πεδίο αναζήτησης προϊόντων" />
                 <button type="submit"
                     aria-label="Αναζήτηση - Αναζητήστε ανά προϊόν, κατασκευαστή ή κατηγορία">

@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 import Minicart from "./minicart";
 
 const SearchInput = dynamic(() => import('@/components/molecules/searchInput'), {
-    ssr: false,
+    ssr: true,
     loading: () => <p>Loading...</p>
   })
 

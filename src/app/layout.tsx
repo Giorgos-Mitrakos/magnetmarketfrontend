@@ -16,6 +16,7 @@ import { getSession } from './api/auth/[...nextauth]/options'
 import Copyright from '@/components/atoms/copyright'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import Script from 'next/script';
+import { Suspense } from 'react';
 const PixelTracker = dynamic(() => import("../components/atoms/pixelTracker"), { ssr: false });
 
 const inter = Inter({ subsets: ['greek'] })
@@ -69,7 +70,9 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
                     info: ' bg-blue-300 text-black p-4 rounded-lg',
                   },
                 }} />
-              <PixelTracker />
+              {/* <Suspense fallback={null}>
+                <PixelTracker />
+              </Suspense> */}
               <Αnnouncement />
               <Header user={session?.user?.name?.split('@')[0]} />
               <main className='mx-2 sm:mx-6 md:mx-8'>
