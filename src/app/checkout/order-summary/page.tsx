@@ -2,7 +2,6 @@
 import CartSummary from "@/components/atoms/cartSummary"
 import CartAside from "@/components/organisms/cartItemsAside"
 import { ShippingContext } from "@/context/shipping"
-import { getTransactionTicket } from "@/lib/helpers/piraeusGateway"
 import { useContext, useState } from "react"
 import { useRouter } from 'next/navigation'
 import { CartContext } from "@/context/cart"

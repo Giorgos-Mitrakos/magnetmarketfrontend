@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
         if (!isResponseAuth) {
             const bankresp = await saveBankResponse({ bankResponse: responseTransactionData })
 
-            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`));
+            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`),302);
         }
 
         if (responseTransactionData.StatusFlag === 'Success') {

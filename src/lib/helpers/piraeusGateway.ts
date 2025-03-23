@@ -103,7 +103,7 @@ export async function getTicket({ bankResponse }: { bankResponse: IBankResponse 
 
 export async function saveBankResponse({ bankResponse }: { bankResponse: IBankResponse }) {
     try {
-        const response=await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/saveBankResponse`,
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/saveBankResponse`,
             {
                 method: "POST",
                 headers: {
@@ -120,13 +120,16 @@ export async function saveBankResponse({ bankResponse }: { bankResponse: IBankRe
                         ResponseDescription: bankResponse.ResponseDescription,
                         ApprovalCode: bankResponse.ApprovalCode,
                         PackageNo: bankResponse.PackageNo,
-                        AuthStatus: bankResponse.AuthStatus
+                        AuthStatus: bankResponse.AuthStatus,
+                        TransactionId: bankResponse.TransactionId,
+                        PaymentMethod: bankResponse.PaymentMethod,
+                        TraceID: bankResponse.TraceID
                     }
                 })
             }
         )
 
-        const res=response.json()
+        const res = response.json()
 
         return res
     } catch (error) {
