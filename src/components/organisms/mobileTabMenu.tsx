@@ -10,7 +10,7 @@ import { MenuContext } from '@/context/menu';
 import dynamic from 'next/dynamic';
 
 const SearchInput = dynamic(() => import('@/components/molecules/searchInput'), {
-    ssr: true,
+    ssr: false,
     loading: () => <p>Loading...</p>
   })
 

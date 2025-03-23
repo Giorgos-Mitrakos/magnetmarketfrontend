@@ -166,7 +166,7 @@ export const ShippingProvider = ({ children }: any) => {
     const [paymentMethod, setPaymentMethod] = useState<IPaymentMethod>({ payment: '' })
 
     useEffect(() => {
-        if (!localStorage)
+        if (!localStorage || typeof window !== 'undefined' )
             return
 
         const address = localStorage.getItem("addresses");

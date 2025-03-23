@@ -29,7 +29,7 @@ export async function POST(request: NextRequest, res: NextResponse) {
     User: process.env.PEIRAIWS_USERNAME,
     LanguageCode: 'el-GR',
     MerchantReference: orderId,
-    ParamBackLink: 'https://magnetmarket.gr/checkout/confirm/success',
+    ParamBackLink: 'https://magnetmarket.gr/checkout/confirm/order-summary',
   };
 
 

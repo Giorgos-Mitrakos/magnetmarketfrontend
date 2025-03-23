@@ -35,6 +35,7 @@ const ShippingMethods = forwardRef<ShippingMethodsRef>((props, ref) => {
 
         return shippingMethod// savedValues ? JSON.parse(savedValues) : { pickup: false, shipping: '' };
     }
+    
 
     const formik = useFormik({
         initialValues: shippingMethod,

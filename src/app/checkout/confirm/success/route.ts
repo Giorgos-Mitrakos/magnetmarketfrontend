@@ -6,11 +6,6 @@ export async function POST(request: NextRequest) {
     try {
         const transactionData = await request.formData();
 
-        const paymentData = Object.fromEntries(transactionData.entries());
-
-        // console.log(paymentData)
-        sendEmail({ title: "paymentData", data: JSON.stringify(paymentData) })
-
         const response = {
             SupportReferenceID: transactionData.get('SupportReferenceID'),
             ResultCode: transactionData.get('ResultCode'),
