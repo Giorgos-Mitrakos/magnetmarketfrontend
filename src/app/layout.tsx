@@ -70,9 +70,9 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
                     info: ' bg-blue-300 text-black p-4 rounded-lg',
                   },
                 }} />
-              {/* <Suspense fallback={null}>
+              <Suspense fallback={null}>
                 <PixelTracker />
-              </Suspense> */}
+              </Suspense>
               <Αnnouncement />
               <Header user={session?.user?.name?.split('@')[0]} />
               <main className='mx-2 sm:mx-6 md:mx-8'>

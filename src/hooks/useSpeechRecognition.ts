@@ -1,3 +1,4 @@
+'use client'
 import { sendGAEvent } from '@next/third-parties/google';
 import { redirect, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react'

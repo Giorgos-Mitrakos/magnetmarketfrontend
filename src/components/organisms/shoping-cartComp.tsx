@@ -70,7 +70,7 @@ const CartItemTemplate = ({ item }: { item: ICartItem }) => {
     return (
         <div className="grid gap-y-4 gap-x-2 grid-cols-2 xs:grid-cols-9 lg:grid-cols-12 mb-4 p-2 border rounded">
             <div className="col-span-2 lg:col-span-1">
-                {item.image ?
+                {item.image && item.image.data ?
                     <div className="relative h-20 w-full ">
                         <Image
                             // layout='responsive'
