@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 
         if (ticket.Flag !== "success") {
             sendEmail({ title: "No success", data: `ticket:${ticket.toString()}` })
-            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`, `${process.env.NEXT_URL}`));
+            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`, `${process.env.NEXT_URL}`), 303);
         }
 
         const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(res), ticket: ticket.ticket })
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
         if (!isResponseAuth) {
             await saveBankResponse({ bankResponse: response })
             // sendEmail({ title: "isResponseAuth", data: `ticket:${isResponseAuth?.toString()}` })
-            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`));
+            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`), 303);
         }
 
         if (response.StatusFlag === 'Success') {
@@ -54,8 +54,8 @@ export async function POST(request: NextRequest) {
                         path: "/", // Cookie is available on all paths
                         httpOnly: true, // Can't be accessed via JavaScript
                         secure: true, // Only sent over HTTPS
-                        sameSite: "strict", // Prevents CSRF attacks 
-                        maxAge: 30 * 60
+                        sameSite: "lax", // Prevents CSRF attacks 
+                        maxAge: 10 * 60
                     })
             }
             if (response.MerchantReference) {
@@ -65,8 +65,8 @@ export async function POST(request: NextRequest) {
                     path: "/", // Cookie is available on all paths
                     httpOnly: true, // Can't be accessed via JavaScript
                     secure: true, // Only sent over HTTPS
-                    sameSite: "strict", // Prevents CSRF attacks 
-                    maxAge: 30 * 60
+                    sameSite: "lax", // Prevents CSRF attacks 
+                    maxAge: 10 * 60
                 })
             }
 
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
             await saveBankResponse({ bankResponse: response })
             sendEmail({ title: "No Success", data: `orderId:${response.MerchantReference?.toString()}` })
 
-            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`));
+            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`), 303);
         }
 
         // sendEmail({ title: "authenticated", data: `authenticated:${isResponseAuth}, ticket: ${ticket}, resposeFromBank: ${res}` })
@@ -91,6 +91,6 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         console.log(error)
         sendEmail({ title: "Error in Respone", data: `Error: ${error}` })
-        return NextResponse.redirect(new URL(`${process.env.NEXT_URL}`));
+        return NextResponse.redirect(new URL(`${process.env.NEXT_URL}`), 303);
     }
 }
