@@ -27,6 +27,21 @@ export default async function Fail() {
         case 1:
             resultAnswer = 'H συναλλαγή δεν έγινε δεκτή από την εκδότρια Τράπεζα'
             break;
+        case 2:
+            resultAnswer = 'Αδυναμία εκτέλεσης της συναλλαγής'
+            break;
+        case 3:
+            resultAnswer = 'Αδυναμία εκτέλεσης της συναλλαγής λόγω (τεχνικού) προβλήματος. Παρακαλούμε να προσπαθήσετε ξανά αργότερα'
+            break;
+        case 4:
+            resultAnswer = 'Αδυναμία εκτέλεσης της συναλλαγής. Παρακαλούμε να ελέγξετε τα στοιχεία της κάρτας σας και προσπαθήστε ξανά.'
+            break;
+        case 5:
+            resultAnswer = 'Αδυναμία εκτέλεσης της συναλλαγής. Παρακαλούμε να προσπαθήσετε ξανά αργότερα'
+            break;
+        case 6:
+            resultAnswer = 'Αδυναμία εκτέλεσης της συναλλαγής λόγω προσωρινού τεχνικού προβλήματος. Παρακαλούμε να προσπαθήσετε ξανά αργότερα'
+            break;
 
         default:
             break;
@@ -34,7 +49,7 @@ export default async function Fail() {
 
     return (
         <section className="rounded-lg p-4 bg-gradient-to-tr from-siteColors-lightblue via-siteColors-blue to-siteColors-pink mb-16">
-            <h1 className="text-2xl mb-4 font-semibold text-slate-200 text-center">Η συναλλαγή απέτυχε!</h1>
+            <h1 className="text-2xl mb-4 font-semibold text-slate-200 text-center">Ευχαριστούμε για την παραγγελία!</h1>
             <h2 className="text-xl mb-4 font-semibold text-slate-200 text-center">Αρ. {order.orderId}</h2>
             {resultAnswer !== '' &&
                 <div className="text-lg mb-4 text-slate-200 text-center">
@@ -72,6 +87,12 @@ export default async function Fail() {
                         </div>
                     </div>
                 ))}
+            </div>
+            <div className="rounded-lg shadow-md p-4 mt-4 text-gray-500 bg-white">
+                <div className="flex space-x-4">
+                    <h3>Σύνολο:</h3>
+                    <p>{data.order.data.attributes.total.toFixed(2)} €</p>
+                </div>
             </div>
         </section>
     )

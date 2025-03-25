@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkAuthResponse, getTicket, saveBankResponse, sendEmail } from "@/lib/helpers/piraeusGateway";
+import { saveBankResponse, sendEmail } from "@/lib/helpers/piraeusGateway";
 import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
@@ -29,26 +29,33 @@ export async function POST(request: NextRequest) {
             TraceID: transactionData.get('TraceID'),
         }
 
-        const res = JSON.stringify(response)
-
-        if (response.ResultCode?.toString() === '0') {
+        if (response.ResultCode) {
             await saveBankResponse({ bankResponse: response })
-            sendEmail({ title: "Bank Response", data: `Bank Response:${JSON.stringify(response)}` })
-            cookies().set("_rcf", JSON.stringify({ RCF: 1 }),
-                {
-                    path: "/", // Cookie is available on all paths
-                    httpOnly: true, // Can't be accessed via JavaScript
-                    secure: true, // Only sent over HTTPS
-                    sameSite: "lax", // Prevents CSRF attacks 
-                    maxAge: 10 * 60
-                })
-            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`, `${process.env.NEXT_URL}`), 303);
-        }
 
-        if (response.StatusFlag === 'Success') {
-            await saveBankResponse({ bankResponse: response })
-            if (response.ApprovalCode) {
-                cookies().set("ApprovalCode", JSON.stringify({ ApprovalCode: response.ApprovalCode?.toString() }),
+            let resultCode = 0
+
+            const intResultCode = parseInt(response.ResultCode.toString())
+            if (intResultCode === 0) {
+                resultCode = 1
+            }
+            else if (intResultCode === 1048) {
+                resultCode = 2
+            }
+            else if (intResultCode >= 500 && intResultCode < 600) {
+                resultCode = 3
+            }
+            else if (intResultCode === 981) {
+                resultCode = 4
+            }
+            else if (intResultCode === 1045 || intResultCode === 1072) {
+                resultCode = 5
+            }
+            else if (intResultCode === 1) {
+                resultCode = 6
+            }
+
+            if (resultCode !== 0) {
+                cookies().set("_rcf", JSON.stringify({ RCF: resultCode }),
                     {
                         path: "/", // Cookie is available on all paths
                         httpOnly: true, // Can't be accessed via JavaScript
@@ -57,21 +64,9 @@ export async function POST(request: NextRequest) {
                         maxAge: 10 * 60
                     })
             }
-            if (response.MerchantReference) {
-                cookies().set("magnet_market_order", JSON.stringify({
-                    orderId: response.MerchantReference?.toString()
-                }), {
-                    path: "/", // Cookie is available on all paths
-                    httpOnly: true, // Can't be accessed via JavaScript
-                    secure: true, // Only sent over HTTPS
-                    sameSite: "lax", // Prevents CSRF attacks 
-                    maxAge: 10 * 60
-                })
-            }
 
-            sendEmail({ title: "Success", data: `orderId:${response.MerchantReference?.toString()}` })
+            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`, `${process.env.NEXT_URL}`), 303);
 
-            return NextResponse.redirect(new URL(`/checkout/thank-you`, `${process.env.NEXT_URL}`), 303);
         }
         else {
             await saveBankResponse({ bankResponse: response })
