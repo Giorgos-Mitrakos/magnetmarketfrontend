@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkAuthResponse, getTicket, saveBankResponse, sendEmail } from "@/lib/helpers/piraeusGateway";
+import { checkAuthResponse, getTicket, saveBankResponse } from "@/lib/helpers/piraeusGateway";
 import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
@@ -33,8 +33,7 @@ export async function POST(request: NextRequest) {
 
         const ticket = await getTicket({ bankResponse: JSON.parse(res) })
 
-        if (ticket.Flag !== "success") {
-            sendEmail({ title: "No success", data: `ticket:${ticket.toString()}` })
+        if (ticket.Flag !== "success" ) {
             return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`, `${process.env.NEXT_URL}`), 303);
         }
 
@@ -42,11 +41,10 @@ export async function POST(request: NextRequest) {
 
         if (!isResponseAuth) {
             await saveBankResponse({ bankResponse: response })
-            // sendEmail({ title: "isResponseAuth", data: `ticket:${isResponseAuth?.toString()}` })
             return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`), 303);
         }
 
-        if (response.StatusFlag === 'Success') {
+        if (response.StatusFlag === 'Success' && response.ResultCode?.toString() === '0') {
             await saveBankResponse({ bankResponse: response })
             if (response.ApprovalCode) {
                 cookies().set("ApprovalCode", JSON.stringify({ ApprovalCode: response.ApprovalCode?.toString() }),
@@ -70,28 +68,16 @@ export async function POST(request: NextRequest) {
                 })
             }
 
-            // const res = NextResponse.redirect((new URL(`/checkout/thank-you`, `${process.env.NEXT_URL}`)))
-
-
-
-            sendEmail({ title: "Success", data: `orderId:${response.MerchantReference?.toString()}` })
-
             return NextResponse.redirect(new URL(`/checkout/thank-you`, `${process.env.NEXT_URL}`), 303);
             // return NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/thank-you`), 303);
         }
         else {
             await saveBankResponse({ bankResponse: response })
-            sendEmail({ title: "No Success", data: `orderId:${response.MerchantReference?.toString()}` })
 
             return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`), 303);
         }
 
-        // sendEmail({ title: "authenticated", data: `authenticated:${isResponseAuth}, ticket: ${ticket}, resposeFromBank: ${res}` })
-
-
     } catch (error) {
-        console.log(error)
-        sendEmail({ title: "Error in Respone", data: `Error: ${error}` })
         return NextResponse.redirect(new URL(`${process.env.NEXT_URL}`), 303);
     }
 }

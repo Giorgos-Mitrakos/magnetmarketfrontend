@@ -15,11 +15,11 @@ function addDays(date: Date, days: number) {
     return newDate;
 }
 
-interface IOrderCookie {
+export interface IOrderCookie {
     orderId: number
 }
 
-interface IOrder {
+export interface IOrder {
     order: {
         data: {
             id: number,
