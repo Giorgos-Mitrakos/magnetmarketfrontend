@@ -31,23 +31,6 @@ export async function POST(request: NextRequest) {
 
         const res = JSON.stringify(response)
 
-        const ticket = await getTicket({ bankResponse: JSON.parse(res) })
-
-        if (ticket.Flag !== "success") {
-
-            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`, `${process.env.NEXT_URL}`), 303);
-        }
-
-        sendEmail({ title: "Bank Response", data: `Bank Response:${JSON.stringify(response)}` })
-
-        const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(res), ticket: ticket.ticket })
-
-        if (!isResponseAuth) {
-            await saveBankResponse({ bankResponse: response })
-
-            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`), 303);
-        }
-
         if (response.ResultCode?.toString() === '0') {
             await saveBankResponse({ bankResponse: response })
             sendEmail({ title: "Bank Response", data: `Bank Response:${JSON.stringify(response)}` })
