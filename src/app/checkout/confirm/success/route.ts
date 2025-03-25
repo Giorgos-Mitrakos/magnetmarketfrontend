@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkAuthResponse, getTicket, saveBankResponse, sendEmail } from "@/lib/helpers/piraeusGateway";
+import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
 
@@ -47,19 +48,18 @@ export async function POST(request: NextRequest) {
 
         if (response.StatusFlag === 'Success') {
             await saveBankResponse({ bankResponse: response })
-            const res = NextResponse.redirect((new URL(`/checkout/thank-you`, `${process.env.NEXT_URL}`)))
-
             if (response.ApprovalCode) {
-                res.cookies.set("ApprovalCode", response.ApprovalCode?.toString(), {
-                    path: "/", // Cookie is available on all paths
-                    httpOnly: true, // Can't be accessed via JavaScript
-                    secure: true, // Only sent over HTTPS
-                    sameSite: "strict", // Prevents CSRF attacks 
-                    maxAge: 30 * 60
-                });
+                cookies().set("ApprovalCode", response.ApprovalCode?.toString(),
+                    {
+                        path: "/", // Cookie is available on all paths
+                        httpOnly: true, // Can't be accessed via JavaScript
+                        secure: true, // Only sent over HTTPS
+                        sameSite: "strict", // Prevents CSRF attacks 
+                        maxAge: 30 * 60
+                    })
             }
-            if (response.MerchantReference)
-                res.cookies.set("magnet_market_order", JSON.stringify({
+            if (response.MerchantReference) {
+                cookies().set("magnet_market_order", JSON.stringify({
                     orderId: response.MerchantReference?.toString()
                 }), {
                     path: "/", // Cookie is available on all paths
@@ -67,11 +67,16 @@ export async function POST(request: NextRequest) {
                     secure: true, // Only sent over HTTPS
                     sameSite: "strict", // Prevents CSRF attacks 
                     maxAge: 30 * 60
-                });
+                })
+            }
+
+            // const res = NextResponse.redirect((new URL(`/checkout/thank-you`, `${process.env.NEXT_URL}`)))
+
+
 
             sendEmail({ title: "Success", data: `orderId:${response.MerchantReference?.toString()}` })
-            return res
-            //  NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/thank-you`));
+
+            NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/thank-you`));
         }
         else {
             await saveBankResponse({ bankResponse: response })

@@ -87,6 +87,8 @@ export default async function Success() {
 
     const order: IOrderCookie = orderCookie ? JSON.parse(orderCookie.value) : null
 
+    console.log("OrderId:", order.orderId)
+
     const response = await requestSSR({
         query: GET_ORDER, variables: { id: order.orderId }
     });
