@@ -91,8 +91,6 @@ export default async function Success() {
 
     const approvalCode = ApprovalCodeCookie ? JSON.parse(ApprovalCodeCookie.value) : null
 
-    console.log("OrderId:", approvalCode.ApprovalCode)
-
     const response = await requestSSR({
         query: GET_ORDER, variables: { id: order.orderId }
     });
