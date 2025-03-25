@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkAuthResponse, getTicket, saveBankResponse, sendEmail } from "@/lib/helpers/piraeusGateway";
+import { cookies } from "next/headers";
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
 
     try {
-        const transactionData = await req.formData();
+        const transactionData = await request.formData();
 
-        const responseTransactionData = {
+        const response = {
             SupportReferenceID: transactionData.get('SupportReferenceID'),
             ResultCode: transactionData.get('ResultCode'),
             ResultDescription: transactionData.get('ResultDescription'),
@@ -28,60 +29,69 @@ export async function POST(req: NextRequest) {
             TraceID: transactionData.get('TraceID'),
         }
 
-        const resTransactionData = JSON.stringify(responseTransactionData)
+        const res = JSON.stringify(response)
 
-        const ticket = await getTicket({ bankResponse: JSON.parse(resTransactionData) })
+        const ticket = await getTicket({ bankResponse: JSON.parse(res) })
 
         if (ticket.Flag !== "success") {
-            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`));
+            sendEmail({ title: "No success", data: `ticket:${ticket.toString()}` })
+            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`, `${process.env.NEXT_URL}`), 303);
         }
 
-        const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(resTransactionData), ticket: ticket.ticket })
+        const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(res), ticket: ticket.ticket })
 
         if (!isResponseAuth) {
-            const bankresp = await saveBankResponse({ bankResponse: responseTransactionData })
-
-            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`),302);
+            await saveBankResponse({ bankResponse: response })
+            // sendEmail({ title: "isResponseAuth", data: `ticket:${isResponseAuth?.toString()}` })
+            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`), 303);
         }
 
-        if (responseTransactionData.StatusFlag === 'Success') {
-            const bankresp = await saveBankResponse({ bankResponse: responseTransactionData })
-            const res = NextResponse.redirect((new URL(`/checkout/thank-you`, `${process.env.NEXT_URL}`)))
-
-            if (responseTransactionData.ApprovalCode) {
-                res.cookies.set("ApprovalCode", responseTransactionData.ApprovalCode?.toString(), {
-                    path: "/", // Cookie is available on all paths
-                    httpOnly: true, // Can't be accessed via JavaScript
-                    secure: true, // Only sent over HTTPS
-                    sameSite: "strict", // Prevents CSRF attacks 
-                    maxAge: 30 * 60
-                });
+        if (response.StatusFlag === 'Success') {
+            await saveBankResponse({ bankResponse: response })
+            if (response.ApprovalCode) {
+                cookies().set("ApprovalCode", response.ApprovalCode?.toString(),
+                    {
+                        path: "/", // Cookie is available on all paths
+                        httpOnly: true, // Can't be accessed via JavaScript
+                        secure: true, // Only sent over HTTPS
+                        sameSite: "lax", // Prevents CSRF attacks 
+                        maxAge: 10 * 60
+                    })
             }
-            if (responseTransactionData.MerchantReference)
-                res.cookies.set("magnet_market_order", JSON.stringify({
-                    orderId: responseTransactionData.MerchantReference?.toString()
+            if (response.MerchantReference) {
+                cookies().set("magnet_market_order", JSON.stringify({
+                    orderId: response.MerchantReference?.toString()
                 }), {
                     path: "/", // Cookie is available on all paths
                     httpOnly: true, // Can't be accessed via JavaScript
                     secure: true, // Only sent over HTTPS
-                    sameSite: "strict", // Prevents CSRF attacks 
-                    maxAge: 30 * 60
-                });
+                    sameSite: "lax", // Prevents CSRF attacks 
+                    maxAge: 10 * 60
+                })
+            }
 
-            return res
-            //  NextResponse.redirect(new URL(`${ process.env.NEXT_URL }checkout / thank - you`));
+            // const res = NextResponse.redirect((new URL(`/checkout/thank-you`, `${process.env.NEXT_URL}`)))
+
+
+
+            sendEmail({ title: "Success", data: `orderId:${response.MerchantReference?.toString()}` })
+
+            return NextResponse.redirect(new URL(`/checkout/thank-you`, `${process.env.NEXT_URL}`), 303);
+            // return NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/thank-you`), 303);
         }
         else {
-            await saveBankResponse({ bankResponse: responseTransactionData })
-            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`));
+            await saveBankResponse({ bankResponse: response })
+            sendEmail({ title: "No Success", data: `orderId:${response.MerchantReference?.toString()}` })
+
+            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`), 303);
         }
 
-        // sendEmail({ title: "authenticated", data: `authenticated: ${ isResponseAuth }, ticket: ${ ticket }, resposeFromBank: ${ res }` })
+        // sendEmail({ title: "authenticated", data: `authenticated:${isResponseAuth}, ticket: ${ticket}, resposeFromBank: ${res}` })
 
 
     } catch (error) {
         console.log(error)
-        // sendEmail({ title: "Error in Respone", data: `Error: ${ error }` })
-        return NextResponse.redirect(new URL(`${process.env.NEXT_URL}`));
+        sendEmail({ title: "Error in Respone", data: `Error: ${error}` })
+        return NextResponse.redirect(new URL(`${process.env.NEXT_URL}`), 303);
     }
 }
