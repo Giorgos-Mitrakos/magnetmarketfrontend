@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
 
             sendEmail({ title: "Success", data: `orderId:${response.MerchantReference?.toString()}` })
 
-            NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/thank-you`));
+            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/thank-you`), 303);
         }
         else {
             await saveBankResponse({ bankResponse: response })
