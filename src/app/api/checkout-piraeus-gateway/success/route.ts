@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         if (response.StatusFlag === 'Success' && response.ResultCode?.toString() === '0') {
             await saveBankResponse({ bankResponse: response })
             if (response.ApprovalCode) {
-                cookies().set("ApprovalCode", JSON.stringify({ ApprovalCode: response.ApprovalCode?.toString() }),
+                cookies().set("_apc", JSON.stringify({ ApprovalCode: response.ApprovalCode?.toString() }),
                     {
                         path: "/", // Cookie is available on all paths
                         httpOnly: true, // Can't be accessed via JavaScript
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
                     })
             }
             if (response.MerchantReference) {
-                cookies().set("magnet_market_order", JSON.stringify({
+                cookies().set("_mmo", JSON.stringify({
                     orderId: response.MerchantReference?.toString()
                 }), {
                     path: "/", // Cookie is available on all paths
