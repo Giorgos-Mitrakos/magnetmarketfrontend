@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkAuthResponse, getTicket, saveBankResponse } from "@/lib/helpers/piraeusGateway";
+import { checkAuthResponse, getTicket, saveBankResponse, sendEmail } from "@/lib/helpers/piraeusGateway";
 import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
@@ -31,10 +31,12 @@ export async function POST(request: NextRequest) {
 
         const res = JSON.stringify(response)
 
+        await sendEmail({title:'bank response',data:res})
+
         const ticket = await getTicket({ bankResponse: JSON.parse(res) })
 
         if (ticket.Flag !== "success") {
-            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure/failure-redirect`, `${process.env.NEXT_URL}`), 303);
+            return NextResponse.redirect(new URL(`/checkout/failure/failure-redirect`, `${process.env.NEXT_URL}`), 303);
         }
 
         const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(res), ticket: ticket.ticket })
