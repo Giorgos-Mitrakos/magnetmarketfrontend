@@ -177,7 +177,7 @@ export const metadata: Metadata = {
         canonical: `${process.env.NEXT_URL}/checkout/confirm/success`,
     },
     openGraph: {
-        url: 'www.magnetmarket.gr',
+        url: 'magnetmarket.gr/checkout/thank-you',
         type: 'website',
         images: [`${process.env.NEXT_URL}/MARKET MAGNET-LOGO.svg`],
         siteName: "www.magnetmarket.gr",

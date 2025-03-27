@@ -54,10 +54,10 @@ export const metadata: Metadata = {
         canonical: `${process.env.NEXT_URL}/login`,
     },
     openGraph: {
-        url: 'www.magnetmarket.gr',
+        url: 'magnetmarket.gr/register',
         type: 'website',
         images: [`${process.env.NEXT_URL}/_next/static/media/MARKET MAGNET-LOGO.79db5357.svg`],
-        siteName: "www.magnetmarket.gr",
+        siteName: "magnetmarket.gr",
         emails: ["info@magnetmarket.gr"],
         phoneNumbers: ['2221121657'],
         countryName: 'Ελλάδα',

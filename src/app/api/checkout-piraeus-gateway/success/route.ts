@@ -33,15 +33,15 @@ export async function POST(request: NextRequest) {
 
         const ticket = await getTicket({ bankResponse: JSON.parse(res) })
 
-        if (ticket.Flag !== "success" ) {
-            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`, `${process.env.NEXT_URL}`), 303);
+        if (ticket.Flag !== "success") {
+            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure/failure-redirect`, `${process.env.NEXT_URL}`), 303);
         }
 
         const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(res), ticket: ticket.ticket })
 
         if (!isResponseAuth) {
             await saveBankResponse({ bankResponse: response })
-            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`), 303);
+            return NextResponse.redirect(new URL(`/checkout/failure/failure-redirect`, `${process.env.NEXT_URL}`), 303);
         }
 
         if (response.StatusFlag === 'Success' && response.ResultCode?.toString() === '0') {
@@ -68,13 +68,12 @@ export async function POST(request: NextRequest) {
                 })
             }
 
-            return NextResponse.redirect(new URL(`/checkout/thank-you`, `${process.env.NEXT_URL}`), 303);
-            // return NextResponse.redirect(new URL(`${process.env.NEXT_URL}checkout/thank-you`), 303);
+            return NextResponse.redirect(new URL(`/checkout/thank-you/success-redirect`, `${process.env.NEXT_URL}`), 303);
         }
         else {
             await saveBankResponse({ bankResponse: response })
 
-            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`), 303);
+            return NextResponse.redirect(new URL(`/checkout/failure/failure-redirect`, `${process.env.NEXT_URL}`), 303);
         }
 
     } catch (error) {

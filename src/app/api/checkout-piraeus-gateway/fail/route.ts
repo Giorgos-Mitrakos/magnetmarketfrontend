@@ -65,14 +65,14 @@ export async function POST(request: NextRequest) {
                     })
             }
 
-            return NextResponse.redirect(new URL(`${process.env.NEXT_URL}/checkout/failure`, `${process.env.NEXT_URL}`), 303);
+            return NextResponse.redirect(new URL(`/checkout/failure/failure-redirect`, `${process.env.NEXT_URL}`), 303);
 
         }
         else {
             await saveBankResponse({ bankResponse: response })
             sendEmail({ title: "No Success", data: `orderId:${response.MerchantReference?.toString()}` })
 
-            return NextResponse.redirect(new URL(`/checkout/failure`, `${process.env.NEXT_URL}`), 303);
+            return NextResponse.redirect(new URL(`/checkout/failure/failure-redirect`, `${process.env.NEXT_URL}`), 303);
         }
 
     } catch (error) {
