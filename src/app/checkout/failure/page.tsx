@@ -7,7 +7,7 @@ import { FaRegImage } from "react-icons/fa6";
 
 export default async function Fail() {
 
-    const orderCookie = await getCookies({ name: 'magnet_market_order' })
+    const orderCookie = await getCookies({ name: '_mmo' })
 
     const rcfCookie = await getCookies({ name: '_rcf' })
 

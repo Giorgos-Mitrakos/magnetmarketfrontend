@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         if (response.StatusFlag === 'Success' && response.ResultCode?.toString() === '0') {
             await saveBankResponse({ bankResponse: response })
             if (response.ApprovalCode) {
-                cookies().set("_apc", JSON.stringify({ ApprovalCode: response.ApprovalCode?.toString() }),
+                cookies().set("ApprovalCode", JSON.stringify({ ApprovalCode: response.ApprovalCode?.toString() }),
                     {
                         path: "/", // Cookie is available on all paths
                         httpOnly: true, // Can't be accessed via JavaScript
