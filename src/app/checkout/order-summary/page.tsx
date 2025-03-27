@@ -94,7 +94,7 @@ const Confirm = () => {
                         // cache: "default",
                     };
 
-                    const formdata = await fetch(`/api/checkout-piraeus-gateway`,
+                    const formdata = await fetch(`/api/checkout-piraeus-gateway/ticket`,
                         myInit,
                     )
 
