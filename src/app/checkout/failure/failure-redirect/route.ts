@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  return NextResponse.redirect(new URL("/checkout/failure", req.url), 303);
+    return NextResponse.redirect(new URL("/checkout/failure", `${process.env.NEXT_URL}`), 303);
 }
