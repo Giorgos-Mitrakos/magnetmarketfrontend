@@ -51,7 +51,7 @@ const AddressSummary = ({ address }: { address: IAddressSumary }) => {
 }
 
 const Confirm = () => {
-    const { cartItems, shippingCost, paymentMethod, shippingMethod, paymentCost, addresses, createOrder } = useContext(ShippingContext)
+    const { paymentMethod, shippingMethod, addresses, createOrder } = useContext(ShippingContext)
     const { clearCart } = useContext(CartContext)
     const [processing, setProcessing] = useState(false)
     const router = useRouter()
@@ -60,11 +60,15 @@ const Confirm = () => {
         try {
             setProcessing(true)
             const newOrder = await createOrder()
-            
+
+            console.log(newOrder)
+
             if (newOrder && newOrder.status === "fail") {
                 toast.error(newOrder.message, {
                     position: 'top-right',
                 })
+
+                return
             }
 
             if (newOrder.orderId) {
@@ -75,7 +79,7 @@ const Confirm = () => {
                 })
             }
 
-            if (newOrder && paymentMethod.payment === "Κάρτα") {
+            if (newOrder && (paymentMethod?.attributes.name === "Χρεωστική Κάρτα" || paymentMethod?.attributes.name === "Πιστωτική Κάρτα")) {
                 if (newOrder.orderId && newOrder.amount) {
 
                     const myHeaders = new Headers();
@@ -88,11 +92,13 @@ const Confirm = () => {
                         body: JSON.stringify({
                             orderId: newOrder.orderId,
                             amount: newOrder.amount,
-                            installments: 1
+                            installments: newOrder.installments
                         })
                         // mode: "cors",
                         // cache: "default",
                     };
+
+                    console.log(myInit)
 
                     const formdata = await fetch(`/api/checkout-piraeus-gateway/ticket`,
                         myInit,
@@ -120,7 +126,7 @@ const Confirm = () => {
 
                 setProcessing(false)
             }
-            else {               
+            else {
 
                 clearCart()
 
@@ -153,11 +159,11 @@ const Confirm = () => {
                     </li>}
                     <li className="p-4 rounded">
                         <h2 className='font-medium  mb-4 border-b text-siteColors-purple dark:text-slate-200'>Τρόπος πληρωμής</h2>
-                        <span>{paymentMethod.payment}</span>
+                        <span>{paymentMethod?.attributes?.name}</span>
                     </li>
                     <li className="p-4 rounded">
                         <h2 className='font-medium  mb-4 border-b text-siteColors-purple dark:text-slate-200'>Τρόπος αποστολής</h2>
-                        <span>{shippingMethod.pickup ? 'Παραλαβή από το κατάστημα' : shippingMethod.shipping}</span>
+                        <span>{shippingMethod.shipping}</span>
                     </li>
                     <li className="p-4 rounded">
                         <h2 className='font-medium  mb-4 border-b text-siteColors-purple dark:text-slate-200'>Τύπος παραστατικού</h2>

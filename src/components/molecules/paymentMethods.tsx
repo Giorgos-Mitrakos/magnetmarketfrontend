@@ -1,135 +1,43 @@
-'use client'
+import React, { useContext } from "react";
+import { useFormikContext, FormikValues } from "formik";
+import Radio from "../atoms/radio";
+import { IPaymentMethod, IPaymentMethods, ShippingContext } from "@/context/shipping";
+import Installments from "./installments";
 
-import { GET_PAYMENT_METHODS } from "@/lib/queries/shippingQuery"
-import { useQuery } from "@/repositories/clientRepository"
-import Radio from "../atoms/radio"
-import { forwardRef, useContext, useEffect, useImperativeHandle } from "react"
-import { ShippingContext } from "@/context/shipping"
-import { useFormik } from "formik"
-import * as Yup from 'yup'
-import Banks from "../atoms/banks"
-import { CartContext } from "@/context/cart"
+const PaymentMethods = ({ payments }: { payments: IPaymentMethods }) => {
+    const { values, setFieldValue, errors, touched } = useFormikContext<FormikValues>();
+    const { saveInstallments, savePaymentMethod, gettotalCostWithoutInstallments } = useContext(ShippingContext)
 
-export type PaymentMethodsRef = {
-    submitForm: () => void;
-    isSubmitting: boolean,
-};
-
-interface IPaymentMethods {
-    payments: {
-        data: {
-            id: number | string
-            attributes: {
-                name: string
-                price: number
-                icon: {
-                    data: {
-                        attributes: {
-                            name: string
-                            alternativeText: string
-                        }
-                    }
-                }
-                range: {
-                    minimum: number
-                    maximum: number
-                }
-            }
-        }[]
-    }
-}
-
-const PaymentMethods = forwardRef<PaymentMethodsRef>((props, ref) => {
-    const { paymentMethod, savePaymentMethod, shippingMethod } = useContext(ShippingContext)
-    const { cartTotal } = useContext(CartContext)
-    const { data: paymentMethodsData, loading: loadingPaymentMethods, error: errorPaymentMethods } = useQuery({ query: GET_PAYMENT_METHODS, jwt: '' })
-
-    const paymentMethods = paymentMethodsData as IPaymentMethods
-
-    const loadInitialValues = () => {
-        const savedValues = typeof window !== 'undefined' && localStorage.getItem('paymentMethod');
-        return savedValues ? JSON.parse(savedValues) : { payment: '' };
-    }
-
-    const formik = useFormik({
-        initialValues: loadInitialValues(),
-        validationSchema: Yup.object({
-            payment: Yup.string().required()
-        }),
-        onSubmit: values => {
-            savePaymentMethod({ payment: formik.values.payment })
-        },
-    });
-
-    useImperativeHandle(ref, () => ({
-        submitForm: () => {
-            formik.submitForm()
-        },
-        resetForm: () => {
-            formik.resetForm();
-        },
-        isSubmitting: formik.isSubmitting
-
-    }));
-
-    // const onRadioPaymentChange = (e: React.ChangeEvent<HTMLInputElement> | undefined) => {
-    //     if (e) {
-    //         savePaymentMethod({ name: formik.values.payment })
-    //     }
-
-    // }
-
-    useEffect(() => {
-        if (shippingMethod.pickup && paymentMethod.payment === "Αντικαταβολή") {
-            formik.setFieldValue("payment", "")
-        }
-
-    }, [shippingMethod.pickup])
-
-    useEffect(() => {
-        const updatePayment = { ...paymentMethod, payment: formik.values.payment }
-        savePaymentMethod(updatePayment)
-    }, [formik.values.payment])
+    const handleSelect = (method: IPaymentMethod) => {
+        setFieldValue("paymentMethod", method.attributes.name);
+        setFieldValue("paymentMethodId", method.id);
+        setFieldValue("installments", 1);
+        saveInstallments(1)
+        savePaymentMethod(method)
+    };
 
     return (
-        <form className='space-y-4 w-full p-4 bg-slate-50 dark:bg-slate-700 rounded-lg'
-            onSubmit={formik.handleSubmit}>
-            <h3 className='font-medium mb-6 border-b text-siteColors-purple dark:text-slate-200'>Τρόποι πληρωμής</h3>
+        <div className='space-y-4 mt-4 w-full p-4 bg-slate-50 dark:bg-slate-700 rounded-lg'>
+            <h3>Τρόποι πληρωμής {errors.paymentMethod && touched.paymentMethod &&
+                <span> <small id="feedback" className="text-sm text-red-500">{errors.paymentMethod.toString()}</small></span>}</h3>
             <ul className="space-y-4">
-                {!loadingPaymentMethods && paymentMethods.payments.data.filter(method => {
-                    if (shippingMethod.pickup && method.attributes.name === "Αντικαταβολή") {
-                        return false
-                    }
-                    if (!shippingMethod.pickup && method.attributes.name === "Μετρητά") {
-                        return false
-                    }
-                    if (shippingMethod.shipping==="Μεταφορική" && method.attributes.name === "Αντικαταβολή") {
-                        return false
-                    }
-                    if (method.attributes.range && method.attributes.range.maximum < cartTotal)
-                        return false
-
-                    return true
-                }).map(method => (
-                    <li key={method.id} className="flex items-center text-sm t space-x-2">
-                        <div className="flex flex-col">
-                            <Radio name="payment"
-                                id={method.attributes.name}
-                                value={method.attributes.name}
-                                checked={formik.values.payment === method.attributes.name}
-                                onChange={formik.handleChange}
-                            ></Radio>
-                            {method.attributes.name === "Τραπεζική κατάθεση" &&
-                                formik.values.payment === method.attributes.name &&
-                                <Banks />}
-                        </div>
+                {payments.data.map((method, index) => (
+                    <li
+                        key={index}
+                        className="flex flex-col items-start text-sm t space-x-2">
+                        <Radio name="payment"
+                            id={method.attributes.name}
+                            value={method.attributes.name}
+                            checked={values.paymentMethod === method.attributes.name}
+                            onChange={() => handleSelect(method)}
+                        ></Radio>
+                        {method.attributes.installments && values.paymentMethod === method.attributes.name &&
+                            <Installments/>}
                     </li>
                 ))}
             </ul>
-        </form >
-    )
-})
+        </div>
+    );
+};
 
-PaymentMethods.displayName = 'PaymentMethods'
-
-export default PaymentMethods
+export default PaymentMethods;

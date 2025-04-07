@@ -22,7 +22,7 @@ const Footer = async () => {
 
     return (
         <footer className="flex flex-wrap py-4 bg-gradient-to-b from-siteColors-lightblue from-10%  to-siteColors-blue to-90% justify-between px-2 xs:px-4 sm:px-6 md:px-8">
-            <div className=" text-white space-y-4 mr-8 mb-8">
+            <address className=" text-white space-y-4 mr-8 mb-8">
                 <h2 className='text-lg uppercase font-semibold'
                     aria-label="Επικοινωνία">Επικοινωνία</h2>
                 <ul className="space-y-4">
@@ -50,12 +50,12 @@ const Footer = async () => {
                         <Link href="https://www.facebook.com/magnetmarket.gr/" target="_blank" className=" hover:text-siteColors-pink">
                             <FaFacebookF className="text-2xl" aria-label="Instagram" />
                         </Link>
-                        <Link href="https://www.instagram.com/magnetmarket.gr/" target="_blank"  className=" hover:text-siteColors-pink">
+                        <Link href="https://www.instagram.com/magnetmarket.gr/" target="_blank" className=" hover:text-siteColors-pink">
                             <FaInstagram className="text-2xl" aria-label="Facebook" />
                         </Link>
                     </li>
                 </ul >
-            </div>
+            </address>
             {data.sections.map(x => (
                 <FooterSection key={x.id} label={x.Label} links={x.links} />
             ))}

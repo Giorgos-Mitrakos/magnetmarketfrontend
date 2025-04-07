@@ -1,105 +1,47 @@
-'use client'
+import React, { useContext } from "react";
+import { useFormikContext, FormikValues } from "formik";
+import Radio from "../atoms/radio";
+import { IPaymentMethods, IShippingMethods, ShippingContext } from "@/context/shipping";
 
-import { GET_SHIPPING_METHODS } from "@/lib/queries/shippingQuery"
-import { useQuery } from "@/repositories/clientRepository"
-import Radio from "../atoms/radio"
-import { forwardRef, useContext, useEffect, useImperativeHandle } from "react"
-import { ShippingContext } from "@/context/shipping"
-import { useFormik } from "formik"
-import * as Yup from 'yup'
-
-export type ShippingMethodsRef = {
-    submitForm: () => void;
-    isSubmitting: boolean
-};
-
-interface IShippingMethods {
-    shippings: {
-        data: {
-            id: number | string
-            attributes: {
-                name: string
-            }
-        }[]
-    }
+interface ShippingMethodsProps {
+    methods: IShippingMethods
+    onShippingChange: (payments: IPaymentMethods) => void;
 }
 
-const ShippingMethods = forwardRef<ShippingMethodsRef>((props, ref) => {
-    const { saveShippingMethod, shippingMethod } = useContext(ShippingContext)
-    const { data: shippingMethodsData, loading: loadingShippingMethods, error: errorSippingMethods } = useQuery({ query: GET_SHIPPING_METHODS, jwt: '' })
+const ShippingMethods: React.FC<ShippingMethodsProps> = ({ methods, onShippingChange }) => {
+    const { values, setFieldValue, errors, touched } = useFormikContext<FormikValues>();
+    const { shippingCost, paymentMethod, saveShippingMethod } = useContext(ShippingContext)
 
-    const shippingMethods = shippingMethodsData as IShippingMethods
-
-    const loadInitialValues = () => {
-        const savedValues = typeof window !== 'undefined' && localStorage.getItem('shippingMethod');
-
-        return shippingMethod// savedValues ? JSON.parse(savedValues) : { pickup: false, shipping: '' };
-    }
-    
-
-    const formik = useFormik({
-        initialValues: shippingMethod,
-        validationSchema: Yup.object({
-            pickup: Yup.boolean(),
-            shipping: Yup.string().when("pickup", {
-                is: false,
-                then: (schema) => schema.required()
-            }),
-        }),
-        onSubmit: values => {
-            saveShippingMethod({ shipping: formik.values.shipping, pickup: formik.values.pickup })
-        },
-    });
-
-    useImperativeHandle(ref, () => ({
-        submitForm: () => {
-            formik.submitForm()
-        },
-        resetForm: () => {
-            formik.resetForm();
-        },
-        isSubmitting: formik.isSubmitting
-
-    }));
-
-    useEffect(() => {
-        if (formik.values.pickup)
-            formik.setFieldValue("shipping", "")
-
-        const updateShipping = { ...shippingMethod, pickup: formik.values.pickup }
-        saveShippingMethod(updateShipping)
-    }, [formik.values.pickup])
-
-    useEffect(() => {
-        const updateShipping = { ...shippingMethod, shipping: formik.values.shipping }
-        saveShippingMethod(updateShipping)
-    }, [formik.values.shipping])
+    const handleSelect = (id: number, shipping: string, payments: IPaymentMethods) => {
+        setFieldValue("shippingMethod", shipping);
+        setFieldValue("shippingMethodId", id);
+        saveShippingMethod({ id: id, shipping: shipping })
+        onShippingChange(payments); // Update payment methods dynamically
+    };
 
     return (
-        <form className='space-y-4 w-full p-4 bg-slate-50 dark:bg-slate-700 rounded-lg'
-            onSubmit={formik.handleSubmit}>
-            <h3 className='font-medium mb-6 border-b text-siteColors-purple dark:text-slate-200'>Τρόποι αποστολής</h3>
+        <div className='space-y-4 w-full p-4 bg-slate-50 dark:bg-slate-700 rounded-lg'>
+            <h3>Τρόποι αποστολής {errors.shippingMethod && touched.shippingMethod &&
+                <span> <small id="feedback" className="text-sm text-red-500">{errors.shippingMethod.toString()}</small></span>}</h3>
+
             <ul className="space-y-4">
-                <li className="flex items-center space-x-2">
-                    <input type="checkbox" name="pickup" id="pickup" className="bg-siteColors-purple rounded"
-                        checked={shippingMethod?.pickup} onChange={formik.handleChange} />
-                    <label htmlFor="pickup" className="text-sm tracking-wide">Παραλαβή από το κατάστημα</label>
-                </li>
-                {!loadingShippingMethods && !shippingMethod.pickup && shippingMethods.shippings.data.map(method => (
-                    <li key={method.id} className="flex items-center text-sm t space-x-2">
-                        <Radio
-                            name="shipping"
-                            value={method.attributes.name}
+                {methods.shippings.data.map((method, index) => (
+                    <li
+                        key={index}
+                        className="flex items-center text-sm t space-x-2">
+                        <Radio name="shipping"
                             id={method.attributes.name}
-                            checked={formik.values.shipping === method.attributes.name}
-                            onChange={formik.handleChange}
-                        ></Radio></li>
+                            value={method.attributes.name}
+                            checked={values.shippingMethod === method.attributes.name}
+                            onChange={() =>
+                                handleSelect(method.id, method.attributes.name, method.attributes.payments)
+                            }
+                        ></Radio>
+                    </li>
                 ))}
             </ul>
-        </form>
-    )
-})
+        </div>
+    );
+};
 
-ShippingMethods.displayName = 'ShippingMethods'
-
-export default ShippingMethods
+export default ShippingMethods;

@@ -6,7 +6,26 @@ query getShippingMethods{
     data {
       id
       attributes {
-        name        
+        name
+        payments(filters:{isActive:{eq:true}}){
+          data{
+            id
+            attributes{
+              name
+              price
+              range{
+                minimum
+                maximum
+              }
+              isActive
+              installments{
+                max_installments
+                free_rate_months
+                annual_rate
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -32,6 +51,11 @@ query getPaymentMethods{
         range{
           minimum
           maximum
+        }
+        installments {
+          max_installments
+          free_rate_months
+          annual_rate
         }
       }
     }
