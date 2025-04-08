@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
         const res = JSON.stringify(response)
 
-        await sendEmail({title:'bank response',data:res})
+        await sendEmail({ title: 'bank response', data: res })
 
         const ticket = await getTicket({ bankResponse: JSON.parse(res) })
 
@@ -70,7 +70,12 @@ export async function POST(request: NextRequest) {
                 })
             }
 
-            return NextResponse.redirect(new URL(`/checkout/thank-you/success-redirect`, `${process.env.NEXT_URL}`), 303);
+            // 🔥 Fire Step 2 (Background Request to Redirect API)
+            fetch(`${process.env.NEXT_URL}/checkout/thank-you/success-redirect`, {
+                method: 'GET',
+            }).catch((err) => console.error('Redirect request failed:', err));
+
+            return NextResponse.json({ success: true });
         }
         else {
             await saveBankResponse({ bankResponse: response })

@@ -49,7 +49,7 @@ export default async function Fail() {
 
     return (
         <section className="rounded-lg p-4 bg-gradient-to-tr from-siteColors-lightblue via-siteColors-blue to-siteColors-pink mb-16">
-            <h1 className="text-2xl mb-4 font-semibold text-slate-200 text-center">Ευχαριστούμε για την παραγγελία!</h1>
+            <h1 className="text-2xl mb-4 font-semibold text-slate-200 text-center">H παραγγελία σας δεν κατάφερε να ολοκληρωθεί!</h1>
             <h2 className="text-xl mb-4 font-semibold text-slate-200 text-center">Αρ. {order.orderId}</h2>
             {resultAnswer !== '' &&
                 <div className="text-lg mb-4 text-slate-200 text-center">
