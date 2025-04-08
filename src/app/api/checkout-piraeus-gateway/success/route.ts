@@ -36,14 +36,38 @@ export async function POST(request: NextRequest) {
         const ticket = await getTicket({ bankResponse: JSON.parse(res) })
 
         if (ticket.Flag !== "success") {
-            return NextResponse.redirect(new URL(`/checkout/failure/failure-redirect`, `${process.env.NEXT_URL}`), 303);
+            return new NextResponse(`
+                <html>
+                  <head>
+                    <meta http-equiv="refresh" content="0;url=/checkout/failure" />
+                    <script>window.location.href = "/checkout/thank-you"</script>
+                  </head>
+                  <body>Redirecting...</body>
+                </html>
+              `, {
+                headers: {
+                    'Content-Type': 'text/html',
+                },
+            })
         }
 
         const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(res), ticket: ticket.ticket })
 
         if (!isResponseAuth) {
             await saveBankResponse({ bankResponse: response })
-            return NextResponse.redirect(new URL(`/checkout/failure/failure-redirect`, `${process.env.NEXT_URL}`), 303);
+            return new NextResponse(`
+                <html>
+                  <head>
+                    <meta http-equiv="refresh" content="0;url=/checkout/failure" />
+                    <script>window.location.href = "/checkout/thank-you"</script>
+                  </head>
+                  <body>Redirecting...</body>
+                </html>
+              `, {
+                headers: {
+                    'Content-Type': 'text/html',
+                },
+            })
         }
 
         if (response.StatusFlag === 'Success' && response.ResultCode?.toString() === '0') {
@@ -70,20 +94,50 @@ export async function POST(request: NextRequest) {
                 })
             }
 
-            // 🔥 Fire Step 2 (Background Request to Redirect API)
-            fetch(`${process.env.NEXT_URL}/checkout/thank-you/success-redirect`, {
-                method: 'GET',
-            }).catch((err) => console.error('Redirect request failed:', err));
-
-            return NextResponse.json({ success: true });
+            return new NextResponse(`
+                <html>
+                  <head>
+                    <meta http-equiv="refresh" content="0;url=/checkout/thank-you" />
+                    <script>window.location.href = "/checkout/thank-you"</script>
+                  </head>
+                  <body>Redirecting...</body>
+                </html>
+              `, {
+                headers: {
+                    'Content-Type': 'text/html',
+                },
+            })
         }
         else {
             await saveBankResponse({ bankResponse: response })
-
-            return NextResponse.redirect(new URL(`/checkout/failure/failure-redirect`, `${process.env.NEXT_URL}`), 303);
+            return new NextResponse(`
+                <html>
+                  <head>
+                    <meta http-equiv="refresh" content="0;url=/checkout/failure" />
+                    <script>window.location.href = "/checkout/thank-you"</script>
+                  </head>
+                  <body>Redirecting...</body>
+                </html>
+              `, {
+                headers: {
+                    'Content-Type': 'text/html',
+                },
+            })
         }
 
     } catch (error) {
-        return NextResponse.redirect(new URL(`${process.env.NEXT_URL}`), 303);
+        return new NextResponse(`
+            <html>
+              <head>
+                <meta http-equiv="refresh" content="0;url=/checkout/failure" />
+                <script>window.location.href = "/"</script>
+              </head>
+              <body>Redirecting...</body>
+            </html>
+          `, {
+            headers: {
+                'Content-Type': 'text/html',
+            },
+        })
     }
 }
