@@ -65,19 +65,56 @@ export async function POST(request: NextRequest) {
                     })
             }
 
-            return NextResponse.redirect(new URL(`/checkout/failure/failure-redirect`, `${process.env.NEXT_URL}`), 303);
+            return new NextResponse(`
+                <html>
+                  <head>
+                    <meta http-equiv="refresh" content="0;url=/checkout/failure" />
+                    <script>window.location.href = "/checkout/thank-you"</script>
+                  </head>
+                  <body>Redirecting...</body>
+                </html>
+              `, {
+                headers: {
+                    'Content-Type': 'text/html',
+                },
+            })
 
         }
         else {
             await saveBankResponse({ bankResponse: response })
             sendEmail({ title: "No Success", data: `orderId:${response.MerchantReference?.toString()}` })
 
-            return NextResponse.redirect(new URL(`/checkout/failure/failure-redirect`, `${process.env.NEXT_URL}`), 303);
+            return new NextResponse(`
+                <html>
+                  <head>
+                    <meta http-equiv="refresh" content="0;url=/checkout/failure" />
+                    <script>window.location.href = "/checkout/thank-you"</script>
+                  </head>
+                  <body>Redirecting...</body>
+                </html>
+              `, {
+                headers: {
+                    'Content-Type': 'text/html',
+                },
+            })
         }
 
     } catch (error) {
         console.log(error)
         sendEmail({ title: "Error in Respone", data: `Error: ${error}` })
-        return NextResponse.redirect(new URL(`${process.env.NEXT_URL}`), 303);
+        
+        return new NextResponse(`
+            <html>
+              <head>
+                <meta http-equiv="refresh" content="0;url=/checkout/failure" />
+                <script>window.location.href = "/checkout/thank-you"</script>
+              </head>
+              <body>Redirecting...</body>
+            </html>
+          `, {
+            headers: {
+                'Content-Type': 'text/html',
+            },
+        })
     }
 }
