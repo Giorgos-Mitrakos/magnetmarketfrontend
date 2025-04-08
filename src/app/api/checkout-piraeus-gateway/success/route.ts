@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
                 <html>
                   <head>
                     <meta http-equiv="refresh" content="0;url=/checkout/failure" />
-                    <script>window.location.href = "/checkout/thank-you"</script>
+                    <script>window.location.href = "/checkout/failure"</script>
                   </head>
                   <body>Redirecting...</body>
                 </html>
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
                 <html>
                   <head>
                     <meta http-equiv="refresh" content="0;url=/checkout/failure" />
-                    <script>window.location.href = "/checkout/thank-you"</script>
+                    <script>window.location.href = "/checkout/failure"</script>
                   </head>
                   <body>Redirecting...</body>
                 </html>
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
                 <html>
                   <head>
                     <meta http-equiv="refresh" content="0;url=/checkout/failure" />
-                    <script>window.location.href = "/checkout/thank-you"</script>
+                    <script>window.location.href = "/checkout/failure"</script>
                   </head>
                   <body>Redirecting...</body>
                 </html>
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
         return new NextResponse(`
             <html>
               <head>
-                <meta http-equiv="refresh" content="0;url=/checkout/failure" />
+                <meta http-equiv="refresh" content="0;url=/" />
                 <script>window.location.href = "/"</script>
               </head>
               <body>Redirecting...</body>

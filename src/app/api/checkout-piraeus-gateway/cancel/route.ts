@@ -9,7 +9,7 @@ export async function POST(request: NextRequest, res: NextResponse) {
         <html>
           <head>
             <meta http-equiv="refresh" content="0;url=/checkout/order-summary" />
-            <script>window.location.href = "/checkout/thank-you"</script>
+            <script>window.location.href = "/checkout/order-summary"</script>
           </head>
           <body>Redirecting...</body>
         </html>
