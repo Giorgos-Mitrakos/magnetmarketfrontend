@@ -7,35 +7,54 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest, res: NextResponse) {
   // we will use params to access the data passed to the dynamic route
   // const user = params.user;
+  try {
+    const data = await request.json()
 
-  const data = await request.json()
+    const { orderId, amount } = data
+    const installments = Number(data.installments) || 1;
 
-  const { orderId, amount, installments } = data
+    const {
+      ACQUIRER_ID,
+      MERCHANT_ID,
+      POS_ID,
+      PEIRAIWS_USERNAME
+    } = process.env;
 
-
-  // στέλνω στην τράπεζα τις πληροφορίες ώστε να μου αποστείλει πίσω το τικετ
-  const response = await getTransactionTicket({
-    orderId: orderId,
-    amount: amount,
-    installments: installments || 1
-  })
-
-  const ticketResponse = response as ITicketResponse
-
-  const paymentData = {
-    AcquirerId: process.env.ACQUIRER_ID,
-    MerchantId: process.env.MERCHANT_ID,
-    PosId: parseInt(`${process.env.POS_ID}`),
-    User: process.env.PEIRAIWS_USERNAME,
-    LanguageCode: 'el-GR',
-    MerchantReference: orderId,
-    ParamBackLink: 'https://magnetmarket.gr/checkout/confirm/order-summary',
-  };
+    if (!ACQUIRER_ID || !MERCHANT_ID || !POS_ID || !PEIRAIWS_USERNAME) {
+      return new NextResponse(JSON.stringify({ error: 'Missing payment credentials' }), { status: 500 });
+    }
 
 
-  if (parseInt(ticketResponse.ResultCode) === 0) {
-    await saveTicket({ orderId: orderId, TranTicket: ticketResponse.TranTicket })
+    // στέλνω στην τράπεζα τις πληροφορίες ώστε να μου αποστείλει πίσω το τικετ
+    const response = await getTransactionTicket({
+      orderId: orderId,
+      amount: amount,
+      installments: installments
+    })
+
+    const ticketResponse = response as ITicketResponse
+
+    const paymentData = {
+      AcquirerId: Number(ACQUIRER_ID),
+      MerchantId: Number(MERCHANT_ID),
+      PosId: Number(POS_ID),
+      User: PEIRAIWS_USERNAME,
+      LanguageCode: 'el-GR',
+      MerchantReference: orderId,
+      ParamBackLink: 'https://magnetmarket.gr/checkout/confirm/order-summary',
+    };
+
+
+    if (parseInt(ticketResponse.ResultCode) === 0) {
+      await saveTicket({ orderId: orderId, TranTicket: ticketResponse.TranTicket })
+    } else {
+      console.error('Piraeus error:', ticketResponse);
+      return new NextResponse(JSON.stringify({ error: 'Piraeus returned error', details: ticketResponse }), { status: 502 });
+    }
+
+    return new NextResponse(JSON.stringify(paymentData));
+  } catch (err) {
+    console.error('Unexpected error:', err);
+    return new NextResponse(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
   }
-
-  return new NextResponse(JSON.stringify(paymentData));
 }

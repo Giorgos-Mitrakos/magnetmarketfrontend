@@ -79,50 +79,67 @@ const Confirm = () => {
             }
 
             if (newOrder && (paymentMethod?.attributes.name === "Χρεωστική Κάρτα" || paymentMethod?.attributes.name === "Πιστωτική Κάρτα")) {
-                if (newOrder.orderId && newOrder.amount) {
+                if (Number(newOrder.orderId) && Number(newOrder.amount)) {
 
-                    const myHeaders = new Headers();
-                    myHeaders.append('Content-Type', 'application/json')
-                    // myHeaders.append('Access-Control-Allow-Origin', 'https://www.magnetmarket.gr/api/checkout-piraeus-gateway')
+                    try {
+                        const myHeaders = new Headers();
+                        myHeaders.append('Content-Type', 'application/json')
+                        // myHeaders.append('Access-Control-Allow-Origin', 'https://www.magnetmarket.gr/api/checkout-piraeus-gateway')
 
-                    const myInit = {
-                        method: "POST",
-                        headers: myHeaders,
-                        body: JSON.stringify({
-                            orderId: newOrder.orderId,
-                            amount: newOrder.amount,
-                            installments: newOrder.installments
-                        })
-                        // mode: "cors",
-                        // cache: "default",
-                    };
+                        const myInit = {
+                            method: "POST",
+                            headers: myHeaders,
+                            body: JSON.stringify({
+                                orderId: newOrder.orderId,
+                                amount: newOrder.amount,
+                                installments: newOrder.installments
+                            })
+                            // mode: "cors",
+                            // cache: "default",
+                        };
 
-                    const formdata = await fetch(`/api/checkout-piraeus-gateway/ticket`,
-                        myInit,
-                    )
+                        const formdata = await fetch(`/api/checkout-piraeus-gateway/ticket`,
+                            myInit,
+                        )
 
-                    const paymentData = await formdata.json();
+                        if (!formdata.ok) {
+                            const errorData = await formdata.json();
+                            console.error('Piraeus gateway error:', errorData);
+                            alert('Παρουσιάστηκε πρόβλημα με την πληρωμή. Παρακαλώ προσπαθήστε ξανά.');
+                            return;
+                        }
 
-                    await sendEmail({ title: 'paymentData', data: paymentData })
+                        const paymentData = await formdata.json();
 
-                    // Δημιουργία και υποβολή φόρμας για το redirection
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = 'https://paycenter.piraeusbank.gr/redirection/pay.aspx'; // URL πληρωμής
+                        const requiredFields = ['AcquirerId', 'MerchantId', 'PosId', 'User', 'MerchantReference'];
+                        for (const field of requiredFields) {
+                            if (!paymentData[field]) {
+                                console.error(`Missing field: ${field}`);
+                                alert('Δεν είναι δυνατή η πληρωμή. Λείπουν στοιχεία.');
+                                return;
+                            }
+                        }
 
-                    // Προσθήκη των παραμέτρων ως hidden inputs
-                    for (const key in paymentData) {
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = key;
-                        input.value = paymentData[key];
-                        form.appendChild(input);
+                        // Δημιουργία και υποβολή φόρμας για το redirection
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = 'https://paycenter.piraeusbank.gr/redirection/pay.aspx'; // URL πληρωμής
+
+                        // Προσθήκη των παραμέτρων ως hidden inputs
+                        for (const key in paymentData) {
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = key;
+                            input.value = paymentData[key];
+                            form.appendChild(input);
+                        }
+
+                        document.body.appendChild(form);
+                        form.submit(); // Υποβολή της φόρμας
+                    } catch (error) {
+                        console.error('Unexpected error during payment:', error);
+                        alert('Απρόβλεπτο σφάλμα. Παρακαλώ δοκιμάστε ξανά.');
                     }
-
-                    await sendEmail({ title: 'formData', data: JSON.stringify(form) })
-
-                    document.body.appendChild(form);
-                    form.submit(); // Υποβολή της φόρμας
                 }
 
                 setProcessing(false)
