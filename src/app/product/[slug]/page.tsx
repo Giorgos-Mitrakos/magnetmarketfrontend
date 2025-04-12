@@ -88,16 +88,8 @@ export default async function Product({ params }:
       url: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
       availability: "https://schema.org/InStock",
       itemCondition: 'https://schema.org/NewCondition',
-      priceSpecification: [{
-        "@type": "UnitPriceSpecification",
-        "price": product.attributes.sale_price,
-        "priceCurrency": "EUR"
-      }, {
-        "@type": "UnitPriceSpecification",
-        "priceType": "https://schema.org/StrikethroughPrice",
-        "price": product.attributes.price,
-        "priceCurrency": "EUR"
-      }],
+      "price": product.attributes.sale_price,
+      "priceCurrency": "EUR",
       "shippingDetails": {
         "@type": "OfferShippingDetails",
         "shippingRate": {
@@ -130,7 +122,7 @@ export default async function Product({ params }:
         "applicableCountry": "GR",
         "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
         "merchantReturnDays": 14,
-        "merchantReturnLink": `${process.env.NEXT_URL}pages/politiki-epistrofon`,
+        "merchantReturnLink": `${process.env.NEXT_URL}/pages/politiki-epistrofon`,
         "returnMethod": "https://schema.org/ReturnByMail",
         "returnFees": "https://schema.org/FreeReturn"
       }
@@ -138,15 +130,12 @@ export default async function Product({ params }:
   }
   else {
     structuredDataPrice = {
-      "@type": "Offer",      
+      "@type": "Offer",
       url: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
       availability: "https://schema.org/InStock",
       itemCondition: 'https://schema.org/NewCondition',
-      "priceSpecification": [{
-        "@type": "UnitPriceSpecification",
-        "price": product.attributes.price,
-        "priceCurrency": "EUR"
-      }],
+      "price": product.attributes.price,
+      "priceCurrency": "EUR",
       "shippingDetails": {
         "@type": "OfferShippingDetails",
         "shippingRate": {
@@ -179,7 +168,7 @@ export default async function Product({ params }:
         "applicableCountry": "GR",
         "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
         "merchantReturnDays": 14,
-        "merchantReturnLink": `${process.env.NEXT_URL}pages/politiki-epistrofon`,
+        "merchantReturnLink": `${process.env.NEXT_URL}/pages/politiki-epistrofon`,
         "returnMethod": "https://schema.org/ReturnByMail",
         "returnFees": "https://schema.org/FreeReturn"
       }
