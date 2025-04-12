@@ -1,16 +1,11 @@
 import Image from "next/image";
-import Visa from "../../../public//Visa_Brandmark_Blue_RGB_2021.png"
-import Mastercard from "../../../public//mc_symbol_opt_73_3x.png"
-import Maestro from "../../../public//ms_vrt_opt_pos_73_3x.png"
+import EpayIcon from "../../../public/epay_icons.png"
 
 const EpayIcons = () => {
     return (
         <div className="flex justify-center bg-[#559be3] items-center space-x-4 px-8 ">
-            <Image src={Visa} alt="Visa" 
-                height={32} />
-            <Image src={Mastercard} alt="Mastercard" 
-                height={48} />
-            <Image src={Maestro} height={52} alt="Maestro"/>
+            <Image src={EpayIcon} alt="Visa" 
+                height={64} />
         </div>
     );
 

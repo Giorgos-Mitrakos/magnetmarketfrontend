@@ -61,8 +61,6 @@ const Confirm = () => {
             setProcessing(true)
             const newOrder = await createOrder()
 
-            console.log(newOrder)
-
             if (newOrder && newOrder.status === "fail") {
                 toast.error(newOrder.message, {
                     position: 'top-right',
@@ -97,8 +95,6 @@ const Confirm = () => {
                         // mode: "cors",
                         // cache: "default",
                     };
-
-                    console.log(myInit)
 
                     const formdata = await fetch(`/api/checkout-piraeus-gateway/ticket`,
                         myInit,
