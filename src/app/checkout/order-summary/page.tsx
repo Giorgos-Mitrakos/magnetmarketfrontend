@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { CartContext } from "@/context/cart"
 import { toast } from "sonner"
 import { saveCookies } from "@/lib/helpers/actions"
+import { sendEmail } from "@/lib/helpers/piraeusGateway"
 
 interface IAddressSumary {
     firstname: string,
@@ -102,6 +103,8 @@ const Confirm = () => {
 
                     const paymentData = await formdata.json();
 
+                    await sendEmail({ title: 'paymentData', data: paymentData })
+
                     // Δημιουργία και υποβολή φόρμας για το redirection
                     const form = document.createElement('form');
                     form.method = 'POST';
@@ -115,6 +118,8 @@ const Confirm = () => {
                         input.value = paymentData[key];
                         form.appendChild(input);
                     }
+
+                    await sendEmail({ title: 'formData', data: JSON.stringify(form) })
 
                     document.body.appendChild(form);
                     form.submit(); // Υποβολή της φόρμας
@@ -133,6 +138,7 @@ const Confirm = () => {
 
         } catch (error) {
             console.log(error)
+            await sendEmail({ title: 'formData', data: JSON.stringify(error) })
             router.push('/checkout/failure')
         }
     }
