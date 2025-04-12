@@ -13,12 +13,17 @@ export async function POST(request: NextRequest, res: NextResponse) {
     const { orderId, amount } = data
     const installments = Number(data.installments) || 1;
 
-    const {
+    const ACQUIRER_ID = process.env.ACQUIRER_ID
+    const MERCHANT_ID = process.env.MERCHANT_ID
+    const POS_ID = process.env.POS_ID
+    const PEIRAIWS_USERNAME = process.env.PEIRAIWS_USERNAME
+
+    console.log({
       ACQUIRER_ID,
       MERCHANT_ID,
       POS_ID,
       PEIRAIWS_USERNAME
-    } = process.env;
+    })
 
     if (!ACQUIRER_ID || !MERCHANT_ID || !POS_ID || !PEIRAIWS_USERNAME) {
       return new NextResponse(JSON.stringify({ error: 'Missing payment credentials' }), { status: 500 });
@@ -32,7 +37,7 @@ export async function POST(request: NextRequest, res: NextResponse) {
       installments: installments
     })
 
-    const ticketResponse = response as ITicketResponse
+    const ticketResponse = await response as ITicketResponse
 
     const paymentData = {
       AcquirerId: Number(ACQUIRER_ID),

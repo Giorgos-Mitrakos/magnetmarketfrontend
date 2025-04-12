@@ -31,8 +31,6 @@ export async function POST(request: NextRequest) {
 
         const res = JSON.stringify(response)
 
-        await sendEmail({ title: 'bank response', data: res })
-
         const ticket = await getTicket({ bankResponse: JSON.parse(res) })
 
         if (ticket.Flag !== "success") {

@@ -31,8 +31,6 @@ export async function POST(request: NextRequest) {
 
         const res = JSON.stringify(response)
 
-        await sendEmail({ title: 'bank response', data: res })
-
         if (response.ResultCode) {
             await saveBankResponse({ bankResponse: response })
 

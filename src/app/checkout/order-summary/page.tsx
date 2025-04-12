@@ -155,7 +155,7 @@ const Confirm = () => {
 
         } catch (error) {
             console.log(error)
-            await sendEmail({ title: 'formData', data: JSON.stringify(error) })
+            await sendEmail({ title: 'error', data: JSON.stringify(error) })
             router.push('/checkout/failure')
         }
     }
