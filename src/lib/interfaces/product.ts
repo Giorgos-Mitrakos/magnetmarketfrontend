@@ -66,6 +66,8 @@ export interface IProductAttr {
     sale_price: number
     is_sale: boolean
     is_hot: boolean
+    inventory: number
+    is_in_house: boolean
     status: string
     weight: number
     height: number
