@@ -127,6 +127,8 @@ export interface IProductPriceProps {
         is_hot: boolean
         is_sale: boolean
         status: string
+        is_in_house:boolean
+        inventory:number
       }
     }
   }

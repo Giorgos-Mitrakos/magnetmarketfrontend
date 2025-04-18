@@ -90,6 +90,22 @@ export default async function Product({ params }:
       itemCondition: 'https://schema.org/NewCondition',
       "price": product.attributes.sale_price,
       "priceCurrency": "EUR",
+      // Optional: add priceValidUntil only if known
+      // "priceValidUntil": "2025-12-31",
+
+      "priceSpecification": [
+        {
+          "@type": "UnitPriceSpecification",
+          "price": product.attributes.sale_price,
+          "priceCurrency": "EUR"
+        },
+        {
+          "@type": "UnitPriceSpecification",
+          "priceType": "https://schema.org/StrikethroughPrice",
+          "price": product.attributes.price,
+          "priceCurrency": "EUR"
+        }
+      ],
       "shippingDetails": {
         "@type": "OfferShippingDetails",
         "shippingRate": {
@@ -136,6 +152,14 @@ export default async function Product({ params }:
       itemCondition: 'https://schema.org/NewCondition',
       "price": product.attributes.price,
       "priceCurrency": "EUR",
+
+      "priceSpecification": [
+        {
+          "@type": "UnitPriceSpecification",
+          "price": product.attributes.price,
+          "priceCurrency": "EUR"
+        }
+      ],
       "shippingDetails": {
         "@type": "OfferShippingDetails",
         "shippingRate": {

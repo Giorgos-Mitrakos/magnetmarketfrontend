@@ -8,6 +8,8 @@ interface IcategoryProductsAttr {
     price: number
     sale_price: number
     is_sale: boolean
+    inventory: number
+    is_in_house: boolean
 }
 
 export type IcategoryProductsProps = {

@@ -16,7 +16,7 @@ const ProductCard = (props: ProductCardProps) => {
 
     const product = props.product.attributes
     const brand = product.brand
-    
+
     return (
         <div className="relative py-2 px-1 max-w-96 overflow-hidden">
             <div className="grid h-full grid-rows-cardLayout shadow-md hover:shadow-lg dark:shadow-slate-500 dark:hover:shadow-slate-600 bg-white dark:bg-slate-700 rounded-lg m-1 p-4">
@@ -82,7 +82,8 @@ const ProductCard = (props: ProductCardProps) => {
                 </div>
                 <div className="flex items-center justify-center">
                     <p className="text-green-800 dark:text-green-400 text-sm font-semibold"
-                        aria-label="Διαθεσιμότητα">Παράδοση σε 1 – 3 ημέρες</p>
+                        aria-label="Διαθεσιμότητα"> {product && product.inventory > 0 && product.is_in_house ?
+                            'Άμεσα διαθέσιμο' : "Παράδοση σε 1 – 3 ημέρες"}</p>
                 </div>
                 <ProductCardPrice id={props.product.id} />
                 <ProductCardFoot product={props.product} />

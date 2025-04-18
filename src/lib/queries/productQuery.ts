@@ -16,6 +16,8 @@ query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationAr
             price
             sale_price
             is_sale
+            inventory
+            is_in_house
             is_hot
             weight
             height
@@ -190,6 +192,8 @@ query getProductPrice($id:ID!){
           is_hot
           is_sale
           status
+          inventory
+          is_in_house
         }
       }
     }
@@ -463,6 +467,8 @@ query getProductPrice($filters:ProductFiltersInput!,$sort:[String!]){
           sale_price
           is_sale
           is_hot
+          inventory
+          is_in_house
           weight
           height
           width

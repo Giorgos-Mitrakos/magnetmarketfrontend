@@ -25,6 +25,8 @@ export const GET_HOMEPAGE = gql`
                   sale_price
                   is_sale
                   is_hot
+                  inventory
+                  is_in_house
                   weight
                   height
                   width

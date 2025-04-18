@@ -30,7 +30,8 @@ function ProductPrice(props: { id: number }) {
                                         {data?.product.data.attributes.price.toFixed(2)} €</span>}
                                 <h4 className="text-base text-green-800 dark:text-green-400"
                                     aria-label="Παράδοση σε 1–3 ημέρες">
-                                    Παράδοση σε 1 – 3 ημέρες</h4>
+                                    {data && data.product.data.attributes.inventory>0 && data.product.data.attributes.is_in_house?
+                                    'Άμεσα διαθέσιμο':"Παράδοση σε 1 – 3 ημέρες"}</h4>
                             </div>
                         </div>
                         {!isLoading && discount && profit && isSale &&
