@@ -1,6 +1,7 @@
 
 import Banks from "@/components/atoms/banks";
 import ClearCartItems from "@/components/atoms/clearCart";
+import BestPriceOrderTracking from "@/components/atoms/bestPriceOrderTracking"
 import { getCookies } from "@/lib/helpers/actions"
 import { IImageAttr } from "@/lib/interfaces/image";
 import { GET_ORDER } from "@/lib/queries/shippingQuery";
@@ -102,6 +103,25 @@ export default async function Success() {
     const earlyDeviveryDate = addDays(deliveryDate, 3)
     const lateDeviveryDate = addDays(deliveryDate, 6)
 
+    const orderDetails = {
+        orderId: data.order.data.id,
+        revenue: data.order.data.attributes.total,
+        shipping: data.order.data.attributes.shipping.cost,
+        tax: data.order.data.attributes.total * 0.24,
+        // method: 'card', // Example payment method
+        currency: 'euro',
+    };
+
+    const products = data.order.data.attributes.products.map(product => {
+        return {
+            orderId: data.order.data.id,
+            productId: product.id,
+            title: product.name,
+            price: product.is_sale && product.sale_price ? product.sale_price : product.price,
+            quantity: product.quantity
+        }
+    })
+
     return (
         <>
             <ClearCartItems />
@@ -168,6 +188,7 @@ export default async function Success() {
                     <Banks />
                 </div>}
             </section>
+            <BestPriceOrderTracking orderDetails={orderDetails} products={products} />
         </>
     )
 

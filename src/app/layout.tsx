@@ -17,6 +17,7 @@ import Copyright from '@/components/atoms/copyright'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import Script from 'next/script';
 import { Suspense } from 'react';
+import BestPriceScript from '@/components/atoms/bestPrice360';
 const PixelTracker = dynamic(() => import("../components/atoms/pixelTracker"), { ssr: false });
 
 const inter = Inter({ subsets: ['greek'] })
@@ -88,6 +89,7 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
             </ShippingProvider>
           </CartProvider>
         </SessionProviders>
+        <BestPriceScript />
       </body>
       <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />
     </html>

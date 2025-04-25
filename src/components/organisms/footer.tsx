@@ -22,7 +22,7 @@ const Footer = async () => {
 
     return (
         <footer className="flex flex-wrap py-4 bg-gradient-to-b from-siteColors-lightblue from-10%  to-siteColors-blue to-90% justify-between px-2 xs:px-4 sm:px-6 md:px-8">
-            <address className=" text-white space-y-4 mr-8 mb-8">
+            <address className="not-italic text-white space-y-4 mr-8 mb-8">
                 <h2 className='text-lg uppercase font-semibold'
                     aria-label="Επικοινωνία">Επικοινωνία</h2>
                 <ul className="space-y-4">

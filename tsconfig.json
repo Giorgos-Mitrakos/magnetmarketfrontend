@@ -23,6 +23,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/molecules/searchInput.tsx", "src/components/atoms/swiperCube.js", "src/components/molecules/productImageWidget.js", "src/components/molecules/homepage/heroCarousel.js", "src/components/atoms/carousel.js", "src/app/api/auth/[...nextauth]/options.js", "src/app/api/auth/[...nextauth]/options.js", "src/app/api/auth/[...nextauth]/options.js", "src/components/molecules/homepage/brandsBanner.tsx", "src/components/molecules/homepage/heroFixedBanners.tsx", "src/components/molecules/homepage/categoriesBanner.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/molecules/searchInput.tsx", "src/components/atoms/swiperCube.js", "src/components/molecules/productImageWidget.js", "src/components/molecules/homepage/heroCarousel.js", "src/components/atoms/carousel.js", "src/app/api/auth/[...nextauth]/options.js", "src/app/api/auth/[...nextauth]/options.js", "src/app/api/auth/[...nextauth]/options.js", "src/components/molecules/homepage/brandsBanner.tsx", "src/components/molecules/homepage/heroFixedBanners.tsx", "src/components/molecules/homepage/categoriesBanner.tsx", "src/components/atoms/bestPriceOrderTracking.js"],
   "exclude": ["node_modules"]
 }
