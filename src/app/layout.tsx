@@ -18,6 +18,7 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 import Script from 'next/script';
 import { Suspense } from 'react';
 import BestPriceScript from '@/components/atoms/bestPrice360';
+import BestPriceBadge from '@/components/atoms/bestPriceBadge';
 const PixelTracker = dynamic(() => import("../components/atoms/pixelTracker"), { ssr: false });
 
 const inter = Inter({ subsets: ['greek'] })
@@ -81,6 +82,7 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
               </main>
               <Footer />
               <EpayIcons />
+              <BestPriceBadge />
               <Copyright />
               <CookieBanner />
               <MenuProvider>

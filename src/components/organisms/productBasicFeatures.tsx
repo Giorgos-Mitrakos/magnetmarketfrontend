@@ -4,10 +4,11 @@ import ProductPrice from "../molecules/productPrice"
 import ProductAddToCart from "../molecules/productAddToCart"
 import Link from "next/link"
 import { IProduct } from "@/lib/interfaces/product"
+import BestPriceProductBadge from "../atoms/bestPriceProductBadge"
 
 
-const ProductBasicFeatures = ({ product }: {product:IProduct}) => {
-  
+const ProductBasicFeatures = ({ product }: { product: IProduct }) => {
+
   return (
     <div className="flex flex-col p-4">
       <div className="flex h-8 relative">
@@ -17,8 +18,8 @@ const ProductBasicFeatures = ({ product }: {product:IProduct}) => {
               product.attributes.brand.data.attributes.logo.data !== null ?
                 <Link className="h-full w-f" href={`/brands/${product.attributes.brand.data.attributes.slug}`}> <Image className="flex object-contain object-left"
                   aria-label={`Λογότυπο της εταιρίας ${product.attributes.brand.data.attributes.name}`}
-                  src={getStrapiMedia(product.attributes.brand.data.attributes.logo.data.attributes.formats?
-                    product.attributes.brand.data.attributes.logo.data.attributes.formats.thumbnail.url:
+                  src={getStrapiMedia(product.attributes.brand.data.attributes.logo.data.attributes.formats ?
+                    product.attributes.brand.data.attributes.logo.data.attributes.formats.thumbnail.url :
                     product.attributes.brand.data.attributes.logo.data.attributes.url)}
                   fill
                   // width={36}
@@ -38,6 +39,7 @@ const ProductBasicFeatures = ({ product }: {product:IProduct}) => {
       <h5 className="text-sm text-slate-500 dark:text-slate-300"
         aria-label={`Barcode: ${product.attributes.barcode}`}>EAN: {product.attributes.barcode}</h5>
       <h2 aria-label="Περιγραφή">{product.attributes.short_description}</h2>
+      <BestPriceProductBadge productId={product.id} />
       <ProductPrice id={product.id} />
       <ProductAddToCart product={product} />
     </div>
