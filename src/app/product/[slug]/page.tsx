@@ -227,7 +227,7 @@ export default async function Product({ params }:
       {
         '@type': 'Brand',
         name: product.attributes.brand.data.attributes.name,
-        logo: product.attributes.brand.data.attributes.logo ?
+        logo: product.attributes.brand.data.attributes.logo && product.attributes.brand.data.attributes.logo.data ?
           `${process.env.NEXT_PUBLIC_API_URL}${product.attributes.brand.data.attributes.logo.data.attributes.url}`
           : ''
       } :
