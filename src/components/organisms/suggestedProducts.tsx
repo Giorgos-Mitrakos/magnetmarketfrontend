@@ -87,7 +87,7 @@ const SuggestedProducts = async ({ product }: { product: IProduct }) => {
                     {suggestedProducts.map((prod, i) => (
                         <div key={i} className="overflow-hidden ">
                             <div className="flex flex-col relative shadow-md hover:shadow-lg dark:shadow-slate-500 dark:hover:shadow-slate-600 bg-white dark:bg-slate-700 rounded-lg m-1 p-4">
-                                <ProductCardHead brand={prod.attributes.brand} id={prod.id} />
+                                <ProductCardHead brand={prod.attributes.brand} product={prod} />
                                 <Link className="grid h-48 w-full place-content-center bg-white relative" href={`/product/${prod.attributes.slug}`}
                                     aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${prod.attributes.name}`}>
                                     {prod.attributes.image.data ?
@@ -133,7 +133,7 @@ const SuggestedProducts = async ({ product }: { product: IProduct }) => {
                                     <p className="text-green-700 dark:text-green-400 text-sm font-semibold"
                                         aria-label="Διαθεσιμότητα">Διαθέσιμο</p>
                                 </div>
-                                <ProductCardPrice id={prod.id} />
+                                <ProductCardPrice product={prod} />
                             </div>
                         </div>)
                     )}

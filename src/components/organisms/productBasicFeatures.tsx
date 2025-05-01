@@ -40,7 +40,7 @@ const ProductBasicFeatures = ({ product }: { product: IProduct }) => {
         aria-label={`Barcode: ${product.attributes.barcode}`}>EAN: {product.attributes.barcode}</h5>
       <h2 aria-label="Περιγραφή">{product.attributes.short_description}</h2>
       <BestPriceProductBadge productId={product.id} />
-      <ProductPrice id={product.id} />
+      <ProductPrice product={product} />
       <ProductAddToCart product={product} />
     </div>
   )

@@ -47,7 +47,7 @@ export default function Minicart() {
                             {item.name}
                         </Link>
                         <div className="col-span-2">
-                            <ProductCardPrice id={item.id} />
+                            {/* <ProductCardPrice product={item} /> */}
                         </div>
                         {/* <div >{item.price}</div> */}
                     </div>)
