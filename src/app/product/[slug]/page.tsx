@@ -80,124 +80,140 @@ export default async function Product({ params }:
 
   const structuredDataImages = images.map(x => `${process.env.NEXT_PUBLIC_API_URL}${x.attributes.url}`)
 
-  let structuredDataPrice = {}
+  // let structuredDataPrice = {
+  //   "@type": "Offer",
+  //   "url": `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
+  //   "availability": "https://schema.org/InStock",
+  //   "itemCondition": "https://schema.org/NewCondition",
+  //   "priceCurrency": "EUR",
+  //   "price": product.attributes.is_sale && product.attributes.sale_price
+  //     ? product.attributes.sale_price
+  //     : product.attributes.price,
+  //   "priceSpecification": {
+  //     "@type": "UnitPriceSpecification",
+  //     "price": product.attributes.is_sale && product.attributes.sale_price
+  //       ? product.attributes.sale_price
+  //       : product.attributes.price,
+  //     "priceCurrency": "EUR"
+  //   }
+  // }
 
-  if (product.attributes.is_sale && product.attributes.sale_price) {
-    structuredDataPrice = {
-      "@type": "Offer",
-      url: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
-      availability: "https://schema.org/InStock",
-      itemCondition: 'https://schema.org/NewCondition',
-      "price": product.attributes.sale_price,
-      "priceCurrency": "EUR",
-      // Optional: add priceValidUntil only if known
-      // "priceValidUntil": "2025-12-31",
+  // if(product.attributes.is_sale && product.attributes.sale_price) {
+  //     structuredDataPrice = {
+  //       "@type": "Offer",
+  //       url: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
+  //       availability: "https://schema.org/InStock",
+  //       itemCondition: 'https://schema.org/NewCondition',
+  //       "price": product.attributes.sale_price,
+  //       "priceCurrency": "EUR",
+  //       // Optional: add priceValidUntil only if known
+  //       // "priceValidUntil": "2025-12-31",
 
-      "priceSpecification": [
-        {
-          "@type": "UnitPriceSpecification",
-          "price": product.attributes.sale_price,
-          "priceCurrency": "EUR"
-        },
-        {
-          "@type": "UnitPriceSpecification",
-          "priceType": "https://schema.org/StrikethroughPrice",
-          "price": product.attributes.price,
-          "priceCurrency": "EUR"
-        }
-      ],
-      "shippingDetails": {
-        "@type": "OfferShippingDetails",
-        "shippingRate": {
-          "@type": "MonetaryAmount",
-          "value": 4.5,
-          "currency": "EUR"
-        },
-        "shippingDestination": {
-          "@type": "DefinedRegion",
-          "addressCountry": "GR"
-        },
-        "deliveryTime": {
-          "@type": "ShippingDeliveryTime",
-          "handlingTime": {
-            "@type": "QuantitativeValue",
-            "minValue": 0,
-            "maxValue": 1,
-            "unitCode": "DAY"
-          },
-          "transitTime": {
-            "@type": "QuantitativeValue",
-            "minValue": 1,
-            "maxValue": 5,
-            "unitCode": "DAY"
-          }
-        }
-      },
-      "hasMerchantReturnPolicy": {
-        "@type": "MerchantReturnPolicy",
-        "applicableCountry": "GR",
-        "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-        "merchantReturnDays": 14,
-        "merchantReturnLink": `${process.env.NEXT_URL}/pages/politiki-epistrofon`,
-        "returnMethod": "https://schema.org/ReturnByMail",
-        "returnFees": "https://schema.org/FreeReturn"
-      }
-    }
-  }
-  else {
-    structuredDataPrice = {
-      "@type": "Offer",
-      url: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
-      availability: "https://schema.org/InStock",
-      itemCondition: 'https://schema.org/NewCondition',
-      "price": product.attributes.price,
-      "priceCurrency": "EUR",
+  //       "priceSpecification": [
+  //         {
+  //           "@type": "UnitPriceSpecification",
+  //           "price": product.attributes.sale_price,
+  //           "priceCurrency": "EUR"
+  //         },
+  //         {
+  //           "@type": "UnitPriceSpecification",
+  //           "priceType": "https://schema.org/StrikethroughPrice",
+  //           "price": product.attributes.price,
+  //           "priceCurrency": "EUR"
+  //         }
+  //       ],
+  //       "shippingDetails": {
+  //         "@type": "OfferShippingDetails",
+  //         "shippingRate": {
+  //           "@type": "MonetaryAmount",
+  //           "value": 4.5,
+  //           "currency": "EUR"
+  //         },
+  //         "shippingDestination": {
+  //           "@type": "DefinedRegion",
+  //           "addressCountry": "GR"
+  //         },
+  //         "deliveryTime": {
+  //           "@type": "ShippingDeliveryTime",
+  //           "handlingTime": {
+  //             "@type": "QuantitativeValue",
+  //             "minValue": 0,
+  //             "maxValue": 1,
+  //             "unitCode": "DAY"
+  //           },
+  //           "transitTime": {
+  //             "@type": "QuantitativeValue",
+  //             "minValue": 1,
+  //             "maxValue": 5,
+  //             "unitCode": "DAY"
+  //           }
+  //         }
+  //       },
+  //       "hasMerchantReturnPolicy": {
+  //         "@type": "MerchantReturnPolicy",
+  //         "applicableCountry": "GR",
+  //         "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+  //         "merchantReturnDays": 14,
+  //         "merchantReturnLink": `${process.env.NEXT_URL}/pages/politiki-epistrofon`,
+  //         "returnMethod": "https://schema.org/ReturnByMail",
+  //         "returnFees": "https://schema.org/FreeReturn"
+  //       }
+  //     }
+  //   }
+  // else {
+  //   structuredDataPrice = {
+  //     "@type": "Offer",
+  //     url: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
+  //     availability: "https://schema.org/InStock",
+  //     itemCondition: 'https://schema.org/NewCondition',
+  //     "price": product.attributes.price,
+  //     "priceCurrency": "EUR",
 
-      "priceSpecification": [
-        {
-          "@type": "UnitPriceSpecification",
-          "price": product.attributes.price,
-          "priceCurrency": "EUR"
-        }
-      ],
-      "shippingDetails": {
-        "@type": "OfferShippingDetails",
-        "shippingRate": {
-          "@type": "MonetaryAmount",
-          "value": 4.5,
-          "currency": "EUR"
-        },
-        "shippingDestination": {
-          "@type": "DefinedRegion",
-          "addressCountry": "GR"
-        },
-        "deliveryTime": {
-          "@type": "ShippingDeliveryTime",
-          "handlingTime": {
-            "@type": "QuantitativeValue",
-            "minValue": 0,
-            "maxValue": 1,
-            "unitCode": "DAY"
-          },
-          "transitTime": {
-            "@type": "QuantitativeValue",
-            "minValue": 1,
-            "maxValue": 5,
-            "unitCode": "DAY"
-          }
-        }
-      },
-      "hasMerchantReturnPolicy": {
-        "@type": "MerchantReturnPolicy",
-        "applicableCountry": "GR",
-        "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-        "merchantReturnDays": 14,
-        "merchantReturnLink": `${process.env.NEXT_URL}/pages/politiki-epistrofon`,
-        "returnMethod": "https://schema.org/ReturnByMail",
-        "returnFees": "https://schema.org/FreeReturn"
-      }
-    }
-  }
+  //     "priceSpecification": [
+  //       {
+  //         "@type": "UnitPriceSpecification",
+  //         "price": product.attributes.price,
+  //         "priceCurrency": "EUR"
+  //       }
+  //     ],
+  //     "shippingDetails": {
+  //       "@type": "OfferShippingDetails",
+  //       "shippingRate": {
+  //         "@type": "MonetaryAmount",
+  //         "value": 4.5,
+  //         "currency": "EUR"
+  //       },
+  //       "shippingDestination": {
+  //         "@type": "DefinedRegion",
+  //         "addressCountry": "GR"
+  //       },
+  //       "deliveryTime": {
+  //         "@type": "ShippingDeliveryTime",
+  //         "handlingTime": {
+  //           "@type": "QuantitativeValue",
+  //           "minValue": 0,
+  //           "maxValue": 1,
+  //           "unitCode": "DAY"
+  //         },
+  //         "transitTime": {
+  //           "@type": "QuantitativeValue",
+  //           "minValue": 1,
+  //           "maxValue": 5,
+  //           "unitCode": "DAY"
+  //         }
+  //       }
+  //     },
+  //     "hasMerchantReturnPolicy": {
+  //       "@type": "MerchantReturnPolicy",
+  //       "applicableCountry": "GR",
+  //       "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+  //       "merchantReturnDays": 14,
+  //       "merchantReturnLink": `${process.env.NEXT_URL}/pages/politiki-epistrofon`,
+  //       "returnMethod": "https://schema.org/ReturnByMail",
+  //       "returnFees": "https://schema.org/FreeReturn"
+  //     }
+  //   }
+  // }
 
   const productStructuredData = {
     '@context': 'https://schema.org',
@@ -207,20 +223,72 @@ export default async function Product({ params }:
     sku: product.id,
     mpn: product.attributes.mpn,
     gtin13: product.attributes.barcode,
-    brand: {},
+    brand: product.attributes.brand.data ?
+      {
+        '@type': 'Brand',
+        name: product.attributes.brand.data.attributes.name,
+        logo: product.attributes.brand.data.attributes.logo ?
+          `${process.env.NEXT_PUBLIC_API_URL}${product.attributes.brand.data.attributes.logo.data.attributes.url}`
+          : ''
+      } :
+      {}
+    ,
     image: structuredDataImages,
     keywords: `${product.attributes.category.data.attributes.name}`,
-    offers: structuredDataPrice,
-    // datePublished: product.attributes.publishedAt
+    offers: {
+      "@type": "Offer",
+      "url": `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
+      "availability": "https://schema.org/InStock",
+      "itemCondition": "https://schema.org/NewCondition",
+      "priceCurrency": "EUR",
+      "price": product.attributes.is_sale && product.attributes.sale_price
+        ? product.attributes.sale_price
+        : product.attributes.price,
+      "priceSpecification": {
+        "@type": "UnitPriceSpecification",
+        "price": product.attributes.is_sale && product.attributes.sale_price
+          ? product.attributes.sale_price
+          : product.attributes.price,
+        "priceCurrency": "EUR"
+      },
+      "shippingDetails": {
+        "@type": "OfferShippingDetails",
+        "shippingRate": {
+          "@type": "MonetaryAmount",
+          "value": 4.5,
+          "currency": "EUR"
+        },
+        "shippingDestination": {
+          "@type": "DefinedRegion",
+          "addressCountry": "GR"
+        },
+        "deliveryTime": {
+          "@type": "ShippingDeliveryTime",
+          "handlingTime": {
+            "@type": "QuantitativeValue",
+            "minValue": 0,
+            "maxValue": 1,
+            "unitCode": "DAY"
+          },
+          "transitTime": {
+            "@type": "QuantitativeValue",
+            "minValue": 1,
+            "maxValue": 5,
+            "unitCode": "DAY"
+          }
+        }
+      },
+      "hasMerchantReturnPolicy": {
+        "@type": "MerchantReturnPolicy",
+        "applicableCountry": "GR",
+        "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+        "merchantReturnDays": 14,
+        "merchantReturnLink": `${process.env.NEXT_URL}/pages/politiki-epistrofon`,
+        "returnMethod": "https://schema.org/ReturnByMail",
+        "returnFees": "https://schema.org/FreeReturn"
+      }
+    },
   };
-
-  if (product.attributes.brand.data) {
-    productStructuredData.brand = {
-      '@type': 'Brand',
-      name: product.attributes.brand.data.attributes.name,
-      logo: product.attributes.brand.data.attributes.logo
-    }
-  }
 
   const breadcrumbList = breadcrumbs.map((breabcrumb, i) => ({
     "@type": "ListItem",
