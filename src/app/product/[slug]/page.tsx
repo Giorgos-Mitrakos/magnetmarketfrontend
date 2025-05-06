@@ -240,16 +240,13 @@ export default async function Product({ params }:
       "url": `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
       "availability": "https://schema.org/InStock",
       "itemCondition": "https://schema.org/NewCondition",
-      "priceCurrency": "EUR",
       "price": product.attributes.is_sale && product.attributes.sale_price
         ? product.attributes.sale_price
         : product.attributes.price,
-      "priceSpecification": {
-        "@type": "UnitPriceSpecification",
-        "price": product.attributes.is_sale && product.attributes.sale_price
-          ? product.attributes.sale_price
-          : product.attributes.price,
-        "priceCurrency": "EUR"
+      "priceCurrency": "EUR",
+      "seller": {
+        "@type": "Organization",
+        "name": "Magnet Market"
       },
       "shippingDetails": {
         "@type": "OfferShippingDetails",
