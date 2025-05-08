@@ -76,16 +76,17 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
                 <PixelTracker />
               </Suspense>
               <Αnnouncement />
-              <Header user={session?.user?.name?.split('@')[0]} />
-              <main className='mx-2 sm:mx-6 md:mx-8'>
-                {children}
-              </main>
-              <Footer />
-              <EpayIcons />
-              <BestPriceBadge />
-              <Copyright />
-              <CookieBanner />
               <MenuProvider>
+                <Header user={session?.user?.name?.split('@')[0]} />
+                <main className='mx-2 sm:mx-6 md:mx-8'>
+                  {children}
+                </main>
+                <Footer />
+                <EpayIcons />
+                <BestPriceBadge />
+                <Copyright />
+                <CookieBanner />
+
                 <MobileTabMenu />
               </MenuProvider>
             </ShippingProvider>

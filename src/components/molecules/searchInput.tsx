@@ -10,19 +10,30 @@ function SearchInput() {
     const router = useRouter();
 
     const { text, setText, isListening, startListening, stopListening, hasRecognitionSupport } = useSpeechRecognition()
+    
+    const handleClick = () => {
+        isListening ? stopListening : startListening
+      };
+    
+      const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+        if (event.key === "Enter") {
+          event.preventDefault(); // Prevents the button from triggering on Enter
+        }
+      };
 
     return (
-        <div className="flex place-self-center w-full dark:text-slate-800">
-            <form onSubmit={() => {
+        <div className="flex place-self-center w-full lg:w-1/2 dark:text-slate-800">
+            <form onSubmit={(e) => {
                 sendGAEvent('event', 'search', {
                     text
                 });
+                e.preventDefault()
                 router.push(`/search?search=${text}`)
             }}
-                className="flex w-full justify-between border-b-2 border p-2 rounded-sm bg-inherit dark:bg-slate-800 border-siteColors-purple"
+                className="flex w-full justify-between border-b-2 p-2 rounded-sm bg-inherit dark:bg-slate-800 border-siteColors-purple"
                 aria-label="Αναζήτηση">
                 {hasRecognitionSupport &&
-                    <button onClick={isListening ? stopListening : startListening}
+                    <button onClick={isListening ? stopListening : startListening} onKeyDown={handleKeyDown}
                         className="flex text-siteColors-purple dark:text-slate-200 text-lg xs:text-xl md:text-2xl"
                         aria-label="Ενεργοποίηση φωνητικής αναζήτησης"
                     >

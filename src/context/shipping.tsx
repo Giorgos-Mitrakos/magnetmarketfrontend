@@ -246,7 +246,7 @@ export const ShippingProvider = ({ children }: any) => {
 
             const methodsJson = methods ? JSON.parse(methods?.value) : null
 
-            if (methodsJson.shippingMethod) {
+            if (methodsJson && methodsJson.shippingMethod) {
                 setShippingMethod({ id: methodsJson.shippingMethodId, shipping: methodsJson.shippingMethod })
                 if (methodsJson.paymentMethod) {
                     const myHeaders = new Headers();
