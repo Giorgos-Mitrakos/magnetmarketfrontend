@@ -30,7 +30,7 @@ export default function MobileTabMenu() {
             </div>
             <div className={`fixed lg:hidden rounded w-full z-50 top-0 bg-white shadow-lg flex justify-center py-4 px-8 
                 transition-transform transform ${isSearchOpen ? "translate-y-0" :
-                    "-translate-y-full"} duration-500`}>
+                    "-translate-y-full"} duration-500 dark:bg-slate-700`}>
                 <SearchInput />
             </div>
             <div className='flex lg:hidden px-2 xs:px-4 text-2xl justify-between z-30 fixed bottom-0 w-full left-0 bg-siteColors-lightblue text-white shadow-topShadow'>

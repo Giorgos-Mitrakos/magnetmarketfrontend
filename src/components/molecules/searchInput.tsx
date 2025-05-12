@@ -23,7 +23,8 @@ function SearchInput() {
     };
 
     return (
-        <div className="flex place-self-center border-b-2 border-siteColors-purple items-center w-full lg:w-1/2 dark:text-slate-800">
+        <div className="flex p-2 place-self-center border-b-2 border-siteColors-purple items-center w-full lg:w-1/2 
+         dark:lg:text-slate-800 rounded-sm bg-inherit dark:bg-slate-200">
             {hasRecognitionSupport &&
                 <button onClick={(e) => handleClick(e)} onKeyDown={handleKeyDown}
                     className="flex text-siteColors-purple dark:text-slate-200 text-lg xs:text-xl md:text-2xl"
@@ -44,17 +45,17 @@ function SearchInput() {
                 router.push(`/search?search=${text}`)
                 setText("")
             }}
-                className="flex w-full justify-between p-2 rounded-sm bg-inherit dark:bg-slate-800"
+                className="flex w-full justify-between"
                 aria-label="Αναζήτηση">
 
                 <input type="search" tabIndex={0} placeholder="Αναζήτηση" value={text} onChange={(e) => setText(e.target.value)}
-                    className="pl-2 bg-inherit  dark:text-slate-100 outline-none border-none flex-grow"
+                    className="pl-2 bg-inherit  dark:text-slate-900 outline-none border-none flex-grow"
                     aria-label="Πεδίο αναζήτησης προϊόντων" />
                 <button type="submit"
                     aria-label="Αναζήτηση - Αναζητήστε ανά προϊόν, κατασκευαστή ή κατηγορία">
                     <AiOutlineSearch
                         aria-label="Κουμπί αναζήτησης"
-                        className="text-3xl text-siteColors-purple dark:text-slate-200" />
+                        className="text-3xl text-siteColors-purple dark:text-slate-800" />
                 </button>
             </form>
         </div>
