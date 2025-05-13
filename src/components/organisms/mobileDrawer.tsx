@@ -3,9 +3,10 @@
 import { GET_MENU } from "@/lib/queries/categoryQuery"
 import { useNoRevalideteQuery } from "@/repositories/clientRepository"
 import Link from "next/link"
-import {  useContext,  useState } from "react"
+import { useContext, useState } from "react"
 import NextImage from "../atoms/nextImage"
 import { FaArrowLeftLong, FaRegImage } from "react-icons/fa6";
+import { AiOutlineClose } from "react-icons/ai";
 import { MenuContext } from "@/context/menu"
 import { useRouter } from "next/navigation"
 import { IMenuProps, IMenuSub2CategoryProps } from "@/lib/interfaces/category"
@@ -152,6 +153,9 @@ export default function MobileDrawer() {
             </div>}
             <div className="p-4 h-[calc(100%-60px)]">
                 <h2 className="text-lg text-center text-white rounded font-semibold mb-8 bg-siteColors-blue p-2">Κατηγορίες</h2>
+                <button className="flex items-center justify-end px-4 w-full mb-4" >
+                    <AiOutlineClose 
+                    onClick={() => closeMenuDrawer()} className="text-2xl"/></button>
                 <div className="h-full overflow-y-auto">
                     <ul className="pb-20 grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 place-items-center">
                         {menu && menu.categories.data.map(cat => (
