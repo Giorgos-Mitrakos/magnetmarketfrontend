@@ -22,7 +22,7 @@ export default function MobileFilters(props: CategoryFiltersProps) {
                     <CategoryFilters category1={props.category1} category2={props.category2} category3={props.category3} searchParams={props.searchParams} />
                 </div>
             </div>
-            <button
+            <button  id="filterButton" name="filterButton" aria-label="Φίλτρα"
                 className="fixed lg:hidden bottom-24 right-8 flex justify-center items-center rounded-full 
         bg-siteColors-lightblue h-14 w-14 shadow-xl"
                 onClick={() => setIsFiltersOpen(true)}>

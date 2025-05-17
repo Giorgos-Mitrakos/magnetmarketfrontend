@@ -24,7 +24,7 @@ export default function MobileSearchFilters({ searchParams }: MetadataProps) {
                     <SearchFilters searchParams={searchParams} />
                 </div>
             </div>
-            <button
+            <button id="searchFilterButton" name="searchFilterButton" aria-label="Φίλτρα"
                 className="fixed lg:hidden bottom-24 right-8 flex justify-center items-center rounded-full 
         bg-siteColors-lightblue h-14 w-14 shadow-xl z-30"
                 onClick={() => setIsFiltersOpen(true)}>
