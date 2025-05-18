@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { getLocalStorage, setLocalStorage } from "@/lib/helpers/storage-helper";
-import ReactPixel from "react-facebook-pixel";
 
 // CookieBanner component that displays a banner for cookie consent.
 export default function CookieBanner() {
