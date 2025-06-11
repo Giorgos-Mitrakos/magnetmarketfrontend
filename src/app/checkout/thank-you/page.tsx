@@ -176,7 +176,7 @@ export default async function Success() {
                     </div>
                     <div className="flex space-x-4">
                         <h3>Πιθανή ημ/νια παράδοσης:</h3>
-                        <p>{earlyDeviveryDate.toLocaleDateString()} - {lateDeviveryDate.toLocaleDateString()}</p>
+                        <p>{earlyDeviveryDate.toLocaleDateString("el-GR")} - {lateDeviveryDate.toLocaleDateString("el-GR")}</p>
                     </div>
                     <div className="flex space-x-4">
                         <h3>Σύνολο:</h3>
