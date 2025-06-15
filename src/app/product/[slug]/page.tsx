@@ -8,7 +8,6 @@ import SuggestedProducts from '@/components/organisms/suggestedProducts';
 import { GET_PRODUCT_BY_SLUG } from '@/lib/queries/productQuery';
 import { requestSSR } from '@/repositories/repository';
 import { FaRegImage } from "react-icons/fa";
-import Script from 'next/script'
 import { notFound } from 'next/navigation'
 import { IProducts } from "@/lib/interfaces/product";
 const ProductInfo = dynamic(() => import("@/components/organisms/productInfo"), {
