@@ -1,6 +1,6 @@
 import { gql } from "graphql-request";
 import { IImageAttr } from "../interfaces/image";
-import { IProdChar, IProduct,  IProductBrand} from "../interfaces/product";
+import { IProdChar, IProduct, IProductBrand } from "../interfaces/product";
 
 export const GET_CATEGORY_PRODUCTS = gql`
 query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationArg!,$sort:[String!]){
@@ -200,7 +200,7 @@ query getProductPrice($id:ID!){
   }`
 
 export const GET_PRODUCT_BY_SLUG = gql`
-query getCategoryProducts($slug:String!){
+query getProductBySlug($slug:String!){
   products(
     filters: {
       slug: { eq: $slug }

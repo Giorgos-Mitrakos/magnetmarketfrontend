@@ -25,8 +25,6 @@ type MetadataProps = {
   params: { slug: string }
 }
 
-
-
 async function getProductData(slug: string) {
   const data: IProducts | any = await requestSSR({
     query: GET_PRODUCT_BY_SLUG, variables: { slug: slug }
@@ -306,10 +304,14 @@ export default async function Product({ params }:
 
   return (
     <>
-      <Script
+      <script
+      
         id="structured-data"
+        key="product-structured-data"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData),
+        }}
       />
       <div className="dark:bg-gray-800">
         <SiteFeatures />
