@@ -129,7 +129,6 @@ const ProductStructuredData = async ({ slug, breadcrumbs }: { slug: string, brea
     <Script
       id="structured-data"
       type="application/ld+json"
-      strategy="beforeInteractive"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
     />
   );
