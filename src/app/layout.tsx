@@ -19,7 +19,6 @@ import Script from 'next/script';
 import { Suspense } from 'react';
 import BestPriceScript from '@/components/atoms/bestPrice360';
 import BestPriceBadge from '@/components/atoms/bestPriceBadge';
-import CookieBannerWrapper from '@/components/molecules/homepage/cookieBannerWrapper';
 const PixelTracker = dynamic(() => import("../components/atoms/pixelTracker"), { ssr: false });
 const CookieBanner = dynamic(() => import('@/components/molecules/homepage/cookie-banner'), { ssr: false });
 
@@ -87,7 +86,9 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
                 <EpayIcons />
                 <BestPriceBadge />
                 <Copyright />
-                <CookieBannerWrapper />
+                <Suspense fallback={null}>
+                  <CookieBanner />
+                </Suspense>
                 <MobileTabMenu />
               </MenuProvider>
             </ShippingProvider>
