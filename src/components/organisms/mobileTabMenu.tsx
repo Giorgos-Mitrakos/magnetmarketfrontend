@@ -4,11 +4,12 @@ import Link from "next/link";
 import { AiOutlineHome, AiOutlineMenu, AiOutlineSearch, AiOutlineUser } from 'react-icons/ai';
 import { useSession } from 'next-auth/react';
 import { useContext, useState } from 'react';
-import { CartContext } from '@/context/cart';
+// import {  useCart } from '@/context/cart';
 import MobileDrawer from './mobileDrawer';
 import { MenuContext } from '@/context/menu';
 import dynamic from 'next/dynamic';
 import { ToggleMobileMenu } from '../atoms/toggleMobileMenu';
+import { useCheckout } from '@/context/checkout';
 
 const SearchInput = dynamic(() => import('@/components/molecules/searchInput'), {
     ssr: false,
@@ -18,7 +19,8 @@ const SearchInput = dynamic(() => import('@/components/molecules/searchInput'), 
 export default function MobileTabMenu() {
     const { data: session, status } = useSession()
 
-    const { cartItems } = useContext(CartContext)
+    // const { cart } = useCart()
+    const { checkout } = useCheckout()
     const { isMenuOpen, isSearchOpen, toggleSearchDrawer, toggleMenuDrawer, closeMenu } = useContext(MenuContext)
 
     return (
@@ -52,7 +54,7 @@ export default function MobileTabMenu() {
                         <FaOpencart aria-label="Κουμπί ανακατεύθυνσης στο καλάθι σας" />
                     </Link>
                     <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-siteColors-pink border-2 border-white rounded-full top-1 right-1 dark:border-gray-900">
-                        {cartItems.reduce((previousValue, currentValue, currentIndex) => { return previousValue + currentValue.quantity }, 0)}
+                        {checkout.cart.reduce((previousValue, currentValue, currentIndex) => { return previousValue + currentValue.quantity }, 0)}
                     </div>
                 </div>
             </div>

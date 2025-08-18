@@ -1,18 +1,19 @@
 "use client"
 
-import { useContext } from "react"
-import {  FaOpencart, } from "react-icons/fa"
+import { FaOpencart, } from "react-icons/fa"
 import useProductPrice from "@/hooks/useProductPrice"
 import Image from "next/image"
 import { getStrapiMedia } from "@/repositories/medias"
-import { CartContext, ICartItem } from "@/context/cart"
 import { FaRegImage } from "react-icons/fa6"
 import { IProduct } from "@/lib/interfaces/product"
+import { ICartItem } from "@/lib/interfaces/cart"
+import { useCheckout } from "@/context/checkout"
+import { addToCartToast } from "@/lib/toasts/cartToasts"
 
 
-function ProductAddToCart({ product }: {product:IProduct}) {
+function ProductAddToCart({ product }: { product: IProduct }) {
     const { profit, discount, isSale, isLoading, error, data } = useProductPrice(product.id)
-    const { cartItems, addToCart } = useContext(CartContext)
+    const { dispatch } = useCheckout()
 
     const item: ICartItem = {
         id: product.id,
@@ -24,13 +25,14 @@ function ProductAddToCart({ product }: {product:IProduct}) {
         brand: product.attributes.brand.data?.attributes.name || null,
         quantity: 1,
         isAvailable: true,
-        is_sale:product.attributes.is_sale,
-        sale_price:product.attributes.sale_price,
+        is_sale: product.attributes.is_sale,
+        sale_price: product.attributes.sale_price,
         category: product.attributes.category
     }
 
     const handleAddProductClick = (product: ICartItem) => {
-        addToCart(product)
+        dispatch({ type: "ADD_ITEM", payload: product })
+        addToCartToast(product)
     }
 
     return (

@@ -1,22 +1,21 @@
-import React, { useContext } from "react";
 import { useFormikContext, FormikValues } from "formik";
 import Radio from "../atoms/radio";
-import { IPaymentMethods, IShippingMethods, ShippingContext } from "@/context/shipping";
+import { useCheckout } from "@/context/checkout";
+import React from "react";
+import { IPaymentMethods, IShippingMethods } from "@/lib/interfaces/shipping";
 
-interface ShippingMethodsProps {
-    methods: IShippingMethods
-    onShippingChange: (payments: IPaymentMethods) => void;
-}
-
-const ShippingMethods: React.FC<ShippingMethodsProps> = ({ methods, onShippingChange }) => {
+const ShippingMethods = () => {
     const { values, setFieldValue, errors, touched } = useFormikContext<FormikValues>();
-    const { shippingCost, paymentMethod, saveShippingMethod } = useContext(ShippingContext)
+    const { checkout, dispatch } = useCheckout()
 
-    const handleSelect = (id: number, shipping: string, payments: IPaymentMethods) => {
+    const handleSelect = async (id: number, shipping: string, payments: IPaymentMethods) => {
         setFieldValue("shippingMethod", shipping);
         setFieldValue("shippingMethodId", id);
-        saveShippingMethod({ id: id, shipping: shipping })
-        onShippingChange(payments); // Update payment methods dynamically
+        setFieldValue("paymentMethod", ""); // Reset payment method selection
+        setFieldValue("paymentMethodId", null); // Reset payment method selection
+        setFieldValue("installments", 1); // Reset payment method selection
+
+        dispatch({ type: "SAVE_SHIPPING_METHOD", payload: { shippingMethod: { id: id, shipping: shipping }, availablePayments: payments } })
     };
 
     return (
@@ -25,7 +24,7 @@ const ShippingMethods: React.FC<ShippingMethodsProps> = ({ methods, onShippingCh
                 <span> <small id="feedback" className="text-sm text-red-500">{errors.shippingMethod.toString()}</small></span>}</h3>
 
             <ul className="space-y-4">
-                {methods.shippings.data.map((method, index) => (
+                {checkout.availableShippingMethods && checkout.availableShippingMethods.shippings.data.map((method, index) => (
                     <li
                         key={index}
                         className="flex items-center text-sm t space-x-2">

@@ -1,49 +1,36 @@
 "use client"
 import CartSummary from "@/components/atoms/cartSummary"
-import ApplyCoupon from "@/components/atoms/discountCoupon"
+import CouponForm from "@/components/molecules/CouponForm"
 import PaymentMethods from "@/components/molecules/paymentMethods"
 import ShippingMethods from "@/components/molecules/shippingMethods"
 import CartAside from "@/components/organisms/cartItemsAside"
-import { IPaymentMethods, IShippingMethods, ShippingContext } from "@/context/shipping"
+import { useCheckout } from "@/context/checkout"
 import { saveCookies } from "@/lib/helpers/actions"
+import { calculateTotals } from "@/lib/helpers/checkout"
+import { IPaymentMethods, IShippingMethods } from "@/lib/interfaces/shipping"
 import { GET_SHIPPING_METHODS } from "@/lib/queries/shippingQuery"
 import { useQuery } from "@/repositories/clientRepository"
 import { FormikProvider, useFormik } from "formik"
 import { useRouter } from "next/navigation"
-import { useContext} from "react"
 import { toast } from "sonner"
 import * as Yup from 'yup'
 
 const OrderInfo = () => {
-    const { data: shippingMethodsData, loading: loadingShippingMethods, error: errorShippingMethods } = useQuery({ query: GET_SHIPPING_METHODS, jwt: '' })
-
-    const shippingMethods = shippingMethodsData as IShippingMethods
-
-    const { gettotalCostWithoutInstallments, saveInstallments, savePaymentMethod, availablePayments, saveAvailablePayments } = useContext(ShippingContext)
+    const { checkout, dispatch } = useCheckout()
 
 
     const router = useRouter()
 
-    const handleConfirmClick = () => {   
+    const handleConfirmClick = () => {
         formik.submitForm()
     }
 
-    const handleShippingChange = (payments: IPaymentMethods) => {
-        saveAvailablePayments(payments); // Update payment options dynamically
-        formik.setFieldValue("paymentMethod", ""); // Reset payment method selection
-        formik.setFieldValue("paymentMethodId", null); // Reset payment method selection
-        formik.setFieldValue("installments", 1); // Reset payment method selection
-        formik.setFieldValue("totalCost", { cost: gettotalCostWithoutInstallments() }); // Reset payment method selection
-        savePaymentMethod(null)
-        saveInstallments(1)
-    };
-
     const formik = useFormik({
         initialValues: {
-            shippingMethodId: null,
-            shippingMethod: null,
-            paymentMethodId: null,
-            paymentMethod: null,
+            shippingMethodId: checkout.shippingMethod?.id || null,
+            shippingMethod: checkout.shippingMethod?.shipping || null,
+            paymentMethodId: checkout.paymentMethod?.id || null,
+            paymentMethod: checkout.paymentMethod?.attributes.name || null,
             installments: 1,
         },
         validationSchema: Yup.object({
@@ -69,21 +56,19 @@ const OrderInfo = () => {
                 <FormikProvider value={formik}>
                     <form onSubmit={formik.handleSubmit}>
                         <h2 className='text-lg mb-2 font-medium text-siteColors-purple dark:text-slate-200'>Στοιχεία Παραγγελίας</h2>
-                        {!loadingShippingMethods && <ShippingMethods methods={shippingMethods} onShippingChange={handleShippingChange} />}
-                        {availablePayments && <PaymentMethods payments={availablePayments} />}
-                        {/* <button type="submit">Submit</button> */}
+                        <ShippingMethods />
+                        {checkout.shippingMethod?.id && <PaymentMethods />}
                     </form>
                 </FormikProvider>
             </div>
             <div className='space-y-2 md:col-start-2'>
                 <CartAside />
+                <div className='w-full'>
+                    <CouponForm />
+                </div>
                 <div className="bg-slate-200 rounded">
                     <CartSummary />
                 </div>
-
-                {/* <div className='max-w-sm'>
-                    <ApplyCoupon />
-                </div> */}
                 <button onClick={handleConfirmClick}
                     className="md:row-start-2 md:col-start-2 flex justify-center items-center px-4 py-2 w-full rounded border md:text-slate-100 text-lg font-semibold
                 bg-gradient-to-b from-siteColors-pink via-siteColors-purple to-siteColors-pink text-white

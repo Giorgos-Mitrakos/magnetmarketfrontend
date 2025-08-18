@@ -1,13 +1,15 @@
 'use client'
 import CartSummary from "@/components/atoms/cartSummary"
 import CartAside from "@/components/organisms/cartItemsAside"
-import { ShippingContext } from "@/context/shipping"
-import { useContext, useState } from "react"
+import { useCheckout } from "@/context/checkout"
+import { useState } from "react"
 import { useRouter } from 'next/navigation'
-import { CartContext } from "@/context/cart"
 import { toast } from "sonner"
 import { saveCookies } from "@/lib/helpers/actions"
 import { sendEmail } from "@/lib/helpers/piraeusGateway"
+import { PaymentMethodEnum } from "@/lib/interfaces/shipping"
+import { createOrder } from "@/lib/helpers/checkout"
+// import { useCart } from "@/context/cart"
 
 interface IAddressSumary {
     firstname: string,
@@ -52,15 +54,15 @@ const AddressSummary = ({ address }: { address: IAddressSumary }) => {
 }
 
 const Confirm = () => {
-    const { paymentMethod, shippingMethod, addresses, createOrder } = useContext(ShippingContext)
-    const { clearCart } = useContext(CartContext)
+    // const { paymentMethod, shippingMethod, addresses, createOrder } = useCheckout()
+    const { checkout, dispatch } = useCheckout()
     const [processing, setProcessing] = useState(false)
     const router = useRouter()
 
     const handleConfirmClik = async () => {
         try {
             setProcessing(true)
-            const newOrder = await createOrder()
+            const newOrder = await createOrder(checkout)
 
             if (newOrder && newOrder.status === "fail") {
                 toast.error(newOrder.message, {
@@ -78,7 +80,7 @@ const Confirm = () => {
                 })
             }
 
-            if (newOrder && (paymentMethod?.attributes.name === "Χρεωστική Κάρτα" || paymentMethod?.attributes.name === "Πιστωτική Κάρτα")) {
+            if (newOrder && (checkout.paymentMethod?.attributes.method === PaymentMethodEnum.CREDIT_CARD || checkout.paymentMethod?.attributes.method === PaymentMethodEnum.DEBIT_CARD)) {
                 if (Number(newOrder.orderId) && Number(newOrder.amount)) {
 
                     try {
@@ -106,6 +108,7 @@ const Confirm = () => {
                             const errorData = await formdata.json();
                             console.error('Piraeus gateway error:', errorData);
                             alert('Παρουσιάστηκε πρόβλημα με την πληρωμή. Παρακαλώ προσπαθήστε ξανά.');
+                            setProcessing(false)
                             return;
                         }
 
@@ -139,6 +142,7 @@ const Confirm = () => {
                     } catch (error) {
                         console.error('Unexpected error during payment:', error);
                         alert('Απρόβλεπτο σφάλμα. Παρακαλώ δοκιμάστε ξανά.');
+                        setProcessing(false)
                     }
                 }
 
@@ -146,7 +150,7 @@ const Confirm = () => {
             }
             else {
 
-                clearCart()
+                dispatch({ type: "CLEAR_CART" })
 
                 setProcessing(false)
 
@@ -154,7 +158,6 @@ const Confirm = () => {
             }
 
         } catch (error) {
-            console.log(error)
             await sendEmail({ title: 'error', data: JSON.stringify(error) })
             router.push('/checkout/failure')
         }
@@ -169,24 +172,36 @@ const Confirm = () => {
                 </div>
                 <ul className="flex flex-col bg-slate-100 dark:bg-slate-700 rounded">
                     <li className="p-4 rounded">
-                        <h2 className='font-medium mb-4 border-b text-siteColors-purple dark:text-slate-200'>Διεύθυνση χρέωσης {!addresses.different_shipping ? '- αποστολής' : ''}</h2>
-                        <AddressSummary address={addresses.billing} />
+                        <h2 className='font-medium mb-4 border-b text-siteColors-purple dark:text-slate-200'>Διεύθυνση χρέωσης {!checkout.addresses.different_shipping ? '- αποστολής' : ''}</h2>
+                        <AddressSummary address={checkout.addresses.billing} />
                     </li>
-                    {addresses.different_shipping && <li className="p-4 rounded">
+                    {checkout.addresses.different_shipping && <li className="p-4 rounded">
                         <h2 className='font-medium  mb-4 border-b text-siteColors-purple dark:text-slate-200'>Διεύθυνση αποστολής</h2>
-                        <AddressSummary address={addresses.different_shipping ? addresses.shipping : addresses.billing} />
+                        <AddressSummary address={checkout.addresses.different_shipping ? checkout.addresses.shipping : checkout.addresses.billing} />
                     </li>}
                     <li className="p-4 rounded">
                         <h2 className='font-medium  mb-4 border-b text-siteColors-purple dark:text-slate-200'>Τρόπος πληρωμής</h2>
-                        <span>{paymentMethod?.attributes?.name}</span>
+                        <p>{checkout.paymentMethod?.attributes?.name}</p>
+                        {checkout.paymentMethod?.attributes.installments && checkout.installments>1 &&
+                            <p>{checkout.installments} {checkout.paymentMethod?.attributes.installments.free_rate_months >= checkout.installments ?
+                                "Άτοκες" : "Έντοκες"
+                            } δόσεις</p>}
                     </li>
+                    {checkout.appliedCoupon &&
+                        <li className="p-4 rounded">
+                            <h2 className='font-medium  mb-4 border-b text-siteColors-purple dark:text-slate-200'>Εκπτωτικό κουπόνι</h2>
+                            <p>{checkout.appliedCoupon.discountType === "free_shipping" ? "Δωρεάν μεταφορικά" :
+                                checkout.appliedCoupon.discountType === "percentage" ?
+                                    `${checkout.appliedCoupon.discountValue}  % έκπτωση` :
+                                    `${checkout.appliedCoupon.discountValue}  € έκπτωση`}</p>
+                        </li>}
                     <li className="p-4 rounded">
                         <h2 className='font-medium  mb-4 border-b text-siteColors-purple dark:text-slate-200'>Τρόπος αποστολής</h2>
-                        <span>{shippingMethod.shipping}</span>
+                        <span>{checkout.shippingMethod?.shipping}</span>
                     </li>
                     <li className="p-4 rounded">
                         <h2 className='font-medium  mb-4 border-b text-siteColors-purple dark:text-slate-200'>Τύπος παραστατικού</h2>
-                        <span>{addresses.billing.isInvoice ? "Τιμολόγιο" : "Απόδειξη"}</span>
+                        <span>{checkout.addresses.billing.isInvoice ? "Τιμολόγιο" : "Απόδειξη"}</span>
                     </li>
                     <li>
                         <div className="rounded">

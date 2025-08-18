@@ -5,8 +5,8 @@ import Header from '@/components/organisms/header'
 import Footer from '@/components/organisms/footer'
 import Αnnouncement from '@/components/atoms/announcement'
 import MobileTabMenu from '@/components/organisms/mobileTabMenu'
-import { CartProvider } from '@/context/cart'
-import { ShippingProvider } from '@/context/shipping'
+// import { CartProvider } from '@/context/cart'
+import { CheckoutProvider } from '@/context/checkout'
 import { MenuProvider } from '@/context/menu'
 // import CookieBanner from '@/components/molecules/homepage/cookie-banner'
 import EpayIcons from '@/components/molecules/epayIcons'
@@ -20,6 +20,7 @@ import { Suspense } from 'react';
 import BestPriceScript from '@/components/atoms/bestPrice360';
 import BestPriceBadge from '@/components/atoms/bestPriceBadge';
 import CookieBannerWrapper from '@/components/molecules/homepage/cookieBannerWrapper';
+import Image from 'next/image';
 const PixelTracker = dynamic(() => import("../components/atoms/pixelTracker"), { ssr: false });
 
 const inter = Inter({ subsets: ['greek'] })
@@ -56,14 +57,13 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
         `,
         }}
         />
-        <noscript><img height="1" width="1" className="display:none"
-          src="https://www.facebook.com/tr?id=1151339979478836&ev=PageView&noscript=1"
-        /></noscript>
+        <noscript><img src="https://www.facebook.com/tr?id=1151339979478836&ev=PageView&noscript=1" alt='facebook' height="1" width="1" className="display:none" />
+          {/* <img height="1" width="1" className="display:none"/> */}
+          </noscript>
       </head>
       <body className={`${inter.className} h-full dark:bg-slate-800`}>
         <SessionProviders session={session}>
-          <CartProvider>
-            <ShippingProvider>
+          <CheckoutProvider>
               <Toaster
                 toastOptions={{
                   classNames: {
@@ -89,8 +89,7 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
                 <CookieBannerWrapper />
                 <MobileTabMenu />
               </MenuProvider>
-            </ShippingProvider>
-          </CartProvider>
+          </CheckoutProvider>
         </SessionProviders>
         <BestPriceScript />
       </body>

@@ -1,14 +1,15 @@
 "use client"
 
 import Addresses, { FormInputRef } from '@/components/organisms/addresses'
-import { useContext, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useApiRequest } from '@/repositories/clientRepository';
 import { useSession } from 'next-auth/react';
 import CartAside from '@/components/organisms/cartItemsAside';
-import ApplyCoupon from '@/components/atoms/discountCoupon';
 import CartSummary from '@/components/atoms/cartSummary';
 import { useRouter } from 'next/navigation';
-import { CartContext } from '@/context/cart';
+import { trackCartEvent } from '@/lib/helpers/analytics';
+import { useCheckout } from '@/context/checkout';
+
 
 
 export interface IProfile {
@@ -56,7 +57,8 @@ export interface IProfile {
 
 const CustomerInfo = () => {
     const router = useRouter()
-    const { sendEvent } = useContext(CartContext)
+    const { checkout, dispatch } = useCheckout()
+
     const [processing, setProcessing] = useState(false)
 
     const { data: session, status } = useSession()
@@ -65,7 +67,8 @@ const CustomerInfo = () => {
 
     const formikRef = useRef<FormInputRef | null>(null);
 
-    const handleNextOnClik = () => {
+    const handleNextOnClick = () => {
+        if (!checkout.cart) return
         setProcessing(true)
         formikRef.current?.submitForm()
         setTimeout(() => {
@@ -74,7 +77,7 @@ const CustomerInfo = () => {
             }
         }, 100);
         setProcessing(false)
-        sendEvent('add_shipping_info')
+        trackCartEvent('add_shipping_info', checkout.cart)
     }
 
     return (
@@ -93,7 +96,7 @@ const CustomerInfo = () => {
                 <div className="bg-slate-200 rounded">
                     <CartSummary />
                 </div>
-                <button onClick={handleNextOnClik}
+                <button onClick={handleNextOnClick}
                     className="md:row-start-2 md:col-start-2 flex justify-center items-center px-4 py-2 w-full rounded border md:text-slate-100 text-lg font-semibold
                 bg-gradient-to-b from-siteColors-pink via-siteColors-purple to-siteColors-pink text-white
                 md:bg-gradient-to-br md:from-siteColors-lightblue md:to-siteColors-blue

@@ -51,6 +51,7 @@ async function getFilteredProducts(searchParams: ({ [key: string]: string | stri
     const filterAnd = []
     const filterOr = []
 
+    filterOr.push({ id: { eq: search } })
     filterOr.push({ name: { containsi: search } })
 
     if (filterBrandString.length > 0) {

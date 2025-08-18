@@ -7,146 +7,49 @@ import { forwardRef, useContext, useImperativeHandle } from "react"
 import { IProfile } from "@/app/checkout/customer-informations/page"
 import { useNoRevalideteQuery, useQuery } from "@/repositories/clientRepository"
 import { GET_COUNTRY_LIST, GET_COUNTRY_STATES, GET_REGION_POSTALS, GET_STATE_REGIONS } from "@/lib/queries/addressQuery"
-import { ShippingContext } from "@/context/shipping"
+import { useCheckout } from "@/context/checkout"
+import { ICountries, ICustomerInfo, IRegionPostals, IRegions, IStates } from "@/lib/interfaces/addresses"
 
 export type FormInputRef = {
     submitForm: () => void;
     isSubmitting: boolean
 };
 
-interface ICustomerInfo {
-    id: number | string
-    email: string;
-    firstname: string;
-    lastname: string;
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-    telephone: string;
-    mobilePhone: string;
-    afm: string;
-    doy: string;
-    companyName: string;
-    businessActivity: string;
-    isInvoice: boolean;
-    different_shipping: boolean;
-    ship_firstname: string;
-    ship_lastname: string;
-    ship_street: string;
-    ship_city: string;
-    ship_state: string;
-    ship_zipCode: string;
-    ship_country: string;
-    ship_telephone: string;
-    ship_mobilePhone: string;
-    deliveryNotes: string
-}
-
-interface ICountries {
-    countries: {
-        data: {
-            id: number | string
-            attributes: {
-                name: string
-            }
-        }[]
-    }
-}
-
-interface IStates {
-    countries: {
-        data: {
-            id: number | string
-            attributes: {
-                name: string
-                states: {
-                    data: {
-                        id: number | string
-                        attributes: {
-                            name: string
-                        }
-                    }[]
-                }
-            }
-        }[]
-    }
-}
-
-interface IRegions {
-    states: {
-        data: {
-            id: number | string
-            attributes: {
-                name: string
-                regions: {
-                    data: {
-                        id: number | string
-                        attributes: {
-                            name: string
-                        }
-                    }[]
-                }
-            }
-        }[]
-    }
-}
-
-interface IRegionPostals {
-    regions: {
-        data: {
-            id: number | string
-            attributes: {
-                name: string
-                postal_codes: {
-                    data: {
-                        id: number | string
-                        attributes: {
-                            postal: string
-                        }
-                    }[]
-                }
-            }
-        }[]
-    }
-}
-
 const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
 
-    const { saveAddresses, addresses } = useContext(ShippingContext)
+    const { checkout, dispatch } = useCheckout()
     const { data: countriesData, loading, error } = useNoRevalideteQuery({ query: GET_COUNTRY_LIST, jwt: '' })
 
     const countries = countriesData as ICountries
 
     let initialValues: ICustomerInfo = {
         id: props.user?.info.id || "",
-        email: props.user?.info.email || addresses.billing.email,
-        firstname: props.user?.billing_address?.firstname || addresses.billing.firstname,
-        lastname: props.user?.billing_address?.lastname || addresses.billing.lastname,
-        street: props.user?.billing_address?.street || addresses.billing.street,
-        city: props.user?.billing_address?.city || addresses.billing.city,
-        state: props.user?.billing_address?.state || addresses.billing.state,
-        zipCode: props.user?.billing_address?.zipCode || addresses.billing.zipCode,
-        country: props.user?.billing_address?.country || addresses.billing.country,
-        telephone: props.user?.billing_address?.telephone || addresses.billing.telephone,
-        mobilePhone: props.user?.billing_address?.mobilePhone || addresses.billing.mobilePhone,
-        afm: props.user?.billing_address?.afm || addresses.billing.afm,
-        doy: props.user?.billing_address?.doy || addresses.billing.doy,
-        companyName: props.user?.billing_address?.companyName || addresses.billing.companyName,
-        businessActivity: props.user?.billing_address?.businessActivity || addresses.billing.businessActivity,
-        isInvoice: addresses.billing.isInvoice,
-        deliveryNotes: addresses.deliveryNotes,
-        different_shipping: addresses.different_shipping || false,
-        ship_firstname: props.user?.shipping_address?.firstname || addresses.shipping.firstname,
-        ship_lastname: props.user?.shipping_address?.lastname || addresses.shipping.lastname,
-        ship_street: props.user?.shipping_address?.street || addresses.shipping.street,
-        ship_city: props.user?.shipping_address?.city || addresses.shipping.city,
-        ship_state: props.user?.shipping_address?.state || addresses.shipping.state,
-        ship_zipCode: props.user?.shipping_address?.zipCode || addresses.shipping.zipCode,
-        ship_country: props.user?.shipping_address?.country || addresses.shipping.country,
-        ship_telephone: props.user?.shipping_address?.telephone || addresses.shipping.telephone,
-        ship_mobilePhone: props.user?.shipping_address?.mobilePhone || addresses.shipping.mobilePhone,
+        email: props.user?.info.email || checkout.addresses.billing.email,
+        firstname: props.user?.billing_address?.firstname || checkout.addresses.billing.firstname,
+        lastname: props.user?.billing_address?.lastname || checkout.addresses.billing.lastname,
+        street: props.user?.billing_address?.street || checkout.addresses.billing.street,
+        city: props.user?.billing_address?.city || checkout.addresses.billing.city,
+        state: props.user?.billing_address?.state || checkout.addresses.billing.state,
+        zipCode: props.user?.billing_address?.zipCode || checkout.addresses.billing.zipCode,
+        country: props.user?.billing_address?.country || checkout.addresses.billing.country,
+        telephone: props.user?.billing_address?.telephone || checkout.addresses.billing.telephone,
+        mobilePhone: props.user?.billing_address?.mobilePhone || checkout.addresses.billing.mobilePhone,
+        afm: props.user?.billing_address?.afm || checkout.addresses.billing.afm,
+        doy: props.user?.billing_address?.doy || checkout.addresses.billing.doy,
+        companyName: props.user?.billing_address?.companyName || checkout.addresses.billing.companyName,
+        businessActivity: props.user?.billing_address?.businessActivity || checkout.addresses.billing.businessActivity,
+        isInvoice: checkout.addresses.billing.isInvoice,
+        deliveryNotes: checkout.addresses.deliveryNotes,
+        different_shipping: checkout.addresses.different_shipping || false,
+        ship_firstname: props.user?.shipping_address?.firstname || checkout.addresses.shipping.firstname,
+        ship_lastname: props.user?.shipping_address?.lastname || checkout.addresses.shipping.lastname,
+        ship_street: props.user?.shipping_address?.street || checkout.addresses.shipping.street,
+        ship_city: props.user?.shipping_address?.city || checkout.addresses.shipping.city,
+        ship_state: props.user?.shipping_address?.state || checkout.addresses.shipping.state,
+        ship_zipCode: props.user?.shipping_address?.zipCode || checkout.addresses.shipping.zipCode,
+        ship_country: props.user?.shipping_address?.country || checkout.addresses.shipping.country,
+        ship_telephone: props.user?.shipping_address?.telephone || checkout.addresses.shipping.telephone,
+        ship_mobilePhone: props.user?.shipping_address?.mobilePhone || checkout.addresses.shipping.mobilePhone,
     }
 
     const formik = useFormik({
@@ -159,7 +62,13 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
             city: Yup.string().required('*Yποχρεωτικό πεδίο!'),
             state: Yup.string().required('*Yποχρεωτικό πεδίο!'),
             zipCode: Yup.string().required('*Yποχρεωτικό πεδίο!'),
-            mobilePhone: Yup.string().required('*Yποχρεωτικό πεδίο!'),
+            telephone: Yup.string().notRequired()
+                .test(
+                    'is-ten-digits',
+                    'Το τηλέφωνο πρέπει να έχει 10 ψηφία',
+                    value => !value || /^\d{10}$/.test(value)
+                ),
+            mobilePhone: Yup.string().matches(/^\d{10}$/, 'Το τηλέφωνο πρέπει να έχει 10 ψηφία').required('*Yποχρεωτικό πεδίο!'),
             firstname: Yup.string().when("isInvoice", {
                 is: false,
                 then: (schema) => schema.required('*Τό Όνομα είναι υποχρεωτικό πεδίο!')
@@ -213,7 +122,13 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                 is: true,
                 then: (schema) => schema.required('*Yποχρεωτικό πεδίο!')
             }),
-            ship_mobilePhone: Yup.string().when("different_shipping", {
+            ship_telephone: Yup.string().notRequired()
+                .test(
+                    'is-ten-digits',
+                    'Το τηλέφωνο πρέπει να έχει 10 ψηφία',
+                    value => !value || /^\d{10}$/.test(value)
+                ),
+            ship_mobilePhone: Yup.string().matches(/^\d{10}$/, 'Το τηλέφωνο πρέπει να έχει 10 ψηφία').when("different_shipping", {
                 is: true,
                 then: (schema) => schema.required('*Yποχρεωτικό πεδίο!')
             }),
@@ -255,11 +170,9 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                     mobilePhone: values.ship_mobilePhone,
                 }
             }
-            // localStorage.setItem("addresses", JSON.stringify(addresses));
-            saveAddresses(addresses)
 
-            // cookies().set('addresses', JSON.stringify(addresses), { secure: true })
-            // signIn('Credentials',values)
+            dispatch({ type: "SAVE_ADDRESS", payload: addresses })
+            // saveAddresses(addresses)
         }
     });
 
@@ -290,15 +203,17 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
     const shipPostals = shipPostalData as IRegionPostals
 
     const onCheckNoteChange = () => {
-        const updateAddresses = { ...addresses, billing: { ...addresses.billing, isInvoice: !addresses.billing.isInvoice } }
-        saveAddresses(updateAddresses)
-        formik.values.isInvoice = !addresses.billing.isInvoice
+        const updateAddresses = { ...checkout.addresses, billing: { ...checkout.addresses.billing, isInvoice: !checkout.addresses.billing.isInvoice } }
+        // saveAddresses(updateAddresses)
+        dispatch({ type: "SAVE_ADDRESS", payload: updateAddresses })
+        formik.values.isInvoice = !checkout.addresses.billing.isInvoice
     }
 
     const ondifferentAddressChange = () => {
-        const updateAddresses = { ...addresses, different_shipping: !addresses.different_shipping }
-        saveAddresses(updateAddresses)
-        formik.values.different_shipping = !addresses.different_shipping
+        const updateAddresses = { ...checkout.addresses, different_shipping: !checkout.addresses.different_shipping }
+        // saveAddresses(updateAddresses)
+        dispatch({ type: "SAVE_ADDRESS", payload: updateAddresses })
+        formik.values.different_shipping = !checkout.addresses.different_shipping
     }
 
     return (
@@ -325,9 +240,9 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                     <li>
                         <h3 className='font-medium mt-8 mb-4 border-b text-siteColors-purple dark:text-slate-200'>Τύπος παραστατικού</h3>
                         <Radio name="checkNote" id="receipt" value="Απόδειξη"
-                            checked={!addresses.billing.isInvoice} onChange={onCheckNoteChange}></Radio>
-                        <Radio name="checkNote" id="invoice"value="Τιμολόγιο"
-                            checked={addresses.billing.isInvoice} onChange={onCheckNoteChange}></Radio>
+                            checked={!checkout.addresses.billing.isInvoice} onChange={onCheckNoteChange}></Radio>
+                        <Radio name="checkNote" id="invoice" value="Τιμολόγιο"
+                            checked={checkout.addresses.billing.isInvoice} onChange={onCheckNoteChange}></Radio>
                     </li>
                     <li>
                         <h3 className='font-medium mt-8 mb-6 border-b text-siteColors-purple dark:text-slate-200'>Διεύθυνση</h3>
@@ -465,10 +380,13 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                             onChange={(e) => {
                                                 formik.handleChange(e)
                                                 formik.setFieldValue('state', "")
-                                                saveAddresses({ ...addresses, billing: { ...addresses.billing, country: e.target.value, state: '' } })
+                                                const updateAddresses = { ...checkout.addresses, billing: { ...checkout.addresses.billing, country: e.target.value, state: '' } }
+                                                dispatch({ type: "SAVE_ADDRESS", payload: updateAddresses })
+                                                // saveAddresses({ ...addresses, billing: { ...addresses.billing, country: e.target.value, state: '' } })
                                             }}
                                             onBlur={formik.handleBlur}
                                             value={formik.values.country}>
+                                            <option value="">--Επέλεξε Χώρα--</option>
                                             {
                                                 countries.countries.data.map(x => (
                                                     <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>
@@ -492,13 +410,14 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                             onChange={(e) => {
                                                 formik.handleChange(e)
                                                 formik.setFieldValue('city', "")
-                                                saveAddresses({ ...addresses, billing: { ...addresses.billing, state: e.target.value, city: '' } })
+                                                dispatch({ type: "SAVE_ADDRESS", payload: { ...checkout.addresses, billing: { ...checkout.addresses.billing, state: e.target.value, city: '' } } })
                                             }}
                                             onBlur={formik.handleBlur}
                                             value={formik.values.state}>
                                             <option value="">--Επέλεξε Νομό--</option>
-                                            {!loadingState && states.countries.data[0].attributes.states.data.map(x => (
-                                                <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>))
+                                            {!loadingState && states.countries.data.length > 0 &&
+                                                states.countries.data[0].attributes.states.data.map(x => (
+                                                    <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>))
                                             }
                                         </select>
                                     </div>
@@ -520,7 +439,7 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                             onChange={(e) => {
                                                 formik.handleChange(e)
                                                 formik.setFieldValue('zipCode', "")
-                                                saveAddresses({ ...addresses, billing: { ...addresses.billing, city: e.target.value, zipCode: '' } })
+                                                dispatch({ type: "SAVE_ADDRESS", payload: { ...checkout.addresses, billing: { ...checkout.addresses.billing, city: e.target.value, zipCode: '' } } })
                                             }}
                                             onBlur={formik.handleBlur}
                                             value={formik.values.city}>
@@ -609,7 +528,7 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                     </li>
                     <li>
                         <div className='flex my-4'>
-                            <input type='checkbox' id='different_shipping' name='different_shipping' checked={addresses.different_shipping} onChange={() => ondifferentAddressChange()} />
+                            <input type='checkbox' id='different_shipping' name='different_shipping' checked={checkout.addresses.different_shipping} onChange={() => ondifferentAddressChange()} />
                             <label htmlFor='different_shipping' className="text-sm text-siteColors-purple dark:text-slate-200 ml-1">Θέλω να παραλάβω σε άλλη διεύθυνση.</label>
                         </div>
                         {formik.values.different_shipping && <>
@@ -679,7 +598,7 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                                 onChange={(e) => {
                                                     formik.handleChange(e)
                                                     formik.setFieldValue('ship_state', "")
-                                                    saveAddresses({ ...addresses, shipping: { ...addresses.shipping, country: e.target.value, state: '' } })
+                                                    dispatch({ type: "SAVE_ADDRESS", payload: { ...checkout.addresses, shipping: { ...checkout.addresses.shipping, country: e.target.value, state: '' } } })
                                                 }}
                                                 onBlur={formik.handleBlur}
                                                 value={formik.values.ship_country}>
@@ -706,12 +625,12 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                                 onChange={(e) => {
                                                     formik.handleChange(e)
                                                     formik.setFieldValue('ship_city', "")
-                                                    saveAddresses({ ...addresses, shipping: { ...addresses.shipping, state: e.target.value, city: '' } })
+                                                    dispatch({ type: "SAVE_ADDRESS", payload: { ...checkout.addresses, shipping: { ...checkout.addresses.shipping, state: e.target.value, city: '' } } })
                                                 }}
                                                 onBlur={formik.handleBlur}
                                                 value={formik.values.ship_state}>
                                                 <option value="">--Επέλεξε Νομό--</option>
-                                                {!loadingShipState && shipStates.countries.data[0].attributes.states.data.map(x => (
+                                                {!loadingShipState && shipStates.countries.data.length > 0 && shipStates.countries.data[0].attributes.states.data.map(x => (
                                                     <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>))
                                                 }
                                             </select>
@@ -734,7 +653,7 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                                 onChange={(e) => {
                                                     formik.handleChange(e)
                                                     formik.setFieldValue('ship_zipCode', "")
-                                                    saveAddresses({ ...addresses, shipping: { ...addresses.shipping, city: e.target.value, zipCode: '' } })
+                                                    dispatch({ type: "SAVE_ADDRESS", payload: { ...checkout.addresses, shipping: { ...checkout.addresses.shipping, city: e.target.value, zipCode: '' } } })
                                                 }}
                                                 onBlur={formik.handleBlur}
                                                 value={formik.values.ship_city}>
@@ -816,6 +735,6 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
     )
 })
 
-Addresses.displayName='Addresses'
+Addresses.displayName = 'Addresses'
 
 export default Addresses

@@ -58,15 +58,18 @@ query getCategoryProducts($filters:ProductFiltersInput!,$pagination:PaginationAr
             }
             category {
               data {
+                id
                 attributes {
                   name
                   parents {
                     data {
+                      id
                       attributes {
                         name
                         slug                    
                         parents {
                           data {
+                            id
                             attributes {
                               name
                               slug

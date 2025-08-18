@@ -1,7 +1,7 @@
 import CategoryPageTemplate from "@/components/templates/categoryPage";
 import { createFiltersForDbQuery } from "@/lib/helpers/helpers";
 import { IcategoriesMappingProps, IcategoryMetadataProps, IcategoryProductsProps } from "@/lib/interfaces/category";
-import { GET_CATEGORIES_MAPPING,  GET_CATEGORY_METADATA } from "@/lib/queries/categoryQuery";
+import { GET_CATEGORIES_MAPPING, GET_CATEGORY_METADATA } from "@/lib/queries/categoryQuery";
 import { GET_CATEGORY_PRODUCTS } from "@/lib/queries/productQuery";
 import { requestSSR } from "@/repositories/repository";
 import { Metadata, ResolvingMetadata } from 'next'
@@ -92,8 +92,8 @@ export async function generateMetadata(
         alternates: {
             canonical: `${process.env.NEXT_URL}/category${params.category1}${searchParams.page ? `?page=${searchParams.page}` : ""}`,
         },
-        
-        
+
+
     }
 
     if (response.categories.data[0].attributes.image.data) {

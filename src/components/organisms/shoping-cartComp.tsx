@@ -1,21 +1,24 @@
 "use client"
 
 import CartSummary from "@/components/atoms/cartSummary"
-import ApplyCoupon from "@/components/atoms/discountCoupon"
 import Breadcrumb from "@/components/molecules/breadcrumb"
 import SiteFeatures from "@/components/organisms/siteFeatures"
-import { CartContext, createCategories, ICartItem } from "@/context/cart"
 import useProductPrice from "@/hooks/useProductPrice"
 import { getStrapiMedia } from "@/repositories/medias"
 import Image from "next/image"
 import Link from "next/link"
-import { useContext, useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import { FaRegTrashCan } from "react-icons/fa6";
 import { useSession } from "next-auth/react"
+import { ICartItem } from "@/lib/interfaces/cart"
+import { trackCartEvent } from "@/lib/helpers/analytics"
+import { useCheckout } from "@/context/checkout"
+import { addToCartToast, removeItemToast } from "@/lib/toasts/cartToasts"
 
 export default function CartComp() {
     const hasPageBeenRendered = useRef(false)
-    const { cartItems, cartTotal, sendEvent } = useContext(CartContext)
+
+    const { checkout } = useCheckout()
     const { data: session, status } = useSession()
     const breadcrumbs = [
         {
@@ -29,9 +32,10 @@ export default function CartComp() {
     ]
 
     useEffect(() => {
-        if (cartItems.length > 0 && cartTotal > 0 && !hasPageBeenRendered.current) {
-            sendEvent('add_to_cart')
-            hasPageBeenRendered.current=(true)
+        if (!checkout.cart) return
+        if (checkout.cart.length > 0 && checkout.totals.subtotal > 0 && !hasPageBeenRendered.current) {
+            trackCartEvent('view_cart', checkout.cart)
+            hasPageBeenRendered.current = (true)
         }
     }, [])
 
@@ -42,19 +46,19 @@ export default function CartComp() {
             <h1 className="text-xl sm:text-3xl my-4 lg:my-8 text-center font-bold text-slate-700 dark:text-slate-200">Καλάθι αγορών</h1>
             <div className="grid lg:grid-cols-4 gap-4">
                 <div className="lg:col-span-3">
-                    {cartItems.map(item => (
+                    {checkout.cart.length > 0 ? checkout.cart.map(item => (
                         <CartItemTemplate key={item.id} item={item} />)
-                    )}
+                    ) :
+                        <h2 className="text-lg font-semibold text-center">Το καλάθι είναι άδειο!</h2>}
                 </div>
                 <div>
                     <div className="flex flex-col space-y-2 border rounded">
-                        {/* <ApplyCoupon /> */}
                         <CartSummary />
-                        <Link onClick={()=>sendEvent('begin_checkout')} href={`${status === "authenticated" ? "/checkout/customer-informations" : "/login?callbackUrl=/checkout/customer-informations"}`}
+                        {checkout.cart.length > 0 && <Link onClick={() => { trackCartEvent('begin_checkout', checkout.cart) }} href={`${status === "authenticated" ? "/checkout/customer-informations" : "/login?callbackUrl=/checkout/customer-informations"}`}
                             className="flex justify-center items-center px-4 py-2 w-full rounded border md:text-slate-100 text-lg font-semibold
                         bg-gradient-to-b from-siteColors-pink via-siteColors-purple to-siteColors-pink text-white
                         md:bg-gradient-to-br md:from-siteColors-lightblue md:to-siteColors-blue
-                        hover:bg-gradient-to-b hover:from-siteColors-pink hover:via-siteColors-purple hover:to-siteColors-pink hover:text-white">Επόμενο</Link>
+                        hover:bg-gradient-to-b hover:from-siteColors-pink hover:via-siteColors-purple hover:to-siteColors-pink hover:text-white">Επόμενο</Link>}
                     </div>
                 </div>
             </div>
@@ -63,10 +67,27 @@ export default function CartComp() {
 }
 
 const CartItemTemplate = ({ item }: { item: ICartItem }) => {
-    const { increaseQuantity, decreaseQuantity, removeFromCart } = useContext(CartContext)
+    const { dispatch } = useCheckout()
     const { profit, discount, isSale, isLoading, error, data } = useProductPrice(item.id)
 
     const redAlert = item.isAvailable
+
+    const handleRemoveItem = (item: ICartItem) => {
+        dispatch({ type: "REMOVE_ITEM", payload: item })
+        removeItemToast(item)
+    }
+
+    const handleIncreaseItemQuantity = (item: ICartItem) => {
+        dispatch({ type: "INCREASE_ITEM_QUANTITY", payload: { item: item, quantity: 1 } })
+        addToCartToast(item)
+    }
+
+    const handledecreaseItemQuantity = (item: ICartItem) => {
+        dispatch({ type: "DECREASE_ITEM_QUANTITY", payload: { item: item, quantity: 1 } })
+        removeItemToast(item)
+    }
+
+
     return (
         <div className="grid gap-y-4 gap-x-2 grid-cols-2 xs:grid-cols-9 lg:grid-cols-12 mb-4 p-2 border rounded">
             <div className="col-span-2 lg:col-span-1">
@@ -78,8 +99,8 @@ const CartItemTemplate = ({ item }: { item: ICartItem }) => {
                             // height={100}
                             // width={100}
                             fill
-                            src={getStrapiMedia(item.image.data.attributes.formats?
-                                item.image.data.attributes.formats.thumbnail.url:
+                            src={getStrapiMedia(item.image.data.attributes.formats ?
+                                item.image.data.attributes.formats.thumbnail.url :
                                 item.image.data.attributes.url)}
                             alt={item.name}
                             quality={75}
@@ -95,7 +116,7 @@ const CartItemTemplate = ({ item }: { item: ICartItem }) => {
                 }
             </div>
             <button
-                onClick={() => removeFromCart(item)}
+                onClick={() => handleRemoveItem(item)}
                 className="flex row-start-5 xs:row-start-1 xs:col-start-9 lg:col-start-12 col-span-2 lg:col-span-1 xs:col-span-1 border xs:border-none p-2 border-red-500 items-start lg:items-center justify-center">
                 <FaRegTrashCan className="text-3xl text-red-500 dark:text-red-400" />
             </button>
@@ -114,7 +135,7 @@ const CartItemTemplate = ({ item }: { item: ICartItem }) => {
             {/* <div className=" xs:col-span-3 lg:col-span-2 flex items-center justify-center text-gray-500 font-semibold">{data?.product.data.attributes.price} €</div> */}
             <div className=" xs:col-span-3 lg:col-span-2  flex items-center justify-center xs:justify-end">
                 <button type="button" id="decrement-button"
-                    onClick={() => decreaseQuantity(item)}
+                    onClick={() => handledecreaseItemQuantity(item)}
                     className="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-3 h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none">
                     <svg className="w-3 h-3 text-gray-900 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
                         <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1h16" />
@@ -123,7 +144,7 @@ const CartItemTemplate = ({ item }: { item: ICartItem }) => {
                 <input type="text" id="items-input" aria-describedby="items count"
                     className="bg-gray-50 border-x-0 border-gray-300 h-11 font-medium text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={item.quantity} required disabled></input>
                 <button type="button" id="increment-button"
-                    onClick={() => increaseQuantity(item)}
+                    onClick={() => handleIncreaseItemQuantity(item)}
                     className="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-3 h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none">
                     <svg className="w-3 h-3 text-gray-900 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
                         <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16M1 9h16" />
@@ -135,6 +156,6 @@ const CartItemTemplate = ({ item }: { item: ICartItem }) => {
                     data?.product.data.attributes.sale_price && (item.quantity * data?.product.data.attributes.sale_price).toFixed(2) :
                     data?.product.data.attributes.price && (item.quantity * data?.product.data.attributes.price).toFixed(2)} €</div>
 
-        </div>
+        </div >
     )
 }

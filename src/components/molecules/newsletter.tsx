@@ -4,8 +4,12 @@ import { useFormik } from "formik";
 import * as Yup from 'yup';
 import CustomInput from "../atoms/input";
 import { toast } from "sonner";
+import { useState } from "react";
 
 const Newsletter = () => {
+
+    const [isSubmiting, setIsSubmiting] = useState(false)
+
     const POST_EMAIL = `
     mutation createNewsletter($email:String!,$publishedAt:DateTime){
         createNewsletter(data:{email:$email,publishedAt:$publishedAt}){
@@ -31,6 +35,7 @@ const Newsletter = () => {
         }),
         onSubmit: async (values, { setErrors }) => {
             try {
+                setIsSubmiting(true)
                 let date = new Date()
 
                 const myHeaders = new Headers();
@@ -41,16 +46,13 @@ const Newsletter = () => {
                     method: "POST",
                     headers: myHeaders,
                     body: JSON.stringify({
-                        data: {
-                            email: values.email,
-                            publishedAt: date
-                        }
+                        email: values.email
                     })
                     // mode: "cors",
                     // cache: "default",
                 };
 
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/newsletters`,
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/newsletter/subscribe`,
                     myInit,
                 )
 
@@ -84,6 +86,7 @@ const Newsletter = () => {
 
 
             values.email = ''
+            setIsSubmiting(false)
         }
     });
 
@@ -110,7 +113,7 @@ const Newsletter = () => {
                                 value={formik.values.email}
                                 label="Email" />
                         </div>
-                        <button type="submit" className="mt-2 text-white text-lg rounded-lg md:rounded-none md:rounded-r-lg bg-siteColors-blue"
+                        <button type="submit" disabled={isSubmiting} className="mt-2 text-white text-lg rounded-lg md:rounded-none md:rounded-r-lg bg-siteColors-blue"
                             aria-label="Κουμπί εγγραφής">Εγγραφή</button>
                     </div>
                     {formik.touched.email && formik.errors.email && formik.values.email !== "" ?

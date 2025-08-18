@@ -12,6 +12,8 @@ query getShippingMethods{
             id
             attributes{
               name
+              description
+              method
               price
               range{
                 minimum
@@ -31,36 +33,36 @@ query getShippingMethods{
   }
 }`
 
-export const GET_PAYMENT_METHODS = gql`
-query getPaymentMethods{
-    payments(filters:{isActive:{eq:true}}){
-    data{
-      id
-      attributes{
-        name
-        price
-        icon{
-          data{
-            attributes{
-              name
-              alternativeText
-              formats
-            }
-          }
-        }
-        range{
-          minimum
-          maximum
-        }
-        installments {
-          max_installments
-          free_rate_months
-          annual_rate
-        }
-      }
-    }
-  }
-}`
+// export const GET_PAYMENT_METHODS = gql`
+// query getPaymentMethods{
+//     payments(filters:{isActive:{eq:true}}){
+//     data{
+//       id
+//       attributes{
+//         name
+//         price
+//         icon{
+//           data{
+//             attributes{
+//               name
+//               alternativeText
+//               formats
+//             }
+//           }
+//         }
+//         range{
+//           minimum
+//           maximum
+//         }
+//         installments {
+//           max_installments
+//           free_rate_months
+//           annual_rate
+//         }
+//       }
+//     }
+//   }
+// }`
 
 export const GET_ORDER = gql`
 query getOrder($id:ID!){

@@ -1,16 +1,17 @@
 "use client"
 
-import { CartContext, ICartItem } from "@/context/cart"
+// import { useCart } from "@/context/cart"
 import useProductPrice from "@/hooks/useProductPrice"
 import { getStrapiMedia } from "@/repositories/medias"
+import { ICartItem } from "@/lib/interfaces/cart"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
-import { useContext } from "react"
+import { useCheckout } from "@/context/checkout"
 
 const CartItem = ({ item }: { item: ICartItem }) => {
     const { profit, discount, isSale, salePrice, isLoading, error, data } = useProductPrice(item.id)
-    
+
     const redAlert = item.isAvailable
     return (
         <div className="grid gap-y-4 space-x-4 grid-cols-6 mb-4 py-2 border-t last:border-b">
@@ -80,13 +81,13 @@ const CartItem = ({ item }: { item: ICartItem }) => {
 }
 
 export default function CartAside() {
-    const { cartItems } = useContext(CartContext)
-    const { data: session, status } = useSession()
+    // const { cart } = useCart()
+    const { checkout } = useCheckout()
 
     return (
         <div>
             <h2 className="text-lg mb-2 font-medium text-siteColors-purple  dark:text-slate-200">Η παραγγελία μου</h2>
-            {cartItems.map(item => (
+            {checkout.cart.map(item => (
                 <CartItem key={item.id} item={item} />)
             )}
         </div>

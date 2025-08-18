@@ -9,8 +9,9 @@ import Minicart from "./minicart";
 import { ToggleMobileMenu } from "../atoms/toggleMobileMenu";
 import Link from "next/link";
 import { FaOpencart } from "react-icons/fa";
-import { CartContext } from "@/context/cart";
+// import { useCart } from "@/context/cart";
 import { MenuContext } from "@/context/menu";
+import { useCheckout } from "@/context/checkout";
 // import { ToggleMobileMenu } from './toggleMobileMenu'
 
 const SearchInput = dynamic(() => import('@/components/molecules/searchInput'), {
@@ -20,7 +21,8 @@ const SearchInput = dynamic(() => import('@/components/molecules/searchInput'), 
 
 export default function Header({ user }: { user: any }) {
     const [openMenu, setOpenMenu] = useState(false)
-    const { cartItems } = useContext(CartContext)
+    // const { cart, dispatch } = useCart();
+    const { checkout, dispatch } = useCheckout()
     const { isMenuOpen, isSearchOpen, toggleSearchDrawer, toggleMenuDrawer, closeMenu } = useContext(MenuContext)
 
     return (
@@ -40,7 +42,7 @@ export default function Header({ user }: { user: any }) {
                             <FaOpencart className="text-2xl" aria-label="Κουμπί ανακατεύθυνσης στο καλάθι σας" />
                         </Link>
                         <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-siteColors-pink border-2 border-white rounded-full top-1 right-1 dark:border-gray-900">
-                            {cartItems.reduce((previousValue, currentValue, currentIndex) => { return previousValue + currentValue.quantity }, 0)}
+                            {checkout.cart.reduce((previousValue, currentValue, currentIndex) => { return previousValue + currentValue.quantity }, 0)}
                         </div>
                     </div>
                 </div>

@@ -1,30 +1,34 @@
 "use client"
-import { CartContext, ICartItem } from "@/context/cart"
-import { useContext } from "react"
+// import { useCart } from "@/context/cart"
 import { FaHeart, FaOpencart, FaRegEye } from "react-icons/fa"
 import { ProductCardProps } from "../organisms/productCard"
+import { ICartItem } from "@/lib/interfaces/cart"
+import { useCheckout } from "@/context/checkout"
+import { addToCartToast } from "@/lib/toasts/cartToasts"
 
 
 function ProductCardFoot({ product }: ProductCardProps) {
-    const { cartItems, addToCart } = useContext(CartContext)
+    // const { cart, dispatch } = useCart()
+    const { dispatch } = useCheckout()
 
     const item: ICartItem = {
         id: product.id,
         name: product.attributes.name,
         slug: product.attributes.slug,
-        image: product.attributes.image|| null,
+        image: product.attributes.image || null,
         weight: product.attributes.weight,
         price: product.attributes.price,
         brand: product.attributes.brand.data?.attributes.name || null,
         quantity: 1,
         isAvailable: true,
-        is_sale:product.attributes.is_sale,
-        sale_price:product.attributes.sale_price,
-        category:product.attributes.category
+        is_sale: product.attributes.is_sale,
+        sale_price: product.attributes.sale_price,
+        category: product.attributes.category
     }
 
     const handleAddProductClick = (product: ICartItem) => {
-        addToCart(product)
+        dispatch({ type: "ADD_ITEM", payload: product })
+        addToCartToast(product)
     }
 
     return (

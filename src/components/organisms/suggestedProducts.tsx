@@ -13,7 +13,7 @@ const SuggestedProducts = async ({ product }: { product: IProduct }) => {
 
     const categoryFilters = product.attributes.category.data.attributes.filters.map(x => x.name)
     const attributesFilter = product.attributes.prod_chars.filter(x => categoryFilters.includes(x.name))
-    let minSupplierPrice = product.attributes.supplierInfo?.reduce((prev, current) => {
+    let minSupplierPrice = product.attributes.supplierInfo.length > 0 && product.attributes.supplierInfo?.reduce((prev, current) => {
         return (prev.wholesale < current.wholesale || !current.in_stock) ? prev : current
     })
 
@@ -22,7 +22,7 @@ const SuggestedProducts = async ({ product }: { product: IProduct }) => {
         category: product.attributes.category.data.attributes.slug,
         price: product.attributes.price,
         salePrice: product.attributes.sale_price,
-        wholesale: minSupplierPrice.wholesale,
+        wholesale: minSupplierPrice ? minSupplierPrice.wholesale : null,
         brand: product.attributes.brand.data?.attributes.name
     }
 

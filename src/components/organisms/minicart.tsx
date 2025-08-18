@@ -1,15 +1,15 @@
 "use client"
 
 import Link from "next/link"
-import { useContext } from "react"
-import { CartContext, ICartItem } from "@/context/cart"
+// import { useCart } from "@/context/cart"
 import Image from "next/image"
 import { getStrapiMedia } from "@/repositories/medias"
 import ProductCardPrice from "../atoms/productCardPrice"
 import { FaRegImage } from "react-icons/fa6"
+import { useCheckout } from "@/context/checkout"
 
 export default function Minicart() {
-    const { cartItems } = useContext(CartContext)
+    const { checkout } = useCheckout()
     return (
         <section className="w-96 z-20 bg-slate-50 rounded-lg p-4">
             <button type="button" data-drawer-hide="drawer-right-example" aria-controls="drawer-right-example"
@@ -21,7 +21,7 @@ export default function Minicart() {
             </button>
             <h2 className="text-lg space-y-2 font-semibold text-siteColors-purple">Το καλάθι σας</h2>
             <div>
-                {cartItems.map(item => (
+                {checkout.cart?.map(item => (
                     <div key={item.id} className="grid grid-cols-6 gap-2">
                         {/* <div >{item.quantity}</div> */}
                         <div className="">

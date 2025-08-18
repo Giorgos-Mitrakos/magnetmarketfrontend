@@ -82,6 +82,7 @@ export interface IProductAttr {
 export interface IProductCategory {
     category: {
         data: {
+            id: number
             attributes: {
                 name: string
                 slug: string
@@ -90,11 +91,13 @@ export interface IProductCategory {
                 }[]
                 parents: {
                     data: {
+                        id: number
                         attributes: {
                             name: string
                             slug: string
                             parents: {
                                 data: {
+                                    id: number
                                     attributes: {
                                         name: string
                                         slug: string
@@ -121,19 +124,19 @@ export interface IProducts {
 }
 
 export interface IProductPriceProps {
-  product: {
-    data: {
-      attributes: {
-        price: number
-        sale_price: number
-        is_hot: boolean
-        is_sale: boolean
-        status: string
-        is_in_house:boolean
-        inventory:number
-      }
+    product: {
+        data: {
+            attributes: {
+                price: number
+                sale_price: number
+                is_hot: boolean
+                is_sale: boolean
+                status: string
+                is_in_house: boolean
+                inventory: number
+            }
+        }
     }
-  }
 }
 
 

@@ -169,6 +169,8 @@ export default async function Success() {
                     <div className="flex space-x-4">
                         <h3>Τρόπος Πληρωμής:</h3>
                         <p>{data.order.data.attributes.payment.name}</p>
+                        {data.order.data.attributes.installments > 1 &&
+                            <p>Αριθμός δόσεων: {data.order.data.attributes.installments}</p>}
                     </div>
                     <div className="flex space-x-4">
                         <h3>Τρόπος Αποστολής:</h3>
