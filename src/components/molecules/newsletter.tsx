@@ -5,23 +5,12 @@ import * as Yup from 'yup';
 import CustomInput from "../atoms/input";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const Newsletter = () => {
 
+    const router = useRouter();
     const [isSubmiting, setIsSubmiting] = useState(false)
-
-    const POST_EMAIL = `
-    mutation createNewsletter($email:String!,$publishedAt:DateTime){
-        createNewsletter(data:{email:$email,publishedAt:$publishedAt}){
-          data{
-            attributes{
-              email
-              publishedAt
-            }
-          }
-        }
-      }
-    `
 
     const initialValues = {
         email: "",
@@ -36,40 +25,45 @@ const Newsletter = () => {
         onSubmit: async (values, { setErrors }) => {
             try {
                 setIsSubmiting(true)
-                let date = new Date()
 
-                const myHeaders = new Headers();
-
-                myHeaders.append('Content-Type', 'application/json')
-
-                const myInit = {
-                    method: "POST",
-                    headers: myHeaders,
+                const response =await fetch('/api/newsletter/subscribe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                     body: JSON.stringify({
                         email: values.email
-                    })
-                    // mode: "cors",
-                    // cache: "default",
-                };
+                    }),
+                });                
 
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/newsletter/subscribe`,
-                    myInit,
-                )
+                const data = await response.json()
 
-                const { data, error } = await response.json()
-                if (data) {
-                    toast.success(
-                        <p className='font-semibold'>Η εγγραφή σας έγινε με επιτυχία!</p>, {
-                        position: 'top-right',
-                    })
-                }
-                else {
-                    if (error.message === "This attribute must be unique") {
-                        toast.info(<p className='font-semibold'>Το email σας είναι ήδη καταχωρημένο!</p>, {
-                            position: 'top-right',
-                        })
-                    }
-                }
+                switch (data.message) {
+                                case "suceess subscribe":
+                                    toast.success(
+                                        <p className='font-semibold'>Η εγγραφή σας έγινε με επιτυχία!</p>, {
+                                        position: 'top-right',
+                                    })
+                                    // router.push('/newsletter/subscribe/success');
+                                    break;
+                
+                                case "suceess activate":
+                                    toast.info(<p className='font-semibold'>Η αποστολή newsletter ενεργοποιήθηκε!</p>, {
+                                        position: 'top-right',
+                                    })
+                                    // router.push('/newsletter/subscribe/success?message=Η εγγραφή στο newsletter ενεργοποιήθηκε ξανά!');
+                                    break;
+                
+                                case "This attribute must be unique":
+                                    // toast.info(<p className='font-semibold'>Έχετε κάνει ήδη εγγραφή στο newsletter μας!</p>, {
+                                    //     position: 'top-right',
+                                    // })
+                                    router.push('/newsletter/subscribe/error?message=Έχετε κάνει ήδη εγγραφή στο newsletter μας!');
+                                    break;
+                
+                                default:
+                                    break;
+                            }
             }
             catch (err: any) {
                 const errors: { [key: string]: string } = {}
