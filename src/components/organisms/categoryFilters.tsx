@@ -51,35 +51,66 @@ interface metaProps {
 }
 
 const CategoryFilters = (props: CategoryFiltersProps) => {
-
-    const searchParamsArray = Object.keys(props.searchParams).map((key) => (
-        {
-            name: key,
-            value: props.searchParams[key],
-        }));
+    const searchParamsArray = Object.keys(props.searchParams).map((key) => ({
+        name: key,
+        value: props.searchParams[key],
+    }));
 
     const category = props.category3 ? props.category3 : props.category2 ? props.category2 : props.category1
     const level = props.category3 ? 3 : props.category2 ? 2 : 1
 
     const { data: brands, loading: loadingBrands, error: errorBrands }: { data: any, loading: boolean, error: any } = useApiRequest({
-        method: 'POST', api: "/api/category/brandFilter",
-        variables: ({ name: category, level: level, searchParams: searchParamsArray }), jwt: ""
+        method: 'POST', 
+        api: "/api/category/brandFilter",
+        variables: { name: category, level: level, searchParams: searchParamsArray }, 
+        jwt: ""
     })
 
     const { data: filters, loading: loadingFilters, error: errorFilters }: {
         data: FilterProps[], loading: boolean, error: any
-    } = useApiRequest({ method: 'POST', api: "/api/category/categoryFilter", variables: ({ name: category, level: level, searchParams: searchParamsArray }), jwt: "" })
+    } = useApiRequest({ 
+        method: 'POST', 
+        api: "/api/category/categoryFilter", 
+        variables: { name: category, level: level, searchParams: searchParamsArray }, 
+        jwt: "" 
+    })
 
     return (
-        <div className='mt-4 space-y-4'>
-            {loadingBrands && !brands ? <div>Loading</div> :
-                <ProductFilter title="Εταιρίες" filterBy="brands" filters={brands} />}
-            {loadingFilters && !filters ? <div>Loading</div> :
+        <div className="mt-6 space-y-6">
+            {loadingBrands && !brands ? (
+                <div className="flex items-center justify-center py-4">
+                    <div className="animate-pulse flex space-x-2">
+                        <div className="h-2 w-2 bg-gray-300 rounded-full"></div>
+                        <div className="h-2 w-2 bg-gray-300 rounded-full"></div>
+                        <div className="h-2 w-2 bg-gray-300 rounded-full"></div>
+                    </div>
+                </div>
+            ) : (
+                <ProductFilter 
+                    title="Εταιρείες" 
+                    filterBy="brands" 
+                    filters={brands} 
+                />
+            )}
+            
+            {loadingFilters && !filters ? (
+                <div className="flex items-center justify-center py-4">
+                    <div className="animate-pulse flex space-x-2">
+                        <div className="h-2 w-2 bg-gray-300 rounded-full"></div>
+                        <div className="h-2 w-2 bg-gray-300 rounded-full"></div>
+                        <div className="h-2 w-2 bg-gray-300 rounded-full"></div>
+                    </div>
+                </div>
+            ) : (
                 filters && filters.map(filter => (
-                    <ProductFilter key={filter.title} title={filter.title} filterBy={filter.title} filters={filter.filterValues} />
+                    <ProductFilter 
+                        key={filter.title} 
+                        title={filter.title} 
+                        filterBy={filter.title} 
+                        filters={filter.filterValues} 
+                    />
                 ))
-
-            }
+            )}
         </div>
     )
 }

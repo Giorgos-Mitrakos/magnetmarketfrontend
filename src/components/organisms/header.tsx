@@ -2,7 +2,7 @@
 import HeaderActions from "../molecules/headerActions";
 import Logo from "../atoms/logo";
 import { useContext, useState } from "react";
-import { FaBarsStaggered } from "react-icons/fa6";
+import { FaAngleDown, FaBarsStaggered } from "react-icons/fa6";
 import MainMenu from "./mainMenu";
 import dynamic from "next/dynamic";
 import Minicart from "./minicart";
@@ -53,16 +53,29 @@ export default function Header({ user }: { user: any }) {
             </header>
             <div className="flex content-start">
                 <div className='hidden my-4 lg:flex relative w-full'>
+                    {/* Container που περιέχει ΚΑΙ το κουμπί ΚΑΙ το menu */}
                     <div
-                        className="flex max-w-fit items-center z-50 mb-2 ml-8 border-siteColors-lightblue text-lg cursor-pointer relative"
+                        className="relative"
                         onMouseEnter={() => setOpenMenu(true)}
                         onMouseLeave={() => setOpenMenu(false)}
                     >
-                        <FaBarsStaggered aria-label="Κουμπί ανοιγματος κυρίως μενού!" className='mr-2' />
-                        <span className='font-bold'>ΠΡΟΙΟΝΤΑ</span>
+                        {/* Κουμπί Κατηγοριών */}
+                        <div className="flex items-center z-50 ml-8 px-4 py-3 rounded-lg text-lg cursor-pointer transition-all duration-300 group bg-white dark:bg-slate-800 hover:bg-siteColors-lightblue/10 dark:hover:bg-siteColors-lightblue/20">
+                            <FaBarsStaggered
+                                aria-label="Κουμπί ανοιγματος κυρίως μενού!"
+                                className='mr-3 text-siteColors-blue dark:text-white transition-colors duration-300 group-hover:text-siteColors-lightblue dark:group-hover:text-siteColors-lightblue'
+                            />
+                            <span className='font-bold text-siteColors-blue dark:text-white transition-colors duration-300 group-hover:text-siteColors-lightblue dark:group-hover:text-siteColors-lightblue'>
+                                ΚΑΤΗΓΟΡΙΕΣ
+                            </span>
 
-                        {/* Αυτό είναι το σημαντικό μέρος - τοποθέτηση του MainMenu */}
-                        <div className="absolute top-full left-0">
+                            <div className={`ml-2 transform transition-transform duration-300 ${openMenu ? 'rotate-180' : 'rotate-0'}`}>
+                                <FaAngleDown className="text-siteColors-blue dark:text-white group-hover:text-siteColors-lightblue dark:group-hover:text-siteColors-lightblue transition-colors" />
+                            </div>
+                        </div>
+
+                        {/* MegaMenu - απόλυτη θέση κάτω από το κουμπί */}
+                        <div className="absolute top-full left-0 z-50">
                             <MainMenu isMenuOpen={openMenu} />
                         </div>
                     </div>

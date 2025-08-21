@@ -3,75 +3,30 @@ import { IMenuProps } from "@/lib/interfaces/category";
 import { GET_MENU } from "@/lib/queries/categoryQuery";
 import { useNoRevalideteQuery } from "@/repositories/clientRepository";
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { FaAngleRight, FaAngleDown } from "react-icons/fa6";
 
 const MainMenu = ({ isMenuOpen }: { isMenuOpen: boolean }) => {
     const [activeCategory, setActiveCategory] = useState("");
-    const [isVisible, setIsVisible] = useState(false);
-    const [isAnimating, setIsAnimating] = useState(false);
-    const menuRef = useRef<HTMLDivElement>(null);
-
     const { data: menuData, loading, error } = useNoRevalideteQuery({ query: GET_MENU, jwt: '' })
-
     const menu = menuData as IMenuProps
 
-    // Handle animations for smooth open/close
-    useEffect(() => {
-        if (isMenuOpen) {
-            setIsVisible(true);
-            setTimeout(() => setIsAnimating(true), 10);
-        } else {
-            setIsAnimating(false);
-            setTimeout(() => setIsVisible(false), 300);
-        }
-    }, [isMenuOpen]);
-
-    // Προσθήκη mouse events για να παραμείνει ανοιχτό όταν ο χρήστης είναι πάνω στο menu
-    useEffect(() => {
-        const menuElement = menuRef.current;
-        if (menuElement) {
-            menuElement.addEventListener('mouseenter', () => {
-                setIsVisible(true);
-                setIsAnimating(true);
-            });
-            menuElement.addEventListener('mouseleave', () => {
-                setIsAnimating(false);
-                setTimeout(() => setIsVisible(false), 300);
-            });
-        }
-
-        return () => {
-            if (menuElement) {
-                menuElement.removeEventListener('mouseenter', () => { });
-                menuElement.removeEventListener('mouseleave', () => { });
-            }
-        };
-    }, []);
+    if (!isMenuOpen) return null;
 
     return (
-        <div
-            ref={menuRef}
-            className={`bg-white dark:bg-slate-800 shadow-xl rounded-b-md overflow-hidden transition-all duration-300 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-            style={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                width: 'max-content',
-                minWidth: '100%',
-                maxWidth: '100vw' // Προσθήκη maxWidth για να μην βγαίνει εκτός οθόνης
-            }}
-        >
-            <div className="p-4">
+        <div className="bg-white dark:bg-slate-800 shadow-xl dark:shadow-slate-900/50 rounded-b-md border border-slate-200 dark:border-slate-700">
+            <div className="p-4" style={{ width: 'max-content', minWidth: '100%' }}>
                 <div className="flex">
                     {/* Main Categories Column */}
-                    <div className="w-64 border-r border-slate-100 dark:border-slate-700 pr-4">
-                        {/* <h3 className="px-4 py-2 text-sm font-semibold text-siteColors-purple mb-2">Categories</h3> */}
+                    <div className="w-64 border-r border-slate-200 dark:border-slate-700 pr-4">
                         <ul className="flex flex-col">
                             {menu && menu.categories.data.map(cat => (
                                 cat.attributes.name !== "Uncategorized" &&
                                 <li
-                                    className={`group flex justify-between items-center px-4 py-3 text-sm cursor-pointer rounded-lg transition-all duration-200 ${activeCategory === cat.attributes.slug ? 'bg-siteColors-lightblue/10 text-siteColors-lightblue' : 'hover:bg-slate-100 dark:hover:bg-slate-700'}`}
+                                    className={`group flex justify-between items-center px-4 py-3 text-sm cursor-pointer rounded-lg transition-all duration-200 
+                                              ${activeCategory === cat.attributes.slug ?
+                                            'bg-siteColors-lightblue/10 text-siteColors-lightblue dark:bg-siteColors-lightblue/20 dark:text-white' :
+                                            'hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200'}`}
                                     key={cat.attributes.slug}
                                     onMouseEnter={() => setActiveCategory(cat.attributes.slug)}
                                 >
@@ -82,14 +37,14 @@ const MainMenu = ({ isMenuOpen }: { isMenuOpen: boolean }) => {
                                         <h3 className="font-medium">{cat.attributes.name}</h3>
                                     </Link>
                                     {cat.attributes.categories.data.length > 0 &&
-                                        <FaAngleRight className="text-slate-400 dark:text-slate-400 group-hover:text-siteColors-lightblue transition-colors" />}
+                                        <FaAngleRight className="text-slate-400 dark:text-slate-400 group-hover:text-siteColors-lightblue dark:group-hover:text-white transition-colors" />}
                                 </li>
                             ))}
                         </ul>
                     </div>
 
                     {/* Subcategories Panel */}
-                    <div className="flex-1 pl-6 z-50">
+                    <div className="flex-1 pl-6">
                         {menu && menu.categories.data.map(cat => (
                             <div
                                 key={cat.attributes.slug}
@@ -112,9 +67,9 @@ const MainMenu = ({ isMenuOpen }: { isMenuOpen: boolean }) => {
 
                                         <div className="flex flex-wrap gap-6">
                                             {cat.attributes.categories.data.map(sub => (
-                                                <div key={sub.attributes.slug} className="mb-6 min-w-[200px] max-w-[240px]">
+                                                <div key={sub.attributes.slug} className="mb-6 min-w-[180px] max-w-[220px]">
                                                     <Link href={`/category/${cat.attributes.slug}/${sub.attributes.slug}`}>
-                                                        <h3 className="text-lg font-semibold text-siteColors-purple dark:text-slate-200 mb-3 pb-2 border-b border-siteColors-lightblue/20">
+                                                        <h3 className="text-lg font-semibold text-siteColors-purple dark:text-siteColors-lightblue mb-3 pb-2 border-b border-siteColors-lightblue/20 dark:border-siteColors-lightblue/40">
                                                             {sub.attributes.name}
                                                         </h3>
                                                     </Link>
@@ -155,21 +110,6 @@ const MainMenu = ({ isMenuOpen }: { isMenuOpen: boolean }) => {
                         ))}
                     </div>
                 </div>
-
-                {/* Featured Categories Banner */}
-                {/* <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
-                    <h3 className="text-sm font-semibold text-siteColors-purple mb-3">Featured Categories</h3>
-                    <div className="flex space-x-4">
-                        <div className="flex-1 bg-gradient-to-r from-siteColors-lightblue to-siteColors-blue rounded-lg p-4 text-white">
-                            <h4 className="font-medium mb-2">Summer Specials</h4>
-                            <p className="text-sm opacity-90">Discounts up to 30%</p>
-                        </div>
-                        <div className="flex-1 bg-gradient-to-r from-siteColors-pink to-siteColors-purple rounded-lg p-4 text-white">
-                            <h4 className="font-medium mb-2">New Arrivals</h4>
-                            <p className="text-sm opacity-90">Fresh products added daily</p>
-                        </div>
-                    </div>
-                </div> */}
             </div>
         </div>
     )

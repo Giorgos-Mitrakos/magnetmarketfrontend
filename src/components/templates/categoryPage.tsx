@@ -123,7 +123,7 @@ async function CategoryPageTemplate(props: pageProps) {
                 <h1 className="w-full mt-8 text-2xl font-semibold text-center text-siteColors-purple dark:text-slate-300">{breadcrumbs[breadcrumbs.length - 1].title}</h1>
                 <div className="grid pt-4 mb-8 w-full bg-white dark:bg-slate-800">
                     <div className="grid lg:grid-cols-4 gap-4">
-                        <div className="hidden lg:flex lg:flex-col bg-slate-100 dark:bg-slate-700 p-4 rounded">
+                        <div className="hidden lg:flex lg:flex-col bg-slate-50 dark:bg-slate-800 p-5 rounded-lg shadow-sm border border-gray-100 dark:border-slate-700">
                             <Menu category1={category1} category2={category2 ? category2 : null} category3={category3 ? category3 : null} />
                             <CategoryFilters category1={category1} category2={category2} category3={category3} searchParams={searchParams} />
                         </div>
