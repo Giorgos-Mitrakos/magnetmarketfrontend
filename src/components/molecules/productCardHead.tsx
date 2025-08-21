@@ -37,7 +37,7 @@ function ProductCardHead(props: ProductCardHeadProps) {
                         /></Link>}
             </div>
             {discount && profit && is_sale &&
-                <div className="absolute -top-4 -right-9 z-50 w-44 h-44">
+                <div className="absolute -top-4 -right-9 z-40 w-44 h-44">
                     <span className="relative left-8 origin-top-left text-center text-white font-bold rotate-45 block leading-7 bg-gradient-to-b from-siteColors-pink via-siteColors-pink to-siteColors-purple shadow-2xl
                     before:content-[''] before:absolute before:left-0 before:top-full before:border-4 before:border-l-siteColors-purple before:border-t-siteColors-purple before:border-b-transparent before:border-r-transparent 
                     after:content-[''] after:absolute after:right-0 after:top-full after:border-4 after:border-r-siteColors-purple after:border-t-siteColors-purple after:border-b-transparent after:border-l-transparent"

@@ -8,7 +8,8 @@ import { BuiltInProviderType } from 'next-auth/providers'
 import CustomInput from '@/components/atoms/input'
 import { useSearchParams } from 'next/navigation'
 import { FaEye, FaEyeSlash, FaArrowRight, FaCheck, FaInfoCircle } from 'react-icons/fa'
-import { FiUser, FiMail, FiLock, FiTruck, FiHeart, FiClock, FiPercent, FiShoppingCart } from 'react-icons/fi'
+import { FiUser, FiMail, FiLock, FiTruck, FiHeart, FiClock, FiPercent } from 'react-icons/fi'
+import { FaBagShopping } from 'react-icons/fa6';
 
 export interface ILoginData {
     email: string;
@@ -149,7 +150,7 @@ export default function RegisterComp() {
                 <div className="w-full lg:w-2/5 bg-gradient-to-b from-siteColors-blue to-siteColors-purple text-white p-8 lg:p-12 flex flex-col justify-between">
                     <div>
                         <div className="flex items-center mb-12">
-                            <FiShoppingCart className="h-8 w-8 mr-2" />
+                            <FaBagShopping className="h-8 w-8 mr-2" />
                             <span className="text-2xl font-bold">MagnetMarket</span>
                         </div>
                         <h1 className="text-3xl lg:text-4xl font-bold mb-6">Δημιουργήστε λογαριασμό</h1>
@@ -202,7 +203,7 @@ export default function RegisterComp() {
                     </div>
 
                     <div className="mt-8 text-blue-200 text-sm">
-                        <p>© 2023 MagnetMarket. All rights reserved.</p>
+                        <p>© 2025 MagnetMarket. All rights reserved.</p>
                     </div>
                 </div>
 
