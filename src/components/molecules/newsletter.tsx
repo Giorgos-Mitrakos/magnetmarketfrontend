@@ -81,7 +81,7 @@ const Newsletter = () => {
     });
 
     return (
-        <section className="w-full pb-8 md:py-16 bg-white">
+        <section className="w-full pb-8 md:py-16 bg-white dark:bg-slate-800">
             <div className="w-full max-w-7xl mx-auto px-4 md:px-6">
                 <div className="w-full bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 md:p-10 flex flex-col lg:flex-row items-center justify-between shadow-lg border border-gray-100">
                     {/* Text Content - Left Side */}
@@ -95,7 +95,7 @@ const Newsletter = () => {
                             </h3>
                         </div>
                         <p className="text-lg text-gray-700 mb-2">
-                            Μην χάνεις <span className="font-semibold text-siteColors-pink">καμία προσφορά</span>
+                            Για να μην χάνεις <span className="font-semibold text-siteColors-pink">καμία προσφορά</span>
                         </p>
                         <p className="text-gray-600">
                             Εγγραφείτε για αποκλειστικές προσφορές, εκπτώσεις και νέα προϊόντα.

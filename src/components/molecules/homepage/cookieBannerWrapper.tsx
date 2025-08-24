@@ -6,5 +6,5 @@ export default function CookieBannerWrapper() {
 
   if (consent) return null;
 
-  return <CookieBannerClient />;
+  return <CookieBannerClient consent={consent} />;
 }

@@ -6,6 +6,8 @@ export const GET_ANNOUNCEMENT = gql`
     data{
       attributes{
         text
+        type
+        isClosable
       }
     }
   }

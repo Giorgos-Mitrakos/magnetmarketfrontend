@@ -3,7 +3,7 @@ import { useFormik } from "formik"
 import * as Yup from 'yup'
 import Radio from "../atoms/radio"
 import CustomInput from "../atoms/input"
-import { forwardRef, useContext, useImperativeHandle } from "react"
+import { forwardRef, useImperativeHandle, useCallback } from "react"
 import { IProfile } from "@/app/checkout/customer-informations/page"
 import { useNoRevalideteQuery, useQuery } from "@/repositories/clientRepository"
 import { GET_COUNTRY_LIST, GET_COUNTRY_STATES, GET_REGION_POSTALS, GET_STATE_REGIONS } from "@/lib/queries/addressQuery"
@@ -16,13 +16,12 @@ export type FormInputRef = {
 };
 
 const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
-
     const { checkout, dispatch } = useCheckout()
     const { data: countriesData, loading, error } = useNoRevalideteQuery({ query: GET_COUNTRY_LIST, jwt: '' })
 
     const countries = countriesData as ICountries
 
-    let initialValues: ICustomerInfo = {
+    const initialValues: ICustomerInfo = {
         id: props.user?.info.id || "",
         email: props.user?.info.email || checkout.addresses.billing.email,
         firstname: props.user?.billing_address?.firstname || checkout.addresses.billing.firstname,
@@ -53,7 +52,7 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
     }
 
     const formik = useFormik({
-        initialValues: initialValues,
+        initialValues,
         validationSchema: Yup.object({
             isInvoice: Yup.boolean(),
             email: Yup.string().email('*Παρακαλώ ελέγξε το email!').required('*Yποχρεωτικό πεδίο!'),
@@ -132,9 +131,6 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                 is: true,
                 then: (schema) => schema.required('*Yποχρεωτικό πεδίο!')
             }),
-            // .email('*Το email δεν είναι σωστό!!!')
-            // .required('*To email είναι υποχρεωτικό πεδίο!'),
-            // password: Yup.string().required("*Συμπληρώστε τον κωδικό σας!"),
         }),
         onSubmit: (values) => {
             const addresses = {
@@ -156,7 +152,6 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                     doy: values.doy,
                     companyName: values.companyName,
                     businessActivity: values.businessActivity,
-
                 },
                 shipping: {
                     firstname: values.ship_firstname,
@@ -170,9 +165,7 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                     mobilePhone: values.ship_mobilePhone,
                 }
             }
-
             dispatch({ type: "SAVE_ADDRESS", payload: addresses })
-            // saveAddresses(addresses)
         }
     });
 
@@ -184,16 +177,15 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
             formik.resetForm();
         },
         isSubmitting: formik.isSubmitting
-
     }));
 
-    const { data: stateData, loading: loadingState, error: errorState } = useQuery({ query: GET_COUNTRY_STATES, variables: { country: formik.values.country }, jwt: '' })
-    const { data: regionData, loading: loadingRegions, error: errorRegions } = useQuery({ query: GET_STATE_REGIONS, variables: { state: formik.values.state }, jwt: '' })
-    const { data: postalData, loading: loadingPostals, error: errorPostals } = useQuery({ query: GET_REGION_POSTALS, variables: { region: formik.values.city }, jwt: '' })
+    const { data: stateData, loading: loadingState } = useQuery({ query: GET_COUNTRY_STATES, variables: { country: formik.values.country }, jwt: '' })
+    const { data: regionData, loading: loadingRegions } = useQuery({ query: GET_STATE_REGIONS, variables: { state: formik.values.state }, jwt: '' })
+    const { data: postalData, loading: loadingPostals } = useQuery({ query: GET_REGION_POSTALS, variables: { region: formik.values.city }, jwt: '' })
 
-    const { data: shipStateData, loading: loadingShipState, error: errorShipState } = useQuery({ query: GET_COUNTRY_STATES, variables: { country: formik.values.ship_country }, jwt: '' })
-    const { data: shipRegionData, loading: loadingShipRegions, error: errorShipRegions } = useQuery({ query: GET_STATE_REGIONS, variables: { state: formik.values.ship_state }, jwt: '' })
-    const { data: shipPostalData, loading: loadingShipPostals, error: errorShipPostals } = useQuery({ query: GET_REGION_POSTALS, variables: { region: formik.values.ship_city }, jwt: '' })
+    const { data: shipStateData, loading: loadingShipState } = useQuery({ query: GET_COUNTRY_STATES, variables: { country: formik.values.ship_country }, jwt: '' })
+    const { data: shipRegionData, loading: loadingShipRegions } = useQuery({ query: GET_STATE_REGIONS, variables: { state: formik.values.ship_state }, jwt: '' })
+    const { data: shipPostalData, loading: loadingShipPostals } = useQuery({ query: GET_REGION_POSTALS, variables: { region: formik.values.ship_city }, jwt: '' })
 
     const states = stateData as IStates
     const regions = regionData as IRegions
@@ -202,534 +194,507 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
     const shipRegions = shipRegionData as IRegions
     const shipPostals = shipPostalData as IRegionPostals
 
-    const onCheckNoteChange = () => {
-        const updateAddresses = { ...checkout.addresses, billing: { ...checkout.addresses.billing, isInvoice: !checkout.addresses.billing.isInvoice } }
-        // saveAddresses(updateAddresses)
-        dispatch({ type: "SAVE_ADDRESS", payload: updateAddresses })
-        formik.values.isInvoice = !checkout.addresses.billing.isInvoice
-    }
+    // FIXED: Remove dispatch calls from onChange handlers to prevent focus loss
+    const handleCountryChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>, isShipping: boolean = false) => {
+        formik.handleChange(e)
+        formik.setFieldValue(isShipping ? 'ship_state' : 'state', "")
+    }, [formik])
 
-    const ondifferentAddressChange = () => {
-        const updateAddresses = { ...checkout.addresses, different_shipping: !checkout.addresses.different_shipping }
-        // saveAddresses(updateAddresses)
-        dispatch({ type: "SAVE_ADDRESS", payload: updateAddresses })
-        formik.values.different_shipping = !checkout.addresses.different_shipping
-    }
+    const handleStateChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>, isShipping: boolean = false) => {
+        formik.handleChange(e)
+        formik.setFieldValue(isShipping ? 'ship_city' : 'city', "")
+    }, [formik])
+
+    const handleCityChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>, isShipping: boolean = false) => {
+        formik.handleChange(e)
+        formik.setFieldValue(isShipping ? 'ship_zipCode' : 'zipCode', "")
+    }, [formik])
+
+    const onCheckNoteChange = useCallback(() => {
+        const isInvoice = !formik.values.isInvoice
+        formik.setFieldValue('isInvoice', isInvoice)
+    }, [formik.values.isInvoice, formik.setFieldValue])
+
+    const onDifferentAddressChange = useCallback(() => {
+        const differentShipping = !formik.values.different_shipping
+        formik.setFieldValue('different_shipping', differentShipping)
+    }, [formik.values.different_shipping, formik.setFieldValue])
 
     return (
         <section>
-            <form onSubmit={formik.handleSubmit}>
-                <ul className='space-y-4 w-full p-4 bg-slate-50 dark:bg-slate-800 rounded-lg' >
-                    <li>
-                        <h3 className='font-medium mb-6 border-b text-siteColors-purple dark:text-slate-200'>Στοιχεία επικοινωνίας</h3>
-                        <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                            <CustomInput
-                                aria_label="Φόρμα εισαγωγής Email"
-                                type="email"
-                                id='email'
-                                name='email'
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                                value={formik.values.email}
-                                label='Email' />
-                        </div>
-                        {formik.errors.email && formik.touched.email &&
-                            <small id="feedback" className="text-sm text-red-500">{formik.errors.email}</small>}
-
-                    </li>
-                    <li>
-                        <h3 className='font-medium mt-8 mb-4 border-b text-siteColors-purple dark:text-slate-200'>Τύπος παραστατικού</h3>
-                        <Radio name="checkNote" id="receipt" value="Απόδειξη"
-                            checked={!checkout.addresses.billing.isInvoice} onChange={onCheckNoteChange}></Radio>
-                        <Radio name="checkNote" id="invoice" value="Τιμολόγιο"
-                            checked={checkout.addresses.billing.isInvoice} onChange={onCheckNoteChange}></Radio>
-                    </li>
-                    <li>
-                        <h3 className='font-medium mt-8 mb-6 border-b text-siteColors-purple dark:text-slate-200'>Διεύθυνση</h3>
-                        <ul className="space-y-4">
-                            {formik.values.isInvoice === true ?
-                                <>
-                                    <li>
-                                        <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                            <CustomInput
-                                                aria_label="Φόρμα εισαγωγής Όνοματος Εταιρίας"
-                                                type="text"
-                                                id='companyName'
-                                                name='companyName'
-                                                onChange={formik.handleChange}
-                                                onBlur={formik.handleBlur}
-                                                value={formik.values.companyName}
-                                                label='Όνομα Εταιρίας*' />
-                                        </div>
-                                        {formik.errors.companyName && formik.touched.companyName &&
-                                            <small id="feedback" className="text-sm text-red-500">{formik.errors.companyName}</small>}
-                                    </li>
-                                    <li>
-                                        <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                            <CustomInput
-                                                aria_label="Φόρμα εισαγωγής Δραστηριότητας Εταιρίας"
-                                                type="text"
-                                                id='businessActivity'
-                                                name='businessActivity'
-                                                onChange={formik.handleChange}
-                                                onBlur={formik.handleBlur}
-                                                value={formik.values.businessActivity}
-                                                label='Δραστηριότητα*' />
-                                        </div>
-                                        {formik.errors.businessActivity && formik.touched.businessActivity &&
-                                            <small id="feedback" className="text-sm text-red-500">{formik.errors.businessActivity}</small>}
-                                    </li>
-                                    <li className="grid sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                                        <div>
-                                            <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                                <CustomInput
-                                                    aria_label="Φόρμα εισαγωγής Α.Φ.Μ."
-                                                    type="text"
-                                                    id='afm'
-                                                    name='afm'
-                                                    onChange={formik.handleChange}
-                                                    onBlur={formik.handleBlur}
-                                                    value={formik.values.afm}
-                                                    label='Α.Φ.Μ.*' />
-                                            </div>
-                                            {formik.errors.afm && formik.touched.afm &&
-                                                <small id="feedback" className="text-sm text-red-500">{formik.errors.afm}</small>}
-                                        </div>
-                                        <div>
-                                            <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                                <CustomInput
-                                                    aria_label="Φόρμα εισαγωγής Δ.Ο.Υ."
-                                                    type="text"
-                                                    id='doy'
-                                                    name='doy'
-                                                    onChange={formik.handleChange}
-                                                    onBlur={formik.handleBlur}
-                                                    value={formik.values.doy}
-                                                    label='Δ.Ο.Υ.*' />
-                                            </div>
-                                            {formik.errors.doy && formik.touched.doy &&
-                                                <small id="feedback" className="text-sm text-red-500">{formik.errors.doy}</small>}
-
-                                        </div>
-                                    </li>
-                                </> :
-                                <>
-                                    <li className="grid sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                                        <div>
-                                            <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                                <CustomInput
-                                                    aria_label="Φόρμα εισαγωγής ονόματος"
-                                                    type="text"
-                                                    id='firstname'
-                                                    name='firstname'
-                                                    onChange={formik.handleChange}
-                                                    onBlur={formik.handleBlur}
-                                                    value={formik.values.firstname}
-                                                    label='Όνομα*' />
-                                            </div>
-                                            {formik.errors.firstname && formik.touched.firstname &&
-                                                <small id="feedback" className="text-sm text-red-500">{formik.errors.firstname}</small>}
-                                        </div>
-                                        <div>
-                                            <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                                <CustomInput
-                                                    aria_label="Φόρμα εισαγωγής επιθέτου"
-                                                    type="text"
-                                                    id='lastname'
-                                                    name='lastname'
-                                                    onChange={formik.handleChange}
-                                                    onBlur={formik.handleBlur}
-                                                    value={formik.values.lastname}
-                                                    label='Επίθετο*' />
-                                            </div>
-                                            {formik.errors.lastname && formik.touched.lastname &&
-                                                <small id="feedback" className="text-sm text-red-500">{formik.errors.lastname}</small>}
-
-                                        </div>
-                                    </li>
-                                </>
-                            }
-                            <li>
-                                <div>
-                                    <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                        <CustomInput
-                                            aria_label="Φόρμα εισαγωγής Οδού"
-                                            type="text"
-                                            id='street'
-                                            name='street'
-                                            onChange={formik.handleChange}
-                                            onBlur={formik.handleBlur}
-                                            value={formik.values.street}
-                                            label='Οδός*' />
-                                    </div>
-                                    {formik.errors.street && formik.touched.street &&
-                                        <small id="feedback" className="text-sm text-red-500">{formik.errors.street}</small>}
-                                </div>
-                            </li>
-                            <li className="grid sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                                <div>
-                                    {!loading && <div className="relative rounded-lg border border-1 border-slate-300 bg-white appearance-none">
-                                        <label htmlFor="country"
-                                            className="absolute text-sm text-slate-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
-                                    peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
-                                     peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Χώρα*</label>
-                                        <select
-                                            className='bg-transparent border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-300 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
-                                            id='country'
-                                            name='country'
-                                            onChange={(e) => {
-                                                formik.handleChange(e)
-                                                formik.setFieldValue('state', "")
-                                                const updateAddresses = { ...checkout.addresses, billing: { ...checkout.addresses.billing, country: e.target.value, state: '' } }
-                                                dispatch({ type: "SAVE_ADDRESS", payload: updateAddresses })
-                                                // saveAddresses({ ...addresses, billing: { ...addresses.billing, country: e.target.value, state: '' } })
-                                            }}
-                                            onBlur={formik.handleBlur}
-                                            value={formik.values.country}>
-                                            <option value="">--Επέλεξε Χώρα--</option>
-                                            {
-                                                countries.countries.data.map(x => (
-                                                    <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>
-                                                ))
-                                            }
-                                        </select>
-                                    </div>}
-                                    {formik.errors.country && formik.touched.country &&
-                                        <small id="feedback" className="text-sm text-red-500">{formik.errors.country}</small>}
-                                </div>
-                                <div>
-                                    <div className="relative rounded-lg border border-1 border-slate-300 bg-white appearance-none">
-                                        <label htmlFor="state"
-                                            className="absolute text-sm text-slate-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
-                                    peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
-                                     peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Νομός*</label>
-                                        <select
-                                            className='bg-transparent border border-slate-300 text-slate-900 dark:text-slate-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-300 dark:focus:ring-blue-500 dark:focus:border-blue-500"'
-                                            id='state'
-                                            name='state'
-                                            onChange={(e) => {
-                                                formik.handleChange(e)
-                                                formik.setFieldValue('city', "")
-                                                dispatch({ type: "SAVE_ADDRESS", payload: { ...checkout.addresses, billing: { ...checkout.addresses.billing, state: e.target.value, city: '' } } })
-                                            }}
-                                            onBlur={formik.handleBlur}
-                                            value={formik.values.state}>
-                                            <option value="">--Επέλεξε Νομό--</option>
-                                            {!loadingState && states.countries.data.length > 0 &&
-                                                states.countries.data[0].attributes.states.data.map(x => (
-                                                    <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>))
-                                            }
-                                        </select>
-                                    </div>
-                                    {formik.errors.state && formik.touched.state &&
-                                        <small id="feedback" className="text-sm text-red-500">{formik.errors.state}</small>}
-                                </div>
-                            </li>
-                            <li className="grid sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                                <div>
-                                    <div className="relative rounded-lg border border-1 border-gray-300  bg-white appearance-none">
-                                        <label htmlFor="city"
-                                            className="absolute text-sm text-slate-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
-                                    peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
-                                     peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Πόλη*</label>
-                                        <select
-                                            className='bg-transparent border border-gray-300 text-slate-900 dark:text-slate-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"'
-                                            id='city'
-                                            name='city'
-                                            onChange={(e) => {
-                                                formik.handleChange(e)
-                                                formik.setFieldValue('zipCode', "")
-                                                dispatch({ type: "SAVE_ADDRESS", payload: { ...checkout.addresses, billing: { ...checkout.addresses.billing, city: e.target.value, zipCode: '' } } })
-                                            }}
-                                            onBlur={formik.handleBlur}
-                                            value={formik.values.city}>
-                                            <option value="">--Επέλεξε πόλη--</option>
-                                            {!loadingRegions && regions.states?.data[0]?.attributes.regions.data.map(x => (
-                                                <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>))
-                                            }
-                                        </select>
-                                    </div>
-                                    {formik.errors.city && formik.touched.city &&
-                                        <small id="feedback" className="text-sm text-red-500">{formik.errors.city}</small>}
-                                </div>
-                                <div>
-                                    <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                        <label htmlFor="zipCode"
-                                            className="absolute text-sm text-slate-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
-                                    peer-focus:px-2 peer-focus:text-blue-600 slateeer-focus:dark:text-blue-500 
-                                     peer-placeholder-shown:scale-100 peer-plslateceholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Τ.Κ*</label>
-                                        <input
-                                            onChange={formik.handleChange}
-                                            onBlur={formik.handleBlur}
-                                            value={formik.values.zipCode}
-                                            id='zipCode'
-                                            name="zipCode"
-                                            list="postals-list"
-                                            className="block px-2.5 py-2.5 w-full text-sm text-slate-900 dark:text-slate-200 bg-transparent dark:bg-slate-700 focus:outline-none focus:ring-0 peer focus:ring-blue-500 focus:border-blue-500 rounded-lg" />
-                                        {!loadingPostals && postals !== undefined &&
-                                            <datalist id="postals-list">
-                                                {postals?.regions?.data[0]?.attributes.postal_codes.data.map(postal => (
-                                                    <option key={postal.id} value={postal.attributes.postal.toString()} />
-                                                ))}
-                                            </datalist>}
-                                    </div>
-                                    {formik.errors.zipCode && formik.touched.zipCode &&
-                                        <small id="feedback" className="text-sm text-red-500">{formik.errors.zipCode}</small>}
-                                </div>
-
-                            </li>
-                            <li className="grid sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                                <div>
-                                    <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                        <CustomInput
-                                            aria_label="Φόρμα εισαγωγής τηλεφώνου"
-                                            type="text"
-                                            id='telephone'
-                                            name='telephone'
-                                            onChange={formik.handleChange}
-                                            onBlur={formik.handleBlur}
-                                            value={formik.values.telephone}
-                                            label='Τηλέφωνο'
-                                        />
-                                    </div>
-                                    {formik.errors.telephone && formik.touched.telephone &&
-                                        <small id="feedback" className="text-sm text-red-500">{formik.errors.telephone}</small>}
-                                </div>
-                                <div>
-                                    <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                        <CustomInput
-                                            aria_label="Φόρμα εισαγωγής κινητό"
-                                            type="text"
-                                            id='mobilePhone'
-                                            name='mobilePhone'
-                                            onChange={formik.handleChange}
-                                            onBlur={formik.handleBlur}
-                                            value={formik.values.mobilePhone}
-                                            label='Κινητό*' />
-                                    </div>
-                                    {formik.errors.mobilePhone && formik.touched.mobilePhone &&
-                                        <small id="feedback" className="text-sm text-red-500">{formik.errors.mobilePhone}</small>}
-
-                                </div>
-                            </li>
-                        </ul>
-                    </li>
-                    <li className="space-y-2">
-                        <label htmlFor="deliveryNotes" className="text-sm tracking-wide ">Σχόλια</label>
-                        <textarea
-                            className="w-full p-4 dark:bg-slate-700"
-                            id="deliveryNotes"
-                            name="deliveryNotes"
+            <form onSubmit={formik.handleSubmit} className="space-y-8">
+                {/* Contact Information */}
+                <div className="space-y-4">
+                    <h3 className='text-lg font-semibold text-gray-900 dark:text-slate-200 pb-2 border-b border-gray-200 dark:border-slate-700'>
+                        Στοιχεία επικοινωνίας
+                    </h3>
+                    <div className="relative">
+                        <CustomInput
+                            aria_label="Φόρμα εισαγωγής Email"
+                            type="email"
+                            id='email'
+                            name='email'
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
-                            value={formik.values.deliveryNotes}
-                            rows={4}
-                            maxLength={200} />
-                    </li>
-                    <li>
-                        <div className='flex my-4'>
-                            <input type='checkbox' id='different_shipping' name='different_shipping' checked={checkout.addresses.different_shipping} onChange={() => ondifferentAddressChange()} />
-                            <label htmlFor='different_shipping' className="text-sm text-siteColors-purple dark:text-slate-200 ml-1">Θέλω να παραλάβω σε άλλη διεύθυνση.</label>
+                            value={formik.values.email}
+                            label='Email'
+                            error={formik.touched.email ? formik.errors.email : undefined}
+                        />
+                    </div>
+                </div>
+
+                {/* Document Type */}
+                <div className="space-y-4">
+                    <h3 className='text-lg font-semibold text-gray-900 dark:text-slate-200 pb-2 border-b border-gray-200 dark:border-slate-700'>
+                        Τύπος παραστατικού
+                    </h3>
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <Radio 
+                            name="checkNote" 
+                            id="receipt" 
+                            value="Απόδειξη"
+                            checked={!formik.values.isInvoice} 
+                            onChange={onCheckNoteChange}
+                        />
+                        <Radio 
+                            name="checkNote" 
+                            id="invoice" 
+                            value="Τιμολόγιο"
+                            checked={formik.values.isInvoice} 
+                            onChange={onCheckNoteChange}
+                        />
+                    </div>
+                </div>
+
+                {/* Billing Address */}
+                <div className="space-y-6">
+                    <h3 className='text-lg font-semibold text-gray-900 dark:text-slate-200 pb-2 border-b border-gray-200 dark:border-slate-700'>
+                        Διεύθυνση
+                    </h3>
+                    
+                    {formik.values.isInvoice ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="md:col-span-2">
+                                <CustomInput
+                                    aria_label="Φόρμα εισαγωγής Όνοματος Εταιρίας"
+                                    type="text"
+                                    id='companyName'
+                                    name='companyName'
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    value={formik.values.companyName}
+                                    label='Όνομα Εταιρίας*'
+                                    error={formik.touched.companyName ? formik.errors.companyName : undefined}
+                                />
+                            </div>
+                            <div className="md:col-span-2">
+                                <CustomInput
+                                    aria_label="Φόρμα εισαγωγής Δραστηριότητας Εταιρίας"
+                                    type="text"
+                                    id='businessActivity'
+                                    name='businessActivity'
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    value={formik.values.businessActivity}
+                                    label='Δραστηριότητα*'
+                                    error={formik.touched.businessActivity ? formik.errors.businessActivity : undefined}
+                                />
+                            </div>
+                            <div>
+                                <CustomInput
+                                    aria_label="Φόρμα εισαγωγής Α.Φ.Μ."
+                                    type="text"
+                                    id='afm'
+                                    name='afm'
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    value={formik.values.afm}
+                                    label='Α.Φ.Μ.*'
+                                    error={formik.touched.afm ? formik.errors.afm : undefined}
+                                />
+                            </div>
+                            <div>
+                                <CustomInput
+                                    aria_label="Φόρμα εισαγωγής Δ.Ο.Υ."
+                                    type="text"
+                                    id='doy'
+                                    name='doy'
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    value={formik.values.doy}
+                                    label='Δ.Ο.Υ.*'
+                                    error={formik.touched.doy ? formik.errors.doy : undefined}
+                                />
+                            </div>
                         </div>
-                        {formik.values.different_shipping && <>
-                            <h3 className='font-medium mt-8 mb-6 border-b text-siteColors-purple dark:text-slate-200'>Διεύθυνση Αποστολής</h3>
-                            <ul className="space-y-4">
-                                <li className="grid sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                                    <div>
-                                        <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                            <CustomInput
-                                                aria_label="Φόρμα εισαγωγής ονόματος"
-                                                type="text"
-                                                id='ship_firstname'
-                                                name='ship_firstname'
-                                                onChange={formik.handleChange}
-                                                onBlur={formik.handleBlur}
-                                                value={formik.values.ship_firstname}
-                                                label='Όνομα*' />
-                                        </div>
-                                        {formik.errors.ship_firstname && formik.touched.ship_firstname &&
-                                            <small id="feedback" className="text-sm text-red-500">{formik.errors.ship_firstname}</small>}
-                                    </div>
-                                    <div>
-                                        <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                            <CustomInput
-                                                aria_label="Φόρμα εισαγωγής επιθέτου"
-                                                type="text"
-                                                id='ship_lastname'
-                                                name='ship_lastname'
-                                                onChange={formik.handleChange}
-                                                onBlur={formik.handleBlur}
-                                                value={formik.values.ship_lastname}
-                                                label='Επίθετο*' />
-                                        </div>
-                                        {formik.errors.ship_lastname && formik.touched.ship_lastname &&
-                                            <small id="feedback" className="text-sm text-red-500">{formik.errors.ship_lastname}</small>}
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <CustomInput
+                                    aria_label="Φόρμα εισαγωγής ονόματος"
+                                    type="text"
+                                    id='firstname'
+                                    name='firstname'
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    value={formik.values.firstname}
+                                    label='Όνομα*'
+                                    error={formik.touched.firstname ? formik.errors.firstname : undefined}
+                                />
+                            </div>
+                            <div>
+                                <CustomInput
+                                    aria_label="Φόρμα εισαγωγής επιθέτου"
+                                    type="text"
+                                    id='lastname'
+                                    name='lastname'
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    value={formik.values.lastname}
+                                    label='Επίθετο*'
+                                    error={formik.touched.lastname ? formik.errors.lastname : undefined}
+                                />
+                            </div>
+                        </div>
+                    )}
 
-                                    </div>
-                                </li>
-                                <li>
-                                    <div>
-                                        <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                            <CustomInput
-                                                aria_label="Φόρμα εισαγωγής Οδού"
-                                                type="text"
-                                                id='ship_street'
-                                                name='ship_street'
-                                                onChange={formik.handleChange}
-                                                onBlur={formik.handleBlur}
-                                                value={formik.values.ship_street}
-                                                label='Οδός*' />
-                                        </div>
-                                        {formik.errors.ship_street && formik.touched.ship_street &&
-                                            <small id="feedback" className="text-sm text-red-500">{formik.errors.ship_street}</small>}
-                                    </div>
-                                </li>
-                                <li className="grid sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                                    <div>
-                                        {!loading && <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                            <label htmlFor="ship_country"
-                                                className="absolute text-sm text-slate-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
-                                    peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
-                                     peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Χώρα*</label>
-                                            <select
-                                                className='bg-transparent border border-gray-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-slate-200 dark:focus:ring-blue-500 dark:focus:border-blue-500"'
-                                                id='ship_country'
-                                                name='ship_country'
-                                                onChange={(e) => {
-                                                    formik.handleChange(e)
-                                                    formik.setFieldValue('ship_state', "")
-                                                    dispatch({ type: "SAVE_ADDRESS", payload: { ...checkout.addresses, shipping: { ...checkout.addresses.shipping, country: e.target.value, state: '' } } })
-                                                }}
-                                                onBlur={formik.handleBlur}
-                                                value={formik.values.ship_country}>
-                                                {
-                                                    countries.countries.data.map(x => (
-                                                        <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>
-                                                    ))
-                                                }
-                                            </select>
-                                        </div>}
-                                        {formik.errors.ship_country && formik.touched.ship_country &&
-                                            <small id="feedback" className="text-sm text-red-500">{formik.errors.ship_country}</small>}
-                                    </div>
-                                    <div>
-                                        <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                            <label htmlFor="ship_state"
-                                                className="absolute text-sm text-slate-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
-                                    peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
-                                     peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Νομός*</label>
-                                            <select
-                                                className='bg-transparent border border-gray-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-slate-200 dark:focus:ring-blue-500 dark:focus:border-blue-500"'
-                                                id='ship_state'
-                                                name='ship_state'
-                                                onChange={(e) => {
-                                                    formik.handleChange(e)
-                                                    formik.setFieldValue('ship_city', "")
-                                                    dispatch({ type: "SAVE_ADDRESS", payload: { ...checkout.addresses, shipping: { ...checkout.addresses.shipping, state: e.target.value, city: '' } } })
-                                                }}
-                                                onBlur={formik.handleBlur}
-                                                value={formik.values.ship_state}>
-                                                <option value="">--Επέλεξε Νομό--</option>
-                                                {!loadingShipState && shipStates.countries.data.length > 0 && shipStates.countries.data[0].attributes.states.data.map(x => (
-                                                    <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>))
-                                                }
-                                            </select>
-                                        </div>
-                                        {formik.errors.ship_state && formik.touched.ship_state &&
-                                            <small id="feedback" className="text-sm text-red-500">{formik.errors.ship_state}</small>}
-                                    </div>
-                                </li>
-                                <li className="grid sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                                    <div>
-                                        <div className="relative rounded-lg border border-1 border-gray-300  bg-white appearance-none">
-                                            <label htmlFor="ship_city"
-                                                className="absolute text-sm text-slate-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
-                                    peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
-                                     peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Πόλη*</label>
-                                            <select
-                                                className='bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-slate-200 dark:focus:ring-blue-500 dark:focus:border-blue-500"'
-                                                id='ship_city'
-                                                name='ship_city'
-                                                onChange={(e) => {
-                                                    formik.handleChange(e)
-                                                    formik.setFieldValue('ship_zipCode', "")
-                                                    dispatch({ type: "SAVE_ADDRESS", payload: { ...checkout.addresses, shipping: { ...checkout.addresses.shipping, city: e.target.value, zipCode: '' } } })
-                                                }}
-                                                onBlur={formik.handleBlur}
-                                                value={formik.values.ship_city}>
-                                                <option value="">--Επέλεξε πόλη--</option>
-                                                {!loadingShipRegions && shipRegions.states?.data[0]?.attributes.regions.data.map(x => (
-                                                    <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>))
-                                                }
-                                            </select>
-                                        </div>
-                                        {formik.errors.ship_city && formik.touched.ship_city &&
-                                            <small id="feedback" className="text-sm text-red-500">{formik.errors.ship_city}</small>}
-                                    </div>
-                                    <div>
-                                        <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                            <label htmlFor="ship_zipCode"
-                                                className="absolute text-sm text-slate-500 dark:text-slate-200 duration-300 transform -translate-y-4 scale-75 top-1 z-10 origin-[0] bg-transparent px-2 
-                                    peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 
-                                     peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Τ.Κ*</label>
-                                            <input
-                                                onChange={formik.handleChange}
-                                                onBlur={formik.handleBlur}
-                                                value={formik.values.ship_zipCode}
-                                                id='ship_zipCode'
-                                                name="ship_zipCode"
-                                                list="ship-postals-list"
-                                                className="block px-2.5 py-2.5 w-full text-sm text-slate-900 dark:text-slate-200 bg-transparent dark:bg-slate-700 focus:outline-none focus:ring-0 peer focus:ring-blue-500 focus:border-blue-500" />
-                                            {!loadingShipPostals && shipPostals !== undefined &&
-                                                <datalist id="ship-postals-list">
-                                                    {shipPostals?.regions?.data[0]?.attributes.postal_codes.data.map(postal => (
-                                                        <option key={postal.id} value={postal.attributes.postal.toString()} />
-                                                    ))}
-                                                </datalist>}
-                                        </div>
-                                        {formik.errors.ship_zipCode && formik.touched.ship_zipCode &&
-                                            <small id="feedback" className="text-sm text-red-500">{formik.errors.ship_zipCode}</small>}
-                                    </div>
+                    {/* Address Fields */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="md:col-span-2">
+                            <CustomInput
+                                aria_label="Φόρμα εισαγωγής Οδού"
+                                type="text"
+                                id='street'
+                                name='street'
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                value={formik.values.street}
+                                label='Οδός*'
+                                error={formik.touched.street ? formik.errors.street : undefined}
+                            />
+                        </div>
 
-                                </li>
-                                <li className="grid sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                                    <div>
-                                        <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                            <CustomInput
-                                                aria_label="Φόρμα εισαγωγής τηλεφώνου"
-                                                type="text"
-                                                id='ship_telephone'
-                                                name='ship_telephone'
-                                                onChange={formik.handleChange}
-                                                onBlur={formik.handleBlur}
-                                                value={formik.values.ship_telephone}
-                                                label='Τηλέφωνο'
-                                            />
-                                        </div>
-                                        {formik.errors.ship_telephone && formik.touched.ship_telephone &&
-                                            <small id="feedback" className="text-sm text-red-500">{formik.errors.ship_telephone}</small>}
-                                    </div>
-                                    <div>
-                                        <div className="relative rounded-lg border border-1 border-gray-300 bg-white appearance-none">
-                                            <CustomInput
-                                                aria_label="Φόρμα εισαγωγής κινητό"
-                                                type="text"
-                                                id='ship_mobilePhone'
-                                                name='ship_mobilePhone'
-                                                onChange={formik.handleChange}
-                                                onBlur={formik.handleBlur}
-                                                value={formik.values.ship_mobilePhone}
-                                                label='Κινητό*' />
-                                        </div>
-                                        {formik.errors.ship_mobilePhone && formik.touched.ship_mobilePhone &&
-                                            <small id="feedback" className="text-sm text-red-500">{formik.errors.ship_mobilePhone}</small>}
+                        <div>
+                            <label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                                Χώρα*
+                            </label>
+                            <select
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition-colors"
+                                id='country'
+                                name='country'
+                                onChange={(e) => handleCountryChange(e, false)}
+                                onBlur={formik.handleBlur}
+                                value={formik.values.country}>
+                                <option value="">--Επέλεξε Χώρα--</option>
+                                {countries?.countries?.data.map(x => (
+                                    <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>
+                                ))}
+                            </select>
+                            {formik.errors.country && formik.touched.country && (
+                                <small className="text-sm text-red-500 mt-1 block">{formik.errors.country}</small>
+                            )}
+                        </div>
 
-                                    </div>
-                                </li>
-                            </ul>
-                        </>}
-                    </li>
-                </ul>
+                        <div>
+                            <label htmlFor="state" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                                Νομός*
+                            </label>
+                            <select
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition-colors"
+                                id='state'
+                                name='state'
+                                onChange={(e) => handleStateChange(e, false)}
+                                onBlur={formik.handleBlur}
+                                value={formik.values.state}>
+                                <option value="">--Επέλεξε Νομό--</option>
+                                {!loadingState && states?.countries?.data[0]?.attributes.states.data.map(x => (
+                                    <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>
+                                ))}
+                            </select>
+                            {formik.errors.state && formik.touched.state && (
+                                <small className="text-sm text-red-500 mt-1 block">{formik.errors.state}</small>
+                            )}
+                        </div>
+
+                        <div>
+                            <label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                                Πόλη*
+                            </label>
+                            <select
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition-colors"
+                                id='city'
+                                name='city'
+                                onChange={(e) => handleCityChange(e, false)}
+                                onBlur={formik.handleBlur}
+                                value={formik.values.city}>
+                                <option value="">--Επέλεξε πόλη--</option>
+                                {!loadingRegions && regions?.states?.data[0]?.attributes.regions.data.map(x => (
+                                    <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>
+                                ))}
+                            </select>
+                            {formik.errors.city && formik.touched.city && (
+                                <small className="text-sm text-red-500 mt-1 block">{formik.errors.city}</small>
+                            )}
+                        </div>
+
+                        <div>
+                            <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                                Τ.Κ*
+                            </label>
+                            <input
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                value={formik.values.zipCode}
+                                id='zipCode'
+                                name="zipCode"
+                                list="postals-list"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition-colors"
+                                placeholder="Εισάγετε Τ.Κ."
+                            />
+                            {!loadingPostals && postals !== undefined && (
+                                <datalist id="postals-list">
+                                    {postals?.regions?.data[0]?.attributes.postal_codes.data.map(postal => (
+                                        <option key={postal.id} value={postal.attributes.postal.toString()} />
+                                    ))}
+                                </datalist>
+                            )}
+                            {formik.errors.zipCode && formik.touched.zipCode && (
+                                <small className="text-sm text-red-500 mt-1 block">{formik.errors.zipCode}</small>
+                            )}
+                        </div>
+
+                        <div>
+                            <CustomInput
+                                aria_label="Φόρμα εισαγωγής τηλεφώνου"
+                                type="text"
+                                id='telephone'
+                                name='telephone'
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                value={formik.values.telephone}
+                                label='Τηλέφωνο'
+                                error={formik.touched.telephone ? formik.errors.telephone : undefined}
+                            />
+                        </div>
+
+                        <div>
+                            <CustomInput
+                                aria_label="Φόρμα εισαγωγής κινητό"
+                                type="text"
+                                id='mobilePhone'
+                                name='mobilePhone'
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                value={formik.values.mobilePhone}
+                                label='Κινητό*'
+                                error={formik.touched.mobilePhone ? formik.errors.mobilePhone : undefined}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Delivery Notes */}
+                <div className="space-y-4">
+                    <label htmlFor="deliveryNotes" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+                        Σχόλια
+                    </label>
+                    <textarea
+                        className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition-colors"
+                        id="deliveryNotes"
+                        name="deliveryNotes"
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        value={formik.values.deliveryNotes}
+                        rows={4}
+                        maxLength={200}
+                        placeholder="Προσθέστε σχόλια για την παράδοση..."
+                    />
+                </div>
+
+                {/* Different Shipping Address */}
+                <div className="space-y-4">
+                    <div className='flex items-center p-4 bg-gray-50 dark:bg-slate-700 rounded-lg'>
+                        <input 
+                            type='checkbox' 
+                            id='different_shipping' 
+                            name='different_shipping' 
+                            checked={formik.values.different_shipping} 
+                            onChange={onDifferentAddressChange}
+                            className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label htmlFor='different_shipping' className="ml-3 text-sm font-medium text-gray-700 dark:text-slate-300 cursor-pointer">
+                            Θέλω να παραλάβω σε άλλη διεύθυνση
+                        </label>
+                    </div>
+
+                    {formik.values.different_shipping && (
+                        <div className="space-y-6 pt-4 border-t border-gray-200 dark:border-slate-700">
+                            <h3 className='text-lg font-semibold text-gray-900 dark:text-slate-200'>
+                                Διεύθυνση Αποστολής
+                            </h3>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <CustomInput
+                                        aria_label="Φόρμα εισαγωγής ονόματος"
+                                        type="text"
+                                        id='ship_firstname'
+                                        name='ship_firstname'
+                                        onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
+                                        value={formik.values.ship_firstname}
+                                        label='Όνομα*'
+                                        error={formik.touched.ship_firstname ? formik.errors.ship_firstname : undefined}
+                                    />
+                                </div>
+                                <div>
+                                    <CustomInput
+                                        aria_label="Φόρμα εισαγωγής επιθέτου"
+                                        type="text"
+                                        id='ship_lastname'
+                                        name='ship_lastname'
+                                        onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
+                                        value={formik.values.ship_lastname}
+                                        label='Επίθετο*'
+                                        error={formik.touched.ship_lastname ? formik.errors.ship_lastname : undefined}
+                                    />
+                                </div>
+
+                                <div className="md:col-span-2">
+                                    <CustomInput
+                                        aria_label="Φόρμα εισαγωγής Οδού"
+                                        type="text"
+                                        id='ship_street'
+                                        name='ship_street'
+                                        onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
+                                        value={formik.values.ship_street}
+                                        label='Οδός*'
+                                        error={formik.touched.ship_street ? formik.errors.ship_street : undefined}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label htmlFor="ship_country" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                                        Χώρα*
+                                    </label>
+                                    <select
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition-colors"
+                                        id='ship_country'
+                                        name='ship_country'
+                                        onChange={(e) => handleCountryChange(e, true)}
+                                        onBlur={formik.handleBlur}
+                                        value={formik.values.ship_country}>
+                                        <option value="">--Επέλεξε Χώρα--</option>
+                                        {countries?.countries?.data.map(x => (
+                                            <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>
+                                        ))}
+                                    </select>
+                                    {formik.errors.ship_country && formik.touched.ship_country && (
+                                        <small className="text-sm text-red-500 mt-1 block">{formik.errors.ship_country}</small>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label htmlFor="ship_state" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                                        Νομός*
+                                    </label>
+                                    <select
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition-colors"
+                                        id='ship_state'
+                                        name='ship_state'
+                                        onChange={(e) => handleStateChange(e, true)}
+                                        onBlur={formik.handleBlur}
+                                        value={formik.values.ship_state}>
+                                        <option value="">--Επέλεξε Νομό--</option>
+                                        {!loadingShipState && shipStates?.countries?.data[0]?.attributes.states.data.map(x => (
+                                            <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>
+                                        ))}
+                                    </select>
+                                    {formik.errors.ship_state && formik.touched.ship_state && (
+                                        <small className="text-sm text-red-500 mt-1 block">{formik.errors.ship_state}</small>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label htmlFor="ship_city" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                                        Πόλη*
+                                    </label>
+                                    <select
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition-colors"
+                                        id='ship_city'
+                                        name='ship_city'
+                                        onChange={(e) => handleCityChange(e, true)}
+                                        onBlur={formik.handleBlur}
+                                        value={formik.values.ship_city}>
+                                        <option value="">--Επέλεξε πόλη--</option>
+                                        {!loadingShipRegions && shipRegions?.states?.data[0]?.attributes.regions.data.map(x => (
+                                            <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>
+                                        ))}
+                                    </select>
+                                    {formik.errors.ship_city && formik.touched.ship_city && (
+                                        <small className="text-sm text-red-500 mt-1 block">{formik.errors.ship_city}</small>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label htmlFor="ship_zipCode" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                                        Τ.Κ*
+                                    </label>
+                                    <input
+                                        onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
+                                        value={formik.values.ship_zipCode}
+                                        id='ship_zipCode'
+                                        name="ship_zipCode"
+                                        list="ship-postals-list"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition-colors"
+                                        placeholder="Εισάγετε Τ.Κ."
+                                    />
+                                    {!loadingShipPostals && shipPostals !== undefined && (
+                                        <datalist id="ship-postals-list">
+                                            {shipPostals?.regions?.data[0]?.attributes.postal_codes.data.map(postal => (
+                                                <option key={postal.id} value={postal.attributes.postal.toString()} />
+                                            ))}
+                                        </datalist>
+                                    )}
+                                    {formik.errors.ship_zipCode && formik.touched.ship_zipCode && (
+                                        <small className="text-sm text-red-500 mt-1 block">{formik.errors.ship_zipCode}</small>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <CustomInput
+                                        aria_label="Φόρμα εισαγωγής τηλεφώνου"
+                                        type="text"
+                                        id='ship_telephone'
+                                        name='ship_telephone'
+                                        onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
+                                        value={formik.values.ship_telephone}
+                                        label='Τηλέφωνο'
+                                        error={formik.touched.ship_telephone ? formik.errors.ship_telephone : undefined}
+                                    />
+                                </div>
+
+                                <div>
+                                    <CustomInput
+                                        aria_label="Φόρμα εισαγωγής κινητό"
+                                        type="text"
+                                        id='ship_mobilePhone'
+                                        name='ship_mobilePhone'
+                                        onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
+                                        value={formik.values.ship_mobilePhone}
+                                        label='Κινητό*'
+                                        error={formik.touched.ship_mobilePhone ? formik.errors.ship_mobilePhone : undefined}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </form>
         </section>
     )

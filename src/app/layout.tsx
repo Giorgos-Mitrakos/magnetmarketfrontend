@@ -20,7 +20,7 @@ import { Suspense } from 'react';
 import BestPriceScript from '@/components/atoms/bestPrice360';
 import BestPriceBadge from '@/components/atoms/bestPriceBadge';
 import CookieBannerWrapper from '@/components/molecules/homepage/cookieBannerWrapper';
-import Image from 'next/image';
+
 const PixelTracker = dynamic(() => import("../components/atoms/pixelTracker"), { ssr: false });
 
 const inter = Inter({ subsets: ['greek'] })

@@ -83,9 +83,9 @@ const CategoryItem = ({
             {content}
         </button>
     ) : (
-        <Link href="#" onClick={onClick} className="block">
+        <>
             {content}
-        </Link>
+        </>
     );
 };
 

@@ -1,4 +1,3 @@
-
 import Banks from "@/components/atoms/banks";
 import ClearCartItems from "@/components/atoms/clearCart";
 import BestPriceOrderTracking from "@/components/atoms/bestPriceOrderTracking"
@@ -8,7 +7,7 @@ import { GET_ORDER } from "@/lib/queries/shippingQuery";
 import { requestSSR } from "@/repositories/repository";
 import { Metadata } from "next"
 import Image from "next/image"
-import { FaRegImage } from "react-icons/fa6";
+import { FaRegImage, FaCheckCircle, FaTruck, FaCreditCard, FaCalendarAlt, FaEuroSign } from "react-icons/fa";
 
 // Function to Add days to current date
 function addDays(date: Date, days: number) {
@@ -108,7 +107,6 @@ export default async function Success() {
         revenue: data.order.data.attributes.total,
         shipping: data.order.data.attributes.shipping.cost,
         tax: data.order.data.attributes.total * 0.24,
-        // method: 'card', // Example payment method
         currency: 'euro',
     };
 
@@ -125,75 +123,151 @@ export default async function Success() {
     return (
         <>
             <ClearCartItems />
-            <section className="rounded-lg p-4 bg-gradient-to-tr from-siteColors-lightblue via-siteColors-blue to-siteColors-pink mb-16">
-                <h1 className="text-2xl mb-4 font-semibold text-slate-200 text-center">Ευχαριστούμε για την παραγγελία!</h1>
-                <h2 className="text-xl mb-4 font-semibold text-slate-200 text-center">Αρ. {data.order.data.id}</h2>
-                {approvalCode &&
-                    <div className="text-lg mb-4 text-slate-200 text-center">
-                        <h2>H συναλλαγή σας εγκρίθηκε</h2>
-                        <p>Κωδικός έγκρισης: <span className="font-bold">{approvalCode.ApprovalCode}</span></p>
-                    </div>
-                }
-                <div className="flex justify-center flex-wrap gap-4">
-                    {data && data.order.data.attributes.products.map(item => (
-                        <div key={item.id} className="grid grid-cols-5 h-60 w-96 shadow-md rounded-md bg-white">
-                            <div className="flex relative justify-center items-center p-4 col-span-2">
-                                {item.image ? <Image
-                                    className="object-contain py-4 pl-4"
-                                    key={item.id}
-                                    src={`${process.env.NEXT_PUBLIC_API_URL}${item.image.data.attributes.formats.small ? item.image.data.attributes.formats.small.url : item.image.data.attributes.url}`}
-                                    alt={item.name}
-                                    // height={120}
-                                    // width={120}
-                                    fill
-                                /> :
-                                    <FaRegImage className='h-40 w-40 text-siteColors-purple dark:text-slate-200' />}
+            <div className="min-h-screen bg-gradient-to-br from-siteColors-lightblue/10 via-siteColors-blue/10 to-siteColors-pink/10 mb-16 py-8 px-4">
+                <div className="max-w-6xl mx-auto">
+                    {/* Header Section */}
+                    <div className="text-center mb-10">
+                        <div className="flex justify-center mb-4">
+                            <div className="bg-green-100 p-3 rounded-full">
+                                <FaCheckCircle className="h-12 w-12 text-green-500" />
                             </div>
-                            <div className="flex flex-col justify-between col-span-3 p-4 space-y-2 text-gray-500">
-                                <h2 className="text-siteColors-purple font-semibold line-clamp-4 row-span-2">{item.name}</h2>
-                                <div className="flex flex-col">
-                                    <div className="flex space-x-2">
-                                        <h3>Κωδικός:</h3>
-                                        <p className="text-left">{item.id}</p>
+                        </div>
+                        <h1 className="text-3xl md:text-4xl font-bold text-siteColors-purple dark:text-slate-100 mb-2">
+                            Ευχαριστούμε για την παραγγελία!
+                        </h1>
+                        <p className="text-lg text-gray-600 dark:text-slate-200">
+                            Η παραγγελία σας έχει επιβεβαιωθεί και βρίσκεται σε επεξεργασία
+                        </p>
+                        {approvalCode && (
+                            <div className="mt-4 p-3 bg-blue-50 rounded-lg inline-block">
+                                <p className="text-blue-800">
+                                    Κωδικός έγκρισης: <span className="font-bold">{approvalCode.ApprovalCode}</span>
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+                        {/* Order Summary */}
+                        <div className="bg-gradient-to-r from-siteColors-lightblue to-siteColors-pink p-4 text-white">
+                            <h2 className="text-xl font-semibold">
+                                Περίληψη Παραγγελίας <span className="font-normal">#{data.order.data.id}</span>
+                            </h2>
+                        </div>
+
+                        {/* Products Grid */}
+                        <div className="p-6">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-4">Προϊόντα</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {data && data.order.data.attributes.products.map(item => (
+                                    <div key={item.id} className="flex border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                                        <div className="relative w-24 h-24 flex-shrink-0">
+                                            {item.image ? (
+                                                <Image
+                                                    className="object-cover"
+                                                    src={`${process.env.NEXT_PUBLIC_API_URL}${item.image.data.attributes.formats.small ? item.image.data.attributes.formats.small.url : item.image.data.attributes.url}`}
+                                                    alt={item.name}
+                                                    fill
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                                                    <FaRegImage className='h-8 w-8 text-gray-400' />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="p-3 flex-grow">
+                                            <h3 className="font-medium text-siteColors-purple line-clamp-2">{item.name}</h3>
+                                            <div className="mt-2 text-sm text-gray-600">
+                                                <p>Κωδικός: {item.id}</p>
+                                                <p>Ποσότητα: {item.quantity}</p>
+                                                <p className="font-semibold mt-1">
+                                                    {(item.is_sale && item.sale_price ? item.sale_price : item.price).toFixed(2)} €
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="flex space-x-2">
-                                        <h3>Ποσότητα:</h3>
-                                        <p>{item.quantity}</p>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Order Details */}
+                        <div className="border-t p-6">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-4">Λεπτομέρειες Παραγγελίας</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-4">
+                                    <div className="flex items-start">
+                                        <div className="bg-siteColors-lightblue/10 p-2 rounded-full mr-3">
+                                            <FaCreditCard className="text-siteColors-lightblue" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-medium text-gray-700">Τρόπος Πληρωμής</h4>
+                                            <p className="text-gray-600">{data.order.data.attributes.payment.name}</p>
+                                            {data.order.data.attributes.installments > 1 && (
+                                                <p className="text-sm text-gray-500 mt-1">
+                                                    Αριθμός δόσεων: {data.order.data.attributes.installments}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start">
+                                        <div className="bg-siteColors-pink/10 p-2 rounded-full mr-3">
+                                            <FaTruck className="text-siteColors-pink" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-medium text-gray-700">Τρόπος Αποστολής</h4>
+                                            <p className="text-gray-600">{data.order.data.attributes.shipping.name}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="flex items-start">
+                                        <div className="bg-siteColors-blue/10 p-2 rounded-full mr-3">
+                                            <FaCalendarAlt className="text-siteColors-blue" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-medium text-gray-700">Εκτιμώμενη Παράδοση</h4>
+                                            <p className="text-gray-600">
+                                                {earlyDeviveryDate.toLocaleDateString("el-GR")} - {lateDeviveryDate.toLocaleDateString("el-GR")}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start">
+                                        <div className="bg-siteColors-purple/10 p-2 rounded-full mr-3">
+                                            <FaEuroSign className="text-siteColors-purple" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-medium text-gray-700">Σύνολο</h4>
+                                            <p className="text-xl font-bold text-siteColors-purple">
+                                                {data.order.data.attributes.total.toFixed(2)} €
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    ))}
+                    </div>
+
+                    {/* Bank Details Section */}
+                    {data.order.data.attributes.payment.name === "Τραπεζική κατάθεση" && (
+                        <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+                            <div className="bg-gradient-to-r from-siteColors-lightblue to-siteColors-pink p-4 text-white">
+                                <h2 className="text-xl font-semibold">Τραπεζικοί Λογαριασμοί</h2>
+                            </div>
+                            <div className="p-6">
+                                <Banks />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tracking Component */}
+                    <BestPriceOrderTracking orderDetails={orderDetails} products={products} />
                 </div>
-                <div className="rounded-lg shadow-md p-4 mt-4 text-gray-500 bg-white">
-                    <div className="flex space-x-4">
-                        <h3>Τρόπος Πληρωμής:</h3>
-                        <p>{data.order.data.attributes.payment.name}</p>
-                        {data.order.data.attributes.installments > 1 &&
-                            <p>Αριθμός δόσεων: {data.order.data.attributes.installments}</p>}
-                    </div>
-                    <div className="flex space-x-4">
-                        <h3>Τρόπος Αποστολής:</h3>
-                        <p>{data.order.data.attributes.shipping.name}</p>
-                    </div>
-                    <div className="flex space-x-4">
-                        <h3>Πιθανή ημ/νια παράδοσης:</h3>
-                        <p>{earlyDeviveryDate.toLocaleDateString("el-GR")} - {lateDeviveryDate.toLocaleDateString("el-GR")}</p>
-                    </div>
-                    <div className="flex space-x-4">
-                        <h3>Σύνολο:</h3>
-                        <p>{data.order.data.attributes.total.toFixed(2)} €</p>
-                    </div>
-                </div>
-                {data.order.data.attributes.payment.name === "Τραπεζική κατάθεση" && <div className="rounded-lg shadow-md p-4 mt-4 text-gray-500 bg-white">
-                    <h2 className="text-xl mb-4 font-semibold text-siteColors-purple text-center">Τραπεζικοί Λογαριασμοί</h2>
-                    <Banks />
-                </div>}
-            </section>
-            <BestPriceOrderTracking orderDetails={orderDetails} products={products} />
+            </div>
         </>
     )
-
 }
 
 export const metadata: Metadata = {

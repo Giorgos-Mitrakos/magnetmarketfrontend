@@ -78,8 +78,8 @@ export default function LoginComp() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
-            <div className="max-w-6xl mx-auto flex flex-col lg:flex-row rounded-2xl overflow-hidden shadow-xl bg-white">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-800 py-8 px-4">
+            <div className="max-w-6xl mx-auto flex flex-col lg:flex-row rounded-2xl overflow-hidden shadow-xl bg-white ">
                 {/* Left Panel - Branding & Features */}
                 <div className="w-full lg:w-2/5 bg-gradient-to-b from-siteColors-blue to-siteColors-purple text-white p-8 lg:p-12 flex flex-col justify-between">
                     <div>
@@ -87,7 +87,7 @@ export default function LoginComp() {
                             <FaBagShopping className="h-8 w-8 mr-2" />
                             <span className="text-2xl font-bold">MagnetMarket</span>
                         </div>
-                        <h1 className="text-3xl lg:text-4xl font-bold mb-6">Καλώς ήρθατε πίσω</h1>
+                        <h1 className="text-3xl lg:text-4xl font-bold mb-6">Καλώς ήρθατε!</h1>
                         <p className="text-blue-100 mb-10">
                             Συνδεθείτε για να συνεχίσετε με τις αγορές σας και να απολαύσετε μια βελτιωμένη εμπειρία shopping.
                         </p>
