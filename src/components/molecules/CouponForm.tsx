@@ -82,7 +82,7 @@ export default function CouponForm() {
                 Έχετε κουπόνι;
             </h3>
 
-            <form onSubmit={handleSubmit} className="flex gap-2">
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row lg:flex-col gap-2">
                 <div className="flex-1 relative">
                     <input
                         type="text"
