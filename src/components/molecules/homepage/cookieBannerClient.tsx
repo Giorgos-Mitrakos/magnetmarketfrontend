@@ -93,7 +93,7 @@ export default function CookieBannerClient(consent: { consent: boolean }) {
 
       {/* Footer note */}
       <p className="text-xs text-gray-500 mt-3 text-center">
-        Κάνοντας κλικ στην "Αποδοχή όλων", συμφωνείτε με την χρήση όλων των cookies.
+        Κάνοντας κλικ στην &quot;Αποδοχή όλων&quot;, συμφωνείτε με την χρήση όλων των cookies.
       </p>
     </div>
   );
