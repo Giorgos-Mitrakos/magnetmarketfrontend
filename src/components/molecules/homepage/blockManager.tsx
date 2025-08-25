@@ -1,24 +1,15 @@
 import dynamic from 'next/dynamic'
-// import SiteFeatures from "@/components/organisms/siteFeatures";
-// import BrandsBanner from "./brandsBanner";
-// import DoubleBanner from "./doubleBanner";
-// import HotOrSale from "./hotOrSale";
-// import ListProductsBanner from "./listProductsBanner";
-// import SingleBanner from "./singleBanner";
-// import TripleBanner from "./tripleBanner";
-// import HeroBanners from "@/components/organisms/heroBanners";
-// import CategoriesBanner from "./categoriesBanner";
 
-const HeroBanners = dynamic(() => import('@/components/organisms/heroBanners'), { loading: () => <p>Loading...</p>, })
-const BrandsBanner = dynamic(() => import('./brandsBanner'), { loading: () => <p>Loading...</p>, })
-const CategoriesBanner = dynamic(() => import('./categoriesBanner'), { loading: () => <p>Loading...</p>, })
-const SiteFeatures = dynamic(() => import('@/components/organisms/siteFeatures'), { loading: () => <p>Loading...</p>, })
-const DoubleBanner = dynamic(() => import('./doubleBanner'), { loading: () => <p>Loading...</p>, })
-const HotOrSale = dynamic(() => import('./hotOrSale'), { loading: () => <p>Loading...</p>, })
-const ListProductsBanner = dynamic(() => import('./listProductsBanner'), { loading: () => <p>Loading...</p>, })
-const SingleBanner = dynamic(() => import('./singleBanner'), { loading: () => <p>Loading...</p>, })
-const TripleBanner = dynamic(() => import('./tripleBanner'), { loading: () => <p>Loading...</p>, })
-
+// Dynamic imports χωρίς custom loading (τα components θα έχουν εσωτερικά τα skeletons τους)
+const HeroBanners = dynamic(() => import('@/components/organisms/heroBanners'))
+const BrandsBanner = dynamic(() => import('./brandsBanner'))
+const CategoriesBanner = dynamic(() => import('./categoriesBanner'))
+const SiteFeatures = dynamic(() => import('@/components/organisms/siteFeatures'))
+const DoubleBanner = dynamic(() => import('./doubleBanner'))
+const HotOrSale = dynamic(() => import('./hotOrSale'))
+const ListProductsBanner = dynamic(() => import('./listProductsBanner'))
+const SingleBanner = dynamic(() => import('./singleBanner'))
+const TripleBanner = dynamic(() => import('./tripleBanner'))
 
 const getBlockComponent = ({ __typename, ...rest }: { __typename: string }, index: string) => {
     let Block: any;
@@ -51,15 +42,21 @@ const getBlockComponent = ({ __typename, ...rest }: { __typename: string }, inde
         case 'ComponentGlobalCarousel':
             Block = HeroBanners;
             break;
+        default:
+            return null;
     }
 
-    return Block ? <Block tabIndex={index + 1} key={`index-${index}`} id={`index-${index}`} {...rest} /> : null;
+    return Block ? <Block key={`index-${index}`} id={`index-${index}`} {...rest} /> : null;
 };
 
 const BlockManager = ({ blocks }: any) => {
-    return <div className="space-y-16 w-full">
-        {blocks.map(getBlockComponent)}
-    </div>;
+    return (
+        <div className="space-y-16 w-full">
+            {blocks.map((block: any, index: number) =>
+                getBlockComponent(block, index.toString())
+            )}
+        </div>
+    );
 };
 
 BlockManager.defaultProps = {

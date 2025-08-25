@@ -83,9 +83,9 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
                   {children}
                 </main>
                 <Footer />
-                <EpayIcons />
+                {/* <EpayIcons /> */}
                 <BestPriceBadge />
-                <Copyright />
+                {/* <Copyright /> */}
                 <CookieBannerWrapper />
                 <MobileTabMenu />
               </MenuProvider>

@@ -5,10 +5,10 @@ import { ProductCardProps } from "../organisms/productCard"
 import { ICartItem } from "@/lib/interfaces/cart"
 import { useCheckout } from "@/context/checkout"
 import { addToCartToast } from "@/lib/toasts/cartToasts"
+import Link from "next/link"
 
 
-function ProductCardFoot({ product }: ProductCardProps) {
-    // const { cart, dispatch } = useCart()
+const ProductCardFoot = ({ product }: ProductCardProps) => {
     const { dispatch } = useCheckout()
 
     const item: ICartItem = {
@@ -32,33 +32,31 @@ function ProductCardFoot({ product }: ProductCardProps) {
     }
 
     return (
-        <div className="grid grid-cols-3 gap-1 text-3xl text-slate-50">
+        <div className="grid grid-cols-3 gap-2 text-xl text-slate-50 mt-4">
             <button
-                className="flex justify-center items-center text-slate-400 dark:text-slate-300 rounded-md
-                    hover:bg-gradient-to-br hover:from-siteColors-pink hover:to-siteColors-purple hover:text-white"
+                className="flex justify-center items-center p-2 text-slate-400 dark:text-slate-400 rounded-lg
+                  bg-gray-100 dark:bg-slate-700 hover:bg-siteColors-pink/20 hover:text-siteColors-pink dark:hover:bg-siteColors-pink/20 transition-all duration-200"
                 aria-label="Προσθήκη στα αγαπημένα">
-                <FaHeart
-                    aria-label="Καρδιά" />
-            </button>
-            <button
-                className="flex justify-center items-center text-slate-400 dark:text-slate-300 rounded-md 
-                    hover:bg-gradient-to-br hover:from-siteColors-pink hover:to-siteColors-purple hover:text-white"
-                aria-label="Επισκόπηση προϊόντος">
-                <FaRegEye
-                    aria-label="Επισκόπηση προϊόντος" />
-            </button>
-            <button
-                onClick={() => handleAddProductClick(item)}
-                className="grid place-content-center 
-                    bg-gradient-to-br from-siteColors-lightblue to-siteColors-blue
-                    hover:bg-gradient-to-br hover:from-siteColors-pink hover:to-siteColors-purple hover:text-white
-                     rounded-md"
-                aria-label="Προσθήκη προϊόντος στο το καλάθι σου">
-                <FaOpencart
-                    aria-label="Καλάθι" />
+                <FaHeart aria-hidden="true" />
             </button>
 
-            {/* <button className='p-2 w-full mx-auto text-white mt-4 tracking-wide rounded-lg shadow-inner bg-gradient-to-t from-siteColors-lightblue via-siteColors-blue to-siteColors-lightblue hover:bg-gradient-to-tl'>Αγόρασε Τώρα</button> */}
+            <Link
+                href={`/product/${product.attributes.slug}`}
+                className="flex justify-center items-center p-2 text-slate-400 dark:text-slate-400 rounded-lg
+                  bg-gray-100 dark:bg-slate-700 hover:bg-siteColors-blue/20 hover:text-siteColors-blue dark:hover:bg-siteColors-blue/20 transition-all duration-200"
+                aria-label="Επισκόπηση προϊόντος">
+                <FaRegEye aria-hidden="true" />
+            </Link>
+
+            <button
+                onClick={() => handleAddProductClick(item)}
+                className="flex justify-center items-center p-2 rounded-lg
+                  bg-gradient-to-br from-siteColors-lightblue to-siteColors-blue
+                  hover:from-siteColors-pink hover:to-siteColors-purple 
+                  transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+                aria-label="Προσθήκη προϊόντος στο καλάθι σου">
+                <FaOpencart aria-hidden="true" />
+            </button>
         </div>
     )
 }

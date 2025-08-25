@@ -1,14 +1,21 @@
 import Image from "next/image";
 import EpayIcon from "../../../public/epay_icons.png"
 
-const EpayIcons = () => {
-    return (
-        <div className="flex justify-center bg-[#559be3] items-center space-x-4 px-8 ">
-            <Image src={EpayIcon} alt="Visa" 
-                height={64} />
-        </div>
-    );
 
-}
+const EpayIcons = () => {
+  return (
+    <div className="flex flex-col items-center">
+      <span className="text-white font-bold text-sm mb-3">Ασφαλείς Μέθοδοι Πληρωμής</span>
+      <div className="bg-white p-3 rounded-lg shadow">
+        <Image 
+          src={EpayIcon} 
+          alt="Payment methods" 
+          height={48} 
+          className="h-12 w-auto object-contain"
+        />
+      </div>
+    </div>
+  );
+};
 
 export default EpayIcons
