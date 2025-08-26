@@ -26,7 +26,7 @@ const ProductCardHead = (props: ProductCardHeadProps) => {
     : null
 
   return (
-    <div className="flex h-full pb-2 items-center">
+    <div className="grid grid-cols-2 h-full pb-2 items-center">
       <div className="relative w-full h-8">
         {logo && (
           <Link className="h-full w-full block" href={`/brands/${props.brand.data.attributes.slug}`}>
@@ -43,7 +43,7 @@ const ProductCardHead = (props: ProductCardHeadProps) => {
       
       {discount && profit && is_sale && (
         <div className="flex justify-end">
-          <div className="relative bg-gradient-to-br from-siteColors-pink to-siteColors-purple text-white text-xs font-bold py-1 px-3 rounded-full shadow-md transform rotate-0">
+          <div className="bg-gradient-to-br from-siteColors-pink to-siteColors-purple text-center text-white text-xs font-bold py-1 px-2 rounded-full shadow-md">
             {profit < 50 ? `-${discount.toFixed(0)}%` : `Κέρδος ${profit.toFixed(2)}€`}
           </div>
         </div>

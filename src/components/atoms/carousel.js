@@ -22,13 +22,13 @@ const Carousel = ({ products }) => {
                         slidesPerView: 1,
                         spaceBetween: 15
                     },
-                    540: {
+                    620: {
                         slidesPerView: 2,
                         spaceBetween: 15
                     },
-                    768: {
+                    968: {
                         slidesPerView: 3,
-                        spaceBetween: 20
+                        spaceBetween: 10
                     },
                     1280: {
                         slidesPerView: 4,

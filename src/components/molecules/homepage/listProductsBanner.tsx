@@ -39,7 +39,7 @@ const ListProductsBannerSkeleton = () => (
         <div className="h-6 bg-white/30 rounded w-48 mx-auto animate-pulse"></div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {[...Array(4)].map((_, i) => (
+        {[...Array(2)].map((_, i) => (
           <ProductCardSkeleton key={i}/>
         ))}
       </div>
