@@ -15,7 +15,7 @@ const Carousel = ({ products }) => {
     return (
         <div className="relative pb-10">
             <Swiper
-                className="mySwiper"
+                className="mySwiper h-[630px]"
                 spaceBetween={20}
                 breakpoints={{
                     0: {
@@ -66,7 +66,7 @@ const Carousel = ({ products }) => {
                 </div>
 
                 {/* Custom Pagination */}
-                <div className="swiper-pagination absolute bottom-0 left-0 right-0 flex justify-center gap-2"></div>
+                <div className="swiper-pagination absolute bottom-[-30px] left-0 right-0 flex justify-center gap-1"></div>
             </Swiper>
         </div>
     );

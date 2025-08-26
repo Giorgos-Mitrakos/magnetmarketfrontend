@@ -98,7 +98,7 @@ export default function LoginComp() {
                                     <FiTruck className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold">Γρήγορη Checkout</h3>
+                                    <h3 className="font-semibold">Γρήγορες Αγορές</h3>
                                     <p className="text-blue-200 text-sm">Ολοκληρώστε γρήγορα τις αγορές σας</p>
                                 </div>
                             </div>

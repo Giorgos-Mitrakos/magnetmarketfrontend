@@ -23,7 +23,7 @@ const ProductCard = (props: ProductCardProps) => {
     const brand = product.brand
 
     return (
-        <div className="group relative py-2 px-1 max-w-96 overflow-hidden transition-all duration-300 hover:scale-[1.02]">
+        <div className="group relative h-full pt-2 pb-12 px-1 max-w-96 overflow-hidden transition-all duration-300 hover:scale-[1.02]">
             <div className="grid h-full grid-rows-cardLayout shadow-md hover:shadow-xl dark:shadow-slate-700 dark:hover:shadow-slate-600 bg-white dark:bg-slate-800 rounded-xl m-1 p-4 transition-all duration-300">
                 <ProductCardHead brand={brand} product={props.product} />
 

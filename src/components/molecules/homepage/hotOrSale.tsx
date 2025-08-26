@@ -130,7 +130,7 @@ const HotOrSale = ({ id, title, type }: {
                 </div>
 
                 {/* Content area - smooth transitions */}
-                <div className="bg-white dark:bg-slate-800 p-4 transition-opacity duration-300">
+                <div className="bg-white h-full dark:bg-slate-800 p-4 transition-opacity duration-300">
                     {error ? (
                         <div className="flex items-center justify-center h-[600px]">
                             <div className="text-center text-gray-500">
