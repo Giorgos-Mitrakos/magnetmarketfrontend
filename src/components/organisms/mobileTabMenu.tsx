@@ -10,13 +10,14 @@ import { MenuContext } from '@/context/menu';
 import dynamic from 'next/dynamic';
 import { ToggleMobileMenu } from '../atoms/toggleMobileMenu';
 import { useCheckout } from '@/context/checkout';
+import { MenuData } from './mainMenu';
 
 const SearchInput = dynamic(() => import('@/components/molecules/searchInput'), {
     ssr: false,
     loading: () => <p>Loading...</p>
 })
 
-export default function MobileTabMenu() {
+export default function MobileTabMenu({ menuData }: { menuData: MenuData[] }) {
     const { data: session, status } = useSession()
 
     // const { cart } = useCart()
@@ -28,7 +29,7 @@ export default function MobileTabMenu() {
             <div className={`fixed lg:hidden bottom-0 left-0 z-20 h-full w-full shadow-lg bg-blue-100 dark:bg-slate-600
             transition-transform transform ${isMenuOpen ? "translate-x-0" :
                     "-translate-x-full"} duration-500`}>
-                <MobileDrawer />
+                <MobileDrawer menuData={menuData} />
             </div>
             <div className={`fixed lg:hidden rounded w-full z-50 top-0 bg-white shadow-lg flex justify-center py-4 px-8 
                 transition-transform transform ${isSearchOpen ? "translate-y-0" :

@@ -1,4 +1,3 @@
-'use client'
 import Dropdown from "../molecules/dropdown";
 
 export interface DropdownItem {
@@ -34,8 +33,12 @@ const itemsOrderBy: DropdownFilter =
     filter: "sort",
     items: [
         {
+            title: "ΔΗΜΟΦΙΛΗ",
+            route: ""
+        },
+        {
             title: "ΤΙΜΗ ΑΥΞΟΥΣΑ",
-            route: "price"
+            route: "price:asc"
         },
         {
             title: "ΤΙΜΗ ΦΘΙΝΟΥΣΑ",
@@ -43,7 +46,7 @@ const itemsOrderBy: DropdownFilter =
         },
         {
             title: "ΑΛΦΑΒΗΤΙΚΑ Α->Ω",
-            route: "name"
+            route: "name:asc"
         },
         {
             title: "ΑΛΦΑΒΗΤΙΚΑ Ω->Α",

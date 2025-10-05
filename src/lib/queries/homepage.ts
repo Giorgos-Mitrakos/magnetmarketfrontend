@@ -1,356 +1,117 @@
-import { gql } from "graphql-request";
-import { IImageAttr } from "../interfaces/image";
-import { IProdChar } from "../interfaces/product";
+import { flattenJSON } from "../helpers/helpers";
+import { IImageAttr, IImageFormats } from "../interfaces/image";
 
-export const GET_HOMEPAGE = gql`
-{
-    homepage {
-    data {
-      attributes {        
-        body {
-          __typename
-          ... on ComponentHomepageBannerListProducts {
-            title
-            subtitle
-            products {
-              data {
-                id
-                attributes {
-                  name
-                  slug
-                  sku
-                  mpn
-                  barcode
-                  price
-                  sale_price
-                  is_sale
-                  is_hot
-                  inventory
-                  is_in_house
-                  weight
-                  height
-                  width
-                  length
-                  status
-                  category {
-                    data {
-                      attributes {
-                        name
-                        parents {
-                          data {
-                            attributes {
-                              name
-                              slug                    
-                              parents {
-                                data {
-                                  attributes {
-                                    name
-                                    slug
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                  brand {
-                    data {
-                      attributes {
-                        name
-                        slug
-                        logo {
-                          data {
-                            attributes {
-                              name
-                              url
-                              alternativeText
-                              formats
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                  image {
-                    data {
-                      attributes {
-                        name
-                        url
-                        formats
-                        alternativeText
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-          ... on ComponentHomepageCategoryBanner {
-            category {
-              data {
-                attributes {
-                  name
-                }
-              }
-            }
-            title
-            subtitle
-            image {
-              data {
-                attributes {
-                  name
-                  alternativeText
-                  url
-                  width
-                  height
-                }
-              }
-            }
-          }
-          ... on ComponentHomepageSingleBanner {
-            singleBanner{
-              data{
-                attributes{
-                  alternativeText
-                  url
-                  width
-                  height
-                }
-              }
-            }
-            href
-            target
-          }
-          ... on ComponentHomepageDoubleBanner {
-            rightBanner{
-              data{
-                attributes{
-                  alternativeText
-                  url
-                  width
-                  height
-                }
-              }
-            }
-            rightHref
-            rightTarget
-            leftBanner{
-              data{
-                attributes{
-                  alternativeText
-                  url
-                  width
-                  height
-                }
-              }
-            }
-            leftHref
-            leftTarget
-          }
-          ... on ComponentHomepageTripleBanner {
-            rightTripleBanner{
-              data{
-                attributes{
-                  alternativeText
-                  url
-                  width
-                  height
-                }
-              }
-            }
-            rightTripleHref
-            rightTripleTarget
-            middleTripleBanner{
-              data{
-                attributes{
-                  alternativeText
-                  url
-                  width
-                  height
-                }
-              }
-            }
-            middleTripleHref
-            middleTripleTarget
-            leftTripleBanner{
-              data{
-                attributes{
-                  alternativeText
-                  url
-                  width
-                  height
-                }
-              }
-            }
-            leftTripleHref
-            leftTripleTarget
-          }
-          ... on ComponentHomepageHotOrSale {
-            title
-            type
-          }
-          ...on ComponentHomepageCategoriesBanner{
-            categories(pagination:{limit:-1}){
-              data{
-                id
-                attributes{
-                  name
-                  slug
-                  parents{
-                    data{
-                      attributes{
-                        slug
-                        parents{
-                          data{
-                            attributes{
-                              slug
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                  image{
-                    data{
-                      attributes{
-                        url
-                        name
-                        alternativeText
-                        formats
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-          ...on ComponentHomepageBrandsBanner{
-            id
-            brands(pagination:{limit:-1}){
-              data{
-                id
-                attributes{
-                  name
-                  slug
-                  logo{
-                    data{
-                      attributes{
-                        url
-                        name
-                        alternativeText
-                        formats
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-          ...on ComponentGlobalCarousel{
-            Banner{
-              image{
-                data{
-                  attributes{
-                    url
-                    name
-                    alternativeText
-                    formats
-                  }
-                }
-              }
-              backgroundColor
-              link_label
-              href
-              target
-              title
-              text_body
-            }
-          }
-        }
+export async function getHomepageData() {
+  const myHeaders = new Headers();
+
+  myHeaders.append('Content-Type', 'application/json')
+  myHeaders.append('Authorization', `Bearer ${process.env.ADMIN_JWT_SECRET}`,)
+
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/homepage`,
+    {
+      method: "GET",
+      headers: myHeaders,
+      next: {
+        revalidate: 10, // Χρήση της μεταβλητής cacheTime
       }
     }
-  }
-}`
+  )
 
-export interface IHomepageProps {
-  homepage: {
-    data: {
-      attributes: {
-        // Carousel: ICarousel[]
-        fixed_hero_banners: IFixedHeroBanners[]
-        body: {
-          __typename: string
-          title: string
-          subtitle: string
-          products: {
-            data: [{
-              id: number
-              attributes: {
-                name: string
-                slug: string
-                prod_chars: IProdChar[]
-                brand: {
-                  data: {
-                    attributes: {
-                      name: string,
-                      slug: string,
-                      logo: { data: IImageAttr }
-                    }
-                  }
-                }
-                image: { data: IImageAttr }
-              }
-            }]
-          }
-          category: {
-            data: {
-              attributes: {
-                name: string
-              }
+  const data = await response.json()
 
-            }
-            title: string
-            subtitle: string
-            image: { data: IImageAttr }
-          }
-        }
-      }
-    }
-  }
+  const flattenedData = flattenJSON(data);
+  
+  return flattenedData
 }
 
-export interface IFixedHeroBanners {
-  __typename: string
-  image: {
-    data: {
-      attributes: {
-        name: string
-        alternativeText: string
-        url: string
-      }
-    }
-  }
+type TBanner = {
+  height: number,
+  width: number,
+  alternativeText: string,
+  url: string
+}
 
-  link_label: string
+export interface IHomeSingleBanner {
+  id: number
   href: string
   target: string
+  singleBanner: TBanner
 }
 
-export interface ICarousel {
-  __typename: string,
+export interface IHomeDoubleBanner {
+  id: number
+  rightHref: string
+  rightTarget: string
+  leftHref: string
+  leftTarget: string
+  rightBanner: TBanner
+  leftBanner: TBanner
+}
+export interface IHomeTripleBanner {
+  id: number
+  rightTripleHref: string
+  rightTripleTarget: string
+  middleTripleHref: string
+  middleTripleTarget: string
+  leftTripleHref: string
+  leftTripleTarget: string
+  rightTripleBanner: TBanner
+  middleTripleBanner: TBanner
+  leftTripleBanner: TBanner
+}
+
+export interface IHomeCategoriesBanner {
   id: string,
-  image: {
-    data: {
-      attributes: {
-        name: string
-        alternativeText: string
-        url: string
-      }
-    }
+  categories: {
+    id: string
+    name: string
+    slug: string
+    link: string
+    parents: {
+      slug: string
+      parents: {
+        slug: string
+      }[]
+    }[]
+    image: IImageAttr
+  }[]
+}
+
+export interface IHomeBrandsBanner {
+  id: string,
+  name: string,
+  slug: string,
+  logo: {
+    name: string
+    alternativeText: string
+    url: string
+    formats: IImageFormats
   }
-  link_label: string
-  href: string
-  target: string
+}
+
+export interface IHomeHotOrSale {
+  id: string
+  title: string
+  type: string
+}
+
+export interface IHeroCarouselBanner {
+  id: string,
+  link_label: string,
+  href: string,
+  target: string,
+  title: string,
+  text_body: string,
+  backgroundColor: string,
+  caption: string
+  cta: string
+  image: {
+    name: string
+    alternativeText: string
+    url: string
+    width: number
+    height: number
+
+    formats: IImageFormats
+  }
 }

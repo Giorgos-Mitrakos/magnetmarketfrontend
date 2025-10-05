@@ -1,22 +1,19 @@
-// 'use client'
-import HeroCarousel from "../molecules/homepage/heroCarousel"
-import { ICarousel, IFixedHeroBanners } from "@/lib/queries/homepage"
-import HeroFixedBanners from "../molecules/homepage/heroFixedBanners"
+// components/organisms/homepage/heroBanners.tsx
+import HeroCarousel from "../molecules/homepage/heroCarousel";
+import { IHeroCarouselBanner } from "@/lib/queries/homepage";
 
-// const HeroCarousel = dynamic(() => import('../molecules/homepage/heroCarousel'), { ssr: true })
-
-
-const HeroBanners = ({ Banner, sideBanner }: { Banner: ICarousel[], sideBanner: ICarousel[] }) => {
-    return (
-        <section className="flex w-full h-[12rem] sm:h-[18rem] md:h-[25rem] lg:h-[30rem]">
-            <div className="h-full w-full">
-                <HeroCarousel carousel={Banner} />
-            </div>
-            {/* <div className="h-full">
-                <HeroFixedBanners sideBanner={sideBanner} />
-            </div> */}
-        </section>
-    )
+interface HeroBannersProps {
+  Banner: IHeroCarouselBanner[];
 }
 
-export default HeroBanners
+const HeroBanners = ({ Banner }: HeroBannersProps) => {
+  return (
+    <section className="w-full mb-10">
+      <div className="aspect-[18/5] md:aspect-[4/1] rounded-xl overflow-hidden">
+        <HeroCarousel carousel={Banner} className="h-full" />
+      </div>
+    </section>
+  );
+};
+
+export default HeroBanners;

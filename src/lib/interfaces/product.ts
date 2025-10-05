@@ -1,4 +1,4 @@
-import { IImageAttr, TadditionalImages, Timage } from "./image"
+import { IImageAttr, IImageFormats, TadditionalImages, Timage } from "./image"
 
 interface ISeoAttr {
     metaTitle: string
@@ -19,7 +19,7 @@ export interface ISeo {
     seo: ISeoAttr[]
 }
 
-interface IProdCharAttr {
+export interface IProdCharAttr {
     id: number
     name: string
     value: string
@@ -42,7 +42,7 @@ export interface ISupplier {
 export interface IProductBrandAttr {
     name: string
     slug: string
-    logo: { data: IImageAttr }
+    logo: IImageAttr
 }
 
 export interface IProductBrand {
@@ -142,3 +142,181 @@ export interface IProductPriceProps {
 
 export type TProductAttr = IProductAttr & Timage & TadditionalImages
     & IProductBrand & IProdChar & IProductCategory & ISeo & ISupplier
+
+export interface IProductPage {
+    id: number
+    name: string
+    slug: string
+    mpn: string
+    barcode: string
+    description: string
+    short_description: string
+    price: number
+    sale_price: number
+    is_sale: boolean
+    is_hot: boolean
+    inventory: number
+    is_in_house: boolean
+    status: string
+    weight: number
+    height: number
+    width: number
+    length: number
+    category: {
+        id: number
+        name: string
+        slug: string
+        cross_categories: {
+            id: number
+            name: string
+            slug: string
+            image: {
+                name: string
+                alternativeText: string
+                caption: string
+                width: string
+                height: string
+                hash: string
+                ext: string
+                mime: string
+                size: string
+                url: string
+                formats: IImageFormats
+            }
+            parents: {
+                id: number
+                name: string
+                slug: string
+                parents: {
+                    id: number
+                    name: string
+                    slug: string
+                }[]
+            }[]
+        }[]
+        parents: {
+            id: number
+            name: string
+            slug: string
+            parents: {
+                id: number
+                name: string
+                slug: string
+            }[]
+        }[]
+    }
+    image: {
+        name: string
+        alternativeText: string
+        caption: string
+        width: string
+        height: string
+        hash: string
+        ext: string
+        mime: string
+        size: string
+        url: string
+        formats: IImageFormats
+    }
+    additionalImages: {
+        name: string
+        alternativeText: string
+        caption: string
+        width: string
+        height: string
+        hash: string
+        ext: string
+        mime: string
+        size: string
+        url: string
+        formats: IImageFormats
+    }[]
+    brand: IProductBrandAttr
+    prod_chars: IProdCharAttr[]
+}
+
+export interface IProductCard {
+    id: number
+    name: string
+    slug: string
+    mpn: string
+    barcode: string
+    price: number
+    sale_price: number
+    is_sale: boolean
+    is_hot: boolean
+    inventory: number
+    is_in_house: boolean
+    status: string
+    weight: number
+    category: {
+        id: number
+        name: string
+        slug: string
+        parents: {
+            id: number
+            name: string
+            slug: string
+            parents: {
+                id: number
+                name: string
+                slug: string
+            }[]
+        }[]
+    }
+    image: {
+        name: string
+        alternativeText: string
+        caption: string
+        width: string
+        height: string
+        hash: string
+        ext: string
+        mime: string
+        size: string
+        url: string
+        formats: IImageFormats
+    }
+    additionalImages: {
+        name: string
+        alternativeText: string
+        caption: string
+        width: string
+        height: string
+        hash: string
+        ext: string
+        mime: string
+        size: string
+        url: string
+        formats: IImageFormats
+    }[]
+    brand: IProductBrandAttr
+}
+
+export interface ISimilarProductPage {
+    id: number
+    name: string
+    slug: string
+    price: number
+    sale_price: number
+    is_sale: boolean
+    is_hot: boolean
+    inventory: number
+    is_in_house: boolean
+    image: {
+        name: string
+        alternativeText: string
+        caption: string
+        width: string
+        height: string
+        hash: string
+        ext: string
+        mime: string
+        size: string
+        url: string
+        formats: IImageFormats
+    }
+}
+
+export type TProductPage = { product: IProductPage } & { similarProducts: ISimilarProductPage[] }
+

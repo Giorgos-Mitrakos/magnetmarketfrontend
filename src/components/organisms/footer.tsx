@@ -1,24 +1,25 @@
-import { requestSSR } from "@/repositories/repository";
+
 // import FooterSection from "../molecules/footerSection"
-import { GET_FOOTER, IfooterProps } from "@/lib/queries/footerQuery";
 import { FaRegClock } from "react-icons/fa";
 import { AiOutlineMail, AiOutlinePhone } from "react-icons/ai";
 import { FaLocationDot, FaInstagram, FaFacebookF } from "react-icons/fa6";
 import Link from "next/link";
 import EpayIcons from "../molecules/epayIcons";
 import Copyright from "../atoms/copyright";
+import { HTMLAttributeAnchorTarget } from "react";
+import { getFooter } from "@/lib/queries/footerQuery";
 
 export interface FooterSectionProps {
-    label: string;
-    links: [
-        {
-            id: string,
-            label: string,
-            isLink: boolean,
-            href: string,
-            target:string
-        }
-    ]
+  label: string;
+  links:
+  {
+    id: number,
+    label: string,
+    isLink: boolean,
+    href: string,
+    target: HTMLAttributeAnchorTarget
+  }[]
+
 }
 
 const FooterSection = (props: FooterSectionProps) => {
@@ -51,21 +52,15 @@ const FooterSection = (props: FooterSectionProps) => {
   );
 };
 
-async function getFooter(): Promise<IfooterProps> {
-  const data = await requestSSR({
-    query: GET_FOOTER,
-  });
-
-  return data as IfooterProps;
-}
 
 const Footer = async () => {
-  const response = await getFooter();
-  const data = response.footer.data.attributes;
+  const data = await getFooter();
+
+  if (!data)
+    return <div></div>
 
   return (
-    <>
-      <footer className="bg-gradient-to-b from-siteColors-blue from-10% to-siteColors-purple to-100% text-white">
+      <footer className="bg-gradient-to-b pb-36 md:pb-4 from-siteColors-blue from-10% to-siteColors-purple to-100% text-white">
         <div className="container mx-auto px-4 py-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
             {/* Contact Information */}
@@ -86,8 +81,8 @@ const Footer = async () => {
                   <div className="bg-siteColors-pink p-2 rounded-full flex-shrink-0">
                     <AiOutlinePhone className="text-lg text-white" aria-label="Τηλέφωνο" />
                   </div>
-                  <a 
-                    href={`tel:${data.telephone}`} 
+                  <a
+                    href={`tel:${data.telephone}`}
                     className="hover:text-siteColors-pink font-bold transition-colors pt-1"
                     aria-label={data.telephone}
                   >
@@ -106,8 +101,8 @@ const Footer = async () => {
                   <div className="bg-siteColors-pink p-2 rounded-full flex-shrink-0">
                     <AiOutlineMail className="text-lg text-white" aria-label="Φάκελος" />
                   </div>
-                  <a 
-                    href={`mailto:${data.email}`} 
+                  <a
+                    href={`mailto:${data.email}`}
                     className="break-all hover:text-siteColors-pink font-bold transition-colors pt-1"
                     aria-label={`Email: ${data.email}`}
                   >
@@ -129,17 +124,17 @@ const Footer = async () => {
               <h2 className="text-lg uppercase font-semibold tracking-wide pb-2 border-b border-siteColors-pink/30">Ακολουθήστε μας</h2>
               <p className="my-4 text-gray-100">Μείνετε συνδεδεμένοι μαζί μας για ενημερώσεις και προσφορές!</p>
               <div className="flex space-x-4 mt-6">
-                <Link 
-                  href="https://www.facebook.com/magnetmarket.gr/" 
-                  target="_blank" 
+                <Link
+                  href="https://www.facebook.com/magnetmarket.gr/"
+                  target="_blank"
                   className="bg-siteColors-pink p-3 rounded-full text-white hover:bg-white hover:text-siteColors-pink transition-colors shadow-md"
                   aria-label="Facebook"
                 >
                   <FaFacebookF className="text-xl" />
                 </Link>
-                <Link 
-                  href="https://www.instagram.com/magnetmarket.gr/" 
-                  target="_blank" 
+                <Link
+                  href="https://www.instagram.com/magnetmarket.gr/"
+                  target="_blank"
                   className="bg-siteColors-pink p-3 rounded-full text-white hover:bg-white hover:text-siteColors-pink transition-colors shadow-md"
                   aria-label="Instagram"
                 >
@@ -149,11 +144,10 @@ const Footer = async () => {
             </div>
           </div>
         </div>
-        
+
         <EpayIcons />
         <Copyright />
       </footer>
-    </>
   );
 };
 

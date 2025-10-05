@@ -1,154 +1,90 @@
-'use client'
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { getStrapiMedia } from "@/repositories/medias";
-import Image from "next/image";
-import Link from "next/link";
-import { FaRegImage } from "react-icons/fa";
-import { Autoplay, Pagination } from 'swiper/modules';
+// Server Component (main wrapper)
+import { Suspense } from 'react'
+import { getStrapiMedia } from "@/repositories/medias"
+import { IHomeCategoriesBanner } from '@/lib/queries/homepage'
+import CategoriesSwiper from './CategoriesSwiper'
 
+// Server-side data processing
+function processCategories(categories: IHomeCategoriesBanner['categories']) {
+  return categories.map(cat => {
+    let link = ""
+    
+    if (cat.parents.length > 0) {
+      if (cat.parents[0].parents.length > 0) {
+        link = `/category/${cat.parents[0].parents[0].slug}/${cat.parents[0].slug}/${cat.slug}`
+      } else {
+        link = `/category/${cat.parents[0].slug}/${cat.slug}`
+      }
+    } else {
+      link = `/category/${cat.slug}`
+    }
 
-// Import Swiper styles
-import 'swiper/css';
-import 'swiper/css/pagination';
-import { IImageAttr } from '@/lib/interfaces/image';
+    // Process image URLs server-side για καλύτερη performance
+    const imageUrl = cat.image 
+      ? getStrapiMedia(cat.image.formats?.thumbnail?.url || cat.image.url)
+      : null
 
-const CategoriesBanner = ({ id,
-    categories }: {
-        id: string,
-        categories: {
-            data: {
-                id: string
-                attributes: {
-                    name: string
-                    slug: string
-                    link: string
-                    parents: {
-                        data: {
-                            attributes: {
-                                slug: string
-                                parents: {
-                                    data: {
-                                        attributes: {
-                                            slug: string
-                                        }
-                                    }[]
-                                }
-                            }
-                        }[]
-                    }
-                    image: { data: IImageAttr }
-                }
-            }[]
-        }
-    }) => {
-
-    categories.data.map(cat => {
-        let link = ""
-        if (cat.attributes.parents.data.length > 0) {
-            if (cat.attributes.parents.data[0].attributes.parents.data.length > 0) {
-                link = `/category/${cat.attributes.parents.data[0].attributes.parents.data[0].attributes.slug}/${cat.attributes.parents.data[0].attributes.slug}/${cat.attributes.slug}`
-            }
-            else {
-                link = `/category/${cat.attributes.parents.data[0].attributes.slug}/${cat.attributes.slug}`
-            }
-        }
-        else {
-            link = `/category/${cat.attributes.slug}`
-        }
-
-        cat.attributes.link = link
-        return cat
-    })
-
-    return (
-        <section key={id} className="w-full pt-8 bg-gradient-to-b from-siteColors-lightblue from-20% via-siteColors-blue via-50% to-siteColors-lightblue to-80% dark:from-siteColors-purple dark:from-10% dark:via-siteColors-pink dark:via-50% dark:to-siteColors-purple dark:to-90% rounded-md" >
-            <h2 className="text-center mb-8 text-white dark:text-slate-200 xs:text-2xl md:text-3xl font-bold"
-                aria-label="Κατηγορίες">Κατηγορίες</h2>
-            <Swiper
-                init={false}
-                className="mySwiper h-64 p-8 rounded-md"
-                breakpoints={{
-                    0: {
-                        slidesPerView: 1,
-                    },
-                    360: {
-                        slidesPerView: 2,
-                    },
-                    480: {
-                        slidesPerView: 3,
-                    },
-                    700: {
-                        slidesPerView: 4,
-                    },
-                    900: {
-                        slidesPerView: 5,
-                    },
-                    1080: {
-                        slidesPerView: 6,
-                    },
-                    1260: {
-                        slidesPerView: 7,
-                    },
-                    1460: {
-                        slidesPerView: 8,
-                    },
-                    1680: {
-                        slidesPerView: 9,
-                    },
-                    1900: {
-                        slidesPerView: 10,
-                    },
-                }}
-                pagination={{
-                    clickable: true,
-                }}
-                autoplay={{
-                    delay: 3000,
-                    disableOnInteraction: false,
-                }}
-                modules={[Autoplay, Pagination]}
-            >
-                {categories.data && categories.data.length > 0 &&
-                    categories.data.map(cat => (
-                        <SwiperSlide key={cat.id} className=' place-content-center'>
-                            <Link href={cat.attributes.link} className="w-40 h-full grid grid-rows-6">
-                                <div className="flex flex-col row-span-4 justify-end items-center">
-                                    <p className="flex rounded-full p-8 w-36 h-36 bg-white ">
-                                        {cat.attributes.image.data ? cat.attributes.image.data.attributes.formats ?
-                                            <Image
-                                                className='transition delay-75 duration-300 ease-in-out hover:scale-110'
-                                                // fill
-                                                height={144}
-                                                width={144}
-                                                src={getStrapiMedia(cat.attributes.image.data.attributes.formats.thumbnail.url)}
-                                                alt={cat.attributes.image.data.attributes.alternativeText}
-                                                quality={75}
-                                                aria-label={cat.attributes.image.data.attributes.alternativeText || ""}
-                                                blurDataURL={getStrapiMedia(cat.attributes.image.data.attributes.formats.thumbnail.url)}
-                                                placeholder="blur"
-                                            /> :
-                                            <Image
-                                                // className='object-contain'
-                                                // fill
-                                                height={144}
-                                                width={144}
-                                                src={getStrapiMedia(cat.attributes.image.data.attributes.url)}
-                                                alt={cat.attributes.image.data.attributes.alternativeText}
-                                                quality={75}
-                                                aria-label={cat.attributes.image.data.attributes.alternativeText || ""}
-                                                blurDataURL={getStrapiMedia(cat.attributes.image.data.attributes.url)}
-                                                placeholder="blur"
-                                            />
-                                            // <NextImage media={cat.attributes.image.data.attributes} width={144} height={144} />
-                                            : <FaRegImage className="w-16 h-16 self-center" />}
-                                    </p>
-                                </div>
-                                <h2 className="break-words mt-4 text-wrap text-center  text-sm text-white dark:text-slate-200 ">{cat.attributes.name}</h2>
-                            </Link>
-                        </SwiperSlide>))}
-            </Swiper>
-        </section>
-    )
+    return {
+      id: cat.id,
+      name: cat.name,
+      link,
+      imageUrl,
+      imageAlt: cat.image?.alternativeText || cat.name
+    }
+  })
 }
 
-export default CategoriesBanner;
+// Server Component Skeleton
+function CategoriesBannerSkeleton() {
+  return (
+    <section className="w-full py-10 bg-gradient-to-br from-siteColors-lightblue/95 via-siteColors-blue to-siteColors-lightblue/95 dark:from-siteColors-purple/95 dark:via-siteColors-pink dark:to-siteColors-purple/95 rounded-2xl shadow-xl overflow-hidden relative">
+      {/* Subtle pattern overlay */}
+      <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDYwIDYwIj48ZyBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2Utb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNIDAgMCBMIDYwIDYwIE0gNjAgMCBMIDAgNjAiLz48L2c+PC9zdmc+')]"></div>
+      
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="h-10 bg-white/30 rounded-lg w-40 mx-auto mb-8 animate-pulse"></div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-5">
+          {Array.from({ length: 8 }, (_, i) => (
+            <div key={i} className="flex flex-col items-center p-4">
+              <div className="w-32 h-32 bg-white/30 rounded-full mb-4 animate-pulse ring-2 ring-white/20"></div>
+              <div className="h-10 bg-white/30 rounded w-28 animate-pulse"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// Main Server Component
+export default function CategoriesBanner({ id, categories }: IHomeCategoriesBanner) {
+  // Server-side processing
+  const processedCategories = processCategories(categories)
+
+  if (!categories || categories.length === 0) {
+    return <CategoriesBannerSkeleton />
+  }
+
+  return (
+    <section 
+      key={id} 
+      className="w-full py-10 bg-gradient-to-br from-siteColors-lightblue/95 via-siteColors-blue to-siteColors-lightblue/95 dark:from-siteColors-purple/95 dark:via-siteColors-pink dark:to-siteColors-purple/95 rounded-2xl shadow-xl overflow-hidden relative"
+    >
+      {/* Subtle pattern overlay */}
+      <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDYwIDYwIj48ZyBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2Utb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNIDAgMCBMIDYwIDYw IE0gNjAgMCBMIDAgNjAiLz48L2c+PC9zdmc+')]"></div>
+      
+      <div className="container mx-auto px-4 relative z-10">
+        <h2 
+          className="text-center mb-8 text-white dark:text-slate-100 text-3xl md:text-4xl font-bold tracking-tight drop-shadow-md"
+          aria-label="Κατηγορίες"
+        >
+          Κατηγορίες
+        </h2>
+
+        <Suspense fallback={<CategoriesBannerSkeleton />}>
+          <CategoriesSwiper categories={processedCategories} />
+        </Suspense>
+      </div>
+    </section>
+  )
+}

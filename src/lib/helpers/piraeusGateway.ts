@@ -182,14 +182,11 @@ export async function getTransactionTicket({ orderId, amount, installments }: { 
                     // SOAP client object is created successfully
                     const responseData = await new Promise((resolve, reject) => {
                         client.IssueNewTicket(soapTicketData, async function (err: any, result: any) {
-                            // console.log('Last SOAP Request:', client.lastRequest);
                             if (err) {
-                                // console.error("ERRORRRR:",err, err.root?.Envelope?.Body);
                                 const data = await err.toString()
                                 resolve(convertResult({ status: "fail", result: JSON.stringify(data) }))
                             } else {
-                                // SOAP request is successful, and r
-                                // esult contains the response data
+                                // SOAP request is successful, and result contains the response data
                                 resolve(convertResult({ status: "success", result: JSON.stringify(result) }))
                             }
                         });
@@ -241,7 +238,7 @@ export async function checkAuthResponse({ bankResponse, ticket }: { bankResponse
         const hash = CryptoJS.HmacSHA256(message, ticket);
 
         const hashString = hash.toString(CryptoJS.enc.Hex).toUpperCase()
-        // if (hashString === bankResponse.HashKey)
+        
         return hashString === bankResponse.HashKey
     } catch (error) {
         console.log(error)

@@ -1,8 +1,9 @@
 'use client'
-import { useState, useEffect } from "react"
+import { useState } from "react"
+import DOMPurify from "dompurify"
 
 interface ProductInfoClientProps {
-    description: string | null,
+    processedDescription: string | null,
     chars?: {
         id: number,
         name: string,
@@ -10,27 +11,22 @@ interface ProductInfoClientProps {
     }[]
 }
 
-const ProductInfoClient = ({ description, chars }: ProductInfoClientProps) => {
+const ProductInfoClient = ({ processedDescription, chars }: ProductInfoClientProps) => {
     const [active, setActive] = useState(
-        description ? 'description' : 
+        processedDescription ? 'description' : 
         chars && chars.length > 0 ? 'specification' : 
         null
     );
-    const [sanitizedHTML, setSanitizedHTML] = useState<string>('');
 
-    useEffect(() => {
-        if (description && typeof window !== 'undefined') {
-            import('dompurify').then((DOMPurify) => {
-                setSanitizedHTML(DOMPurify.default.sanitize(description));
-            });
-        }
-    }, [description]);
+    const sanitizedData = () => ({
+        __html: processedDescription ? DOMPurify.sanitize(processedDescription) : ''
+    })
 
     return (
         <section className="w-full">
             <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
                 <ul className="flex flex-wrap -mb-px" role="tablist">
-                    {description && (
+                    {processedDescription && (
                         <li className="mr-2" role="presentation">
                             <button 
                                 className={`inline-block py-3 px-6 text-lg font-medium text-center rounded-t-lg border-b-2 transition-colors ${active === "description" 
@@ -66,9 +62,9 @@ const ProductInfoClient = ({ description, chars }: ProductInfoClientProps) => {
             </div>
             
             <div>
-                {description && active === "description" && (
+                {processedDescription && active === "description" && (
                     <div className="p-6 bg-gray-50 dark:bg-gray-700 rounded-lg prose prose-lg max-w-none dark:prose-invert" role="tabpanel">
-                        <div dangerouslySetInnerHTML={{ __html: sanitizedHTML }} className="text-gray-700 dark:text-gray-200" />
+                        <div dangerouslySetInnerHTML={sanitizedData()} className="text-gray-700 dark:text-gray-200" />
                     </div>
                 )}
                 

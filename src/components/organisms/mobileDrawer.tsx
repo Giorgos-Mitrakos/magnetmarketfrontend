@@ -1,7 +1,5 @@
 "use client"
 
-import { GET_MENU } from "@/lib/queries/categoryQuery"
-import { useNoRevalideteQuery } from "@/repositories/clientRepository"
 import Link from "next/link"
 import { useContext, useState, useMemo, useCallback } from "react"
 import NextImage from "../atoms/nextImage"
@@ -11,35 +9,35 @@ import { MenuContext } from "@/context/menu"
 import { useRouter } from "next/navigation"
 import { IMenuProps } from "@/lib/interfaces/category"
 import { IImageAttr } from "@/lib/interfaces/image"
+import { MenuData } from "./mainMenu";
 
 // Define proper interfaces based on the actual data structure
 interface IBaseCategoryProps {
-    attributes: {
-        name: string
-        slug: string
-        image: { data: IImageAttr | null }
-    }
+    name: string
+    slug: string
+    image: IImageAttr | null
 }
 
 interface IMenuCategoryProps extends IBaseCategoryProps {
-    attributes: IBaseCategoryProps['attributes'] & {
-        categories: { data: IMenuSubCategoryProps[] }
-    }
+    categories: IMenuSubCategoryProps[]
 }
 
 interface IMenuSubCategoryProps extends IBaseCategoryProps {
-    attributes: IBaseCategoryProps['attributes'] & {
-        categories: { data: IMenuSub2CategoryProps[] }
-    }
+    categories: IMenuSub2CategoryProps[]
 }
 
 interface IMenuSub2CategoryProps extends IBaseCategoryProps {
     // Sub2 categories don't have nested categories
 }
 
+// Προσθήκη interface για props
+interface MobileDrawerProps {
+    menuData?: MenuData[]; // Προ-φορτωμένα δεδομένα
+}
+
 // Helper function to check if category has image data
 const hasImageData = (category: IBaseCategoryProps): boolean => {
-    return !!category.attributes.image?.data;
+    return !!category.image
 };
 
 // Extract common category item component to reduce duplication
@@ -61,7 +59,7 @@ const CategoryItem = ({
                 {hasImage ? (
                     <div className="w-14 h-14 flex items-center justify-center rounded-full ">
                         <NextImage
-                            media={category.attributes.image.data!.attributes}
+                            media={category.image!}
                             width={56}
                             height={56}
                         />
@@ -73,7 +71,7 @@ const CategoryItem = ({
                 )}
             </div>
             <p className="break-words text-wrap text-center text-sm font-medium text-gray-700 dark:text-white px-1">
-                {category.attributes.name}
+                {category.name}
             </p>
         </div>
     );
@@ -89,8 +87,7 @@ const CategoryItem = ({
     );
 };
 
-// Extract drawer header component to reduce duplication
-// Στο DrawerHeader component, αλλάξτε τα χρώματα:
+// Extract drawer header component
 const DrawerHeader = ({
     title,
     onBack,
@@ -141,8 +138,8 @@ function Sub2categoryDrawer({ category, subcategory }: {
 
     // Filter out uncategorized categories
     const filteredCategories = useMemo(() =>
-        subcategory?.attributes.categories.data.filter(
-            cat => cat.attributes.name !== "Uncategorized"
+        subcategory?.categories.filter(
+            cat => cat.name !== "Uncategorized"
         ) || [],
         [subcategory]
     );
@@ -152,17 +149,17 @@ function Sub2categoryDrawer({ category, subcategory }: {
                 dark:bg-gradient-to-b dark:from-siteColors-blue dark:to-siteColors-purple">
             <div className="p-4 h-[calc(100%-60px)]">
                 <DrawerHeader
-                    title={subcategory?.attributes.name || ""}
+                    title={subcategory?.name || ""}
                     onBack={closeSubCategoryDrawer}
                 />
 
                 <div className="h-full overflow-y-auto">
                     <ul className="pb-32 grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-6">
                         {filteredCategories.map(cat => (
-                            <li key={cat.attributes.slug}>
+                            <li key={cat.slug}>
                                 <Link
                                     onClick={closeMenu}
-                                    href={`/category/${category}/${subcategory?.attributes.slug}/${cat.attributes.slug}`}
+                                    href={`/category/${category}/${subcategory?.slug}/${cat.slug}`}
                                     className="block"
                                 >
                                     <CategoryItem category={cat} onClick={closeMenu} />
@@ -185,19 +182,19 @@ function SubcategoryDrawer({ category }: {
 
     // Filter out uncategorized categories
     const filteredCategories = useMemo(() =>
-        category?.attributes.categories.data.filter(
-            cat => cat.attributes.name !== "Uncategorized"
+        category?.categories.filter(
+            cat => cat.name !== "Uncategorized"
         ) || [],
         [category]
     );
 
     const handleOnclickSub = useCallback((cat: IMenuSubCategoryProps) => {
-        if (cat.attributes.categories.data.length > 0) {
+        if (cat.categories.length > 0) {
             setSubCategory(cat);
             openSubCategoryDrawer();
         } else {
             if (category) {
-                router.push(`/category/${category.attributes.slug}/${cat.attributes.slug}`);
+                router.push(`/category/${category.slug}/${cat.slug}`);
                 closeMenuDrawer();
             }
         }
@@ -210,7 +207,7 @@ function SubcategoryDrawer({ category }: {
                 <div className={`absolute lg:hidden bottom-0 left-0 z-30 h-full w-full transition-transform transform ${isSubCategoriesOpen ? "translate-x-0" : "-translate-x-full"
                     } duration-300`}>
                     <Sub2categoryDrawer
-                        category={category.attributes.slug}
+                        category={category.slug}
                         subcategory={subCategory}
                     />
                 </div>
@@ -218,14 +215,14 @@ function SubcategoryDrawer({ category }: {
 
             <div className="p-4 h-[calc(100%-60px)]">
                 <DrawerHeader
-                    title={category?.attributes.name || ""}
+                    title={category?.name || ""}
                     onBack={closeCategoryDrawer}
                 />
 
                 <div className="h-full overflow-y-auto">
                     <ul className="pb-32 grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-6">
                         {filteredCategories.map(cat => (
-                            <li key={cat.attributes.slug}>
+                            <li key={cat.slug}>
                                 <CategoryItem
                                     category={cat}
                                     onClick={() => handleOnclickSub(cat)}
@@ -240,49 +237,38 @@ function SubcategoryDrawer({ category }: {
     );
 }
 
-export default function MobileDrawer() {
+export default function MobileDrawer({ menuData }: { menuData: MenuData[] }) {
     const router = useRouter();
     const { isCategoriesOpen, openCategoryDrawer, closeMenuDrawer } = useContext(MenuContext);
-    const { data: menuData, loading, error } = useNoRevalideteQuery({
-        query: GET_MENU,
-        jwt: ''
-    });
-
-    const menu = menuData as IMenuProps;
     const [category, setCategory] = useState<IMenuCategoryProps | null>(null);
+
+    // Χρήση των προ-φορτωμένων δεδομένων
+    const menu = menuData;
 
     // Filter out uncategorized categories
     const filteredCategories = useMemo(() =>
-        menu?.categories.data.filter(
-            cat => cat.attributes.name !== "Uncategorized"
+        menu?.filter(
+            cat => cat.name !== "Uncategorized"
         ) || [],
         [menu]
     );
 
     const handleOnclickSub = useCallback((category: IMenuCategoryProps) => {
-        if (category.attributes.categories.data.length > 0) {
+        if (category.categories.length > 0) {
             setCategory(category);
             openCategoryDrawer();
         } else {
-            router.push(`/category/${category.attributes.slug}`);
+            router.push(`/category/${category.slug}`);
             closeMenuDrawer();
         }
     }, [router, openCategoryDrawer, closeMenuDrawer]);
 
-    if (loading) {
+    // Εάν δεν υπάρχουν δεδομένα, δείξε loading
+    if (!menu) {
         return (
             <div className="h-screen bg-gradient-to-b from-blue-100 to-purple-100 flex items-center justify-center
                 dark:bg-gradient-to-b dark:from-siteColors-blue dark:to-siteColors-purple">
                 <div className="text-gray-700 dark:text-white">Φόρτωση...</div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="h-screen bg-gradient-to-b from-blue-100 to-purple-100 flex items-center justify-center
-                dark:bg-gradient-to-b dark:from-siteColors-blue dark:to-siteColors-purple">
-                <div className="text-gray-700 dark:text-white">Προέκυψε σφάλμα</div>
             </div>
         );
     }
@@ -301,7 +287,7 @@ export default function MobileDrawer() {
                 <DrawerHeader
                     title="Κατηγορίες"
                     onBack={closeMenuDrawer}
-                    showBackButton={false} // Απενεργοποίηση βελακιού
+                    showBackButton={false}
                     showCloseButton={true}
                     onClose={closeMenuDrawer}
                 />
@@ -309,7 +295,7 @@ export default function MobileDrawer() {
                 <div className="h-full overflow-y-auto">
                     <ul className="pb-20 grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-6">
                         {filteredCategories.map(cat => (
-                            <li key={cat.attributes.slug}>
+                            <li key={cat.slug}>
                                 <CategoryItem
                                     category={cat}
                                     onClick={() => handleOnclickSub(cat)}

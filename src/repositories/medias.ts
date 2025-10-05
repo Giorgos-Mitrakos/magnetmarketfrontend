@@ -1,7 +1,7 @@
 export function getStrapiMedia(url: string) {
-  // if (url == null) {
-  //   return null;
-  // }
+  if (url == null) {
+    return null;
+  }
 
   // Return the full URL if the media is hosted on an external provider
   if (url.startsWith("http") || url.startsWith("https") || url.startsWith("//")) {

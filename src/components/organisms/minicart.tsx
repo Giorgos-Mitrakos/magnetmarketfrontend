@@ -35,7 +35,7 @@ export default function Minicart() {
                                         className="object-contain object-center"
                                         height={100}
                                         width={100}
-                                        src={getStrapiMedia(item.image.data.attributes.formats.thumbnail.url)}
+                                        src={getStrapiMedia(item.image.formats.thumbnail.url)!}
                                         alt={item.name}
                                         quality={75}
                                     /> :

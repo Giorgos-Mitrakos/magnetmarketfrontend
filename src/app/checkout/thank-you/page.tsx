@@ -2,12 +2,11 @@ import Banks from "@/components/atoms/banks";
 import ClearCartItems from "@/components/atoms/clearCart";
 import BestPriceOrderTracking from "@/components/atoms/bestPriceOrderTracking"
 import { getCookies } from "@/lib/helpers/actions"
-import { IImageAttr } from "@/lib/interfaces/image";
-import { GET_ORDER } from "@/lib/queries/shippingQuery";
-import { requestSSR } from "@/repositories/repository";
 import { Metadata } from "next"
 import Image from "next/image"
-import { FaRegImage, FaCheckCircle, FaTruck, FaCreditCard, FaCalendarAlt, FaEuroSign } from "react-icons/fa";
+import { FaRegImage, FaCheckCircle, FaTruck, FaCreditCard, FaCalendarAlt, FaEuroSign, FaExclamationTriangle } from "react-icons/fa";
+import { getOrder } from "@/lib/queries/order";
+import { IOrder } from "@/lib/interfaces/order";
 
 // Function to Add days to current date
 function addDays(date: Date, days: number) {
@@ -20,67 +19,7 @@ export interface IOrderCookie {
     orderId: number
 }
 
-export interface IOrder {
-    order: {
-        data: {
-            id: number,
-            attributes: {
-                products: {
-                    id: number
-                    name: string,
-                    slug: string,
-                    image: { data: IImageAttr },
-                    price: number,
-                    weight: number,
-                    is_sale: boolean,
-                    quantity: number,
-                    sale_price: null,
-                    isAvailable: boolean
-                }[],
-                total: number,
-                status: string,
-                billing_address: {
-                    isInvoice: boolean,
-                    email: string,
-                    firstname: string,
-                    lastname: string,
-                    street: string,
-                    city: string,
-                    state: string,
-                    zipCode: string,
-                    country: string,
-                    telephone: string,
-                    mobilePhone: string,
-                    afm: string,
-                    doy: string,
-                    companyName: string,
-                    businessActivity: string,
-                }
-                different_shipping: boolean,
-                shipping_address: {
-                    firstname: string,
-                    lastname: string,
-                    street: string,
-                    city: string,
-                    state: string,
-                    zipCode: string,
-                    country: string,
-                    telephone: string,
-                    mobilePhone: string,
-                },
-                installments: number,
-                payment: {
-                    name: string;
-                    cost: number;
-                },
-                shipping: {
-                    name: string;
-                    cost: number;
-                }
-            },
-        }
-    }
-}
+
 
 export default async function Success() {
 
@@ -92,27 +31,68 @@ export default async function Success() {
 
     const approvalCode = ApprovalCodeCookie ? JSON.parse(ApprovalCodeCookie.value) : null
 
-    const response = await requestSSR({
-        query: GET_ORDER, variables: { id: order.orderId }
-    });
+    const result = await getOrder(order.orderId)
 
-    const data = await response as IOrder
+    const { order: data, deliverydays } = result as IOrder
 
-    const deliveryDate = new Date()
-    const earlyDeviveryDate = addDays(deliveryDate, 3)
-    const lateDeviveryDate = addDays(deliveryDate, 6)
+    if (!order || !deliverydays) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-siteColors-lightblue/10 via-siteColors-blue/10 to-siteColors-pink/10 mb-16 py-8 px-4">
+                <div className="max-w-2xl mx-auto">
+                    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div className="bg-gradient-to-r from-orange-500 to-amber-500 p-4 text-white text-center">
+                            <h2 className="text-xl font-semibold">Προέκυψε Σφάλμα</h2>
+                        </div>
+                        <div className="p-8 text-center">
+                            <div className="flex justify-center mb-6">
+                                <div className="bg-amber-100 p-4 rounded-full">
+                                    <FaExclamationTriangle className="h-16 w-16 text-amber-500" />
+                                </div>
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                                Κάτι πήγε στραβά με την παραγγελία σας
+                            </h3>
+                            <p className="text-gray-600 mb-6">
+                                Δεν μπορέσαμε να βρούμε τις λεπτομέρειες της παραγγελίας σας.
+                                Αυτό μπορεί να οφείλεται σε τεχνικό πρόβλημα ή λάθος αναφοράς.
+                            </p>
+                            <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                                <p className="text-blue-800 font-medium">
+                                    Μην ανησυχείτε! Εάν έχετε λάβει email επιβεβαίωσης, η παραγγελία σας έχει καταχωρηθεί επιτυχώς.
+                                </p>
+                            </div>
+                            <div className="space-y-2 text-sm text-gray-700 mb-6">
+                                <p>Εάν έχετε οποιαδήποτε απορία, μη διστάσετε να επικοινωνήσετε μαζί μας:</p>
+                                <p className="font-medium">Τηλέφωνο: 2221121657</p>
+                                <p className="font-medium">Email: info@magnetmarket.gr</p>
+                            </div>
+                            <a
+                                href="/"
+                                className="inline-block bg-siteColors-purple hover:bg-siteColors-purple/90 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+                            >
+                                Επιστροφή στην Αρχική Σελίδα
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    const earlyDeviveryDate = new Date(deliverydays.early)
+    const lateDeviveryDate = new Date(deliverydays.late)
 
     const orderDetails = {
-        orderId: data.order.data.id,
-        revenue: data.order.data.attributes.total,
-        shipping: data.order.data.attributes.shipping.cost,
-        tax: data.order.data.attributes.total * 0.24,
+        orderId: data.id,
+        revenue: data.total,
+        shipping: data.shipping.cost,
+        tax: data.total * 0.24,
         currency: 'euro',
     };
 
-    const products = data.order.data.attributes.products.map(product => {
+    const products = data.products.map(product => {
         return {
-            orderId: data.order.data.id,
+            orderId: data.id,
             productId: product.id,
             title: product.name,
             price: product.is_sale && product.sale_price ? product.sale_price : product.price,
@@ -151,7 +131,7 @@ export default async function Success() {
                         {/* Order Summary */}
                         <div className="bg-gradient-to-r from-siteColors-lightblue to-siteColors-pink p-4 text-white">
                             <h2 className="text-xl font-semibold">
-                                Περίληψη Παραγγελίας <span className="font-normal">#{data.order.data.id}</span>
+                                Περίληψη Παραγγελίας <span className="font-normal">#{data.id}</span>
                             </h2>
                         </div>
 
@@ -159,21 +139,23 @@ export default async function Success() {
                         <div className="p-6">
                             <h3 className="text-lg font-semibold text-gray-800 mb-4">Προϊόντα</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {data && data.order.data.attributes.products.map(item => (
+                                {data && data.products.map(item => (
                                     <div key={item.id} className="flex border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                                         <div className="relative w-24 h-24 flex-shrink-0">
-                                            {item.image ? (
-                                                <Image
-                                                    className="object-cover"
-                                                    src={`${process.env.NEXT_PUBLIC_API_URL}${item.image.data.attributes.formats.small ? item.image.data.attributes.formats.small.url : item.image.data.attributes.url}`}
-                                                    alt={item.name}
-                                                    fill
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                                                    <FaRegImage className='h-8 w-8 text-gray-400' />
-                                                </div>
-                                            )}
+                                            {
+                                                item.image.formats ? (
+                                                    <Image
+                                                        className="object-cover"
+                                                        src={`${process.env.NEXT_PUBLIC_API_URL}${item.image.formats.small ? item.image.formats.small.url : item.image.url}`}
+                                                        alt={item.name}
+                                                        fill
+                                                    />
+                                                )
+                                                    : (
+                                                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                                                            <FaRegImage className='h-8 w-8 text-gray-400' />
+                                                        </div>
+                                                    )}
                                         </div>
                                         <div className="p-3 flex-grow">
                                             <h3 className="font-medium text-siteColors-purple line-clamp-2">{item.name}</h3>
@@ -201,10 +183,10 @@ export default async function Success() {
                                         </div>
                                         <div>
                                             <h4 className="font-medium text-gray-700">Τρόπος Πληρωμής</h4>
-                                            <p className="text-gray-600">{data.order.data.attributes.payment.name}</p>
-                                            {data.order.data.attributes.installments > 1 && (
+                                            <p className="text-gray-600">{data.payment.name}</p>
+                                            {data.installments > 1 && (
                                                 <p className="text-sm text-gray-500 mt-1">
-                                                    Αριθμός δόσεων: {data.order.data.attributes.installments}
+                                                    Αριθμός δόσεων: {data.installments}
                                                 </p>
                                             )}
                                         </div>
@@ -216,7 +198,7 @@ export default async function Success() {
                                         </div>
                                         <div>
                                             <h4 className="font-medium text-gray-700">Τρόπος Αποστολής</h4>
-                                            <p className="text-gray-600">{data.order.data.attributes.shipping.name}</p>
+                                            <p className="text-gray-600">{data.shipping.name}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -241,7 +223,7 @@ export default async function Success() {
                                         <div>
                                             <h4 className="font-medium text-gray-700">Σύνολο</h4>
                                             <p className="text-xl font-bold text-siteColors-purple">
-                                                {data.order.data.attributes.total.toFixed(2)} €
+                                                {data.total.toFixed(2)} €
                                             </p>
                                         </div>
                                     </div>
@@ -251,7 +233,7 @@ export default async function Success() {
                     </div>
 
                     {/* Bank Details Section */}
-                    {data.order.data.attributes.payment.name === "Τραπεζική κατάθεση" && (
+                    {data.payment.name === "Τραπεζική κατάθεση" && (
                         <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
                             <div className="bg-gradient-to-r from-siteColors-lightblue to-siteColors-pink p-4 text-white">
                                 <h2 className="text-xl font-semibold">Τραπεζικοί Λογαριασμοί</h2>

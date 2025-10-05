@@ -1,13 +1,11 @@
-
 import PaginationBar from "@/components/molecules/pagination"
 import CategoryPageHeader from "@/components/organisms/categoryPageHeader"
 import MobileSearchFilters from "@/components/organisms/mobileSearchFilters"
 import ProductCard from "@/components/organisms/productCard"
 import SearchFilters from "@/components/organisms/searchFilters"
 import { organizationStructuredData } from "@/lib/helpers/structureData"
-import { IcategoryProductsProps } from "@/lib/interfaces/category"
-import { GET_FILTERED_PRODUCTS } from "@/lib/queries/productQuery"
-import { requestSSR } from "@/repositories/repository"
+import { FilterProps } from "@/lib/interfaces/filters"
+import { IProductCard } from "@/lib/interfaces/product"
 import { Metadata } from "next"
 import Script from "next/script"
 
@@ -19,87 +17,55 @@ async function getFilteredProducts(searchParams: ({ [key: string]: string | stri
 
     const { sort, page, pageSize, Κατασκευαστές, Κατηγορίες, search } = searchParams
 
-    let sortedBy: string = sort ? sort.toString() : 'price:asc'
-    const sorted = [sortedBy]
+    // Smart caching - διαφορετικό cache time ανάλογα με το context
+    let cacheTime = 900; // Default 15 λεπτά
 
-    let filterBrandString = []
-    if (Κατασκευαστές) {
-        if (typeof Κατασκευαστές !== "string") {
-            for (let brand of Κατασκευαστές) {
-                filterBrandString.push({ name: { eq: `${brand}` } }, { slug: { eq: `${brand}` } })
-            }
+    // Πρώτη σελίδα cache περισσότερο (πιο σημαντική για SEO)
+    if (!page || page === '1') {
+        cacheTime = 600; // 10 λεπτά για την πρώτη σελίδα
+    }
+
+    // Φιλτραρισμένα αποτελέσματα cache λιγότερο (πιο δυναμικά)
+    if (Κατηγορίες || (sort && sort !== 'price:asc') || pageSize || Κατασκευαστές || search) {
+        cacheTime = 300; // 5 λεπτά για φιλτραρισμένα
+    }
+
+    // Σελίδες μετά την πρώτη cache λιγότερο
+    if (page && Number(page) > 1) {
+        cacheTime = 600; // 10 λεπτά για επόμενες σελίδες
+    }
+
+    const myHeaders = new Headers();
+
+    myHeaders.append('Content-Type', 'application/json')
+    myHeaders.append('Authorization', `Bearer ${process.env.ADMIN_JWT_SECRET}`,)
+
+    const myInit = {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify({
+            searchParams: searchParams
+        }),
+        next: {
+            revalidate: cacheTime, // Χρήση της μεταβλητής cacheTime
         }
-        else {
-            filterBrandString.push({ name: { eq: `${Κατασκευαστές}` } }, { slug: { eq: `${Κατασκευαστές}` } })
-        }
+    };
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/product/searchProducts`,
+        myInit,
+    )
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    let filterCategoriesString = []
-    if (Κατηγορίες) {
-        if (typeof Κατηγορίες !== "string") {
-            for (let category of Κατηγορίες) {
-                filterCategoriesString.push({ slug: { eq: `${category}` } })
-            }
-        }
-        else {
-            filterCategoriesString.push({ slug: { eq: `${Κατηγορίες}` } })
-        }
+    const data = await response.json();
+
+    return data as {
+        products: IProductCard[],
+        meta: { pagination: { total: number, page: number, pageSize: number, pageCount: number } },
+        searchFilters: FilterProps[]
     }
-
-    let filters: ({ [key: string]: object }) = {}
-
-    const filterAnd = []
-    const filterOr = []
-
-    filterOr.push({ id: { eq: search } })
-    filterOr.push({ name: { containsi: search } })
-
-    if (filterBrandString.length > 0) {
-        filterAnd.push({ brand: { or: filterBrandString } })
-    }
-    else {
-        filterOr.push({ brand: { or: filterBrandString } })
-    }
-
-    if (filterCategoriesString.length > 0) {
-        filterAnd.push({ category: { or: filterCategoriesString } })
-    }
-    else {
-        filterOr.push({ category: { or: filterCategoriesString } })
-    }
-
-    if (filterAnd.length > 0) {
-        filterAnd.push({ or: filterOr })
-        filters.and = filterAnd
-    }
-    else {
-        filters.or = filterOr
-    }
-
-    if (search) {
-        const data = await requestSSR({
-            query: GET_FILTERED_PRODUCTS, variables: { filters: filters, pagination: { page: page ? Number(page) : 1, pageSize: pageSize ? Number(pageSize) : 12 }, sort: sorted },
-
-        });
-
-        const res = data as {
-            products: {
-                data: IcategoryProductsProps[],
-                meta: {
-                    pagination: {
-                        total: number,
-                        page: number,
-                        pageSize: number,
-                        pageCount: number,
-                    }
-                }
-            }
-        }
-
-        return res
-    }
-
-    return null
 }
 
 export default async function SearchPage({ searchParams }: SearchProps) {
@@ -145,24 +111,24 @@ export default async function SearchPage({ searchParams }: SearchProps) {
                 <h2 className="mb-4 text-center font-medium">ΑΠΟΤΕΛΕΣΜΑΤΑ ΑΝΑΖΗΤΗΣΗΣ ΓΙΑ: <span className="font-semibold text-xl">{searchParams.search}</span></h2>
                 <div className="mt-8 grid lg:grid-cols-4 gap-4" >
                     <div className="hidden lg:flex lg:flex-col bg-slate-100 dark:bg-slate-700 p-4 rounded">
-                        <SearchFilters searchParams={searchParams} />
+                        <SearchFilters searchFilters={response?.searchFilters} />
                     </div>
                     <div className="flex flex-col pr-4 col-span-3 w-full">
-                        <CategoryPageHeader totalItems={response?.products.meta.pagination.total || 0} />
+                        <CategoryPageHeader totalItems={response?.meta.pagination.total || 0} />
                         {/* {response && JSON.stringify(response)} */}
 
                         <section className="grid gap-1 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 place-content-center">
-                            {response && response.products.data.map(product => (
+                            {response && response.products.map(product => (
                                 <div key={product.id}>
                                     {/* {JSON.stringify(product)} */}
                                     <ProductCard key={product.id} product={product} />
                                 </div>
                             ))}
                         </section>
-                        <MobileSearchFilters searchParams={searchParams} />
-                        {response && <PaginationBar totalItems={response.products.meta.pagination.total}
-                            currentPage={response.products.meta.pagination.page}
-                            itemsPerPage={response.products.meta.pagination.pageSize} />}
+                        <MobileSearchFilters searchFilters={response?.searchFilters} />
+                        {response && <PaginationBar totalItems={response.meta.pagination.total}
+                            currentPage={response.meta.pagination.page}
+                            itemsPerPage={response.meta.pagination.pageSize} />}
                     </div>
                 </div >
             </div>

@@ -1,12 +1,9 @@
+import { IImageAttr } from "./image";
 import { IProductBrandAttr } from "./product";
 
 export interface IBrands {
-    brands: IBrandsData
-}
-
-export interface IBrandsData {
-        data: {
-            id: number
-            attributes: IProductBrandAttr
-        }[]
+    id: number
+    name: string
+    slug: string
+    logo: IImageAttr
 }

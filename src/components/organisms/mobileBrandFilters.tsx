@@ -2,29 +2,12 @@
 
 import { useState } from "react"
 import { FaFilter } from "react-icons/fa6"
-import { useApiRequest } from "@/repositories/clientRepository"
 import ProductFilter from "../molecules/productFilter"
+import { FilterProps } from "@/lib/interfaces/filters"
 
-type MetadataProps = {
-    searchParams: { [key: string]: string | string[] | undefined }
-    brand: string
-}
 
-interface FilterProps {
-    title: string,
-    filterValues: {
-        name: string,
-        slug?: string,
-        numberOfItems: number
-    }[]
-}
-
-export default function MobileBrandFilters({ brand, searchParams }: MetadataProps) {
+export default function MobileBrandFilters({ filters }: { filters: FilterProps[] }) {
     const [isFiltersOpen, setIsFiltersOpen] = useState(false)
-
-    const { data: filters, loading: loadingFilters, error: errorFilters }: {
-        data: FilterProps[], loading: boolean, error: any
-    } = useApiRequest({ method: 'POST', api: "/api/product/brandFilters", variables: ({ brand: brand, searchParams: searchParams }), jwt: "" })
 
     return (
         <div>
@@ -38,7 +21,7 @@ export default function MobileBrandFilters({ brand, searchParams }: MetadataProp
                             onClick={() => setIsFiltersOpen(false)} >Κλείσιμο</button>
                     </div>
                     <div className='space-y-4 p-4 rounded'>
-                        {loadingFilters && !filters ? <div>Loading</div> :
+                        {
                             filters && filters.map(filter => (
                                 <ProductFilter key={filter.title} title={filter.title} filterBy={filter.title} filters={filter.filterValues} />
                             ))

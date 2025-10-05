@@ -222,17 +222,17 @@ export const createCategories = (item: ICartItem) => {
         item_category3?: string
     } = {}
 
-    if (item.category.data?.attributes.parents.data[0]?.attributes.parents.data[0]?.attributes.name) {
-        categories.item_category = item.category.data?.attributes.parents.data[0]?.attributes.parents.data[0]?.attributes.name
-        categories.item_category2 = item.category.data?.attributes.parents.data[0]?.attributes.name
-        categories.item_category3 = item.category.data?.attributes.name
+    if (item.category.parents[0]?.parents[0]?.name) {
+        categories.item_category = item.category?.parents[0]?.parents[0]?.name
+        categories.item_category2 = item.category?.parents[0]?.name
+        categories.item_category3 = item.category?.name
     }
-    else if (item.category.data?.attributes.parents.data[0]?.attributes.name) {
-        categories.item_category = item.category.data?.attributes.parents.data[0]?.attributes.name
-        categories.item_category2 = item.category.data?.attributes.name
+    else if (item.category?.parents[0]?.name) {
+        categories.item_category = item.category?.parents[0]?.name
+        categories.item_category2 = item.category?.name
     }
-    else if (item.category.data?.attributes.name) {
-        categories.item_category = item.category.data?.attributes.name
+    else if (item.category?.name) {
+        categories.item_category = item.category?.name
     }
 
     return categories

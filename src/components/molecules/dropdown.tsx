@@ -1,3 +1,4 @@
+'use client'
 import { useState } from 'react'
 import { DropdownFilter, DropdownItem } from '../organisms/categoryPageHeader';
 import { FaCaretDown } from 'react-icons/fa';

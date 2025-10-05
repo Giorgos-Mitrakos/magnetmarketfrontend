@@ -1,88 +1,53 @@
-import { requestSSR } from "@/repositories/repository"
-import { GET_CATEGORY_CHILDS } from "../queries/categoryQuery"
-import { IcategoryChildsProps } from "../interfaces/category"
+type DataWrapper<T> = {
+    data: T;
+};
 
-function findCategoryChilds(categoryData: any, categoriesSlug: { slugs: string[] }) {
-    for (let category of categoryData) {
-        categoriesSlug.slugs.push(category.attributes.slug)
-        if (category.attributes.categories && category.attributes.categories.data.length > 0) {
-            findCategoryChilds(category.attributes.categories.data, categoriesSlug)
-        }
-    }
-}
+type AttributesWrapper<T> = {
+    attributes: T;
+};
 
-export async function createFiltersForDbQuery({ category, categoryLevel, brands, searchParams }:
-    {
-        category: string,
-        categoryLevel: number,
-        brands: string | string[]
-        searchParams: Record<string, any>
-    }) {
+type StrapiWrapper<T> = DataWrapper<T> | AttributesWrapper<T>;
 
-    const data = await requestSSR({
-        query: GET_CATEGORY_CHILDS, variables: { slug: category }
-    });
-
-    const response = data as IcategoryChildsProps
-
-    const categoriesSlug = { slugs: [] }
-    findCategoryChilds(response.categories.data, categoriesSlug)
-
-    let categoryFilterString = []
-
-    for (let slug of categoriesSlug.slugs) {
-        categoryFilterString.push({ slug: { eq: `${slug}` } })
+export function flattenJSON<T>(obj: T): T extends StrapiWrapper<infer U> ? U : T extends Array<infer V> ? Array<ReturnType<typeof flattenJSON<V>>> : T extends object ? { [K in keyof T]: ReturnType<typeof flattenJSON<T[K]>> } : T {
+    if (obj === null || obj === undefined) {
+        return obj as any;
     }
 
-    let filterBrandString = []
-
-    if (brands) {
-        if (typeof brands !== "string") {
-            for (let brand of brands) {
-                filterBrandString.push({ name: { eq: `${brand}` } })
-            }
-        }
-        else {
-            filterBrandString.push({ name: { eq: `${brands}` } })
-        }
+    if (Array.isArray(obj)) {
+        return obj.map(item => flattenJSON(item)) as any;
     }
 
-    const resultArray = Object.keys(searchParams).map((key) => (
-        {
-            name: key,
-            value: searchParams[key],
-        }));
-
-    const filterCharString = []
-
-    for (let searchParam of resultArray) {
-
-        if (searchParam.name === "sort" || searchParam.name === "page" || searchParam.name === "pageSize" || searchParam.name === "brands")
-            continue
-
-
-        const filter = { name: { eq: `${searchParam.name}` } }
-        const values = []
-        if (typeof searchParam.value === "string") {
-            values.push(searchParam.value)
-        }
-        else {
-
-            for (let search of searchParam.value) {
-                values.push(search)
-            }
+    if (typeof obj === 'object') {
+        // Αν το object έχει μόνο ένα key που είναι "data", επιστρέφουμε το περιεχόμενό του
+        if (Object.keys(obj).length === 1 && 'data' in obj) {
+            return flattenJSON((obj as any).data);
         }
 
-        filterCharString.push({
-            prod_chars: {
-                and: [filter, { value: { in: values } }]
-            }
-        })
+        // Αν το object έχει μόνο ένα key που είναι "attributes", επιστρέφουμε το περιεχόμενό του
+        if (Object.keys(obj).length === 1 && 'attributes' in obj) {
+            return flattenJSON((obj as any).attributes);
+        }
+
+        // Αν έχει και "data" και άλλα keys, κρατάμε τα άλλα και αντικαθιστούμε το "data"
+        if ('data' in obj) {
+            const { data, ...rest } = obj as any;
+            return flattenJSON({ ...rest, ...data });
+        }
+
+        // Αν έχει και "attributes" και άλλα keys, κρατάμε τα άλλα και αντικαθιστούμε το "attributes"
+        if ('attributes' in obj) {
+            const { attributes, ...rest } = obj as any;
+            return flattenJSON({ ...rest, ...attributes });
+        }
+
+        // Για όλα τα άλλα objects, επεξεργαζόμαστε αναδρομικά κάθε property
+        const result = {} as any;
+        for (const [key, value] of Object.entries(obj)) {
+            result[key] = flattenJSON(value);
+        }
+        return result;
     }
 
-    let filters: ({ [key: string]: object }) = {}
-
-    filters.and = [{ brand: { or: filterBrandString } }, { category: { or: categoryFilterString } }, { and: filterCharString }]
-
-    return filters
+    // Για primitive values, επιστρέφουμε όπως είναι
+    return obj as any;
 }

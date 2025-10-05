@@ -1,3 +1,4 @@
+// Header.tsx
 'use client'
 import HeaderActions from "../molecules/headerActions";
 import Logo from "../atoms/logo";
@@ -9,19 +10,31 @@ import Minicart from "./minicart";
 import { ToggleMobileMenu } from "../atoms/toggleMobileMenu";
 import Link from "next/link";
 import { FaOpencart } from "react-icons/fa";
-// import { useCart } from "@/context/cart";
 import { MenuContext } from "@/context/menu";
 import { useCheckout } from "@/context/checkout";
-// import { ToggleMobileMenu } from './toggleMobileMenu'
+import { IImageAttr } from "@/lib/interfaces/image";
 
 const SearchInput = dynamic(() => import('@/components/molecules/searchInput'), {
     ssr: false,
     loading: () => <p>Loading...</p>
 })
 
-export default function Header({ user }: { user: any }) {
+// Τύπος για τα δεδομένα μενού
+interface MenuData {
+    id: number
+    slug: string;
+    name: string;
+    image: IImageAttr
+    categories: any[];
+}
+
+interface HeaderProps {
+    user: any;
+    menuData: MenuData[]; // Προσθήκη των προ-φορτωμένων δεδομένων
+}
+
+export default function Header({ user, menuData }: HeaderProps) {
     const [openMenu, setOpenMenu] = useState(false)
-    // const { cart, dispatch } = useCart();
     const { checkout, dispatch } = useCheckout()
     const { isMenuOpen, isSearchOpen, toggleSearchDrawer, toggleMenuDrawer, closeMenu } = useContext(MenuContext)
 
@@ -53,13 +66,11 @@ export default function Header({ user }: { user: any }) {
             </header>
             <div className="flex content-start">
                 <div className='hidden my-4 lg:flex relative w-full'>
-                    {/* Container που περιέχει ΚΑΙ το κουμπί ΚΑΙ το menu */}
                     <div
                         className="relative"
                         onMouseEnter={() => setOpenMenu(true)}
                         onMouseLeave={() => setOpenMenu(false)}
                     >
-                        {/* Κουμπί Κατηγοριών */}
                         <div className="flex items-center z-50 ml-8 px-4 py-3 rounded-lg text-lg cursor-pointer transition-all duration-300 group bg-white dark:bg-slate-800 hover:bg-siteColors-lightblue/10 dark:hover:bg-siteColors-lightblue/20">
                             <FaBarsStaggered
                                 aria-label="Κουμπί ανοιγματος κυρίως μενού!"
@@ -74,9 +85,8 @@ export default function Header({ user }: { user: any }) {
                             </div>
                         </div>
 
-                        {/* MegaMenu - απόλυτη θέση κάτω από το κουμπί */}
                         <div className="absolute top-full left-0 z-50">
-                            <MainMenu isMenuOpen={openMenu} />
+                            <MainMenu isMenuOpen={openMenu} menuData={menuData} />
                         </div>
                     </div>
                 </div>

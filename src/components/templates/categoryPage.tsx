@@ -6,11 +6,11 @@ import CategoryFilters from "../organisms/categoryFilters";
 import SiteFeatures from "../organisms/siteFeatures";
 import MobileFilters from "../organisms/mobileFilters";
 import Script from 'next/script'
-import { requestSSR } from "@/repositories/repository";
-import { GET_CATEGORY_NAME } from "@/lib/queries/categoryQuery";
 import Breadcrumb from "../molecules/breadcrumb";
 import { organizationStructuredData } from "@/lib/helpers/structureData";
-import { IcategoryNameProps, IcategoryProductsProps } from "@/lib/interfaces/category";
+import { IProductCard } from "@/lib/interfaces/product";
+import { FilterProps } from "@/lib/interfaces/filters";
+import { getCategoryProducts } from "@/lib/queries/categoryQuery";
 
 type pageProps = {
     params: {
@@ -18,80 +18,41 @@ type pageProps = {
         category2?: string,
         category3?: string | null,
     },
-    searchParams: {
-        [key: string]: string | string[];
-    }
-    products: {
-        products: {
-            data: IcategoryProductsProps[],
-            meta: {
-                pagination: {
-                    total: number,
-                    page: number,
-                    pageSize: number,
-                    pageCount: number,
-                }
-            }
-        }
-    },
+    searchParams: { [key: string]: string | string[] }
 }
 
-async function CategoryPageTemplate(props: pageProps) {
+export type sideMenuType = {
+    id: number
+    name: string
+    slug: string
+    categories: sideMenuType[]
+}
 
-    const { params, products, searchParams } = props
+type responseType = {
+    availableFilters: FilterProps[],
+    meta: { pagination: { total: number, page: number, pageSize: number, pageCount: number } },
+    products: IProductCard[],
+    sideMenu: sideMenuType,
+    breadcrumbs: {
+        title: string,
+        slug: string
+    }[]
+}
+
+async function CategoryPageTemplate({ params, searchParams }: pageProps) {
+
+    // const { params, products, availableFilters, meta } = props
     const { category1, category2, category3 } = params
 
-    const breadcrumbs = [
-        {
-            title: "Home",
-            slug: "/"
-        }
-    ]
+    const response = await getCategoryProducts(
+        category1,
+        category3 ? category3 : category2 ? category2 : category1,
+        searchParams
+    )
 
-    if (category1) {
-        const data = await requestSSR({
-            query: GET_CATEGORY_NAME, variables: { category: category1 }
-        });
+    const data = response as responseType
 
-        const response = data as IcategoryNameProps
-
-        breadcrumbs.push(
-            {
-                title: response.categories.data[0].attributes.name,
-                slug: `/category/${category1}`
-            }
-        )
-
-        if (category2) {
-            const data = await requestSSR({
-                query: GET_CATEGORY_NAME, variables: { category: category2 }
-            });
-
-            const response = data as IcategoryNameProps
-
-            breadcrumbs.push(
-                {
-                    title: response.categories.data[0].attributes.name,
-                    slug: `/category/${category1}/${category2}`
-                }
-            )
-
-            if (category3) {
-                const data = await requestSSR({
-                    query: GET_CATEGORY_NAME, variables: { category: category3 }
-                });
-
-                const response = data as IcategoryNameProps
-
-                breadcrumbs.push(
-                    {
-                        title: response.categories.data[0].attributes.name,
-                        slug: `/category/${category1}/${category2}/${category3}`
-                    }
-                )
-            }
-        }
-    }
+    const { availableFilters, products, meta, breadcrumbs, sideMenu } = data
 
     const BreadcrumbList = breadcrumbs.map((breabcrumb, i) => ({
         "@type": "ListItem",
@@ -124,22 +85,22 @@ async function CategoryPageTemplate(props: pageProps) {
                 <div className="grid pt-4 mb-8 w-full bg-white dark:bg-slate-800">
                     <div className="grid lg:grid-cols-4 gap-4">
                         <div className="hidden lg:flex lg:flex-col bg-slate-50 dark:bg-slate-800 p-5 rounded-lg shadow-sm border border-gray-100 dark:border-slate-700">
-                            <Menu category1={category1} category2={category2 ? category2 : null} category3={category3 ? category3 : null} />
-                            <CategoryFilters category1={category1} category2={category2} category3={category3} searchParams={searchParams} />
+                            <Menu category1={category1} category2={category2 ? category2 : null} category3={category3 ? category3 : null} sideMenu={sideMenu} />
+                            <CategoryFilters availableFilters={availableFilters} />
                         </div>
                         <div className="flex flex-col pr-4 col-span-3 w-full ">
-                            <CategoryPageHeader totalItems={products.products.meta.pagination.total} />
+                            <CategoryPageHeader totalItems={meta.pagination.total} />
                             <section className="grid gap-1 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 place-content-center">
-                                {products.products.data.map(product => (
+                                {products.map(product => (
                                     <div key={product.id}>
                                         <ProductCard key={product.id} product={product} />
                                     </div>
                                 ))}
                             </section>
-                            <MobileFilters category1={category1} category2={category2} category3={category3} searchParams={searchParams} />
-                            <PaginationBar totalItems={products.products.meta.pagination.total}
-                                currentPage={products.products.meta.pagination.page}
-                                itemsPerPage={products.products.meta.pagination.pageSize} />
+                            <MobileFilters availableFilters={availableFilters} />
+                            <PaginationBar totalItems={meta.pagination.total}
+                                currentPage={meta.pagination.page}
+                                itemsPerPage={meta.pagination.pageSize} />
                         </div>
                     </div>
                 </div>

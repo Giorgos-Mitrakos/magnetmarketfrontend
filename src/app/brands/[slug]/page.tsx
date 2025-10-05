@@ -1,4 +1,3 @@
-
 import Breadcrumb from "@/components/molecules/breadcrumb"
 import PaginationBar from "@/components/molecules/pagination"
 import BrandFilters from "@/components/organisms/brandFilters"
@@ -6,9 +5,7 @@ import CategoryPageHeader from "@/components/organisms/categoryPageHeader"
 import MobileBrandFilters from "@/components/organisms/mobileBrandFilters"
 import ProductCard from "@/components/organisms/productCard"
 import { organizationStructuredData } from "@/lib/helpers/structureData"
-import { IProduct } from "@/lib/interfaces/product"
-import { GET_BRAND_PRODUCTS } from "@/lib/queries/brandsQuery"
-import { requestSSR } from "@/repositories/repository"
+import { IProductCard, IProductPage } from "@/lib/interfaces/product"
 import { Metadata, ResolvingMetadata } from "next"
 import Script from "next/script"
 
@@ -17,8 +14,8 @@ type SearchParamsProps = {
 }
 
 type MetadataProps = {
-    params: { slug: string }
-    searchParams: { [key: string]: string | string[] | undefined }
+    params: Promise<{ slug: string }>
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 async function getBrandProducts({ brand, searchParams }: {
@@ -28,57 +25,81 @@ async function getBrandProducts({ brand, searchParams }: {
 
     const { sort, page, pageSize, Κατηγορίες } = searchParams
 
-    let sortedBy: string = sort ? sort.toString() : 'price:asc'
+    // Smart caching - διαφορετικό cache time ανάλογα με το context
+    let cacheTime = 900; // Default 15 λεπτά
 
-    let filters: ({ [key: string]: object }) = {}
-    if (Κατηγορίες) {
-        if (typeof Κατηγορίες !== "string") {
-            filters = {
-                and: [
-                    { brand: { name: { eq: brand } } },
-                    { category: { slug: { in: Κατηγορίες } } }
-                ]
-            }
-        }
-        else {
-            filters = {
-                and: [
-                    { brand: { name: { eq: brand } } },
-                    { category: { slug: { eq: `${Κατηγορίες}` } } }
-                ]
-            }
-        }
-    }
-    else { filters = { brand: { name: { eq: brand } } } }
-
-    const data = await requestSSR({
-        query: GET_BRAND_PRODUCTS, variables: { filters: filters, pagination: { page: page ? Number(page) : 1, pageSize: pageSize ? Number(pageSize) : 12 }, sort: sortedBy }
-    });
-
-    const res = data as {
-        products: {
-            data: IProduct[],
-            meta: {
-                pagination: {
-                    total: number,
-                    page: number,
-                    pageSize: number,
-                    pageCount: number,
-                }
-            }
-        }
+    // Πρώτη σελίδα cache περισσότερο (πιο σημαντική για SEO)
+    if (!page || page === '1') {
+        cacheTime = 600; // 10 λεπτά για την πρώτη σελίδα
     }
 
-    return res
+    // Φιλτραρισμένα αποτελέσματα cache λιγότερο (πιο δυναμικά)
+    if (Κατηγορίες || (sort && sort !== 'price:asc')) {
+        cacheTime = 300; // 5 λεπτά για φιλτραρισμένα
+    }
+
+    // Σελίδες μετά την πρώτη cache λιγότερο
+    if (page && Number(page) > 1) {
+        cacheTime = 600; // 10 λεπτά για επόμενες σελίδες
+    }
+
+
+    const myHeaders = new Headers();
+
+    myHeaders.append('Content-Type', 'application/json')
+    myHeaders.append('Authorization', `Bearer ${process.env.ADMIN_JWT_SECRET}`,)
+
+    const myInit = {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify({
+            brand: brand,
+            searchParams: { sort, page, pageSize, Κατηγορίες }
+        }),
+        next: { 
+            revalidate: cacheTime, // Χρήση της μεταβλητής cacheTime
+        }
+    };
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/brands/getBrandProducts`,
+        myInit,
+    )
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    return data as {
+        products: IProductCard[],
+        meta: { pagination: { total: number, page: number, pageSize: number, pageCount: number } },
+        filters: {
+            title: string,
+            filterBy:string,
+            filterValues: {
+                name: string,
+                slug: string,
+                numberOfItems: number
+            }[]
+        }[]
+    }
 }
 
 export default async function SearchPage({ params, searchParams }:
     {
-        params: { slug: string },
-        searchParams: SearchParamsProps
+        params: Promise<{ slug: string }>,
+        searchParams: Promise<SearchParamsProps>
     }) {
 
-    const response = await getBrandProducts({ brand: params.slug, searchParams })
+    // Await για τα params και searchParams
+    const resolvedParams = await params;
+    const resolvedSearchParams = await searchParams;
+
+    const response = await getBrandProducts({ 
+        brand: resolvedParams.slug, 
+        searchParams: resolvedSearchParams 
+    })
 
     const breadcrumbs = [
         {
@@ -90,8 +111,8 @@ export default async function SearchPage({ params, searchParams }:
             slug: "/brands"
         },
         {
-            title: params.slug.toUpperCase(),
-            slug: `/brands/${params.slug}`
+            title: resolvedParams.slug.toUpperCase(),
+            slug: `/brands/${resolvedParams.slug}`
         }
     ]
 
@@ -120,25 +141,29 @@ export default async function SearchPage({ params, searchParams }:
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
             />
             <Breadcrumb breadcrumbs={breadcrumbs} />
-            <h1 className="w-full mt-8 text-2xl font-semibold text-center text-siteColors-purple dark:text-slate-300">{breadcrumbs[breadcrumbs.length - 1].title}</h1>
+            <h1 className="w-full mt-8 text-2xl font-semibold text-center text-siteColors-purple dark:text-slate-300">
+                {breadcrumbs[breadcrumbs.length - 1].title}
+            </h1>
             <div className="grid pt-4 w-full bg-white dark:bg-slate-800">
                 <div className="grid lg:grid-cols-4 gap-4">
                     <div className="hidden lg:flex lg:flex-col bg-slate-100 dark:bg-slate-700 p-4 rounded">
-                        <BrandFilters searchParams={searchParams} brand={params.slug} />
+                        <BrandFilters filters={response.filters} />
                     </div>
                     <div className="flex flex-col pr-4 col-span-3 w-full">
-                        <CategoryPageHeader totalItems={response.products.meta.pagination.total} />
+                        <CategoryPageHeader totalItems={response.meta.pagination.total} />
                         <section className="grid gap-1 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 place-content-center">
-                            {response.products.data.map(product => (
+                            {response.products.map(product => (
                                 <div key={product.id}>
-                                    <ProductCard key={product.id} product={product} />
+                                    <ProductCard product={product} />
                                 </div>
                             ))}
                         </section>
-                        <MobileBrandFilters searchParams={searchParams} brand={params.slug} />
-                        <PaginationBar totalItems={response.products.meta.pagination.total}
-                            currentPage={response.products.meta.pagination.page}
-                            itemsPerPage={response.products.meta.pagination.pageSize} />
+                        <MobileBrandFilters filters={response.filters} />
+                        <PaginationBar 
+                            totalItems={response.meta.pagination.total}
+                            currentPage={response.meta.pagination.page}
+                            itemsPerPage={response.meta.pagination.pageSize} 
+                        />
                     </div>
                 </div>
             </div>
@@ -151,12 +176,15 @@ export async function generateMetadata(
     parent: ResolvingMetadata
 ): Promise<Metadata> {
 
+    // Await για τα params
+    const resolvedParams = await params;
+
     let metadata: Metadata = {
-        title: `Magnet Μarket - Προϊόντα ${params.slug.toUpperCase()}`,
+        title: `Magnet Μarket - Προϊόντα ${resolvedParams.slug.toUpperCase()}`,
         description: 'Μην το ψάχνεις εδώ θα βρεις τις καλύτερες τίμες σε υπολογιστές, laptop, smartwatch, κάμερες, εκτυπωτές, οθόνες, τηλεοράσεις, κ.α.',
         keywords: "Computers, Laptops, Notebooks, laptop, Computer, Hardware, Notebook, Peripherals, Greece, Technology, Mobile phones, Laptops, PCs, Scanners, Printers, Modems, Monitors, Software, Antivirus, Windows, Intel Chipsets, AMD, HP, LOGITECH, ACER, TOSHIBA, SAMSUNG, Desktop, Servers, Telephones, DVD, CD, DVDR, CDR, DVD-R, CD-R, periferiaka, Systems, MP3, Υπολογιστής, ΥΠΟΛΟΓΙΣΤΗΣ, ΠΕΡΙΦΕΡΕΙΑΚΑ, περιφερειακά, Χαλκίδα, ΧΑΛΚΙΔΑ, Ελλάδα, ΕΛΛΑΔΑ, Τεχνολογία, τεχνολογία, ΤΕΧΝΟΛΟΓΙΑ, κινητό, ΚΙΝΗΤΟ, κινητά, ΚΙΝΗΤΑ, οθόνη, ΟΘΟΝΗ, οθόνες, ΟΘΟΝΕΣ, ΕΚΤΥΠΩΤΕΣ, εκτυπωτές, σαρωτές, ΣΑΡΩΤΕΣ, εκτυπωτής",
         alternates: {
-            canonical: `${process.env.NEXT_URL}/brands/${params.slug}`,
+            canonical: `${process.env.NEXT_URL}/brands/${resolvedParams.slug}`,
         },
         openGraph: {
             url: 'www.magnetmarket.gr',
@@ -170,5 +198,7 @@ export async function generateMetadata(
     }
 
     return metadata
-
 }
+
+// ΑΦΑΙΡΕΣΗ του force-static αφού χρησιμοποιούμε searchParams
+// export const dynamic = 'force-static';

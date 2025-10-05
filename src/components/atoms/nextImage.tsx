@@ -25,11 +25,11 @@ const NextImage = (props: IProps) => {
       className="object-contain"
       width={width}
       height={height}
-      src={getStrapiMedia(url)}
+      src={getStrapiMedia(url)!}
       alt={alternativeText || ""}
       quality={75}
       aria-label={alternativeText || ""}
-      blurDataURL={getStrapiMedia(url)}
+      blurDataURL={getStrapiMedia(url)!}
       placeholder="blur"
     />
   )

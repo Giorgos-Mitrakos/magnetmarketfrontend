@@ -1,4 +1,5 @@
 import NextImage from "@/components/atoms/nextImage";
+import { IHomeTripleBanner } from "@/lib/queries/homepage";
 import Link from "next/link";
 
 const TripleBanner = ({ id, rightTripleBanner,
@@ -9,50 +10,18 @@ const TripleBanner = ({ id, rightTripleBanner,
     middleTripleTarget,
     leftTripleBanner,
     leftTripleHref,
-    leftTripleTarget }: {
-        id: string,
-        rightTripleBanner: {
-            data: {
-                attributes: {
-                    url: string
-                    alternativeText: string
-                }
-            }
-        },
-        rightTripleHref: string,
-        rightTripleTarget: string,
-        middleTripleBanner: {
-            data: {
-                attributes: {
-                    url: string
-                    alternativeText: string
-                }
-            }
-        },
-        middleTripleHref: string,
-        middleTripleTarget: string,
-        leftTripleBanner: {
-            data: {
-                attributes: {
-                    url: string
-                    alternativeText: string
-                }
-            }
-        },
-        leftTripleHref: string,
-        leftTripleTarget: string
-    }) => {
+    leftTripleTarget }: IHomeTripleBanner) => {
 
     return (
-        <div key={id} className='grid md:grid-cols-3 gap-4'>
+        <div className='grid md:grid-cols-3 gap-4'>
             <Link href={rightTripleHref} target={rightTripleTarget}>
-                <NextImage media={rightTripleBanner.data.attributes} height={256} width={512} />
+                <NextImage media={rightTripleBanner} height={256} width={512} />
             </Link>
             <Link href={middleTripleHref} target={middleTripleTarget}>
-                <NextImage media={middleTripleBanner.data.attributes} height={256} width={512} />
+                <NextImage media={middleTripleBanner} height={256} width={512} />
             </Link>
             <Link href={leftTripleHref} target={leftTripleTarget}>
-                <NextImage media={leftTripleBanner.data.attributes} height={256} width={512} />
+                <NextImage media={leftTripleBanner} height={256} width={512} />
             </Link>
         </div>
     )

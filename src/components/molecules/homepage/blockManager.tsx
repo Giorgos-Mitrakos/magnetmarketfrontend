@@ -1,45 +1,43 @@
-import dynamic from 'next/dynamic'
-
 // Dynamic imports χωρίς custom loading (τα components θα έχουν εσωτερικά τα skeletons τους)
-const HeroBanners = dynamic(() => import('@/components/organisms/heroBanners'))
-const BrandsBanner = dynamic(() => import('./brandsBanner'))
-const CategoriesBanner = dynamic(() => import('./categoriesBanner'))
-const SiteFeatures = dynamic(() => import('@/components/organisms/siteFeatures'))
-const DoubleBanner = dynamic(() => import('./doubleBanner'))
-const HotOrSale = dynamic(() => import('./hotOrSale'))
-const ListProductsBanner = dynamic(() => import('./listProductsBanner'))
-const SingleBanner = dynamic(() => import('./singleBanner'))
-const TripleBanner = dynamic(() => import('./tripleBanner'))
+import HeroBanners from'@/components/organisms/heroBanners'
+import SingleBanner from './singleBanner'
+import DoubleBanner from './doubleBanner'
+import TripleBanner from './tripleBanner'
+import HotOrSale from './hotOrSale'
+import BrandsBanner from './brandsBanner'
+import ListProductsBanner from './listProductsBanner'
+import CategoriesBanner from './categoriesBanner'
+import SiteFeatures from '@/components/organisms/siteFeatures'
 
-const getBlockComponent = ({ __typename, ...rest }: { __typename: string }, index: string) => {
+const getBlockComponent = ({ __component, ...rest }: { __component: string }, index: string) => {
     let Block: any;
 
-    switch (__typename) {
-        case 'ComponentHomepageBannerListProducts':
+    switch (__component) {
+        case 'homepage.banner-list-products':
             Block = ListProductsBanner;
             break;
-        case 'ComponentHomepageSingleBanner':
+        case 'homepage.single-banner':
             Block = SingleBanner;
             break;
-        case 'ComponentHomepageDoubleBanner':
+        case 'homepage.double-banner':
             Block = DoubleBanner;
             break;
-        case 'ComponentHomepageTripleBanner':
+        case 'homepage.triple-banner':
             Block = TripleBanner;
             break;
-        case 'ComponentHomepageHotOrSale':
+        case 'homepage.hot-or-sale':
             Block = HotOrSale;
             break;
-        case 'ComponentHomepageCategoriesBanner':
+        case 'homepage.categories-banner':
             Block = CategoriesBanner;
             break;
-        case 'ComponentHomepageBrandsBanner':
+        case 'homepage.brands-banner':
             Block = BrandsBanner;
             break;
-        case 'ComponentGlobalSiteFeatures':
+        case 'global.site-features':
             Block = SiteFeatures;
             break;
-        case 'ComponentGlobalCarousel':
+        case 'global.carousel':
             Block = HeroBanners;
             break;
         default:
@@ -51,7 +49,7 @@ const getBlockComponent = ({ __typename, ...rest }: { __typename: string }, inde
 
 const BlockManager = ({ blocks }: any) => {
     return (
-        <div className="space-y-16 w-full">
+        <div className="space-y-4 md:space-y-16 w-full">
             {blocks.map((block: any, index: number) =>
                 getBlockComponent(block, index.toString())
             )}

@@ -19,20 +19,18 @@ export interface IImageFormats {
 }
 
 export interface IImageAttr {
-    attributes: {
-        name: string
-        alternativeText: string
-        caption: string
-        width: string
-        height: string
-        hash: string
-        ext: string
-        mime: string
-        size: string
-        url: string
-        formats: IImageFormats
-    }
+    name: string
+    alternativeText: string
+    caption: string
+    width: string
+    height: string
+    hash: string
+    ext: string
+    mime: string
+    size: string
+    url: string
+    formats: IImageFormats
 }
 
-export type Timage = { image: { data: IImageAttr } }
+export type Timage = { image: { data: { attributes: IImageAttr } } }
 export type TadditionalImages = { additionalImages: { data: IImageAttr[] } }

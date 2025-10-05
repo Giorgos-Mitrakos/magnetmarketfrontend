@@ -4,146 +4,188 @@ import UserOrders from "@/components/molecules/userOrders";
 import ProfileAddresses from "@/components/organisms/profileAddresses";
 import { useApiRequest } from "@/repositories/clientRepository";
 import { signOut, useSession } from "next-auth/react";
-import { ReactNode, useReducer, useState } from "react";
-import { AiOutlineAppstore, AiOutlineHistory, AiOutlineLogout, AiOutlineUser } from "react-icons/ai";
+import { useReducer } from "react";
+import { 
+  AiOutlineAppstore, 
+  AiOutlineUser,
+  AiOutlineLogout,
+  AiOutlineLoading3Quarters,
+  AiOutlineSetting 
+} from "react-icons/ai";
 
-
-const reducer = (state: { tabs: { title: string, content: string, icon: ReactNode }[], activeTab: number }, action: { type: string, payload: number }) => {
-    switch (action.type) {
-        case 'SET_ACTIVE_TAB':
-            return { ...state, activeTab: action.payload };
-        default:
-            return state;
-    }
-};
-
-const TabContent = ({ id, activeTab, children }: { id: string, activeTab: string, children: JSX.Element }) => {
-    return (
-        activeTab === id ? <div className="TabContent">
-            {children}
-        </div>
-            : null
-    );
-};
-
-const tabs = [
-    { title: 'Το Προφίλ μου', content: "Profile", icon: <AiOutlineUser /> },
-    // { title: 'Διευθύνσεις Χρέωσης', content: 'BillingAddresses', icon: <AiOutlineUser /> },
-    // { title: 'Διευθύνσεις Αποστολής', content: 'ShippingAddresses', icon: <AiOutlineUser /> },
-    { title: 'Οι Παραγγελίες μου', content: 'Orders', icon: <AiOutlineAppstore /> },
-    // { title: 'Οι πόντοι μου', content: 'MyPoints', icon: <FaCoins /> },
-    // { title: 'Είδα Πρόσφατα', content: 'Recently', icon: <AiOutlineHistory /> }
-]
-
-const TabContentList = ({ state, session }: any) => {
-    interface IProfile {
-        user: {
-            info: {
-                id: string,
-                username: string;
-                email: string
-            },
-            shipping_address: {
-                id: number,
-                firstname: string,
-                lastname: string,
-                telephone: string;
-                mobilePhone: string;
-                street: string,
-                city: string,
-                state: string,
-                zipCode: string,
-                country: string,
-                afm: string,
-                doy: string,
-                companyName: string,
-                businessActivity: string,
-                title: string,
-                isInvoice: boolean
-            },
-            billing_address: {
-                id: number,
-                firstname: string,
-                lastname: string,
-                telephone: string;
-                mobilePhone: string;
-                street: string,
-                city: string,
-                state: string,
-                zipCode: string,
-                country: string,
-                afm: string,
-                doy: string,
-                companyName: string,
-                businessActivity: string,
-                title: string,
-                isInvoice: boolean
-                different_shipping: boolean;
-            }
-        }
-    }
-
-    const { data, loading, error }: { data: IProfile, loading: boolean, error: any } = useApiRequest({method:'POST', api: "/api/user-address/getUser", jwt: `${session.user.jwt}` })
-
-    return (
-        <>
-            {loading && !data ? <div>Loading</div> :
-                <div className="w-full text-center">
-                    <TabContent id="Profile" activeTab={state.tabs[state.activeTab]?.content}>
-                        <div className="grid">
-                            <ProfileAddresses key={data?.user?.info.id}
-                                userInfo={data?.user?.info}
-                                billingAddress={data?.user?.billing_address}
-                                shippingAddress={data?.user?.shipping_address}
-                                jwt={session.user.jwt} />
-
-                        </div>
-                    </TabContent>
-                    <TabContent id="Orders" activeTab={state.tabs[state.activeTab]?.content}>
-                        <UserOrders jwt={session.user.jwt}/>
-                    </TabContent>
-                    {/* <TabContent id="MyPoints" activeTab={state.tabs[state.activeTab]?.content}>
-                        <p>Tab MyPoints!</p>
-                    </TabContent>
-                    <TabContent id="Recently" activeTab={state.tabs[state.activeTab]?.content}>
-                        <p>Tab Recently!</p>
-                    </TabContent> */}
-                </div>}
-        </>)
+// Types
+interface Tab {
+  title: string;
+  content: string;
+  icon: React.ReactNode;
 }
 
-export default function Account() {
+interface TabState {
+  tabs: Tab[];
+  activeTab: number;
+}
 
-    const { data: session, status } = useSession()
-    const [state, dispatch] = useReducer(reducer, {
-        tabs, activeTab: 0
-    });
+type TabAction = { type: 'SET_ACTIVE_TAB'; payload: number };
 
-    const handleTabClick = (index: number) => {
-        dispatch({ type: 'SET_ACTIVE_TAB', payload: index });
-    };
+// Reducer
+const tabReducer = (state: TabState, action: TabAction): TabState => {
+  switch (action.type) {
+    case 'SET_ACTIVE_TAB':
+      return { ...state, activeTab: action.payload };
+    default:
+      return state;
+  }
+};
 
-    return (
-        <div className="flex">
-            <ul className=" text-siteColors-purple min-w-fit mr-2 lg:mr-4 bg-slate-100 dark:bg-slate-700 dark:text-slate-200">
-                {state.tabs.map((tab, index) => (
-                    <li
-                        className=" border dark:border-slate-500 p-4 cursor-pointer"
-                        key={index}
-                        onClick={() => handleTabClick(index)}
-                    >
-                        <p className=" hidden text-left sm:block">{tab.title}</p>
-                        <p className="flex text-2xl sm:hidden text-left">{tab.icon}</p>
-                    </li>))}
-                <li className="border dark:border-slate-500 p-4 flex flex-col justify-start">
-                    <button className=" text-siteColors-lightblue dark:text-slate-200 justify-start" onClick={() => signOut()}>
-                        <p className=" hidden sm:flex">Sign out</p>
-                        <AiOutlineLogout className="sm:hidden text-2xl" />
-                    </button>
-                    {/* <button className=" text-siteColors-lightblue sm:hidden" onClick={() => signOut()}><AiOutlineLogout /></button> */}
-                </li>
-            </ul>
-            <TabContentList state={state} session={session} />
+const tabs: Tab[] = [
+  { title: 'Το Προφίλ μου', content: "Profile", icon: <AiOutlineUser className="text-lg" /> },
+  { title: 'Οι Παραγγελίες μου', content: 'Orders', icon: <AiOutlineAppstore className="text-lg" /> },
+];
+
+const LoadingSpinner = () => (
+  <div className="flex justify-center items-center py-12">
+    <AiOutlineLoading3Quarters className="animate-spin text-2xl text-siteColors-purple" />
+    <span className="ml-2 text-gray-600 dark:text-gray-300">Φόρτωση...</span>
+  </div>
+);
+
+const TabContent = ({ 
+  id, 
+  activeTab, 
+  children 
+}: { 
+  id: string; 
+  activeTab: string; 
+  children: React.ReactNode;
+}) => {
+  return activeTab === id ? (
+    <div className="animate-fade-in">
+      {children}
+    </div>
+  ) : null;
+};
+
+const TabContentList = ({ state, session }: { state: TabState; session: any }) => {
+  const { data, loading, error } = useApiRequest({
+    method: 'POST', 
+    api: "/api/user-address/getUser", 
+    jwt: session?.user?.jwt 
+  });
+
+  if (loading) return <LoadingSpinner />;
+  
+  if (error) return (
+    <div className="text-center py-8 text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg">
+      Σφάλμα φόρτωσης δεδομένων προφίλ
+    </div>
+  );
+
+  const activeTabContent = state.tabs[state.activeTab]?.content;
+
+  return (
+    <div className="w-full">
+      <TabContent id="Profile" activeTab={activeTabContent}>
+        <div className="space-y-6">
+          <ProfileAddresses 
+            key={data?.user?.info.id}
+            userInfo={data?.user?.info}
+            billingAddress={data?.user?.billing_address}
+            shippingAddress={data?.user?.shipping_address}
+            jwt={session.user.jwt} 
+          />
         </div>
-    )
+      </TabContent>
+      
+      <TabContent id="Orders" activeTab={activeTabContent}>
+        <UserOrders jwt={session.user.jwt} />
+      </TabContent>
+    </div>
+  );
+};
+
+export default function Account() {
+  const { data: session, status } = useSession();
+  const [state, dispatch] = useReducer(tabReducer, { tabs, activeTab: 0 });
+
+  const handleTabClick = (index: number) => {
+    dispatch({ type: 'SET_ACTIVE_TAB', payload: index });
+  };
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <AiOutlineSetting className="text-6xl text-gray-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-600 dark:text-gray-300">
+            Παρακαλώ συνδεθείτε για να δείτε τον λογαριασμό σας
+          </h2>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Ο Λογαριασμός μου
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Διαχειριστείτε τα προσωπικά σας στοιχεία και τις παραγγελίες σας
+          </p>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar Navigation */}
+          <div className="lg:w-80">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 sticky top-8">
+              <div className="space-y-2">
+                {state.tabs.map((tab, index) => (
+                  <button
+                    key={index}
+                    className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 ${
+                      state.activeTab === index
+                        ? 'bg-siteColors-purple text-white shadow-md transform scale-105'
+                        : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:translate-x-1'
+                    }`}
+                    onClick={() => handleTabClick(index)}
+                  >
+                    <span className="flex-shrink-0">{tab.icon}</span>
+                    <span className="ml-3 font-medium text-left">{tab.title}</span>
+                  </button>
+                ))}
+                
+                <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-600">
+                  <button
+                    className="w-full flex items-center p-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200 group"
+                    onClick={() => signOut()}
+                  >
+                    <AiOutlineLogout className="text-lg flex-shrink-0" />
+                    <span className="ml-3 font-medium group-hover:underline">Αποσύνδεση</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <TabContentList state={state} session={session} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

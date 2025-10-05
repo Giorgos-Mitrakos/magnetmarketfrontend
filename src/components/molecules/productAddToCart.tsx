@@ -1,86 +1,99 @@
 "use client"
 
-import { FaOpencart, } from "react-icons/fa"
+import { FaOpencart } from "react-icons/fa"
 import useProductPrice from "@/hooks/useProductPrice"
 import Image from "next/image"
 import { getStrapiMedia } from "@/repositories/medias"
 import { FaRegImage } from "react-icons/fa6"
-import { IProduct } from "@/lib/interfaces/product"
+import { IProductCard } from "@/lib/interfaces/product"
 import { ICartItem } from "@/lib/interfaces/cart"
 import { useCheckout } from "@/context/checkout"
 import { addToCartToast } from "@/lib/toasts/cartToasts"
 
+function ProductAddToCart({ product }: { product: IProductCard }) {
+  const { data } = useProductPrice(product.id)
+  const { dispatch } = useCheckout()
 
-function ProductAddToCart({ product }: { product: IProduct }) {
-    const { profit, discount, isSale, isLoading, error, data } = useProductPrice(product.id)
-    const { dispatch } = useCheckout()
+  const item: ICartItem = {
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    image: product.image,
+    weight: product.weight,
+    price: product.price,
+    brand: product.brand?.name || null,
+    quantity: 1,
+    isAvailable: true,
+    is_sale: product.is_sale,
+    sale_price: product.sale_price,
+    category: product.category
+  }
 
-    const item: ICartItem = {
-        id: product.id,
-        name: product.attributes.name,
-        slug: product.attributes.slug,
-        image: product.attributes.image,
-        weight: product.attributes.weight,
-        price: product.attributes.price,
-        brand: product.attributes.brand.data?.attributes.name || null,
-        quantity: 1,
-        isAvailable: true,
-        is_sale: product.attributes.is_sale,
-        sale_price: product.attributes.sale_price,
-        category: product.attributes.category
-    }
+  const handleAddProductClick = () => {
+    dispatch({ type: "ADD_ITEM", payload: item })
+    addToCartToast(item)
+  }
 
-    const handleAddProductClick = (product: ICartItem) => {
-        dispatch({ type: "ADD_ITEM", payload: product })
-        addToCartToast(product)
-    }
+  const displayPrice = product.is_sale && product.sale_price 
+    ? product.sale_price 
+    : product.price;
 
-    return (
-        <div className="fixed md:static pb-4 shadow-topShadow md:shadow-none bottom-14 left-0 justify-center w-full bg-white dark:bg-slate-800 z-10">
-
-            <div className="flex md:hidden h-14 my-1 justify-between p-4 items-center">
-                {data?.product.data.attributes.is_sale ?
-                    <div className="flex flex-col">
-                        <h2 className="text-xl font-bold text-siteColors-purple dark:text-slate-200"
-                            aria-label={`${data?.product.data.attributes.sale_price} €`}>{data?.product.data.attributes.sale_price} €</h2>
-                        <h3 className="text-sm line-through align-top mr-1 text-gray-500 dark:text-slate-300"
-                            aria-label={`${data?.product.data.attributes.price} €`}>{data?.product.data.attributes.price} €</h3>
-                    </div>
-                    : <span className="text-xl font-bold"
-                        aria-label={`${data?.product.data.attributes.price} €`}>{data?.product.data.attributes.price} €</span>}
-                <h4 className="hidden xs:inline-block text-base text-lime-700 dark:text-lime-400"
-                    aria-label={`${data?.product.data.attributes.status} €`}>{data?.product.data.attributes.status}</h4>
-                {product.attributes.image.data ? <Image className="object-contain p-2"
-                    height={72}
-                    width={72}
-                    src={getStrapiMedia(product.attributes.image.data.attributes.url)}
-                    alt={product.attributes.image.data.attributes.name || "Φωτογραφία Προϊόντος"}
-                    aria-label={product.attributes.image.data.attributes.name || "Φωτογραφία Προϊόντος"}
-                    quality={75} /> :
-                    <FaRegImage className='h-16 w-16' />}
+  return (
+    <>
+      {/* Mobile View - Fixed Bottom Bar */}
+      <div className="fixed md:hidden bottom-14 left-0 right-0 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 shadow-lg z-40 p-3">
+        <div className="flex items-center justify-between">
+          {/* Product Image and Price */}
+          <div className="flex items-center gap-3">
+            <div className="relative w-16 h-16 bg-white rounded-lg border border-gray-200 dark:border-slate-600 flex items-center justify-center">
+              {product.image ? (
+                <Image
+                  src={getStrapiMedia(product.image.url)!}
+                  alt={product.image.name || product.name}
+                  fill
+                  className="object-contain p-2"
+                  sizes="64px"
+                />
+              ) : (
+                <FaRegImage className="w-8 h-8 text-gray-400" />
+              )}
             </div>
-            <div className="w-full rounded-lg px-2 flex">
-                <button
-                    onClick={() => handleAddProductClick(item)}
-                    className="flex justify-center items-center px-4 py-2 w-full rounded border dark:border-slate-300 md:text-slate-100 text-lg font-semibold
-                bg-gradient-to-b from-siteColors-pink via-siteColors-purple to-siteColors-pink text-white
-            md:bg-gradient-to-br md:from-siteColors-lightblue md:to-siteColors-blue
-            hover:bg-gradient-to-b hover:from-siteColors-pink hover:via-siteColors-purple hover:to-siteColors-pink hover:text-white">
-                    <FaOpencart
-                        className="text-xl mr-4"
-                        aria-label="Προσθήκη στο καλάθι" />
-                    <span className="hidden xs:inline-block">Προσθήκη στο Καλάθι</span>
-                    <span className="xs:hidden">Καλάθι</span>
-                </button>
-                {/* <button className=" w-14 border flex justify-center items-center text-xl text-slate-400 rounded-md
-            hover:bg-gradient-to-br hover:from-siteColors-pink hover:to-siteColors-purple hover:text-white">
-                    <FaHeart
-                        aria-label="Καρδιά"
-                        aria-description="Προσθήκη στα αγαπημένα" />
-                </button> */}
+            
+            <div className="flex flex-col">
+              <span className="text-lg font-bold text-siteColors-purple dark:text-slate-200">
+                {displayPrice.toFixed(2)} €
+              </span>
+              {product.is_sale && (
+                <span className="text-sm line-through text-gray-500 dark:text-slate-400">
+                  {product.price.toFixed(2)} €
+                </span>
+              )}
             </div>
+          </div>
+
+          {/* Add to Cart Button */}
+          <button
+            onClick={handleAddProductClick}
+            className="flex items-center justify-center px-6 py-3 bg-gradient-to-r from-siteColors-purple to-siteColors-pink text-white rounded-lg font-semibold hover:from-siteColors-pink hover:to-siteColors-purple transition-all duration-200 shadow-md hover:shadow-lg"
+          >
+            <FaOpencart className="mr-2" />
+            <span>Προσθήκη</span>
+          </button>
         </div>
-    )
+      </div>
+
+      {/* Desktop View */}
+      <div className="hidden md:block mt-6">
+        <button
+          onClick={handleAddProductClick}
+          className="w-full flex items-center justify-center px-6 py-4 bg-gradient-to-r from-siteColors-blue to-siteColors-lightblue text-white rounded-xl font-semibold text-lg hover:from-siteColors-lightblue hover:to-siteColors-blue transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+        >
+          <FaOpencart className="mr-3 text-xl" />
+          <span>Προσθήκη στο Καλάθι</span>
+        </button>
+      </div>
+    </>
+  )
 }
 
 export default ProductAddToCart

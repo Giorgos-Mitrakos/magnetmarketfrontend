@@ -3,10 +3,11 @@
 import { useState } from "react"
 import { FaFilter } from "react-icons/fa6"
 import CategoryFilters, { CategoryFiltersProps } from "./categoryFilters"
+import { FilterProps } from "@/lib/interfaces/filters"
 
 
 
-export default function MobileFilters(props: CategoryFiltersProps) {
+export default function MobileFilters({ availableFilters }: { availableFilters: FilterProps[] }) {
     const [isFiltersOpen, setIsFiltersOpen] = useState(false)
     return (
         <div>
@@ -19,10 +20,10 @@ export default function MobileFilters(props: CategoryFiltersProps) {
                         <button className="self-end p-2 w-auto text-sm mt-4 border border-slate-200 text-slate-100 bg-siteColors-blue dark:bg-siteColors-purple rounded-lg"
                             onClick={() => setIsFiltersOpen(false)} >Κλείσιμο</button>
                     </div>
-                    <CategoryFilters category1={props.category1} category2={props.category2} category3={props.category3} searchParams={props.searchParams} />
+                    <CategoryFilters availableFilters={availableFilters} />
                 </div>
             </div>
-            <button  id="filterButton" name="filterButton" aria-label="Φίλτρα"
+            <button id="filterButton" name="filterButton" aria-label="Φίλτρα"
                 className="fixed lg:hidden bottom-24 right-8 flex justify-center items-center rounded-full 
         bg-siteColors-lightblue h-14 w-14 shadow-xl"
                 onClick={() => setIsFiltersOpen(true)}>

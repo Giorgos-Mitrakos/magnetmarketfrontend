@@ -7,7 +7,6 @@ export default function useProductFilters(filterBy: string) {
     const pathname = usePathname()
     const search = searchParams.getAll(filterBy)
 
-    console.log(search)
     const [selectedFilters, setSelectedFilters] = useState<string[]>(() => {
         const filters: string[] = []
         if (search) {
@@ -32,7 +31,6 @@ export default function useProductFilters(filterBy: string) {
     }
 
     useEffect(() => {
-        console.log(filterBy)
         const params = new URLSearchParams(searchParams)
         params.delete(filterBy)
 

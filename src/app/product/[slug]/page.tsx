@@ -1,39 +1,121 @@
-import dynamic from "next/dynamic";
 import Breadcrumb from '@/components/molecules/breadcrumb';
 import { Metadata, ResolvingMetadata } from 'next'
 import Newsletter from '@/components/molecules/newsletter';
 import ProductBasicFeatures from '@/components/organisms/productBasicFeatures';
 import SiteFeatures from '@/components/organisms/siteFeatures';
-import SuggestedProducts from '@/components/organisms/suggestedProducts';
-import { GET_PRODUCT_BY_SLUG } from '@/lib/queries/productQuery';
-import { requestSSR } from '@/repositories/repository';
 import { FaRegImage } from "react-icons/fa";
 import { notFound } from 'next/navigation'
-import { IProducts } from "@/lib/interfaces/product";
-const ProductInfo = dynamic(() => import("@/components/organisms/productInfo"), {
-  ssr: false,
-  loading: () => <p>Loading...</p>
-});
+import { IProductPage, TProductPage } from "@/lib/interfaces/product";
+import { localBusinessStructuredData, organizationStructuredData } from "@/lib/helpers/structureData";
+import SimilarProducts from "@/components/organisms/similarProducts";
+import ProductInfo from "@/components/organisms/productInfo"
+import ProductImageWidget from '@/components/molecules/productImageWidget'
 
-const ProductImageWidget = dynamic(() => import('@/components/molecules/productImageWidget'), {
-  ssr: false,
-  loading: () => <p>Loading...</p>
-})
+export const dynamicParams = true
+export const revalidate = 86400 // 24 ώρες
 
 type MetadataProps = {
   params: { slug: string }
 }
 
-async function getProductData(slug: string) {
-  const data: IProducts | any = await requestSSR({
-    query: GET_PRODUCT_BY_SLUG, variables: { slug: slug }
-  });
+// TypeScript interfaces
+interface IBreadcrumb {
+  title: string;
+  slug: string;
+}
 
-  if (data.products.data.length === 0) {
+interface ICategory {
+  id: number;
+  name: string;
+  slug: string;
+  parents?: ICategory[];
+}
+
+async function getProductData(slug: string) {
+  try {
+    
+    // Βελτιωμένος έλεγχος για invalid slugs
+    if (!slug ||
+      // slug.includes('.') || // Απορρίπτει οποιοδήποτε slug με τελείες
+      slug.length < 2 || // Πολύ μικρά slugs
+      slug.length > 1500 //|| // Πολύ μεγάλα slugs
+      // /[^a-zA-Z0-9\-]/.test(slug) // Μη-επιτρεπτοί χαρακτήρες
+    ) {
+      notFound()
+    }
+
+    const myHeaders = new Headers();
+    myHeaders.append('Content-Type', 'application/json')
+
+    const myInit = {
+      method: "POST",
+      headers: myHeaders,
+      body: JSON.stringify({ slug: slug })
+    };
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/product/getProductBySlug`,
+      myInit
+    )
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data || !data.product) {
+      notFound();
+    }
+
+    return data as TProductPage;
+  } catch (error) {
+    console.error('Error fetching product data:', error);
     notFound();
   }
+}
 
-  return data as IProducts
+// Διορθωμένη υλοποίηση με TypeScript
+function generateBreadcrumbsRecursive(product: IProductPage): IBreadcrumb[] {
+
+  if (!product) {
+    return [{ title: "Home", slug: "/" }];
+  }
+
+  // Recursive συνάρτηση για συλλογή της ιεραρχίας
+  function collectCategoryHierarchy(category: ICategory | null, hierarchy: ICategory[] = []): ICategory[] {
+    if (!category) return hierarchy;
+
+    // Προσθήκη της τρέχουσας κατηγορίας στην αρχή
+    hierarchy.unshift(category);
+
+    // Συνέχεια με το πρώτο parent (αν υπάρχει)
+    const parent = category.parents && category.parents.length > 0 ? category.parents[0] : null;
+    return collectCategoryHierarchy(parent, hierarchy);
+  }
+
+  const breadcrumbs: IBreadcrumb[] = [{ title: "Home", slug: "/" }];
+  const categoryHierarchy = collectCategoryHierarchy(product.category);
+
+  // Δημιουργία breadcrumb για κάθε κατηγορία
+  categoryHierarchy.forEach((category, index) => {
+    const slugParts = categoryHierarchy
+      .slice(0, index + 1)
+      .map(cat => cat.slug);
+
+    breadcrumbs.push({
+      title: category.name,
+      slug: `/category/${slugParts.join('/')}`
+    });
+  });
+
+  // Προσθήκη προϊόντος
+  breadcrumbs.push({
+    title: product.name,
+    slug: `/product/${product.slug}`
+  });
+
+  return breadcrumbs;
 }
 
 export default async function Product({ params }:
@@ -41,270 +123,152 @@ export default async function Product({ params }:
     params: { slug: string }
   }) {
 
-  const data = await getProductData(params.slug)
+  // Έλεγχος των params πριν από οποιαδήποτε processing
+  if (!isValidProductSlug(params.slug)) {
+    notFound();
+  }
 
-  const breadcrumbs = [
-    {
-      title: "Home",
-      slug: "/"
-    },
-    {
-      title: data.products.data[0]?.attributes.category.data.attributes.parents.data[0]?.attributes.parents.data[0].attributes.name,
-      slug: `/category/${data.products.data[0]?.attributes.category.data.attributes.parents.data[0]?.attributes.parents.data[0].attributes.slug}`
-    },
-    {
-      title: data.products.data[0]?.attributes.category.data.attributes.parents.data[0]?.attributes.name,
-      slug: `/category/${data.products.data[0]?.attributes.category.data.attributes.parents.data[0]?.attributes.parents.data[0]?.attributes.slug}/${data.products.data[0]?.attributes.category.data.attributes.parents.data[0]?.attributes.slug}`
-    },
-    {
-      title: data.products.data[0]?.attributes.category.data.attributes.name,
-      slug: `/category/${data.products.data[0]?.attributes.category.data.attributes.parents.data[0]?.attributes.parents.data[0].attributes.slug}/${data.products.data[0]?.attributes.category.data.attributes.parents.data[0]?.attributes.slug}/${data.products.data[0]?.attributes.category.data.attributes.slug}`
-    },
-    {
-      title: data.products.data[0]?.attributes.name,
-      slug: `/product/${data.products.data[0]?.attributes.slug}`
-    }
-  ]
+  const data = await getProductData(params.slug)
+  const product = data.product
+
+  const breadcrumbs = generateBreadcrumbsRecursive(product)
 
   const images = []
-  if (data.products.data[0]?.attributes.image.data)
-    images.push(data.products.data[0]?.attributes.image.data)
-  data.products.data[0]?.attributes.additionalImages.data.forEach(x => {
-    images.push(x)
-  })
+  if (product.image)
+    images.push(product.image)
 
-  const product = data.products.data[0]
+  if (product.additionalImages)
+    product.additionalImages.forEach(x => {
+      images.push(x)
+    })
 
-  const structuredDataImages = images.map(x => `${process.env.NEXT_PUBLIC_API_URL}${x.attributes.url}`)
+  const structuredDataImages = images.map(x => `${process.env.NEXT_PUBLIC_API_URL}${x.url}`)
 
-  // let structuredDataPrice = {
-  //   "@type": "Offer",
-  //   "url": `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
-  //   "availability": "https://schema.org/InStock",
-  //   "itemCondition": "https://schema.org/NewCondition",
-  //   "priceCurrency": "EUR",
-  //   "price": product.attributes.is_sale && product.attributes.sale_price
-  //     ? product.attributes.sale_price
-  //     : product.attributes.price,
-  //   "priceSpecification": {
-  //     "@type": "UnitPriceSpecification",
-  //     "price": product.attributes.is_sale && product.attributes.sale_price
-  //       ? product.attributes.sale_price
-  //       : product.attributes.price,
-  //     "priceCurrency": "EUR"
-  //   }
-  // }
+  const getOfferData = (product: IProductPage) => {
+    const baseOffer = {
+      "@type": "Offer",
+      "url": `${process.env.NEXT_URL}/product/${product.slug}`,
+      "availability": product.inventory > 0
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      "itemCondition": "https://schema.org/NewCondition",
+      "priceCurrency": "EUR",
+      "priceValidUntil": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 year from now
+      "seller": {
+        "@type": "Organization",
+        "name": "Magnet Market"
+      }
+    };
 
-  // if(product.attributes.is_sale && product.attributes.sale_price) {
-  //     structuredDataPrice = {
-  //       "@type": "Offer",
-  //       url: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
-  //       availability: "https://schema.org/InStock",
-  //       itemCondition: 'https://schema.org/NewCondition',
-  //       "price": product.attributes.sale_price,
-  //       "priceCurrency": "EUR",
-  //       // Optional: add priceValidUntil only if known
-  //       // "priceValidUntil": "2025-12-31",
-
-  //       "priceSpecification": [
-  //         {
-  //           "@type": "UnitPriceSpecification",
-  //           "price": product.attributes.sale_price,
-  //           "priceCurrency": "EUR"
-  //         },
-  //         {
-  //           "@type": "UnitPriceSpecification",
-  //           "priceType": "https://schema.org/StrikethroughPrice",
-  //           "price": product.attributes.price,
-  //           "priceCurrency": "EUR"
-  //         }
-  //       ],
-  //       "shippingDetails": {
-  //         "@type": "OfferShippingDetails",
-  //         "shippingRate": {
-  //           "@type": "MonetaryAmount",
-  //           "value": 4.5,
-  //           "currency": "EUR"
-  //         },
-  //         "shippingDestination": {
-  //           "@type": "DefinedRegion",
-  //           "addressCountry": "GR"
-  //         },
-  //         "deliveryTime": {
-  //           "@type": "ShippingDeliveryTime",
-  //           "handlingTime": {
-  //             "@type": "QuantitativeValue",
-  //             "minValue": 0,
-  //             "maxValue": 1,
-  //             "unitCode": "DAY"
-  //           },
-  //           "transitTime": {
-  //             "@type": "QuantitativeValue",
-  //             "minValue": 1,
-  //             "maxValue": 5,
-  //             "unitCode": "DAY"
-  //           }
-  //         }
-  //       },
-  //       "hasMerchantReturnPolicy": {
-  //         "@type": "MerchantReturnPolicy",
-  //         "applicableCountry": "GR",
-  //         "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-  //         "merchantReturnDays": 14,
-  //         "merchantReturnLink": `${process.env.NEXT_URL}/pages/politiki-epistrofon`,
-  //         "returnMethod": "https://schema.org/ReturnByMail",
-  //         "returnFees": "https://schema.org/FreeReturn"
-  //       }
-  //     }
-  //   }
-  // else {
-  //   structuredDataPrice = {
-  //     "@type": "Offer",
-  //     url: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
-  //     availability: "https://schema.org/InStock",
-  //     itemCondition: 'https://schema.org/NewCondition',
-  //     "price": product.attributes.price,
-  //     "priceCurrency": "EUR",
-
-  //     "priceSpecification": [
-  //       {
-  //         "@type": "UnitPriceSpecification",
-  //         "price": product.attributes.price,
-  //         "priceCurrency": "EUR"
-  //       }
-  //     ],
-  //     "shippingDetails": {
-  //       "@type": "OfferShippingDetails",
-  //       "shippingRate": {
-  //         "@type": "MonetaryAmount",
-  //         "value": 4.5,
-  //         "currency": "EUR"
-  //       },
-  //       "shippingDestination": {
-  //         "@type": "DefinedRegion",
-  //         "addressCountry": "GR"
-  //       },
-  //       "deliveryTime": {
-  //         "@type": "ShippingDeliveryTime",
-  //         "handlingTime": {
-  //           "@type": "QuantitativeValue",
-  //           "minValue": 0,
-  //           "maxValue": 1,
-  //           "unitCode": "DAY"
-  //         },
-  //         "transitTime": {
-  //           "@type": "QuantitativeValue",
-  //           "minValue": 1,
-  //           "maxValue": 5,
-  //           "unitCode": "DAY"
-  //         }
-  //       }
-  //     },
-  //     "hasMerchantReturnPolicy": {
-  //       "@type": "MerchantReturnPolicy",
-  //       "applicableCountry": "GR",
-  //       "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-  //       "merchantReturnDays": 14,
-  //       "merchantReturnLink": `${process.env.NEXT_URL}/pages/politiki-epistrofon`,
-  //       "returnMethod": "https://schema.org/ReturnByMail",
-  //       "returnFees": "https://schema.org/FreeReturn"
-  //     }
-  //   }
-  // }
+    if (product.is_sale && product.sale_price) {
+      return {
+        ...baseOffer,
+        "price": product.sale_price,
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "price": product.sale_price,
+          "priceCurrency": "EUR",
+          "referenceQuantity": {
+            "@type": "QuantitativeValue",
+            "value": 1,
+            "unitCode": "C62" // unit code for "piece"
+          }
+        },
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "GR",
+          "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+          "merchantReturnDays": 14,
+          "returnMethod": "https://schema.org/ReturnByMail",
+          "returnFees": "https://schema.org/FreeReturn"
+        }
+      };
+    } else {
+      return {
+        ...baseOffer,
+        "price": product.price,
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "price": product.price,
+          "priceCurrency": "EUR",
+          "referenceQuantity": {
+            "@type": "QuantitativeValue",
+            "value": 1,
+            "unitCode": "C62"
+          }
+        },
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "GR",
+          "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+          "merchantReturnDays": 14,
+          "returnMethod": "https://schema.org/ReturnByMail",
+          "returnFees": "https://schema.org/FreeReturn"
+        }
+      };
+    }
+  };
 
   const productStructuredData = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: product.attributes.name,
-    description: product.attributes.description,
-    sku: product.id,
-    mpn: product.attributes.mpn,
-    gtin13: product.attributes.barcode,
-    brand: product.attributes.brand.data ?
-      {
-        '@type': 'Brand',
-        name: product.attributes.brand.data.attributes.name,
-        logo: product.attributes.brand.data.attributes.logo && product.attributes.brand.data.attributes.logo.data ?
-          `${process.env.NEXT_PUBLIC_API_URL}${product.attributes.brand.data.attributes.logo.data.attributes.url}`
-          : ''
-      } :
-      {}
-    ,
-    image: structuredDataImages,
-    keywords: `${product.attributes.category.data.attributes.name}`,
-    offers: {
-      "@type": "Offer",
-      "url": `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
-      "availability": "https://schema.org/InStock",
-      "itemCondition": "https://schema.org/NewCondition",
-      "price": product.attributes.is_sale && product.attributes.sale_price
-        ? product.attributes.sale_price
-        : product.attributes.price,
-      "priceCurrency": "EUR",
-      "seller": {
-        "@type": "Organization",
-        "name": "Magnet Market"
-      },
-      "shippingDetails": {
-        "@type": "OfferShippingDetails",
-        "shippingRate": {
-          "@type": "MonetaryAmount",
-          "value": 4.5,
-          "currency": "EUR"
-        },
-        "shippingDestination": {
-          "@type": "DefinedRegion",
-          "addressCountry": "GR"
-        },
-        "deliveryTime": {
-          "@type": "ShippingDeliveryTime",
-          "handlingTime": {
-            "@type": "QuantitativeValue",
-            "minValue": 0,
-            "maxValue": 1,
-            "unitCode": "DAY"
-          },
-          "transitTime": {
-            "@type": "QuantitativeValue",
-            "minValue": 1,
-            "maxValue": 5,
-            "unitCode": "DAY"
-          }
-        }
-      },
-      "hasMerchantReturnPolicy": {
-        "@type": "MerchantReturnPolicy",
-        "applicableCountry": "GR",
-        "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-        "merchantReturnDays": 14,
-        "merchantReturnLink": `${process.env.NEXT_URL}/pages/politiki-epistrofon`,
-        "returnMethod": "https://schema.org/ReturnByMail",
-        "returnFees": "https://schema.org/FreeReturn"
-      }
-    },
+    'productID': product.id,
+    'name': product.name,
+    'description': product.description ? product.description.replace(/<[^>]*>/g, '').substring(0, 300) : undefined,
+    'sku': product.id,
+    'mpn': product.mpn,
+    'gtin13': product.barcode,
+    'brand': product.brand ? {
+      '@type': 'Brand',
+      'name': product.brand.name,
+      'logo': product.brand.logo
+        ? `${process.env.NEXT_PUBLIC_API_URL}${product.brand.logo.url}`
+        : undefined
+    } : undefined,
+    'image': structuredDataImages,
+    'offers': getOfferData(product),
+    'category': product.category?.name
   };
 
-  const breadcrumbList = breadcrumbs.map((breabcrumb, i) => ({
-    "@type": "ListItem",
-    "position": i + 1,
-    "name": breabcrumb.title,
-    "item": `${process.env.NEXT_URL}${breabcrumb.slug}`
-  }))
+  const generateBreadcrumbStructuredData = (breadcrumbs: any[]) => {
+    // Filter out any invalid breadcrumbs
+    const validBreadcrumbs = breadcrumbs.filter(breadcrumb =>
+      breadcrumb && breadcrumb.title && breadcrumb.slug
+    );
 
-  const breadcrumbStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": breadcrumbList
-  }
+    if (validBreadcrumbs.length === 0) {
+      return null; // Don't generate structured data if no valid breadcrumbs
+    }
+
+    const itemListElement = validBreadcrumbs.map((breadcrumb, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "name": breadcrumb.title,
+      "item": `${process.env.NEXT_URL}${breadcrumb.slug}`
+    }));
+
+    return {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": itemListElement
+    };
+  };
+
+  // Usage:
+  const breadcrumbData = generateBreadcrumbStructuredData(breadcrumbs);
 
   const structuredData = []
   structuredData.push(productStructuredData)
-  structuredData.push(breadcrumbStructuredData)
+  if (breadcrumbData) {
+    structuredData.push(breadcrumbData);
+  }
+
+  structuredData.push(organizationStructuredData)
+  structuredData.push(localBusinessStructuredData)
 
   return (
     <>
       <script
-      
         id="structured-data"
         key="product-structured-data"
         type="application/ld+json"
@@ -312,80 +276,116 @@ export default async function Product({ params }:
           __html: JSON.stringify(structuredData),
         }}
       />
-      <div className="dark:bg-gray-800">
+      <div className="min-h-screen">
         <SiteFeatures />
+        {/* Breadcrumb */}
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        {data.products.data.length > 0 &&
-          < div className="grid md:grid-cols-4 lg:grid-cols-5 w-full mt-8">
-            <div className='col-span-4'>
-              <div className='grid grid-cols-1 sm:grid-cols-2 col-span-4'>
-                <div>
-                  {images.length > 0 ?
-                    <ProductImageWidget images={images} /> :
-                    <div className="flex justify-center text-siteColors-purple">
-                      <FaRegImage className='h-60 w-60' />
-                    </div>}
-                </div>
-                <div>
-                  <ProductBasicFeatures product={data.products.data[0]} />
-                </div>
+        {/* Στο product page component */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Column - Main Content (9 columns) */}
+          <div className="lg:col-span-9">
+            {/* Product Images and Basic Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+              {/* Product Images */}
+              <div className="bg-white dark:bg-gray-800  overflow-hidden">
+                {images.length > 0 ?
+                  <ProductImageWidget images={images} /> :
+                  <div className="flex justify-center items-center h-96 text-siteColors-purple dark:text-gray-400">
+                    <FaRegImage className='h-40 w-40' />
+                  </div>}
               </div>
-              <div className='mt-16 lg:mr-4'>
-                <ProductInfo description={data.products.data[0].attributes.description} chars={data.products.data[0].attributes.prod_chars} />
+
+              {/* Product Basic Features */}
+              <div className="bg-white dark:bg-gray-800 p-6">
+                <ProductBasicFeatures product={product} />
               </div>
             </div>
-            <aside className='col-span-4 lg:col-start-5'>
-              <SuggestedProducts product={data.products.data[0]} />
-            </aside>
-          </div>}
-        <div className='mt-20'>
+
+            {/* Product Info */}
+            <div className="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+              <ProductInfo description={product.description} chars={product.prod_chars} />
+            </div>
+          </div>
+
+          {/* Right Column - Suggested Products (3 columns) */}
+          <div className="lg:col-span-3">
+            <SimilarProducts similarProducts={data.similarProducts} crossCategories={data.product.category.cross_categories}/>
+          </div>
+        </div>
+
+        {/* Newsletter at bottom */}
+        <div className='mt-12'>
           <Newsletter />
         </div>
-      </div >
+      </div>
     </>
   )
 }
 
+// Προσθήκη αυτής της συνάρτησης για έλεγχο των params
+export function generateStaticParams() {
+  return [] // Δεν προ-rendering καθώς έχουμε dynamic params
+}
 
-export async function generateMetadata({ params }: MetadataProps,
-  parent: ResolvingMetadata): Promise<Metadata> {
+// Validation function
+function isValidProductSlug(slug: string): boolean {
+  return (
+    typeof slug === 'string' &&
+    slug.length >= 2 &&
+    slug.length <= 5000 &&
+    // !slug.includes('.') && // Απορρίπτει files
+    !slug.includes('..')
+  )
+}
 
-  const data = await getProductData(params.slug)
-
-  const product = data.products.data[0]
-
-  let metadata: Metadata = {
-    title: `Magnet Market-${product.attributes.name.length > 53 ? product.attributes.name.slice(0, 53) : product.attributes.name}`,
-    category: `${product.attributes.category.data.attributes.name}`,
-    alternates: {
-      canonical: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
-    }
-
-  }
-
-  if (product.attributes.short_description) {
-    metadata.description = `${product.attributes.short_description
-      .replaceAll("<p>", "")
-      .replaceAll("</p>", "")
-      .replaceAll("&nbsp;", " ")
-      .replaceAll("\n", "")
-      }`
-  }
-  else if (product.attributes.brand.data) {
-    metadata.description = `To ${product.attributes.name} είναι ένα προϊόν της εταιρίας ${product.attributes.brand.data.attributes.name}`
-  }
-
-  if (product.attributes.image.data) {
-    metadata.openGraph = {
-      url: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
-      type: 'website',
-      images: [`${process.env.NEXT_PUBLIC_API_URL}${product.attributes.image.data?.attributes.url}`],
-      siteName: "magnetmarket.gr",
-      phoneNumbers: ["2221121657"],
-      emails: ["info@magnetmarket.gr"],
-      countryName: 'Ελλάδα',
+export async function generateMetadata({ params }: MetadataProps): Promise<Metadata> {
+  // Έλεγχος και εδώ
+  if (!isValidProductSlug(params.slug)) {
+    return {
+      title: 'Product Not Found',
+      description: 'Product not found'
     }
   }
 
-  return metadata
+  try {
+    const data = await getProductData(params.slug)
+    const product = data.product
+
+    let metadata: Metadata = {
+      title: `Magnet Market - ${product.name.length > 53 ? product.name.slice(0, 53) + '...' : product.name}`,
+      category: product.category.name,
+      alternates: {
+        canonical: `${process.env.NEXT_URL}/product/${product.slug}`,
+      }
+    }
+
+    if (product.short_description) {
+      metadata.description = product.short_description
+        .replaceAll("<p>", "")
+        .replaceAll("</p>", "")
+        .replaceAll("&nbsp;", " ")
+        .replaceAll("\n", "")
+        .substring(0, 160); // Περιορισμός length για SEO
+    } else if (product.brand) {
+      metadata.description = `Το ${product.name} είναι ένα προϊόν της εταιρίας ${product.brand.name}`
+    }
+
+    if (product.image) {
+      metadata.openGraph = {
+        title: metadata.title as string,
+        description: metadata.description ? metadata.description : '',
+        url: `${process.env.NEXT_URL}/product/${product.slug}`,
+        type: 'website',
+        images: [`${process.env.NEXT_PUBLIC_API_URL}${product.image.url}`],
+        siteName: "magnetmarket.gr",
+      }
+    }
+
+    return metadata
+  } catch (error) {
+    return {
+      title: 'Product Not Found',
+      description: 'Product not found'
+    }
+  }
 }

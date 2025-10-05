@@ -1,4 +1,5 @@
 import NextImage from "@/components/atoms/nextImage";
+import { IHomeDoubleBanner } from "@/lib/queries/homepage";
 import Link from "next/link";
 
 const DoubleBanner = ({ id, rightBanner,
@@ -6,33 +7,15 @@ const DoubleBanner = ({ id, rightBanner,
     rightTarget,
     leftBanner,
     leftHref,
-    leftTarget }: { id: string,
-        rightBanner:{data: {
-            attributes: {
-              url: string
-              alternativeText: string
-            }
-          }},
-        rightHref: string,
-        rightTarget: string,
-        leftBanner:{
-            data: {
-                attributes: {
-                  url: string
-                  alternativeText: string
-                }
-              }
-        },
-        leftHref: string,
-        leftTarget: string }) => {
-        
+    leftTarget }: IHomeDoubleBanner) => {
+
     return (
-        <div key={id} className='grid h-64 md:grid-cols-2 gap-4'>
+        <div className='grid h-64 md:grid-cols-2 gap-4'>
             <Link href={rightHref} target={rightTarget}>
-                <NextImage media={rightBanner.data.attributes} height={360} width={720} />
+                <NextImage media={rightBanner} height={360} width={720} />
             </Link>
             <Link href={leftHref} target={leftTarget}>
-                <NextImage media={leftBanner.data.attributes} height={360} width={720} />
+                <NextImage media={leftBanner} height={360} width={720} />
             </Link>
         </div>
     )

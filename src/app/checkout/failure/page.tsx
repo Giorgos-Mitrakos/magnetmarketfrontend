@@ -1,22 +1,71 @@
 import { getCookies } from "@/lib/helpers/actions"
-import { IOrder, IOrderCookie } from "../thank-you/page"
-import { requestSSR } from "@/repositories/repository"
-import { GET_ORDER } from "@/lib/queries/shippingQuery"
+import { IOrderCookie } from "../thank-you/page"
 import Image from "next/image"
 import { FaRegImage, FaTimesCircle, FaExclamationTriangle, FaEuroSign } from "react-icons/fa";
+import { getOrder } from "@/lib/queries/order"
 
 export default async function Fail() {
     const orderCookie = await getCookies({ name: '_mmo' })
     const rcfCookie = await getCookies({ name: '_rcf' })
 
     const order: IOrderCookie = orderCookie ? JSON.parse(orderCookie.value) : null
-    // const resultCode = rcfCookie ? JSON.parse(rcfCookie.value) : null
 
-    const response = await requestSSR({
-        query: GET_ORDER, variables: { id: order.orderId }
-    });
+    const result = await getOrder(order.orderId)
 
-    const data = await response as IOrder
+    const data = result?.order
+
+    if (!data) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-siteColors-lightblue/10 via-siteColors-blue/10 to-siteColors-pink/10 mb-16 py-8 px-4">
+                <div className="max-w-2xl mx-auto">
+                    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div className="bg-gradient-to-r from-red-500 to-orange-500 p-4 text-white text-center">
+                            <h2 className="text-xl font-semibold">Προέκυψε Σφάλμα</h2>
+                        </div>
+                        <div className="p-8 text-center">
+                            <div className="flex justify-center mb-6">
+                                <div className="bg-red-100 p-4 rounded-full">
+                                    <FaTimesCircle className="h-16 w-16 text-red-500" />
+                                </div>
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                                Κάτι πήγε στραβά με την παραγγελία σας
+                            </h3>
+                            <p className="text-gray-600 mb-6">
+                                Δεν μπορέσαμε να βρούμε τις λεπτομέρειες της παραγγελίας σας.
+                                Αυτό μπορεί να οφείλεται σε τεχνικό πρόβλημα ή λάθος αναφοράς.
+                            </p>
+                            <div className="bg-red-50 p-4 rounded-lg mb-6 border border-red-200">
+                                <p className="text-red-800 font-medium">
+                                    Η πληρωμή δεν ολοκληρώθηκε με επιτυχία. Εάν έχετε χρεωθεί,
+                                    η ποσό θα επιστραφεί αυτόματα στον λογαριασμό σας εντός λίγων ημερών.
+                                </p>
+                            </div>
+                            <div className="space-y-2 text-sm text-gray-700 mb-6">
+                                <p>Εάν έχετε οποιαδήποτε απορία, μη διστάσετε να επικοινωνήσετε μαζί μας:</p>
+                                <p className="font-medium">Τηλέφωνο: 2221121657</p>
+                                <p className="font-medium">Email: info@magnetmarket.gr</p>
+                            </div>
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                <a
+                                    href="/cart"
+                                    className="inline-block bg-siteColors-purple hover:bg-siteColors-purple/90 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+                                >
+                                    Επιστροφή στο Καλάθι
+                                </a>
+                                <a
+                                    href="/"
+                                    className="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-6 rounded-lg transition-colors"
+                                >
+                                    Επιστροφή στην Αρχική
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     let resultAnswer = ''
 
@@ -83,13 +132,13 @@ export default async function Fail() {
                     {/* Products Grid */}
                     <div className="p-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {data && data.order.data.attributes.products.map(item => (
+                            {data && data.products.map(item => (
                                 <div key={item.id} className="flex border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                                     <div className="relative w-24 h-24 flex-shrink-0">
-                                        {item.image ? (
+                                        {item.image.formats ? (
                                             <Image
                                                 className="object-cover"
-                                                src={`${process.env.NEXT_PUBLIC_API_URL}${item.image.data.attributes.formats.small ? item.image.data.attributes.formats.small.url : item.image.data.attributes.url}`}
+                                                src={`${process.env.NEXT_PUBLIC_API_URL}${item.image.formats.small ? item.image.formats.small.url : item.image.url}`}
                                                 alt={item.name}
                                                 fill
                                             />
@@ -124,7 +173,7 @@ export default async function Fail() {
                                 <h3 className="text-lg font-medium text-gray-700">Σύνολο</h3>
                             </div>
                             <p className="text-xl font-bold text-siteColors-purple">
-                                {data.order.data.attributes.total.toFixed(2)} €
+                                {data.total.toFixed(2)} €
                             </p>
                         </div>
                     </div>

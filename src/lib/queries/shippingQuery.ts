@@ -64,28 +64,28 @@ query getShippingMethods{
 //   }
 // }`
 
-export const GET_ORDER = gql`
-query getOrder($id:ID!){
-    order(id:$id) {
-    data {
-      id
-      attributes {
-        products
-        total
-        status
-        billing_address
-        different_shipping
-        shipping_address
-        installments
-        payment {
-          name
-          cost
-        }
-        shipping{
-          name
-          cost
-        }       
-      }
-    }
-  }
-}`
+// export const GET_ORDER = gql`
+// query getOrder($id:ID!){
+//     order(id:$id) {
+//     data {
+//       id
+//       attributes {
+//         products
+//         total
+//         status
+//         billing_address
+//         different_shipping
+//         shipping_address
+//         installments
+//         payment {
+//           name
+//           cost
+//         }
+//         shipping{
+//           name
+//           cost
+//         }       
+//       }
+//     }
+//   }
+// }`

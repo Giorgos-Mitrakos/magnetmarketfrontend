@@ -5,7 +5,7 @@ export interface ICartItem {
     name: string,
     brand: string | null,
     slug: string,
-    image: { data: IImageAttr },
+    image: IImageAttr,
     price: number,
     quantity: number,
     weight: number,
@@ -13,28 +13,19 @@ export interface ICartItem {
     is_sale: boolean
     sale_price: number
     category: {
-        data: {
+        id: number
+        name: string
+        slug: string
+        parents: {
             id: number
-            attributes: {
+            name: string
+            slug: string
+            parents: {
+                id: number
                 name: string
-                parents: {
-                    data: {
-                        id: number
-                        attributes: {
-                            name: string
-                            parents: {
-                                data: {
-                                    id: number
-                                    attributes: {
-                                        name: string
-                                    }
-                                }[]
-                            }
-                        }
-                    }[]
-                }
-            }
-        }
+                slug: string
+            }[]
+        }[]
     }
 }
 

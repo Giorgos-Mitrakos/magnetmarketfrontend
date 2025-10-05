@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { toast } from "sonner";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FiMail, FiSend, FiCheck, FiArrowRight } from 'react-icons/fi';
+import { FiMail, FiCheck, FiArrowRight } from 'react-icons/fi';
 
 const Newsletter = () => {
     const router = useRouter();

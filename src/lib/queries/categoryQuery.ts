@@ -1,246 +1,176 @@
-import { gql } from "graphql-request";
+import { FilterProps } from "../interfaces/filters";
 import { IImageAttr } from "../interfaces/image";
-import { IProdChar, IProductBrand } from "../interfaces/product";
+import { IProductCard } from "../interfaces/product";
 
-export const GET_CATEGORIES_MAPPING = gql`
-{
-    categories(filters:{parents:{id:{eq:null}}},pagination:{limit:-1}){
-        data{
-          attributes{
-            name
-            slug
-            categories(pagination:{limit:-1}){
-                data{
-                  attributes{
-                    name
-                    slug
-                    categories(pagination:{limit:-1}){
-                        data{
-                          attributes{
-                            name
-                            slug
-                          }
-                        }
-                    }
-                  }
-                }
-            }
-          }
-        }
+export async function getCategoryProducts(mainCategory: string, category: string, searchParams: ({ [key: string]: string | string[] })) {
+
+    const { sort, page, pageSize, Κατασκευαστές, Κατηγορίες, search } = searchParams
+
+    // Smart caching - διαφορετικό cache time ανάλογα με το context
+    let cacheTime = 900; // Default 15 λεπτά
+
+    // Πρώτη σελίδα cache περισσότερο (πιο σημαντική για SEO)
+    if (!page || page === '1') {
+        cacheTime = 600; // 10 λεπτά για την πρώτη σελίδα
     }
-}`
 
-export const GET_CATEGORY_CHILDS = gql`
-query getCategoryChilds($slug:String!){
-    categories(filters:{slug:{eq:$slug}},pagination:{limit:-1}){
-        data{
-          attributes{
-            name
-            slug
-            categories(pagination:{limit:-1}){
-                data{
-                  attributes{
-                    name
-                    slug
-                    categories(pagination:{limit:-1}){
-                        data{
-                          attributes{
-                            name
-                            slug
-                          }
-                        }
-                    }
-                  }
-                }
-            }
-          }
-        }
+    // Φιλτραρισμένα αποτελέσματα cache λιγότερο (πιο δυναμικά)
+    if (Κατηγορίες || (sort && sort !== 'price:asc') || pageSize || Κατασκευαστές || search) {
+        cacheTime = 300; // 5 λεπτά για φιλτραρισμένα
     }
-}`
 
-export const GET_CATEGORY_METADATA = gql`
-query getCategory($category:String!){
-    categories(filters:{slug:{eq:$category}},sort:"name",pagination:{limit:-1}){
-        data{
-          attributes{
-            name
-            slug
-            image{
-                data{
-                  attributes{
-                    name
-                    alternativeText
-                    url
-                    formats
-                  }
-                }
-            }
-            categories{
-                data{
-                    attributes{
-                        name
-                    }
-                }
-            }
-          }
-        }
+    // Σελίδες μετά την πρώτη cache λιγότερο
+    if (page && Number(page) > 1) {
+        cacheTime = 600; // 10 λεπτά για επόμενες σελίδες
     }
-}`
 
-export const GET_CATEGORY = gql`
-query getCategory($category:String!){
-    categories(filters:{slug:{eq:$category}},pagination:{limit:-1}){
-        data{
-            id
-            attributes{
-                name
-                slug
-                categories(pagination:{limit:-1}){
-                    data{
-                        attributes{
-                            name
-                            slug
-                            categories(pagination:{limit:-1}){
-                                data{
-                                attributes{
-                                    name
-                                    slug
-                                }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+    const myHeaders = new Headers();
+
+    myHeaders.append('Content-Type', 'application/json')
+    myHeaders.append('Authorization', `Bearer ${process.env.ADMIN_JWT_SECRET}`,)
+
+    const myInit = {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify({
+            searchParams: { mainCategory, slug: category, ...searchParams }
+        }),
+        next: {
+            revalidate: cacheTime, // Χρήση της μεταβλητής cacheTime
         }
+    };
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/category/getCategoryProducts`,
+        myInit,
+    )
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
     }
-}`
 
-export const GET_CATEGORY_NAME = gql`
-query getCategory($category:String!){
-    categories(filters:{slug:{eq:$category}},pagination:{limit:-1}){
-        data{
-            id
-            attributes{
-                name
-                slug
-            }
-        }
+    const data = await response.json();
+
+    return data as {
+        products: IProductCard[],
+        meta: { pagination: { total: number, page: number, pageSize: number, pageCount: number } },
+        availableFilters: FilterProps[]
     }
-}`
+}
 
-export const GET_CATEGORY_BRANDS = gql`
-query getCategoryBrands($filters:BrandFiltersInput!){
-    brands(filters:$filters,sort:"name",pagination:{limit:-1}){
-        data{
-          attributes{
-            name
-            slug
-          }
+export async function getCategoryMetadata(slug: string) {
+    const myHeaders = new Headers();
+
+    myHeaders.append('Content-Type', 'application/json')
+    myHeaders.append('Authorization', `Bearer ${process.env.ADMIN_JWT_SECRET}`,)
+
+    const myInit = {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify({ slug: slug }),
+        next: {
+            revalidate: 600, // Χρήση της μεταβλητής cacheTime
         }
-      }
-}`
+    };
 
-export const GET_NUMBER_OF_CATEGORY_BRAND_PRODUCTS = gql`
-query getNumberOfCategoryBrandProducts($filters:ProductFiltersInput!){
-    products(filters:$filters){
-        meta{
-          pagination{
-            total
-          }
-        }
-      }
-}`
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/category/categoryMetadata`,
+        myInit,
+    )
 
-export const GET_CATEGORY_FILTERS = gql`
-query getCategoryFilters($category:String!){
-    categories(filters: { slug: { eq: $category } }) {
-        data {
-          attributes {
-            filters {
-              name
-            }
-          }
-        }
-      }
-    
-}`
-
-export const GET_CATEGORY_INITIAL_FILTER_VALUES = gql`
-query getCategoryFilters($filters:ProductFiltersInput!){
-    products(filters:$filters,pagination: { limit: -1 }){
-            data{
-                attributes{
-                    brand{
-                        data{
-                          attributes{
-                            slug
-                          }
-                        }
-                    }
-                    prod_chars{
-                        name
-                        value
-                    }
-                }
-            }
-    }    
-}`
-
-export const GET_MENU = gql`
-{
-    categories(filters:{parents:{id:{eq:null}}},pagination:{limit:-1}){
-        data{
-          attributes{
-            name
-            slug
-            image{
-                data{
-                    attributes{
-                        name
-                        alternativeText
-                        url
-                        formats
-                    }
-                }
-            }
-            categories(pagination:{limit:-1}){
-                data{
-                  attributes{
-                    name
-                    slug
-                    image{
-                        data{
-                            attributes{
-                                name
-                                alternativeText
-                                url
-                                formats
-                            }
-                        }
-                    }
-                    categories(pagination:{limit:-1}){
-                        data{
-                          attributes{
-                            name
-                            slug
-                            image{
-                                data{
-                                    attributes{
-                                        name
-                                        alternativeText
-                                        url
-                                        formats
-                                    }
-                                }
-                            }
-                          }
-                        }
-                    }
-                  }
-                }
-            }
-          }
-        }
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
     }
-}`
+
+    const data = await response.json();
+
+    return data as {
+        id: number,
+        name: string,
+        slug: string,
+        image: IImageAttr,
+        categories: {
+            name: string
+        }[]
+    }
+}
+
+export async function getCategoriesMapping() {
+    const myHeaders = new Headers();
+
+    myHeaders.append('Content-Type', 'application/json')
+    myHeaders.append('Authorization', `Bearer ${process.env.ADMIN_JWT_SECRET}`,)
+
+    const myInit = {
+        method: "GET",
+        headers: myHeaders,
+        next: {
+            revalidate: 24 * 60 * 60, // Χρήση της μεταβλητής cacheTime
+        }
+    };
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/category/categoriesMapping`,
+        myInit,
+    )
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    return data as {
+        name: string,
+        slug: string,
+        categories: {
+            name: string
+            slug: string,
+            categories: {
+                name: string
+                slug: string,
+            }[]
+        }[]
+    }[]
+}
+
+export async function getMenu() {
+    const myHeaders = new Headers();
+
+    myHeaders.append('Content-Type', 'application/json')
+    myHeaders.append('Authorization', `Bearer ${process.env.ADMIN_JWT_SECRET}`,)
+
+    const myInit = {
+        method: "GET",
+        headers: myHeaders,
+        next: {
+            revalidate: 24 * 60 * 60, // Χρήση της μεταβλητής cacheTime
+        }
+    };
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/category/menu`,
+        myInit,
+    )
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    return data as {
+        id: number,
+        name: string,
+        slug: string,
+        image: IImageAttr
+        categories: {
+            id: number,
+            name: string
+            slug: string,
+            image: IImageAttr
+            categories: {
+                id: number,
+                name: string
+                slug: string,
+                image: IImageAttr
+            }[]
+        }[]
+    }[]
+}

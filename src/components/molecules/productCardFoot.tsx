@@ -1,29 +1,28 @@
 "use client"
-// import { useCart } from "@/context/cart"
 import { FaHeart, FaOpencart, FaRegEye } from "react-icons/fa"
-import { ProductCardProps } from "../organisms/productCard"
 import { ICartItem } from "@/lib/interfaces/cart"
 import { useCheckout } from "@/context/checkout"
 import { addToCartToast } from "@/lib/toasts/cartToasts"
 import Link from "next/link"
+import { IProductCard } from "@/lib/interfaces/product"
 
 
-const ProductCardFoot = ({ product }: ProductCardProps) => {
+const ProductCardFoot = ({ product }: { product: IProductCard }) => {
     const { dispatch } = useCheckout()
 
     const item: ICartItem = {
         id: product.id,
-        name: product.attributes.name,
-        slug: product.attributes.slug,
-        image: product.attributes.image || null,
-        weight: product.attributes.weight,
-        price: product.attributes.price,
-        brand: product.attributes.brand.data?.attributes.name || null,
+        name: product.name,
+        slug: product.slug,
+        image: product.image || null,
+        weight: product.weight,
+        price: product.price,
+        brand: product.brand?.name || null,
         quantity: 1,
         isAvailable: true,
-        is_sale: product.attributes.is_sale,
-        sale_price: product.attributes.sale_price,
-        category: product.attributes.category
+        is_sale: product.is_sale,
+        sale_price: product.sale_price,
+        category: product.category
     }
 
     const handleAddProductClick = (product: ICartItem) => {
@@ -41,7 +40,7 @@ const ProductCardFoot = ({ product }: ProductCardProps) => {
             </button>
 
             <Link
-                href={`/product/${product.attributes.slug}`}
+                href={`/product/${product.slug}`}
                 className="flex justify-center items-center p-2 text-slate-400 dark:text-slate-400 rounded-lg
                   bg-gray-100 dark:bg-slate-700 hover:bg-siteColors-blue/20 hover:text-siteColors-blue dark:hover:bg-siteColors-blue/20 transition-all duration-200"
                 aria-label="Επισκόπηση προϊόντος">

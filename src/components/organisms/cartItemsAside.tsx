@@ -11,8 +11,9 @@ const CartItem = ({ item }: { item: ICartItem }) => {
     const { profit, discount, isSale, salePrice, isLoading, error, data } = useProductPrice(item.id)
     const redAlert = item.isAvailable
 
-    const imageUrl = item.image?.data?.attributes?.formats?.thumbnail?.url 
-        ? getStrapiMedia(item.image.data.attributes.formats.thumbnail.url)
+    const imageUrl = item.image
+        ? getStrapiMedia(item.image.formats?.thumbnail?.url ||
+            item.image.url)
         : null
 
     return (
@@ -46,7 +47,7 @@ const CartItem = ({ item }: { item: ICartItem }) => {
 
             {/* Product Info - Takes available space, prevents overflow */}
             <div className="flex-1 min-w-0"> {/* min-w-0 prevents overflow */}
-                <Link 
+                <Link
                     href={`/product/${item.slug}`}
                     className="text-sm font-semibold text-siteColors-purple hover:text-siteColors-pink dark:text-slate-300 dark:hover:text-slate-200 line-clamp-2 mb-1 break-words"
                 >
@@ -76,15 +77,15 @@ const CartItem = ({ item }: { item: ICartItem }) => {
                         <div className="text-xs line-through text-slate-500 dark:text-slate-500 mb-1 whitespace-nowrap">
                             {data && (item.quantity * data.product.data.attributes.price).toFixed(2)} €
                         </div>
-                        
+
                         {/* Discount Info */}
                         <div className="text-xs text-green-600 dark:text-green-400 mb-1 whitespace-nowrap">
-                            {item.quantity * profit < 50 
-                                ? `-${discount.toFixed(2)}%` 
+                            {item.quantity * profit < 50
+                                ? `-${discount.toFixed(2)}%`
                                 : `-${(item.quantity * profit).toFixed(2)}€`
                             }
                         </div>
-                        
+
                         {/* Final Price */}
                         <div className="text-sm font-bold text-siteColors-purple dark:text-slate-200 whitespace-nowrap">
                             {(item.quantity * salePrice).toFixed(2)} €
@@ -108,7 +109,7 @@ export default function CartAside() {
             <h2 className="text-lg font-semibold text-siteColors-purple dark:text-slate-200 mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">
                 Η παραγγελία μου
             </h2>
-            
+
             <div className="max-h-72 overflow-y-auto">
                 {checkout.cart.length > 0 ? (
                     checkout.cart.map(item => (
@@ -121,7 +122,7 @@ export default function CartAside() {
                 )}
             </div>
 
-            
+
         </div>
     )
 }

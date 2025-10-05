@@ -1,14 +1,14 @@
 // "use client"
 
 import { getPrices } from "@/lib/helpers/priceHelper";
-import { IcategoryProductsProps } from "@/lib/interfaces/category";
+import { ISimilarProductPage } from "@/lib/interfaces/product";
 
 
 // Product Card Price Component
-const ProductCardPrice = (props: { product: IcategoryProductsProps }) => {
-  const price = props.product.attributes.price
-  const is_sale = props.product.attributes.is_sale
-  const salePrice = props.product.attributes.sale_price
+const ProductCardPrice = ({product}: { product: ISimilarProductPage }) => {
+  const price = product.price
+  const is_sale = product.is_sale
+  const salePrice = product.sale_price
 
   const { profit, discount } = getPrices({ price: price, sale_price: salePrice })
 

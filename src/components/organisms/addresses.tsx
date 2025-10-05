@@ -16,6 +16,7 @@ export type FormInputRef = {
 };
 
 const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
+    console.log(props)
     const { checkout, dispatch } = useCheckout()
     const { data: countriesData, loading, error } = useNoRevalideteQuery({ query: GET_COUNTRY_LIST, jwt: '' })
 
@@ -37,7 +38,7 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
         doy: props.user?.billing_address?.doy || checkout.addresses.billing.doy,
         companyName: props.user?.billing_address?.companyName || checkout.addresses.billing.companyName,
         businessActivity: props.user?.billing_address?.businessActivity || checkout.addresses.billing.businessActivity,
-        isInvoice: checkout.addresses.billing.isInvoice,
+        isInvoice: checkout.addresses.billing.isInvoice || false,
         deliveryNotes: checkout.addresses.deliveryNotes,
         different_shipping: checkout.addresses.different_shipping || false,
         ship_firstname: props.user?.shipping_address?.firstname || checkout.addresses.shipping.firstname,

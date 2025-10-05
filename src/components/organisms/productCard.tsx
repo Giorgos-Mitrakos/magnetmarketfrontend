@@ -4,44 +4,41 @@ import Link from "next/link"
 import Image from 'next/image'
 import { getStrapiMedia } from "@/repositories/medias"
 import { FaRegImage, FaHeart, FaOpencart, FaRegEye } from "react-icons/fa"
-import { IcategoryProductsProps } from "@/lib/interfaces/category"
 import ProductCardHead from "../molecules/productCardHead"
 import ProductCardPrice from "../atoms/productCardPrice"
 import ProductCardFoot from "../molecules/productCardFoot"
+import { IProductCard } from "@/lib/interfaces/product"
 
 // Main Product Card Component
 export type ProductCardProps = {
-    product: IcategoryProductsProps
+    product: IProductCard
 }
 
-const ProductCard = (props: ProductCardProps) => {
-    const product = props.product.attributes
-    const brand = product.brand
-
+const ProductCard = ({ product }: { product: IProductCard }) => {
     return (
         <div className="group relative h-full pt-2 pb-12 px-1 max-w-96 overflow-hidden transition-all duration-300 hover:scale-[1.02]">
             <div className="grid h-full grid-rows-cardLayout shadow-md hover:shadow-xl dark:shadow-slate-700 dark:hover:shadow-slate-600 bg-white dark:bg-slate-800 rounded-xl m-1 p-4 transition-all duration-300">
-                <ProductCardHead brand={brand} product={props.product} />
+                <ProductCardHead product={product} />
 
                 <Link
                     className="grid w-full place-content-center bg-white relative min-h-[216px] rounded-lg overflow-hidden"
                     href={`/product/${product.slug}`}
                     aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${product.name}`}
                 >
-                    {product.image.data ? (
+                    {product.image ? (
                         <Image
                             className="object-contain p-2 transition-transform duration-300 group-hover:scale-105"
                             aria-label={`Φωτογραφία προϊόντος ${product.name}`}
                             loading="lazy"
                             src={getStrapiMedia(
-                                product.image.data.attributes.formats?.small?.url ||
-                                product.image.data.attributes.url
-                            )}
+                                product.image.formats?.small?.url ||
+                                product.image.url
+                            )!}
                             blurDataURL={getStrapiMedia(
-                                product.image.data.attributes.formats?.small?.url ||
-                                product.image.data.attributes.url
-                            )}
-                            alt={product.image.data.attributes.alternativeText || product.name}
+                                product.image.formats?.small?.url ||
+                                product.image.url
+                            )!}
+                            alt={product.image.alternativeText || product.name}
                             quality={80}
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             fill
@@ -67,7 +64,7 @@ const ProductCard = (props: ProductCardProps) => {
                             {product.name}
                         </h2>
                     </Link>
-                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Κωδ: {props.product.id}</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Κωδ: {product.id}</p>
                 </div>
 
                 <div className="flex items-center justify-center mt-2">
@@ -81,8 +78,8 @@ const ProductCard = (props: ProductCardProps) => {
                     </p>
                 </div>
 
-                <ProductCardPrice product={props.product} />
-                <ProductCardFoot product={props.product} />
+                <ProductCardPrice product={product} />
+                <ProductCardFoot product={product} />
             </div>
         </div>
     )

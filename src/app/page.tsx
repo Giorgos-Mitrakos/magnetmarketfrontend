@@ -2,18 +2,9 @@
 import BlockManager from '@/components/molecules/homepage/blockManager';
 import Newsletter from '@/components/molecules/newsletter'
 import { organizationStructuredData } from '@/lib/helpers/structureData';
-import { GET_HOMEPAGE, IHomepageProps } from '@/lib/queries/homepage';
-import { requestSSR } from '@/repositories/repository';
+import { getHomepageData } from '@/lib/queries/homepage';
 import { Metadata } from 'next'
 import Script from 'next/script';
-
-async function getHomepageData() {
-  const data = await requestSSR({
-    query: GET_HOMEPAGE, variables: {}
-  });
-
-  return data as IHomepageProps
-}
 
 export default async function Home() {
 
@@ -51,7 +42,7 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       <main className="w-full space-y-16">
-        <BlockManager blocks={data.homepage.data.attributes.body} />
+        <BlockManager blocks={data.body} />
         <Newsletter />
       </main>
     </>

@@ -46,12 +46,15 @@ const Carousel = ({ products }) => {
                 }}
                 pagination={{
                     clickable: true,
-                    el: '.swiper-pagination',
+                    dynamicBullets: true,
+                    renderBullet: function (index, className) {
+                        return `<span class="${className} bg-white opacity-70 w-2.5 h-2.5 mx-1 inline-block rounded-full transition-all duration-300"></span>`;
+                    },
                 }}
                 modules={[Autoplay, Navigation, Pagination]}
-                loop={products.data.length > 4}
+                loop={products.length > 4}
             >
-                {products.data.map((product) => (
+                {products.map((product) => (
                     <SwiperSlide key={product.id}>
                         <ProductCard product={product} />
                     </SwiperSlide>
@@ -66,7 +69,7 @@ const Carousel = ({ products }) => {
                 </div>
 
                 {/* Custom Pagination */}
-                <div className="swiper-pagination absolute bottom-[-30px] left-0 right-0 flex justify-center gap-1"></div>
+                {/* <div className="swiper-pagination absolute bottom-[-30px] left-0 right-0 flex justify-center gap-1"></div> */}
             </Swiper>
         </div>
     );
