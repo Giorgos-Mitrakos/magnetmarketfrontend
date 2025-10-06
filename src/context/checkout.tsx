@@ -10,6 +10,7 @@ import { fetcher } from "@/repositories/repository";
 import { GET_SHIPPING_METHODS } from "@/lib/queries/shippingQuery";
 import { ICartItem } from "@/lib/interfaces/cart";
 import { ICouponApplianceResponse, ICouponValidationResponse } from "@/lib/interfaces/coupon";
+import { flattenJSON } from "@/lib/helpers/helpers";
 
 interface IShippingContext {
     checkout: ICheckoutState
@@ -70,6 +71,10 @@ export const CheckoutProvider = ({ children }: any) => {
         if (isClient) {
             const savedCheckout = loadCheckoutFromLocalStorage();
             if (savedCheckout) {
+                if (savedCheckout.cart.length > 0) {
+                    const flattenedData = flattenJSON(savedCheckout.cart);
+                    savedCheckout.cart = flattenedData
+                }
                 dispatch({ type: 'HYDRATE_CART', payload: { ...savedCheckout, shippingMethod: null, paymentMethod: null, installments: 1 } });
             }
 
