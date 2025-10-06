@@ -36,7 +36,7 @@ async function getProductData(slug: string) {
     
     // Βελτιωμένος έλεγχος για invalid slugs
     if (!slug ||
-      // slug.includes('.') || // Απορρίπτει οποιοδήποτε slug με τελείες
+      slug.includes('.') || // Απορρίπτει οποιοδήποτε slug με τελείες
       slug.length < 2 || // Πολύ μικρά slugs
       slug.length > 1500 //|| // Πολύ μεγάλα slugs
       // /[^a-zA-Z0-9\-]/.test(slug) // Μη-επιτρεπτοί χαρακτήρες
@@ -333,7 +333,7 @@ function isValidProductSlug(slug: string): boolean {
     typeof slug === 'string' &&
     slug.length >= 2 &&
     slug.length <= 5000 &&
-    // !slug.includes('.') && // Απορρίπτει files
+    !slug.includes('.') && // Απορρίπτει files
     !slug.includes('..')
   )
 }
