@@ -1,5 +1,5 @@
 import Breadcrumb from '@/components/molecules/breadcrumb';
-import { Metadata, ResolvingMetadata } from 'next'
+import { Metadata } from 'next'
 import Newsletter from '@/components/molecules/newsletter';
 import ProductBasicFeatures from '@/components/organisms/productBasicFeatures';
 import SiteFeatures from '@/components/organisms/siteFeatures';
@@ -11,8 +11,10 @@ import SimilarProducts from "@/components/organisms/similarProducts";
 import ProductInfo from "@/components/organisms/productInfo"
 import ProductImageWidget from '@/components/molecules/productImageWidget'
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic'
 export const dynamicParams = true
-export const revalidate = 86400 // 24 ώρες
+export const revalidate = 86400 // 24 hours
 
 type MetadataProps = {
   params: { slug: string }
@@ -31,15 +33,24 @@ interface ICategory {
   parents?: ICategory[];
 }
 
+// Validation function
+function isValidProductSlug(slug: string): boolean {
+  return (
+    typeof slug === 'string' &&
+    slug.length >= 2 &&
+    slug.length <= 5000 &&
+    // !slug.includes('.') &&
+    !slug.includes('..')
+  )
+}
+
 async function getProductData(slug: string) {
   try {
-    
-    // Βελτιωμένος έλεγχος για invalid slugs
+    // Improved validation for invalid slugs
     if (!slug ||
-      slug.includes('.') || // Απορρίπτει οποιοδήποτε slug με τελείες
-      slug.length < 2 || // Πολύ μικρά slugs
-      slug.length > 1500 //|| // Πολύ μεγάλα slugs
-      // /[^a-zA-Z0-9\-]/.test(slug) // Μη-επιτρεπτοί χαρακτήρες
+      // slug.includes('.') ||
+      slug.length < 2 ||
+      slug.length > 1500
     ) {
       notFound()
     }
@@ -50,7 +61,8 @@ async function getProductData(slug: string) {
     const myInit = {
       method: "POST",
       headers: myHeaders,
-      body: JSON.stringify({ slug: slug })
+      body: JSON.stringify({ slug: slug }),
+      cache: 'no-store' as RequestCache // Prevent caching for dynamic content
     };
 
     const response = await fetch(
@@ -75,21 +87,14 @@ async function getProductData(slug: string) {
   }
 }
 
-// Διορθωμένη υλοποίηση με TypeScript
 function generateBreadcrumbsRecursive(product: IProductPage): IBreadcrumb[] {
-
   if (!product) {
     return [{ title: "Home", slug: "/" }];
   }
 
-  // Recursive συνάρτηση για συλλογή της ιεραρχίας
   function collectCategoryHierarchy(category: ICategory | null, hierarchy: ICategory[] = []): ICategory[] {
     if (!category) return hierarchy;
-
-    // Προσθήκη της τρέχουσας κατηγορίας στην αρχή
     hierarchy.unshift(category);
-
-    // Συνέχεια με το πρώτο parent (αν υπάρχει)
     const parent = category.parents && category.parents.length > 0 ? category.parents[0] : null;
     return collectCategoryHierarchy(parent, hierarchy);
   }
@@ -97,7 +102,6 @@ function generateBreadcrumbsRecursive(product: IProductPage): IBreadcrumb[] {
   const breadcrumbs: IBreadcrumb[] = [{ title: "Home", slug: "/" }];
   const categoryHierarchy = collectCategoryHierarchy(product.category);
 
-  // Δημιουργία breadcrumb για κάθε κατηγορία
   categoryHierarchy.forEach((category, index) => {
     const slugParts = categoryHierarchy
       .slice(0, index + 1)
@@ -109,7 +113,6 @@ function generateBreadcrumbsRecursive(product: IProductPage): IBreadcrumb[] {
     });
   });
 
-  // Προσθήκη προϊόντος
   breadcrumbs.push({
     title: product.name,
     slug: `/product/${product.slug}`
@@ -118,12 +121,8 @@ function generateBreadcrumbsRecursive(product: IProductPage): IBreadcrumb[] {
   return breadcrumbs;
 }
 
-export default async function Product({ params }:
-  {
-    params: { slug: string }
-  }) {
-
-  // Έλεγχος των params πριν από οποιαδήποτε processing
+export default async function Product({ params }: { params: { slug: string } }) {
+  // Validation check before processing
   if (!isValidProductSlug(params.slug)) {
     notFound();
   }
@@ -153,7 +152,7 @@ export default async function Product({ params }:
         : "https://schema.org/OutOfStock",
       "itemCondition": "https://schema.org/NewCondition",
       "priceCurrency": "EUR",
-      "priceValidUntil": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 year from now
+      "priceValidUntil": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       "seller": {
         "@type": "Organization",
         "name": "Magnet Market"
@@ -171,7 +170,7 @@ export default async function Product({ params }:
           "referenceQuantity": {
             "@type": "QuantitativeValue",
             "value": 1,
-            "unitCode": "C62" // unit code for "piece"
+            "unitCode": "C62"
           }
         },
         "hasMerchantReturnPolicy": {
@@ -231,13 +230,12 @@ export default async function Product({ params }:
   };
 
   const generateBreadcrumbStructuredData = (breadcrumbs: any[]) => {
-    // Filter out any invalid breadcrumbs
     const validBreadcrumbs = breadcrumbs.filter(breadcrumb =>
       breadcrumb && breadcrumb.title && breadcrumb.slug
     );
 
     if (validBreadcrumbs.length === 0) {
-      return null; // Don't generate structured data if no valid breadcrumbs
+      return null;
     }
 
     const itemListElement = validBreadcrumbs.map((breadcrumb, index) => ({
@@ -254,7 +252,6 @@ export default async function Product({ params }:
     };
   };
 
-  // Usage:
   const breadcrumbData = generateBreadcrumbStructuredData(breadcrumbs);
 
   const structuredData = []
@@ -278,15 +275,10 @@ export default async function Product({ params }:
       />
       <div className="min-h-screen">
         <SiteFeatures />
-        {/* Breadcrumb */}
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        {/* Στο product page component */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Column - Main Content (9 columns) */}
           <div className="lg:col-span-9">
-            {/* Product Images and Basic Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              {/* Product Images */}
               <div className="bg-white dark:bg-gray-800  overflow-hidden">
                 {images.length > 0 ?
                   <ProductImageWidget images={images} /> :
@@ -295,25 +287,21 @@ export default async function Product({ params }:
                   </div>}
               </div>
 
-              {/* Product Basic Features */}
               <div className="bg-white dark:bg-gray-800 p-6">
                 <ProductBasicFeatures product={product} />
               </div>
             </div>
 
-            {/* Product Info */}
             <div className="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
               <ProductInfo description={product.description} chars={product.prod_chars} />
             </div>
           </div>
 
-          {/* Right Column - Suggested Products (3 columns) */}
-          {/* <div className="lg:col-span-3">
+          <div className="lg:col-span-3">
             <SimilarProducts similarProducts={data.similarProducts} crossCategories={data.product.category.cross_categories}/>
-          </div> */}
+          </div>
         </div>
 
-        {/* Newsletter at bottom */}
         <div className='mt-12'>
           <Newsletter />
         </div>
@@ -322,24 +310,11 @@ export default async function Product({ params }:
   )
 }
 
-// Προσθήκη αυτής της συνάρτησης για έλεγχο των params
 export function generateStaticParams() {
-  return [] // Δεν προ-rendering καθώς έχουμε dynamic params
-}
-
-// Validation function
-function isValidProductSlug(slug: string): boolean {
-  return (
-    typeof slug === 'string' &&
-    slug.length >= 2 &&
-    slug.length <= 5000 &&
-    !slug.includes('.') && // Απορρίπτει files
-    !slug.includes('..')
-  )
+  return []
 }
 
 export async function generateMetadata({ params }: MetadataProps): Promise<Metadata> {
-  // Έλεγχος και εδώ
   if (!isValidProductSlug(params.slug)) {
     return {
       title: 'Product Not Found',
@@ -365,7 +340,7 @@ export async function generateMetadata({ params }: MetadataProps): Promise<Metad
         .replaceAll("</p>", "")
         .replaceAll("&nbsp;", " ")
         .replaceAll("\n", "")
-        .substring(0, 160); // Περιορισμός length για SEO
+        .substring(0, 160);
     } else if (product.brand) {
       metadata.description = `Το ${product.name} είναι ένα προϊόν της εταιρίας ${product.brand.name}`
     }
