@@ -308,9 +308,9 @@ export default async function Product({ params }:
           </div>
 
           {/* Right Column - Suggested Products (3 columns) */}
-          <div className="lg:col-span-3">
+          {/* <div className="lg:col-span-3">
             <SimilarProducts similarProducts={data.similarProducts} crossCategories={data.product.category.cross_categories}/>
-          </div>
+          </div> */}
         </div>
 
         {/* Newsletter at bottom */}
