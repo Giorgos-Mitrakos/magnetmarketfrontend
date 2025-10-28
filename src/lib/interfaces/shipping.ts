@@ -54,7 +54,8 @@ export enum PaymentMethodEnum {
     DEBIT_CARD = "debit_card",
     CASH = "cash",
     CASH_ON_DELIVERY = "cash_on_delivery",
-    BANK_TRANSFER = "bank_transfer"
+    BANK_TRANSFER = "bank_transfer",
+    IRIS_PAYMENT='iris_payment'
 }
 
 export interface IPaymentMethod {

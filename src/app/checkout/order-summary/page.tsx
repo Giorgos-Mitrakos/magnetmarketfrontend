@@ -177,8 +177,11 @@ const Confirm = () => {
                     }
                 })
             }
-
-            if (newOrder && (checkout.paymentMethod?.attributes.method === PaymentMethodEnum.CREDIT_CARD || checkout.paymentMethod?.attributes.method === PaymentMethodEnum.DEBIT_CARD)) {
+            
+            if (newOrder &&
+                (checkout.paymentMethod?.attributes.method === PaymentMethodEnum.CREDIT_CARD ||
+                    checkout.paymentMethod?.attributes.method === PaymentMethodEnum.DEBIT_CARD ||
+                    checkout.paymentMethod?.attributes.method === PaymentMethodEnum.IRIS_PAYMENT)) {
                 if (Number(newOrder.orderId) && Number(newOrder.amount)) {
                     try {
                         const myHeaders = new Headers();
@@ -239,7 +242,7 @@ const Confirm = () => {
                     }
                 }
             } else {
-                dispatch({ type: "CLEAR_CART" })
+                // dispatch({ type: "CLEAR_CART" })
                 setProcessing(false)
                 router.push('/checkout/thank-you')
             }

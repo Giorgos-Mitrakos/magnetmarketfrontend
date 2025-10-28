@@ -103,7 +103,7 @@ export async function getCategoriesMapping() {
         method: "GET",
         headers: myHeaders,
         next: {
-            revalidate: 24 * 60 * 60, // Χρήση της μεταβλητής cacheTime
+            revalidate:  60 * 60, // Χρήση της μεταβλητής cacheTime
         }
     };
 
@@ -141,7 +141,7 @@ export async function getMenu() {
         method: "GET",
         headers: myHeaders,
         next: {
-            revalidate: 24 * 60 * 60, // Χρήση της μεταβλητής cacheTime
+            revalidate:  60 * 60, // Χρήση της μεταβλητής cacheTime
         }
     };
 
@@ -158,16 +158,20 @@ export async function getMenu() {
     return data as {
         id: number,
         name: string,
+        description: string,
         slug: string,
         image: IImageAttr
+        isSpecial?: boolean;
         categories: {
             id: number,
             name: string
+            description: string,
             slug: string,
             image: IImageAttr
             categories: {
                 id: number,
                 name: string
+                description: string,
                 slug: string,
                 image: IImageAttr
             }[]

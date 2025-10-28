@@ -3,6 +3,7 @@ import Radio from "../atoms/radio";
 import { useCheckout } from "@/context/checkout";
 import Installments from "./installments";
 import { IPaymentMethod } from "@/lib/interfaces/shipping";
+import Image from "next/image";
 
 const PaymentMethods = () => {
     const { values, setFieldValue, errors, touched } = useFormikContext<FormikValues>();
@@ -42,34 +43,58 @@ const PaymentMethods = () => {
             <div className="space-y-4">
                 {availableMethods.map((method, index) => (
                     <div
-                        key={index}
+                        key={method.id}
                         className={`p-4 rounded-lg border-2 transition-all duration-200 ${
                             values.paymentMethod === method.attributes.name
                                 ? "border-siteColors-purple bg-purple-50 dark:bg-slate-700"
                                 : "border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 hover:border-gray-300"
                         }`}
                     >
-                        <Radio
-                            name="payment"
-                            id={`payment-${method.id}`}
-                            value={method.attributes.name}
-                            checked={values.paymentMethod === method.attributes.name}
-                            onChange={() => handleSelect(method)}
-                            label={method.attributes.name}
-                            className="w-full"
-                        />
-                        
-                        {method.attributes.description && (
-                            <p className="mt-2 ml-8 text-sm text-gray-600 dark:text-gray-300">
-                                {method.attributes.description}
-                            </p>
-                        )}
+                        <div className="flex items-start gap-3">
+                            <Radio
+                                name="payment"
+                                id={`payment-${method.id}`}
+                                value={method.attributes.name}
+                                checked={values.paymentMethod === method.attributes.name}
+                                onChange={() => handleSelect(method)}
+                                label=""
+                                className="mt-1"
+                            />
+                            
+                            <div className="flex-1">
+                                <div className="flex items-center gap-3">
+                                    {/* IRIS Logo για IRIS payment */}
+                                    {/* {isIRISMethod(method) && (
+                                        <div className="flex-shrink-0">
+                                            <div className="w-10 h-8 bg-blue-600 rounded flex items-center justify-center">
+                                                <span className="text-white text-xs font-bold">IRIS</span>
+                                            </div>
+                                        </div>
+                                    )} */}
+                                    
+                                    <div>
+                                        {/* <label 
+                                            htmlFor={`payment-${method.id}`}
+                                            className="font-medium text-gray-900 dark:text-white cursor-pointer"
+                                        >
+                                            {method.attributes.name}
+                                        </label> */}
+                                        
+                                        {method.attributes.description && (
+                                            <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                                                {method.attributes.description}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
 
-                        {method.attributes.installments && values.paymentMethod === method.attributes.name && (
-                            <div className="mt-4 ml-8">
-                                <Installments />
+                                {method.attributes.installments && values.paymentMethod === method.attributes.name && (
+                                    <div className="mt-4">
+                                        <Installments />
+                                    </div>
+                                )}
                             </div>
-                        )}
+                        </div>
                     </div>
                 ))}
             </div>
