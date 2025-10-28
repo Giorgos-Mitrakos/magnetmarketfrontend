@@ -24,6 +24,7 @@ interface MenuData {
     id: number
     slug: string;
     name: string;
+    description:string
     image: IImageAttr
     categories: any[];
 }
