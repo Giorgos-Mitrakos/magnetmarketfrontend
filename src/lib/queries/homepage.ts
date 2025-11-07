@@ -97,6 +97,7 @@ export interface IHomeHotOrSale {
 
 export interface IHeroCarouselBanner {
   id: string,
+  layout:string,
   link_label: string,
   href: string,
   target: string,
@@ -111,7 +112,6 @@ export interface IHeroCarouselBanner {
     url: string
     width: number
     height: number
-
     formats: IImageFormats
   }
 }

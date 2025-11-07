@@ -153,7 +153,7 @@ const HeroCarousel = ({
               {/* Main Image */}
               <div className="relative h-full w-full">
                 <Image
-                  className="object-contain transition-transform duration-700 ease-out group-hover/slide:scale-105 rounded-xl"
+                  className="object-fill transition-transform duration-700 ease-out group-hover/slide:scale-105 rounded-xl"
                   priority={banner.priority}
                   loading={banner.priority ? 'eager' : 'lazy'}
                   src={banner.imageUrl || '/placeholder-image.jpg'}
