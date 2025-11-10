@@ -13,6 +13,7 @@ import { FaOpencart } from "react-icons/fa";
 import { MenuContext } from "@/context/menu";
 import { useCheckout } from "@/context/checkout";
 import { IImageAttr } from "@/lib/interfaces/image";
+import { usePathname } from 'next/navigation'
 
 const SearchInput = dynamic(() => import('@/components/molecules/searchInput'), {
     ssr: false,
@@ -24,7 +25,7 @@ interface MenuData {
     id: number
     slug: string;
     name: string;
-    description:string
+    description: string
     image: IImageAttr
     categories: any[];
 }
@@ -38,6 +39,7 @@ export default function Header({ user, menuData }: HeaderProps) {
     const [openMenu, setOpenMenu] = useState(false)
     const { checkout, dispatch } = useCheckout()
     const { isMenuOpen, isSearchOpen, toggleSearchDrawer, toggleMenuDrawer, closeMenu } = useContext(MenuContext)
+    const pathname = usePathname()
 
     return (
         <div>
@@ -65,6 +67,15 @@ export default function Header({ user, menuData }: HeaderProps) {
                 </div>
                 <HeaderActions user={user} />
             </header>
+            {/* Floating Offers Button */}
+            {pathname  !== '/offers' && (
+                <Link
+                    href="/offers"
+                    className="fixed top-36 right-6 z-40 flex items-center gap-2 px-5 py-3 rounded-full text-base font-bold transition-all duration-300 group bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 shadow-2xl hover:shadow-[0_0_30px_rgba(249,115,22,0.8)] hover:scale-110"
+                >
+                    <span className="text-xl">🔥</span>
+                    <span className="hidden sm:inline">Προσφορές</span>
+                </Link>)}
             <div className="flex content-start">
                 <div className='hidden my-4 lg:flex relative w-full'>
                     <div
@@ -90,6 +101,7 @@ export default function Header({ user, menuData }: HeaderProps) {
                             <MainMenu isMenuOpen={openMenu} menuData={menuData} />
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>

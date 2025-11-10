@@ -55,10 +55,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.1,
     },
     {
-        url: `${process.env.NEXT_URL}/account`,
+        url: `${process.env.NEXT_URL}/offers`,
         // lastModified: new Date(),
-        changeFrequency: 'yearly',
-        priority: 0.1,
+        changeFrequency: 'daily',
+        priority: 0.7,
     },
     {
         url: `${process.env.NEXT_URL}/checkout/confirm`,
