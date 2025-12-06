@@ -222,7 +222,7 @@ export const createCategories = (item: ICartItem) => {
         item_category3?: string
     } = {}
 
-    if (item.category.parents[0]?.parents[0]?.name) {
+    if (item.category?.parents[0]?.parents[0]?.name) {
         categories.item_category = item.category?.parents[0]?.parents[0]?.name
         categories.item_category2 = item.category?.parents[0]?.name
         categories.item_category3 = item.category?.name

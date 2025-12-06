@@ -55,7 +55,7 @@ export enum PaymentMethodEnum {
     CASH = "cash",
     CASH_ON_DELIVERY = "cash_on_delivery",
     BANK_TRANSFER = "bank_transfer",
-    IRIS_PAYMENT='iris_payment'
+    IRIS_PAYMENT = 'iris_payment'
 }
 
 export interface IPaymentMethod {
@@ -114,5 +114,15 @@ type CouponAction = { type: "APPLY_COUPON"; payload: ICoupon }
 
 type LocalStorageAction = { type: "CLEAR_LOCALESTORAGE" }
 
+type PurchaseCompleteAction = {
+    type: "PURCHASE_COMPLETE"; payload: {
+        transactionId: string;
+        shipping: number;
+        tax: number;
+        items: ICartItem[];
+        coupon?: string;
+    }
+}
+
 // Actions for useReducer
-export type CheckoutAction = CartAction | AddressAction | ShippingAction | PaymentAction | CouponAction | LocalStorageAction;
+export type CheckoutAction = CartAction | AddressAction | ShippingAction | PaymentAction | CouponAction | LocalStorageAction | PurchaseCompleteAction;

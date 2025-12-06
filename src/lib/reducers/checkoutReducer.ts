@@ -1,7 +1,8 @@
-import { trackCartEvent } from "../helpers/analytics";
+// lib/reducers/checkoutReducer.ts (ή όπου έχετε τον reducer)
+
+import { trackAddPaymentInfo, trackAddShippingInfo, trackCartEvent, trackPurchase, trackViewCart, isTransactionTracked } from "../helpers/analytics";
 import { saveCheckoutToLocalStorage } from "../helpers/storage-helper";
 import { CheckoutAction, ICheckoutState } from "../interfaces/shipping";
-import { getCartTotal } from "../helpers/checkout";
 
 export const initialCheckoutState = {
     cart: [],
@@ -24,7 +25,6 @@ export const initialCheckoutState = {
             doy: '',
             companyName: '',
             businessActivity: '',
-
         },
         shipping: {
             firstname: '',
@@ -72,7 +72,6 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
             );
 
             if (existingItemIndex >= 0) {
-                // If item exists, update its quantity
                 const updatedItems = [...state.cart];
                 updatedItems[existingItemIndex] = {
                     ...updatedItems[existingItemIndex],
@@ -84,12 +83,8 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
                     cart: updatedItems,
                 };
             } else {
-
-                // If item doesn't exist, add it to cart
                 const updatedItems = [...state.cart, newItem];
-
                 newState = { ...state, cart: updatedItems };
-
             }
 
             trackCartEvent('add_to_cart', [newItem]);
@@ -101,11 +96,10 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
 
             const filteredItems = state.cart.filter((item) => item.id !== action.payload.id);
             if (filteredItems.length === 0) {
-                newState = { ...state, cart: [] }; // Clear cart if empty
+                newState = { ...state, cart: [] };
             }
             else {
                 newState = { ...state, cart: filteredItems };
-
                 trackCartEvent("remove_from_cart", [action.payload]);
             }
             break;
@@ -120,7 +114,6 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
             );
 
             newState = { ...state, cart: updatedItems };
-
             trackCartEvent("add_to_cart", [action.payload.item]);
             break;
         }
@@ -134,24 +127,24 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
             );
 
             newState = { ...state, cart: updatedItems };
-
             trackCartEvent("remove_from_cart", [action.payload.item]);
             break;
         }
 
         case "CLEAR_CART": {
             newState = { ...state, cart: [] };
-
             break;
         }
 
         case "CLEAR_LOCALESTORAGE": {
             newState = initialCheckoutState;
-
             break;
         }
 
         case 'HYDRATE_CART': {
+            if (action.payload.cart.length > 0) {
+                trackViewCart(action.payload.cart);
+            }
             return action.payload;
         }
 
@@ -176,17 +169,36 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
         }
 
         case 'SAVE_SHIPPING_METHOD': {
-            newState = { ...state, shippingMethod: action.payload.shippingMethod, availablePaymentMethods: action.payload.availablePayments, paymentMethod: null, installments: 1 }
+            newState = {
+                ...state,
+                shippingMethod: action.payload.shippingMethod,
+                availablePaymentMethods: action.payload.availablePayments,
+                paymentMethod: null,
+                installments: 1
+            }
+
+            // Track shipping με όνομα μεθόδου
+            // payload.shippingMethod = { id: number, shipping: string }
+            if (state.cart.length > 0 && action.payload.shippingMethod?.shipping) {
+                trackAddShippingInfo(
+                    state.cart,
+                    action.payload.shippingMethod.shipping // ✅ Είναι ήδη string
+                );
+            }
             break;
         }
 
         case 'SAVE_PAYMENT_METHOD': {
             newState = { ...state, paymentMethod: action.payload, installments: 1 }
-            break;
-        }
 
-        case 'SAVE_INSTALLMENTS': {
-            newState = { ...state, installments: action.payload }
+            // Track payment με όνομα μεθόδου
+            // payload = IPaymentMethod (με attributes.name)
+            if (state.cart.length > 0 && action.payload) {
+                trackAddPaymentInfo(
+                    state.cart,
+                    action.payload.attributes?.name || 'card'
+                );
+            }
             break;
         }
 
@@ -213,12 +225,37 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
             break;
         }
 
+        case 'PURCHASE_COMPLETE': {
+            const { transactionId, shipping, tax, items, coupon } = action.payload;
+
+            // ✅ Έλεγχος για duplicate tracking
+            if (!isTransactionTracked(transactionId)) {
+                trackPurchase(
+                    items,
+                    transactionId,
+                    shipping,
+                    tax,
+                    coupon
+                );
+                console.log('[Reducer] ✅ Purchase tracked via PURCHASE_COMPLETE');
+            } else {
+                console.log('[Reducer] ⚠️ Transaction already tracked, skipping');
+            }
+
+            // Clear cart μετά το tracking
+            newState = {
+                ...state,
+                cart: []
+            };
+            break;
+        }
+
         default: {
             newState = state;
             break;
         }
     }
 
-    saveCheckoutToLocalStorage(newState); // Persist to localStorage
-    return newState
+    saveCheckoutToLocalStorage(newState);
+    return newState;
 }

@@ -2,6 +2,9 @@ import { GET_BRANDS_SITEMAP, GET_CATEGORIES_SITEMAP, GET_PAGES_SITEMAP, GET_PROD
 import { requestSSR } from '@/repositories/repository';
 import { MetadataRoute } from 'next'
 
+// Revalidate sitemap κάθε 1 ώρα (3600 seconds)
+export const revalidate = 3600;
+
 async function getProducts() {
     const data = await requestSSR({
         query: GET_PRODUCTS_SITEMAP
@@ -37,71 +40,74 @@ async function getBrands() {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
 
-    const products = await getProducts()
-    const categories = await getCategories()
-    const pages = await getPages()
-    const brands = await getBrands()
+    const [products, categories, pages, brands] = await Promise.all([
+        getProducts(),
+        getCategories(),
+        getPages(),
+        getBrands()
+    ]);
 
     const sitemapArray: MetadataRoute.Sitemap = [{
         url: `${process.env.NEXT_URL}`,
-        // lastModified: new Date(),
-        changeFrequency: 'weekly',
+        lastModified: new Date(),
+        changeFrequency: 'daily',
         priority: 0.8,
     },
     {
         url: `${process.env.NEXT_URL}/brands`,
-        // lastModified: new Date(),
+        lastModified: new Date(),
         changeFrequency: 'weekly',
         priority: 0.1,
     },
     {
         url: `${process.env.NEXT_URL}/offers`,
-        // lastModified: new Date(),
+        lastModified: new Date(),
         changeFrequency: 'daily',
         priority: 0.7,
     },
-    {
-        url: `${process.env.NEXT_URL}/checkout/confirm`,
-        // lastModified: new Date(),
-        changeFrequency: 'yearly',
-        priority: 0.1,
-    },
-    {
-        url: `${process.env.NEXT_URL}/checkout/customer-informations`,
-        // lastModified: new Date(),
-        changeFrequency: 'yearly',
-        priority: 0.1,
-    },
-    {
-        url: `${process.env.NEXT_URL}/checkout/order-informations`,
-        // lastModified: new Date(),
-        changeFrequency: 'yearly',
-        priority: 0.1,
-    },
-    {
-        url: `${process.env.NEXT_URL}/login`,
-        // lastModified: new Date(),
-        changeFrequency: 'yearly',
-        priority: 0.1,
-    },
-    {
-        url: `${process.env.NEXT_URL}/register`,
-        // lastModified: new Date(),
-        changeFrequency: 'yearly',
-        priority: 0.1,
-    },
-    {
-        url: `${process.env.NEXT_URL}/shopping-cart`,
-        // lastModified: new Date(),
-        changeFrequency: 'yearly',
-        priority: 0.1,
-    }]
+        // {
+        //     url: `${process.env.NEXT_URL}/checkout/confirm`,
+        //     // lastModified: new Date(),
+        //     changeFrequency: 'yearly',
+        //     priority: 0.1,
+        // },
+        // {
+        //     url: `${process.env.NEXT_URL}/checkout/customer-informations`,
+        //     // lastModified: new Date(),
+        //     changeFrequency: 'yearly',
+        //     priority: 0.1,
+        // },
+        // {
+        //     url: `${process.env.NEXT_URL}/checkout/order-informations`,
+        //     // lastModified: new Date(),
+        //     changeFrequency: 'yearly',
+        //     priority: 0.1,
+        // },
+        // {
+        //     url: `${process.env.NEXT_URL}/login`,
+        //     // lastModified: new Date(),
+        //     changeFrequency: 'yearly',
+        //     priority: 0.1,
+        // },
+        // {
+        //     url: `${process.env.NEXT_URL}/register`,
+        //     // lastModified: new Date(),
+        //     changeFrequency: 'yearly',
+        //     priority: 0.1,
+        // },
+        // {
+        //     url: `${process.env.NEXT_URL}/shopping-cart`,
+        //     // lastModified: new Date(),
+        //     changeFrequency: 'yearly',
+        //     priority: 0.1,
+        // }
+    ]
     const categoriesSitemap: MetadataRoute.Sitemap = []
 
     categories.categories.data.forEach(category => {
         categoriesSitemap.push({
             url: `${process.env.NEXT_URL}/category/${category.attributes.slug}`,
-            lastModified: category.attributes.updatedAt.toString(),
+            lastModified: new Date(category.attributes.updatedAt),
             changeFrequency: 'daily',
             priority: 0.5,
         })
@@ -109,7 +115,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             category.attributes.categories.data.forEach(cat2 => {
                 categoriesSitemap.push({
                     url: `${process.env.NEXT_URL}/category/${category.attributes.slug}/${cat2.attributes.slug}`,
-                    lastModified: cat2.attributes.updatedAt.toString(),
+                    lastModified: new Date(cat2.attributes.updatedAt),
                     changeFrequency: 'daily',
                     priority: 0.5,
                 })
@@ -117,7 +123,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
                     cat2.attributes.categories.data.forEach(cat3 => {
                         categoriesSitemap.push({
                             url: `${process.env.NEXT_URL}/category/${category.attributes.slug}/${cat2.attributes.slug}/${cat3.attributes.slug}`,
-                            lastModified: cat3.attributes.updatedAt.toString(),
+                            lastModified: new Date(cat3.attributes.updatedAt),
                             changeFrequency: 'daily',
                             priority: 0.5,
                         })
@@ -129,21 +135,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const brandsSitemap: MetadataRoute.Sitemap = brands.brands.data.filter(x => x.attributes.products.data.length > 0).map(brand => ({
         url: `${process.env.NEXT_URL}/brands/${brand.attributes.slug}`,
-        lastModified: brand.attributes.updatedAt.toString(),
+        lastModified: new Date(brand.attributes.updatedAt),
         changeFrequency: "daily",
         priority: 0.6,
     }))
 
     const pagesSitemap: MetadataRoute.Sitemap = pages.pages.data.map(page => ({
         url: `${process.env.NEXT_URL}/pages/${page.attributes.titleSlug}`,
-        lastModified: page.attributes.updatedAt.toString(),
+        lastModified: new Date(page.attributes.updatedAt),
         changeFrequency: "daily",
         priority: 0.6,
     }))
 
     const productsSitemap: MetadataRoute.Sitemap = products.products.data.map(product => ({
         url: `${process.env.NEXT_URL}/product/${product.attributes.slug}`,
-        lastModified: product.attributes.updatedAt.toString(),
+        lastModified: new Date(product.attributes.updatedAt),
         changeFrequency: "daily",
         priority: 1,
     }))

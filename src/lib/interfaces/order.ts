@@ -1,63 +1,57 @@
-import { IImageAttr } from "./image";
+// lib/interfaces/order.ts
+
+import { IImageAttr } from "@/lib/interfaces/image"
+
+export interface IOrderProduct {
+    id: number;
+    name: string;
+    slug: string;
+    brand: string | null;
+    image: IImageAttr;
+    price: number;
+    sale_price: number | null;
+    is_sale: boolean;
+    quantity: number;
+    weight: number;
+    isAvailable: boolean;
+    category: {
+        id: number;
+        name: string;
+        slug?: string;
+        parents: Array<{
+            id: number;
+            name: string;
+            slug?: string;
+            parents: Array<{
+                id: number;
+                name: string;
+                slug?: string;
+            }>;
+        }>;
+    } | null;
+    sku?: string;
+    variant?: string;
+}
 
 export interface IOrder {
     order: {
-        id: number,
-        products: {
-            id: number
-            name: string,
-            slug: string,
-            image: IImageAttr,
-            price: number,
-            weight: number,
-            is_sale: boolean,
-            quantity: number,
-            sale_price: null,
-            isAvailable: boolean
-        }[],
-        total: number,
-        status: string,
-        billing_address: {
-            isInvoice: boolean,
-            email: string,
-            firstname: string,
-            lastname: string,
-            street: string,
-            city: string,
-            state: string,
-            zipCode: string,
-            country: string,
-            telephone: string,
-            mobilePhone: string,
-            afm: string,
-            doy: string,
-            companyName: string,
-            businessActivity: string,
-        }
-        different_shipping: boolean,
-        shipping_address: {
-            firstname: string,
-            lastname: string,
-            street: string,
-            city: string,
-            state: string,
-            zipCode: string,
-            country: string,
-            telephone: string,
-            mobilePhone: string,
-        },
-        installments: number,
-        payment: {
-            name: string;
-            cost: number;
-        },
+        id: number;
+        total: number;
+        products: IOrderProduct[];
         shipping: {
             name: string;
             cost: number;
-        }
-    },
+        };
+        payment: {
+            name: string;
+        };
+        installments: number;
+        coupon?: {
+            code: string;
+        };
+    };
     deliverydays: {
-        early: Date,
-        late: Date
-    }
+        early: string;
+        late: string;
+    };
 }

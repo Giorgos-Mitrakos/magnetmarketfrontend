@@ -1,5 +1,6 @@
+// app/checkout/success/page.tsx
+
 import Banks from "@/components/atoms/banks";
-import ClearCartItems from "@/components/atoms/clearCart";
 import BestPriceOrderTracking from "@/components/atoms/bestPriceOrderTracking"
 import { getCookies } from "@/lib/helpers/actions"
 import { Metadata } from "next"
@@ -7,32 +8,20 @@ import Image from "next/image"
 import { FaRegImage, FaCheckCircle, FaTruck, FaCreditCard, FaCalendarAlt, FaEuroSign, FaExclamationTriangle } from "react-icons/fa";
 import { getOrder } from "@/lib/queries/order";
 import { IOrder } from "@/lib/interfaces/order";
-
-// Function to Add days to current date
-function addDays(date: Date, days: number) {
-    const newDate = new Date(date);
-    newDate.setDate(date.getDate() + days);
-    return newDate;
-}
+import PurchaseTracker from "@/components/molecules/PurchaseTracker";
 
 export interface IOrderCookie {
     orderId: number
 }
 
-
-
 export default async function Success() {
-
     const orderCookie = await getCookies({ name: '_mmo' })
-
     const ApprovalCodeCookie = await getCookies({ name: '_apc' })
 
     const order: IOrderCookie = orderCookie ? JSON.parse(orderCookie.value) : null
-
     const approvalCode = ApprovalCodeCookie ? JSON.parse(ApprovalCodeCookie.value) : null
 
     const result = await getOrder(order.orderId)
-
     const { order: data, deliverydays } = result as IOrder
 
     if (!order || !deliverydays) {
@@ -82,7 +71,18 @@ export default async function Success() {
     const earlyDeviveryDate = new Date(deliverydays.early)
     const lateDeviveryDate = new Date(deliverydays.late)
 
-    const orderDetails = {
+    // ✅ Data για Google Analytics tracking
+    const orderDataForGATracking = {
+        id: data.id,
+        total: data.total,
+        shipping: {
+            cost: data.shipping.cost
+        },
+        products: data.products
+    };
+
+    // Data για BestPrice tracking
+    const orderDetailsForBestPrice = {
         orderId: data.id,
         revenue: data.total,
         shipping: data.shipping.cost,
@@ -90,19 +90,25 @@ export default async function Success() {
         currency: 'euro',
     };
 
-    const products = data.products.map(product => {
-        return {
-            orderId: data.id,
-            productId: product.id,
-            title: product.name,
-            price: product.is_sale && product.sale_price ? product.sale_price : product.price,
-            quantity: product.quantity
-        }
-    })
+    const productsForBestPrice = data.products.map(product => ({
+        orderId: data.id,
+        productId: product.id,
+        title: product.name,
+        price: product.is_sale && product.sale_price ? product.sale_price : product.price,
+        quantity: product.quantity
+    }));
 
     return (
         <>
-            <ClearCartItems />
+            {/* ✅ ΣΩΣΤΗ ΣΕΙΡΑ:
+                1. PurchaseTracker - Κάνει GA tracking ΚΑΙ clear το cart
+                2. ΔΕΝ χρειαζόμαστε ClearCartItems - το κάνει ο reducer
+            */}
+            <PurchaseTracker 
+                orderData={orderDataForGATracking} 
+                appliedCoupon={data.coupon?.code || null}
+            />
+            
             <div className="min-h-screen bg-gradient-to-br from-siteColors-lightblue/10 via-siteColors-blue/10 to-siteColors-pink/10 mb-16 py-8 px-4">
                 <div className="max-w-6xl mx-auto">
                     {/* Header Section */}
@@ -143,7 +149,7 @@ export default async function Success() {
                                     <div key={item.id} className="flex border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                                         <div className="relative w-24 h-24 flex-shrink-0">
                                             {
-                                                item.image.formats ? (
+                                                item.image?.formats ? (
                                                     <Image
                                                         className="object-cover"
                                                         src={`${process.env.NEXT_PUBLIC_API_URL}${item.image.formats.small ? item.image.formats.small.url : item.image.url}`}
@@ -244,8 +250,11 @@ export default async function Success() {
                         </div>
                     )}
 
-                    {/* Tracking Component */}
-                    <BestPriceOrderTracking orderDetails={orderDetails} products={products} />
+                    {/* ✅ BestPrice Tracking */}
+                    <BestPriceOrderTracking 
+                        orderDetails={orderDetailsForBestPrice} 
+                        products={productsForBestPrice} 
+                    />
                 </div>
             </div>
         </>
