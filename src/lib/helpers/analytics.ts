@@ -54,8 +54,8 @@ export const createCategories = (item: ICartItem) => {
 // ============================================
 
 export const trackCartEvent = (
-    event: string, 
-    items: ICartItem[], 
+    event: string,
+    items: ICartItem[],
     additionalParams = {}
 ) => {
     if (!items || items.length === 0) {
@@ -72,13 +72,13 @@ export const trackCartEvent = (
         items: items.map(item => {
             const categories = createCategories(item);
             const price = item.is_sale && item.sale_price ? item.sale_price : item.price;
-            
+
             return {
                 item_id: item.id.toString(),
                 item_name: item.name,
                 item_brand: item.brand || 'Unknown',
-                discount: item.is_sale && item.sale_price 
-                    ? Number((item.price - item.sale_price).toFixed(2)) 
+                discount: item.is_sale && item.sale_price
+                    ? Number((item.price - item.sale_price).toFixed(2))
                     : 0,
                 item_category: categories.item_category,
                 item_category2: categories.item_category2,
@@ -122,20 +122,46 @@ export const trackAddPaymentInfo = (items: ICartItem[], paymentType: string) => 
     });
 };
 
-export const trackSelectItem = (item: ICartItem, listName?: string) => {
-    const categories = createCategories(item);
-    const price = item.is_sale && item.sale_price ? item.sale_price : item.price;
-    
+/**
+ * Track select_item - ✅ Δέχεται οποιοδήποτε product type
+ */
+export const trackSelectItem = (item: any, listName?: string) => {
+    // Extract values με fallbacks
+    const brand = typeof item.brand === 'string'
+        ? item.brand
+        : item.brand?.name || 'Unknown';
+
+    const price = item.is_sale && item.sale_price
+        ? item.sale_price
+        : item.price;
+
+    // Extract category
+    let categoryName = 'Uncategorized';
+    let category2 = undefined;
+    let category3 = undefined;
+
+    if (item.category) {
+        if (typeof item.category === 'string') {
+            categoryName = item.category;
+        } else if (item.category.name) {
+            category3 = item.category.name;
+            const parent1 = item.category.parents?.[0];
+            category2 = parent1?.name;
+            const parent2 = parent1?.parents?.[0];
+            categoryName = parent2?.name || category2 || category3;
+        }
+    }
+
     sendGAEvent({
         event: 'select_item',
         item_list_name: listName || undefined,
         items: [{
             item_id: item.id.toString(),
             item_name: item.name,
-            item_brand: item.brand || 'Unknown',
-            item_category: categories.item_category,
-            item_category2: categories.item_category2,
-            item_category3: categories.item_category3,
+            item_brand: brand,
+            item_category: categoryName,
+            item_category2: category2,
+            item_category3: category3,
             price: Number(price.toFixed(2)),
         }]
     });
@@ -180,13 +206,13 @@ export const trackPurchase = (
         items: items.map(item => {
             const categories = createCategories(item);
             const price = item.is_sale && item.sale_price ? item.sale_price : item.price;
-            
+
             return {
                 item_id: item.id.toString(),
                 item_name: item.name,
                 item_brand: item.brand || 'Unknown',
-                discount: item.is_sale && item.sale_price 
-                    ? Number((item.price - item.sale_price).toFixed(2)) 
+                discount: item.is_sale && item.sale_price
+                    ? Number((item.price - item.sale_price).toFixed(2))
                     : 0,
                 item_category: categories.item_category,
                 item_category2: categories.item_category2,

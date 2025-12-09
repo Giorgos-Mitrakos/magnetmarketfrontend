@@ -115,8 +115,6 @@ const CartItemTemplate = ({ item }: { item: ICartItem }) => {
         removeItemToast(item)
     }
 
-    console.log("image", item.image)
-
     const imageUrl = item.image ?
         getStrapiMedia(
             item.image.formats?.thumbnail?.url ||

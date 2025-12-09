@@ -3,28 +3,67 @@
 import Link from "next/link"
 import Image from 'next/image'
 import { getStrapiMedia } from "@/repositories/medias"
-import { FaRegImage, FaHeart, FaOpencart, FaRegEye } from "react-icons/fa"
+import { FaRegImage } from "react-icons/fa"
 import ProductCardHead from "../molecules/productCardHead"
 import ProductCardPrice from "../atoms/productCardPrice"
 import ProductCardFoot from "../molecules/productCardFoot"
 import { IProductCard } from "@/lib/interfaces/product"
+import { trackSelectItem } from "@/lib/helpers/analytics"
+import { fbTrackViewContent } from "@/lib/helpers/facebook-pixel"
+import { useCallback } from "react"
 
 // Main Product Card Component
 export type ProductCardProps = {
     product: IProductCard
+    listName?: string      // ✅ Νέο prop για tracking
+    listId?: string        // ✅ Νέο prop για tracking
+    position?: number      // ✅ Νέο prop για tracking
 }
 
-const ProductCard = ({ product }: { product: IProductCard }) => {
+const ProductCard = ({ 
+    product, 
+    listName = 'Products',
+    listId,
+    position 
+}: ProductCardProps) => {
+
+    // ✅ Handler για product click tracking
+    const handleProductClick = useCallback(() => {
+        // GA4 - select_item tracking
+        // Το trackSelectItem κάνει αυτόματα conversion από IProductCard
+        trackSelectItem(product, listName)
+
+        // Facebook Pixel - ViewContent
+        // Χρειάζεται ICartItem format - κάνουμε inline conversion
+        const cartItem = {
+            ...product,
+            brand: typeof product.brand === 'string' ? product.brand : product.brand?.name || null,
+            quantity: 1,
+            weight: product.weight || 0,
+            isAvailable: product.inventory > 0,
+            sale_price: product.sale_price || null,
+            is_sale: product.is_sale || false,
+        }
+        fbTrackViewContent(cartItem as any)
+
+        console.log('[ProductCard] Click tracked:', {
+            product: product.name,
+            list: listName,
+            position: position
+        })
+    }, [product, listName, position])
+
     return (
-        <div className="group relative h-full pt-2 pb-12 px-1 max-w-96 overflow-hidden transition-all duration-300 hover:scale-[1.02]">
+        <Link
+            href={`/product/${product.slug}`}
+            className="group relative h-full pt-2 pb-12 px-1 max-w-96 overflow-hidden transition-all duration-300 hover:scale-[1.02] block"
+            aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${product.name}`}
+            onClick={handleProductClick} // ✅ Tracking - μόνο ΕΔΩ στο κύριο Link
+        >
             <div className="grid h-full grid-rows-cardLayout shadow-md hover:shadow-xl dark:shadow-slate-700 dark:hover:shadow-slate-600 bg-white dark:bg-slate-800 rounded-xl m-1 p-4 transition-all duration-300">
                 <ProductCardHead product={product} />
 
-                <Link
-                    className="grid w-full place-content-center bg-white relative min-h-[216px] rounded-lg overflow-hidden"
-                    href={`/product/${product.slug}`}
-                    aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${product.name}`}
-                >
+                <div className="grid w-full place-content-center bg-white relative min-h-[216px] rounded-lg overflow-hidden">
                     {product.image ? (
                         <Image
                             className="object-contain p-2 transition-transform duration-300 group-hover:scale-105"
@@ -51,19 +90,15 @@ const ProductCard = ({ product }: { product: IProductCard }) => {
                             <FaRegImage className='h-20 w-20 text-siteColors-purple/40 dark:text-slate-500' />
                         </div>
                     )}
-                </Link>
+                </div>
 
                 <div className='mt-4 grid grid-rows-5 justify-between border-b border-gray-100 dark:border-slate-700 pb-3'>
-                    <Link
-                        href={`/product/${product.slug}`}
-                        className="row-span-4"
-                        aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${product.name}`}
-                    >
+                    <div className="row-span-4">
                         <h2 className='w-full font-semibold text-base md:text-lg text-left break-words line-clamp-3 text-siteColors-purple dark:text-slate-200 dark:group-hover:text-slate-100 group-hover:text-siteColors-pink transition-colors duration-200'
                             aria-label="Τίτλος προϊόντος">
                             {product.name}
                         </h2>
-                    </Link>
+                    </div>
                     <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Κωδ: {product.id}</p>
                 </div>
 
@@ -81,7 +116,7 @@ const ProductCard = ({ product }: { product: IProductCard }) => {
                 <ProductCardPrice product={product} />
                 <ProductCardFoot product={product} />
             </div>
-        </div>
+        </Link>
     )
 }
 

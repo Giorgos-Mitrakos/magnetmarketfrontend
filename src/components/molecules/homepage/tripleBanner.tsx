@@ -1,8 +1,10 @@
 import NextImage from "@/components/atoms/nextImage";
 import { IHomeTripleBanner } from "@/lib/queries/homepage";
-import Link from "next/link";
+import { TrackableLink } from "@/components/atoms/TrackableLink";
 
-const TripleBanner = ({ id, rightTripleBanner,
+const TripleBanner = ({ 
+    id,
+    rightTripleBanner,
     rightTripleHref,
     rightTripleTarget,
     middleTripleBanner,
@@ -10,19 +12,45 @@ const TripleBanner = ({ id, rightTripleBanner,
     middleTripleTarget,
     leftTripleBanner,
     leftTripleHref,
-    leftTripleTarget }: IHomeTripleBanner) => {
-
+    leftTripleTarget 
+}: IHomeTripleBanner) => {
     return (
         <div className='grid md:grid-cols-3 gap-4'>
-            <Link href={rightTripleHref} target={rightTripleTarget}>
+            <TrackableLink
+                href={rightTripleHref}
+                target={rightTripleTarget}
+                className="block"
+                bannerId={`triple_banner_right_${id}`}
+                bannerName={rightTripleBanner?.alternativeText || 'Right Banner'}
+                bannerPosition="homepage_triple_banner_right"
+                bannerType="triple"
+            >
                 <NextImage media={rightTripleBanner} height={256} width={512} />
-            </Link>
-            <Link href={middleTripleHref} target={middleTripleTarget}>
+            </TrackableLink>
+            
+            <TrackableLink
+                href={middleTripleHref}
+                target={middleTripleTarget}
+                className="block"
+                bannerId={`triple_banner_middle_${id}`}
+                bannerName={middleTripleBanner?.alternativeText || 'Middle Banner'}
+                bannerPosition="homepage_triple_banner_middle"
+                bannerType="triple"
+            >
                 <NextImage media={middleTripleBanner} height={256} width={512} />
-            </Link>
-            <Link href={leftTripleHref} target={leftTripleTarget}>
+            </TrackableLink>
+            
+            <TrackableLink
+                href={leftTripleHref}
+                target={leftTripleTarget}
+                className="block"
+                bannerId={`triple_banner_left_${id}`}
+                bannerName={leftTripleBanner?.alternativeText || 'Left Banner'}
+                bannerPosition="homepage_triple_banner_left"
+                bannerType="triple"
+            >
                 <NextImage media={leftTripleBanner} height={256} width={512} />
-            </Link>
+            </TrackableLink>
         </div>
     )
 }

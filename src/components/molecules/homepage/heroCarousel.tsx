@@ -1,7 +1,7 @@
+// components/molecules/homepage/heroCarousel.tsx
 'use client';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
-import Link from 'next/link';
 import Image from 'next/image';
 import { getStrapiMedia } from '@/repositories/medias';
 import { EffectFade, Autoplay, Pagination, Navigation } from 'swiper/modules';
@@ -9,6 +9,7 @@ import { IHeroCarouselBanner } from '@/lib/queries/homepage';
 import { HiChevronLeft, HiChevronRight, HiPlay, HiPause } from 'react-icons/hi';
 import { useRef, useState, useCallback, useMemo } from 'react';
 import type { Swiper as SwiperType } from 'swiper';
+import { TrackableLink } from '@/components/atoms/TrackableLink'; 
 
 import 'swiper/css';
 import 'swiper/css/effect-fade';
@@ -20,13 +21,15 @@ interface HeroCarouselProps {
   autoplayDelay?: number;
   showControls?: boolean;
   className?: string;
+  trackingLocation?: string;
 }
 
 const HeroCarousel = ({
   carousel,
   autoplayDelay = 5000,
   showControls = true,
-  className = ''
+  className = '',
+  trackingLocation = 'homepage_hero'
 }: HeroCarouselProps) => {
   const swiperRef = useRef<SwiperType | null>(null);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -64,10 +67,6 @@ const HeroCarousel = ({
     }
   }, [isPlaying]);
 
-  const goToSlide = useCallback((index: number) => {
-    swiperRef.current?.slideToLoop(index);
-  }, []);
-
   const goToPrev = useCallback(() => {
     swiperRef.current?.slidePrev();
   }, []);
@@ -93,7 +92,6 @@ const HeroCarousel = ({
 
   return (
     <div className={`relative group overflow-hidden rounded-xl shadow-2xl h-full ${className}`}>
-      {/* Loading state */}
       {isLoading && (
         <div className="absolute inset-0 z-20 flex items-center justify-center rounded-xl">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -145,12 +143,15 @@ const HeroCarousel = ({
             key={banner.id || index}
             className="w-full h-full relative"
           >
-            <Link
+            {/* ✅ Χρήση TrackableLink */}
+            <TrackableLink
               href={banner.href}
-              aria-label={banner.link_label || `View ${banner.title}`}
               className="block h-full w-full relative group/slide focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-xl"
+              bannerId={`banner_${banner.id || index}`}
+              bannerName={banner.title || banner.link_label || `Banner ${index + 1}`}
+              bannerPosition={`${trackingLocation}_slide_${index}`}
+              bannerType="hero"
             >
-              {/* Main Image */}
               <div className="relative h-full w-full">
                 <Image
                   className="object-fill transition-transform duration-700 ease-out group-hover/slide:scale-105 rounded-xl"
@@ -167,21 +168,18 @@ const HeroCarousel = ({
                     console.warn(`Failed to load image: ${banner.imageUrl}`);
                     const target = e.target as HTMLImageElement;
                     target.src = '/placeholder-image.jpg';
-                    target.onerror = null; // Prevent infinite loop
+                    target.onerror = null;
                   }}
                 />
-
-
               </div>
-            </Link>
+            </TrackableLink>
           </SwiperSlide>
         ))}
       </Swiper>
 
-      {/* Enhanced Controls */}
+      {/* Controls */}
       {showControls && processedCarousel.length > 1 && (
         <>
-          {/* Navigation Arrows */}
           <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out">
             <button
               className="hero-prev-btn absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-xl text-gray-800 p-3 rounded-full transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm border border-white/20"
@@ -199,7 +197,6 @@ const HeroCarousel = ({
             </button>
           </div>
 
-          {/* Play/Pause Button */}
           <button
             className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white shadow-xl text-gray-800 p-2.5 rounded-full transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 opacity-0 group-hover:opacity-100 backdrop-blur-sm border border-white/20"
             onClick={toggleAutoplay}
@@ -212,11 +209,9 @@ const HeroCarousel = ({
             )}
           </button>
 
-          {/* Slide Counter */}
           <div className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium text-gray-800 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 border border-white/20">
             {currentSlide + 1} / {processedCarousel.length}
           </div>
-
         </>
       )}
     </div>

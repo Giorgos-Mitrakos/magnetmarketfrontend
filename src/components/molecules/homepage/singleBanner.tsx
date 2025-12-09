@@ -1,19 +1,30 @@
 import NextImage from "@/components/atoms/nextImage";
 import { IHomeSingleBanner } from "@/lib/queries/homepage";
-import Link from "next/link";
+import { TrackableLink } from "@/components/atoms/TrackableLink"; // ✅ Import
 
-const SingleBanner = ({ id,
+const SingleBanner = ({ 
+    id,
     singleBanner,
     href,
-    target }: IHomeSingleBanner) => {
-
+    target 
+}: IHomeSingleBanner) => {
     return (
         <div className='flex w-full'>
-            {singleBanner && <Link href={href} target={target}>
-                <NextImage media={singleBanner} height={768} width={1536} />
-            </Link>}
+            {singleBanner && (
+                <TrackableLink
+                    href={href}
+                    target={target}
+                    className="block w-full"
+                    bannerId={`single_banner_${id}`}
+                    bannerName={singleBanner?.alternativeText || 'Single Banner'}
+                    bannerPosition="homepage_single_banner"
+                    bannerType="single"
+                >
+                    <NextImage media={singleBanner} height={768} width={1536} />
+                </TrackableLink>
+            )}
         </div>
     )
 }
 
-export default SingleBanner;
+export default SingleBanner

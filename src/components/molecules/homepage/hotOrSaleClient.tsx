@@ -1,10 +1,13 @@
+// components/organisms/homepage/hotOrSaleClient.tsx
 'use client'
-import { memo } from 'react'
+
+import { memo, useEffect, useState } from 'react'
 import dynamic from "next/dynamic"
 import { ProductCardSkeleton } from "@/components/organisms/productCard"
-import { IProductCard, IProducts } from "@/lib/interfaces/product"
+import { IProductCard } from "@/lib/interfaces/product"
+import { trackViewItemList } from "@/lib/helpers/advanced-analytics" // ✅ Μόνο αυτό!
 
-// Dynamic import του Carousel - ΙΔΙΟ όπως πριν
+// Dynamic import του Carousel
 const Carousel = dynamic(() => import('@/components/atoms/carousel'), {
   ssr: false,
   loading: () => (
@@ -23,7 +26,7 @@ interface HotOrSaleClientProps {
   initialData: IProductCard[] | null
 }
 
-// Helper function για colors - ΙΔΙΑ όπως πριν
+// Helper function για colors
 const getHeaderColors = (type: string) => {
   switch (type) {
     case 'hot':
@@ -37,25 +40,41 @@ const getHeaderColors = (type: string) => {
   }
 }
 
-// Main Client Component - ΙΔΙΑ εμφάνιση
 const HotOrSaleClient = memo(({ id, title, type, initialData }: HotOrSaleClientProps) => {
   const headerColorClasses = getHeaderColors(type)
   const hasError = initialData === null
   const hasProducts = initialData && initialData.length > 0
+
+  const [hasTracked, setHasTracked] = useState(false)
+
+  // ✅ Track view_item_list όταν φορτώνει
+  useEffect(() => {
+    if (!hasTracked && hasProducts && initialData) {
+      // ✅ Δεν χρειάζεται conversion - το κάνει αυτόματα η trackViewItemList!
+      trackViewItemList(initialData, title, `homepage_${type}_${id}`)
+      setHasTracked(true)
+
+      console.log('[HotOrSale] Tracked view_item_list:', {
+        list: title,
+        items: initialData.length,
+        type: type
+      })
+    }
+  }, [hasProducts, initialData, hasTracked, title, type, id])
 
   if (!hasProducts) return null
 
   return (
     <section key={id} className="my-8">
       <div className="rounded-xl shadow-lg overflow-hidden border border-gray-200 min-h-[764px]">
-        {/* Header - ίδιο όπως πριν */}
+        {/* Header */}
         <div className={`${headerColorClasses} py-4 px-6`}>
           <h2 className="text-center text-xl md:text-2xl font-bold">
             {title}
           </h2>
         </div>
 
-        {/* Content area - ίδιο όπως πριν */}
+        {/* Content area */}
         <div className="bg-white h-full dark:bg-slate-800 p-4 transition-opacity duration-300">
           {hasError ? (
             <div className="flex items-center justify-center h-[600px]">
@@ -65,7 +84,11 @@ const HotOrSaleClient = memo(({ id, title, type, initialData }: HotOrSaleClientP
               </div>
             </div>
           ) : (
-            <Carousel products={initialData} />
+            <Carousel 
+              products={initialData} 
+              listName={title} // ✅ Pass listName to Carousel
+              listId={`homepage_${type}_${id}`} // ✅ Pass listId
+            />
           )}
         </div>
       </div>

@@ -2,7 +2,7 @@
 import { Suspense } from 'react'
 import Carousel from "@/components/atoms/carousel"
 import { IImageAttr } from "@/lib/interfaces/image"
-import { IProductBrand } from "@/lib/interfaces/product"
+import { IProductBrand, IProductCard } from "@/lib/interfaces/product"
 import { ProductCardSkeleton } from '@/components/organisms/productCard'
 
 // Interfaces - ίδια όπως πριν
@@ -30,7 +30,7 @@ interface ListProductsBannerProps {
   id: string
   title: string
   subtitle?: string
-  products: Product[]
+  products: IProductCard[] | null
   loading?: boolean
 }
 
@@ -89,10 +89,10 @@ export default function ListProductsBanner({
   products,
   loading = false
 }: ListProductsBannerProps) {
-  
+
   // Server-side logic - χωρίς state και effects
   const hasProducts = products && products.length > 0
-  
+
   // Αν loading, δείξε skeleton
   if (loading || !products) {
     return <ListProductsBannerSkeleton />
@@ -105,10 +105,13 @@ export default function ListProductsBanner({
     >
       <div className="mx-auto w-full py-8">
         <BannerHeader title={title} subtitle={subtitle} />
-        
+
         {hasProducts ? (
           <Suspense fallback={<ListProductsBannerSkeleton />}>
-            <Carousel products={products} />
+            <Carousel products={products}
+              listName={title} // ✅ Pass listName to Carousel
+              listId={`homepage_${title}_${id}`} // ✅ Pass listId
+            />
           </Suspense>
         ) : (
           <EmptyState />

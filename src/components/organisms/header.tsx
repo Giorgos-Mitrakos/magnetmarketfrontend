@@ -68,7 +68,7 @@ export default function Header({ user, menuData }: HeaderProps) {
                 <HeaderActions user={user} />
             </header>
             {/* Floating Offers Button */}
-            {pathname  !== '/offers' && (
+            {pathname  !== '/offers' && !pathname.includes('/checkout/') && !pathname.includes('/shopping-cart') && (
                 <Link
                     href="/offers"
                     className="fixed top-36 right-6 z-40 flex items-center gap-2 px-5 py-3 rounded-full text-base font-bold transition-all duration-300 group bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 shadow-2xl hover:shadow-[0_0_30px_rgba(249,115,22,0.8)] hover:scale-110"
