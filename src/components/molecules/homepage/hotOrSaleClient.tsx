@@ -1,4 +1,3 @@
-// components/organisms/homepage/hotOrSaleClient.tsx
 'use client'
 
 import { memo, useEffect, useState } from 'react'
@@ -8,10 +7,12 @@ import { IProductCard } from "@/lib/interfaces/product"
 import { trackViewItemList } from "@/lib/helpers/advanced-analytics" // ✅ Μόνο αυτό!
 
 // Dynamic import του Carousel
-const Carousel = dynamic(() => import('@/components/atoms/carousel'), {
+const Carousel = dynamic(() => import('@/components/atoms/carousel'),
+ {
   ssr: false,
   loading: () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 
+lg:grid-cols-4 gap-6">
       {Array.from({ length: 4 }, (_, i) => (
         <ProductCardSkeleton key={i} />
       ))}
@@ -40,7 +41,8 @@ const getHeaderColors = (type: string) => {
   }
 }
 
-const HotOrSaleClient = memo(({ id, title, type, initialData }: HotOrSaleClientProps) => {
+const HotOrSaleClient = memo(({ id, title, type, initialData }: 
+HotOrSaleClientProps) => {
   const headerColorClasses = getHeaderColors(type)
   const hasError = initialData === null
   const hasProducts = initialData && initialData.length > 0
@@ -50,15 +52,21 @@ const HotOrSaleClient = memo(({ id, title, type, initialData }: HotOrSaleClientP
   // ✅ Track view_item_list όταν φορτώνει
   useEffect(() => {
     if (!hasTracked && hasProducts && initialData) {
-      // ✅ Δεν χρειάζεται conversion - το κάνει αυτόματα η trackViewItemList!
-      trackViewItemList(initialData, title, `homepage_${type}_${id}`)
-      setHasTracked(true)
+      // 💡 Εφαρμογή setTimeout για να δώσουμε χρόνο στο GA να φορτώσει
+      const timer = setTimeout(() => {
+        // ✅ Δεν χρειάζεται conversion - το κάνει αυτόματα η trackViewItemList!
+        trackViewItemList(initialData, title, `homepage_${type}_${id}`)
+        setHasTracked(true)
 
-      console.log('[HotOrSale] Tracked view_item_list:', {
-        list: title,
-        items: initialData.length,
-        type: type
-      })
+        console.log('[HotOrSale] Tracked view_item_list:', {
+          list: title,
+          items: initialData.length,
+          type: type
+        })
+      }, 500); // Καθυστέρηση 500ms
+
+      return () => clearTimeout(timer); // Cleanup function
+
     }
   }, [hasProducts, initialData, hasTracked, title, type, id])
 
@@ -66,21 +74,27 @@ const HotOrSaleClient = memo(({ id, title, type, initialData }: HotOrSaleClientP
 
   return (
     <section key={id} className="my-8">
-      <div className="rounded-xl shadow-lg overflow-hidden border border-gray-200 min-h-[764px]">
+      <div className="rounded-xl shadow-lg overflow-hidden border 
+border-gray-200 min-h-[764px]">
         {/* Header */}
         <div className={`${headerColorClasses} py-4 px-6`}>
-          <h2 className="text-center text-xl md:text-2xl font-bold">
+          <h2 className="text-center text-xl md:text-2xl 
+font-bold">
             {title}
           </h2>
         </div>
 
         {/* Content area */}
-        <div className="bg-white h-full dark:bg-slate-800 p-4 transition-opacity duration-300">
+        <div className="bg-white h-full dark:bg-slate-800 p-4 
+transition-opacity duration-300">
           {hasError ? (
-            <div className="flex items-center justify-center h-[600px]">
+            <div className="flex items-center justify-center 
+h-[600px]">
               <div className="text-center text-gray-500">
-                <p className="text-lg mb-2">⚠️ Failed to load products</p>
-                <p className="text-sm">Please try refreshing the page</p>
+                <p className="text-lg mb-2">⚠️ Failed to load 
+products</p>
+                <p className="text-sm">Please try refreshing the 
+page</p>
               </div>
             </div>
           ) : (

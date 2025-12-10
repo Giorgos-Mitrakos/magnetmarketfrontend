@@ -12,7 +12,7 @@ const nextConfig = {
     FACEBOOK_PIXEL: '',//'1151339979478836',
     NEXTAUTH_SECRET: '2ZCoq03s9HlbbMY36VardIgA',
     NEXTAUTH_URL: 'http://localhost:3000',
-    // GA_MEASUREMENT_ID: 'G-0DL7SDZL7E',
+    GA_MEASUREMENT_ID: 'G-0DL7SDZL7E',
     //#Peiraiws Bank
     ACQUIRER_ID: '14',
     MERCHANT_ID: '2141425445',

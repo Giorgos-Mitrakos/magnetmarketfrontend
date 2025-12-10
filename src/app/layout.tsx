@@ -42,6 +42,7 @@ export default async function RootLayout({
   return (
     <html lang="el">
       <head>
+        <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />
         <Script id="pixel-script" strategy='afterInteractive' dangerouslySetInnerHTML={{
           __html: `
           !function(f,b,e,v,n,t,s)
@@ -93,7 +94,7 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
         </SessionProviders>
         <BestPriceScript />
       </body>
-      <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />
+      
     </html>
   )
 }

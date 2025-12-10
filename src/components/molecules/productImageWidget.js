@@ -59,13 +59,15 @@ const ProductImageWidget = ({ images }) => {
 
   // Initialize swiper after component mounts
   useEffect(() => {
+    const imagesCount = images?.length
+
     if (mainSwiperRef.current && !mainSwiperRef.current.swiper) {
       Object.assign(mainSwiperRef.current, {
         spaceBetween: 0,
         slidesPerView: 1,
         zoom: true,
         effect: 'fade',
-        loop: true,
+        loop: imagesCount > 2,
         on: {
           slideChange: (swiper) => handleSlideChange(swiper)
         }

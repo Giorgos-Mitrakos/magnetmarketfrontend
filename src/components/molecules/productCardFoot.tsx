@@ -5,10 +5,12 @@ import { useCheckout } from "@/context/checkout"
 import { addToCartToast } from "@/lib/toasts/cartToasts"
 import Link from "next/link"
 import { IProductCard } from "@/lib/interfaces/product"
+import { useRouter } from "next/navigation"
 
 
 const ProductCardFoot = ({ product }: { product: IProductCard }) => {
     const { dispatch } = useCheckout()
+    const router = useRouter()
 
     const item: ICartItem = {
         id: product.id,
@@ -30,6 +32,21 @@ const ProductCardFoot = ({ product }: { product: IProductCard }) => {
         addToCartToast(product)
     }
 
+    // ✅ Handler για quick view
+    const handleQuickView = (e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        router.push(`/product/${product.slug}`)
+    }
+
+    // ✅ Handler για wishlist (προσθήκη λειτουργίας αν χρειάζεται)
+    const handleWishlist = (e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        // Προσθέστε κώδικα για wishlist εδώ
+        console.log('Add to wishlist:', product.id)
+    }
+
     return (
         <div className="grid grid-cols-3 gap-2 text-xl text-slate-50 mt-4">
             <button
@@ -39,16 +56,20 @@ const ProductCardFoot = ({ product }: { product: IProductCard }) => {
                 <FaHeart aria-hidden="true" />
             </button>
 
-            <Link
-                href={`/product/${product.slug}`}
+            <button
+                onClick={handleQuickView}
                 className="flex justify-center items-center p-2 text-slate-400 dark:text-slate-400 rounded-lg
                   bg-gray-100 dark:bg-slate-700 hover:bg-siteColors-blue/20 hover:text-siteColors-blue dark:hover:bg-siteColors-blue/20 transition-all duration-200"
                 aria-label="Επισκόπηση προϊόντος">
                 <FaRegEye aria-hidden="true" />
-            </Link>
+            </button>
 
             <button
-                onClick={() => handleAddProductClick(item)}
+                onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleAddProductClick(item)
+                }}
                 className="flex justify-center items-center p-2 rounded-lg
                   bg-gradient-to-br from-siteColors-lightblue to-siteColors-blue
                   hover:from-siteColors-pink hover:to-siteColors-purple 

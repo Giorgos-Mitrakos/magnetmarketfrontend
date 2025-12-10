@@ -5,8 +5,11 @@ import { getStrapiMedia } from "@/repositories/medias"
 import Link from "next/link"
 import { IProductCard } from "@/lib/interfaces/product"
 import { getPrices } from "@/lib/helpers/priceHelper"
+import { useRouter } from "next/navigation"
 
 const ProductCardHead = ({ product }: { product: IProductCard }) => {
+  const router = useRouter()
+
   const price = product.price
   const is_sale = product.is_sale
   const salePrice = product.sale_price
@@ -20,11 +23,22 @@ const ProductCardHead = ({ product }: { product: IProductCard }) => {
       : product.brand.logo.url
     : null
 
+  // ✅ Handler για click στο λογότυπο
+  const handleBrandClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    router.push(`/brands/${product.brand?.slug}`)
+  }
+
   return (
     <div className="grid grid-cols-2 h-full pb-2 items-center">
       <div className="relative w-full h-8">
         {logo && (
-          <Link className="h-full w-full block" href={`/brands/${product.brand?.slug}`}>
+          <button
+            onClick={handleBrandClick}
+            className="h-full w-full block cursor-pointer"
+            aria-label={`Πλοήγηση στη σελίδα της εταιρίας ${brandName}`}
+          >
             <Image
               className="object-contain object-left"
               aria-label={`Λογότυπο της εταιρίας ${brandName}`}
@@ -32,7 +46,7 @@ const ProductCardHead = ({ product }: { product: IProductCard }) => {
               fill
               alt={`Λογότυπο ${product.brand?.name}`}
             />
-          </Link>
+          </button>
         )}
       </div>
 
