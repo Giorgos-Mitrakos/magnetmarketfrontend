@@ -1,11 +1,45 @@
 // lib/helpers/analytics.ts
 
 import { ICartItem } from '@/lib/interfaces/cart';
-import { sendGAEvent } from '@next/third-parties/google';
 import { getCartTotal } from './checkout';
+import { sendDedupedEvent } from './event-deduplication';
 
 // ============================================
-// DUPLICATE TRACKING PREVENTION
+// DEV MODE CHECK
+// ============================================
+const isDev = process.env.NODE_ENV === 'development';
+
+// ============================================
+// NATIVE GTAG EVENT SENDER (with deduplication)
+// ============================================
+
+const sendEvent = (eventName: string, params: any, identifier?: string) => {
+  try {
+    if (typeof window === 'undefined') {
+      if (isDev) console.warn('[Analytics] Attempted to track in SSR');
+      return;
+    }
+
+    if (typeof window.gtag === 'undefined') {
+      if (isDev) console.error('[Analytics] gtag not available');
+      return;
+    }
+
+    // ✅ Use deduplication if identifier provided
+    if (identifier) {
+      sendDedupedEvent(eventName, params, identifier);
+    } else {
+      // No deduplication
+      window.gtag('event', eventName, params);
+      if (isDev) console.log(`[Analytics] ✅ Event sent: ${eventName}`, params);
+    }
+  } catch (error) {
+    if (isDev) console.error('[Analytics] Error:', error);
+  }
+};
+
+// ============================================
+// DUPLICATE TRACKING PREVENTION (for purchases)
 // ============================================
 
 const trackedTransactions = new Set<string>();
@@ -31,14 +65,9 @@ export const createCategories = (item: ICartItem) => {
         };
     }
 
-    // Level 3: Βασική κατηγορία (π.χ. "Laptop")
     const category3 = item.category.name;
-
-    // Level 2: Πρώτο parent (π.χ. "Φορητοί Υπολογιστές")
     const parent1 = item.category.parents?.[0];
     const category2 = parent1?.name;
-
-    // Level 1: Δεύτερο parent (π.χ. "Υπολογιστες")
     const parent2 = parent1?.parents?.[0];
     const category1 = parent2?.name;
 
@@ -47,6 +76,17 @@ export const createCategories = (item: ICartItem) => {
         item_category2: category1 ? category2 : undefined,
         item_category3: category1 ? category3 : (category2 ? undefined : undefined),
     };
+};
+
+// ============================================
+// CART HASH GENERATOR (for deduplication)
+// ============================================
+
+const generateCartHash = (items: ICartItem[]): string => {
+  return items
+    .map(item => `${item.id}:${item.quantity}`)
+    .sort()
+    .join('|');
 };
 
 // ============================================
@@ -59,14 +99,14 @@ export const trackCartEvent = (
     additionalParams = {}
 ) => {
     if (!items || items.length === 0) {
-        console.warn(`[Analytics] Attempted to track ${event} with empty items`);
+        if (isDev) console.warn(`[Analytics] Attempted to track ${event} with empty items`);
         return;
     }
 
     const totalValue = getCartTotal(items);
+    const cartHash = generateCartHash(items);
 
-    sendGAEvent({
-        event: event,
+    const params = {
         currency: "EUR",
         value: Number(totalValue.toFixed(2)),
         items: items.map(item => {
@@ -88,12 +128,9 @@ export const trackCartEvent = (
             }
         }),
         ...additionalParams
-    });
+    };
 
-    console.log(`[Analytics] ✅ Tracked ${event}:`, {
-        value: totalValue.toFixed(2),
-        items: items.length
-    });
+    sendEvent(event, params, cartHash);
 };
 
 // ============================================
@@ -122,11 +159,56 @@ export const trackAddPaymentInfo = (items: ICartItem[], paymentType: string) => 
     });
 };
 
-/**
- * Track select_item - ✅ Δέχεται οποιοδήποτε product type
- */
+export const trackAddToCart = (item: ICartItem, quantity: number = 1) => {
+    const categories = createCategories(item);
+    const price = item.is_sale && item.sale_price ? item.sale_price : item.price;
+    
+    const params = {
+        currency: "EUR",
+        value: Number((price * quantity).toFixed(2)),
+        items: [{
+            item_id: item.id.toString(),
+            item_name: item.name,
+            item_brand: item.brand || 'Unknown',
+            discount: item.is_sale && item.sale_price
+                ? Number((item.price - item.sale_price).toFixed(2))
+                : 0,
+            item_category: categories.item_category,
+            item_category2: categories.item_category2,
+            item_category3: categories.item_category3,
+            price: Number(price.toFixed(2)),
+            quantity: quantity,
+        }]
+    };
+
+    const identifier = `${item.id}:${quantity}`;
+    sendEvent('add_to_cart', params, identifier);
+};
+
+export const trackRemoveFromCart = (item: ICartItem) => {
+    const categories = createCategories(item);
+    const price = item.is_sale && item.sale_price ? item.sale_price : item.price;
+    
+    const params = {
+        currency: "EUR",
+        value: Number((price * item.quantity).toFixed(2)),
+        items: [{
+            item_id: item.id.toString(),
+            item_name: item.name,
+            item_brand: item.brand || 'Unknown',
+            item_category: categories.item_category,
+            item_category2: categories.item_category2,
+            item_category3: categories.item_category3,
+            price: Number(price.toFixed(2)),
+            quantity: item.quantity,
+        }]
+    };
+
+    const identifier = item.id.toString();
+    sendEvent('remove_from_cart', params, identifier);
+};
+
 export const trackSelectItem = (item: any, listName?: string) => {
-    // Extract values με fallbacks
     const brand = typeof item.brand === 'string'
         ? item.brand
         : item.brand?.name || 'Unknown';
@@ -135,7 +217,6 @@ export const trackSelectItem = (item: any, listName?: string) => {
         ? item.sale_price
         : item.price;
 
-    // Extract category
     let categoryName = 'Uncategorized';
     let category2 = undefined;
     let category3 = undefined;
@@ -152,8 +233,7 @@ export const trackSelectItem = (item: any, listName?: string) => {
         }
     }
 
-    sendGAEvent({
-        event: 'select_item',
+    const params = {
         item_list_name: listName || undefined,
         items: [{
             item_id: item.id.toString(),
@@ -164,11 +244,14 @@ export const trackSelectItem = (item: any, listName?: string) => {
             item_category3: category3,
             price: Number(price.toFixed(2)),
         }]
-    });
+    };
+
+    const identifier = `${item.id}:${listName || 'unknown'}`;
+    sendEvent('select_item', params, identifier);
 };
 
 // ============================================
-// PURCHASE EVENT TRACKER (με duplicate protection)
+// PURCHASE EVENT TRACKER
 // ============================================
 
 export const trackPurchase = (
@@ -178,25 +261,22 @@ export const trackPurchase = (
     tax: number,
     coupon?: string
 ) => {
-    // Έλεγχος για duplicate tracking
     if (isTransactionTracked(transactionId)) {
-        console.warn(`[Analytics] Purchase ${transactionId} already tracked. Skipping.`);
+        if (isDev) console.warn(`[Analytics] Purchase ${transactionId} already tracked. Skipping.`);
         return;
     }
 
     if (!items || items.length === 0) {
-        console.error(`[Analytics] Cannot track purchase ${transactionId} with empty items`);
+        if (isDev) console.error(`[Analytics] Cannot track purchase ${transactionId} with empty items`);
         return;
     }
 
-    // Υπολογισμός value (μόνο προϊόντα, χωρίς shipping/tax)
     const value = items.reduce((total, item) => {
         const price = item.is_sale && item.sale_price ? item.sale_price : item.price;
         return total + (price * item.quantity);
     }, 0);
 
-    sendGAEvent({
-        event: 'purchase',
+    const params = {
         transaction_id: transactionId,
         value: Number(value.toFixed(2)),
         currency: "EUR",
@@ -221,15 +301,8 @@ export const trackPurchase = (
                 quantity: item.quantity,
             }
         })
-    });
+    };
 
-    // Σημειώνουμε ότι έγινε track
+    sendEvent('purchase', params, transactionId);
     markTransactionAsTracked(transactionId);
-
-    console.log(`[Analytics] ✅ Tracked purchase ${transactionId}:`, {
-        value: value.toFixed(2),
-        shipping: shipping.toFixed(2),
-        tax: tax.toFixed(2),
-        items: items.length
-    });
 };

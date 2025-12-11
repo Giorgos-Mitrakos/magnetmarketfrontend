@@ -1,18 +1,14 @@
 'use client'
-
 import { memo, useEffect, useState } from 'react'
 import dynamic from "next/dynamic"
 import { ProductCardSkeleton } from "@/components/organisms/productCard"
 import { IProductCard } from "@/lib/interfaces/product"
-import { trackViewItemList } from "@/lib/helpers/advanced-analytics" // ✅ Μόνο αυτό!
+import { trackViewItemList } from "@/lib/helpers/advanced-analytics"
 
-// Dynamic import του Carousel
-const Carousel = dynamic(() => import('@/components/atoms/carousel'),
- {
+const Carousel = dynamic(() => import('@/components/atoms/carousel'), {
   ssr: false,
   loading: () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 
-lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {Array.from({ length: 4 }, (_, i) => (
         <ProductCardSkeleton key={i} />
       ))}
@@ -27,7 +23,6 @@ interface HotOrSaleClientProps {
   initialData: IProductCard[] | null
 }
 
-// Helper function για colors
 const getHeaderColors = (type: string) => {
   switch (type) {
     case 'hot':
@@ -41,32 +36,28 @@ const getHeaderColors = (type: string) => {
   }
 }
 
-const HotOrSaleClient = memo(({ id, title, type, initialData }: 
-HotOrSaleClientProps) => {
+const HotOrSaleClient = memo(({ id, title, type, initialData }: HotOrSaleClientProps) => {
   const headerColorClasses = getHeaderColors(type)
   const hasError = initialData === null
   const hasProducts = initialData && initialData.length > 0
-
   const [hasTracked, setHasTracked] = useState(false)
 
-  // ✅ Track view_item_list όταν φορτώνει
   useEffect(() => {
     if (!hasTracked && hasProducts && initialData) {
-      // 💡 Εφαρμογή setTimeout για να δώσουμε χρόνο στο GA να φορτώσει
-      const timer = setTimeout(() => {
-        // ✅ Δεν χρειάζεται conversion - το κάνει αυτόματα η trackViewItemList!
-        trackViewItemList(initialData, title, `homepage_${type}_${id}`)
-        setHasTracked(true)
-
-        console.log('[HotOrSale] Tracked view_item_list:', {
+      // Χρησιμοποίησε requestIdleCallback ή μεγαλύτερο timeout
+      const timeoutId = setTimeout(() => {
+        console.log('[HotOrSale] Attempting to track:', {
           list: title,
           items: initialData.length,
-          type: type
+          type: type,
+          gtagExists: typeof window !== 'undefined' && typeof window.gtag !== 'undefined'
         })
-      }, 500); // Καθυστέρηση 500ms
 
-      return () => clearTimeout(timer); // Cleanup function
+        trackViewItemList(initialData, title, `homepage_${type}_${id}`)
+        setHasTracked(true)
+      }, 2000) // Αύξησε σε 2 δευτερόλεπτα
 
+      return () => clearTimeout(timeoutId)
     }
   }, [hasProducts, initialData, hasTracked, title, type, id])
 
@@ -74,34 +65,26 @@ HotOrSaleClientProps) => {
 
   return (
     <section key={id} className="my-8">
-      <div className="rounded-xl shadow-lg overflow-hidden border 
-border-gray-200 min-h-[764px]">
-        {/* Header */}
+      <div className="rounded-xl shadow-lg overflow-hidden border border-gray-200 min-h-[764px]">
         <div className={`${headerColorClasses} py-4 px-6`}>
-          <h2 className="text-center text-xl md:text-2xl 
-font-bold">
+          <h2 className="text-center text-xl md:text-2xl font-bold">
             {title}
           </h2>
         </div>
 
-        {/* Content area */}
-        <div className="bg-white h-full dark:bg-slate-800 p-4 
-transition-opacity duration-300">
+        <div className="bg-white h-full dark:bg-slate-800 p-4 transition-opacity duration-300">
           {hasError ? (
-            <div className="flex items-center justify-center 
-h-[600px]">
+            <div className="flex items-center justify-center h-[600px]">
               <div className="text-center text-gray-500">
-                <p className="text-lg mb-2">⚠️ Failed to load 
-products</p>
-                <p className="text-sm">Please try refreshing the 
-page</p>
+                <p className="text-lg mb-2">⚠️ Failed to load products</p>
+                <p className="text-sm">Please try refreshing the page</p>
               </div>
             </div>
           ) : (
             <Carousel 
               products={initialData} 
-              listName={title} // ✅ Pass listName to Carousel
-              listId={`homepage_${type}_${id}`} // ✅ Pass listId
+              listName={title}
+              listId={`homepage_${type}_${id}`}
             />
           )}
         </div>
@@ -111,5 +94,4 @@ page</p>
 })
 
 HotOrSaleClient.displayName = 'HotOrSaleClient'
-
 export default HotOrSaleClient

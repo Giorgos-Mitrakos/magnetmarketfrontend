@@ -17,11 +17,9 @@ import BestPriceScript from '@/components/atoms/bestPrice360';
 import BestPriceBadge from '@/components/atoms/bestPriceBadge';
 import { getMenu } from '@/lib/queries/categoryQuery';
 import CookieBannerWrapper from '@/components/molecules/homepage/cookieBannerWrapper';
-// import CookieBannerWrapper from '@/components/molecules/homepage/cookieBannerWrapper';
-// import { getMenu } from '@/lib/helpers/categories';
+import { cookies } from 'next/headers';
 
 const PixelTracker = dynamic(() => import("../components/atoms/pixelTracker"), { ssr: false });
-
 const inter = Inter({ subsets: ['greek'] })
 
 export const metadata = {
@@ -36,13 +34,36 @@ export default async function RootLayout({
 }) {
   const session = await getSession()
   const menuData = await getMenu();
-
-  const GA_MEASUREMENT_ID = process.env.GA_MEASUREMENT_ID as string
-
+  const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID as string
+  
+  // ✅ Check if user has given consent (server-side)
+  const cookieStore = cookies();
+  const consentCookie = cookieStore.get('cookie_consent');
+  const hasConsent = consentCookie?.value === 'true';
+  
   return (
     <html lang="el">
       <head>
-        <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />
+        {/* ✅ Google Consent Mode v2 - Dynamic based on cookie */}
+        <Script id="google-consent-mode" strategy="beforeInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            
+            // ✅ Set consent based on saved preference
+            gtag('consent', 'default', {
+              'ad_storage': ${hasConsent ? "'granted'" : "'denied'"},
+              'analytics_storage': ${hasConsent ? "'granted'" : "'denied'"},
+              'ad_personalization': ${hasConsent ? "'granted'" : "'denied'"},
+              'ad_user_data': ${hasConsent ? "'granted'" : "'denied'"},
+              'wait_for_update': 500
+            });
+            
+            console.log('[Consent Mode] Initial state:', ${hasConsent ? "'GRANTED'" : "'DENIED'"});
+          `}
+        </Script>
+
+        {/* Facebook Pixel */}
         <Script id="pixel-script" strategy='afterInteractive' dangerouslySetInnerHTML={{
           __html: `
           !function(f,b,e,v,n,t,s)
@@ -51,17 +72,15 @@ export default async function RootLayout({
           if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
           n.queue=[];t=b.createElement(e);t.async=!0;
           t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
+          s.parentNode.insertBefore(t,s)}(window, document,'script',
           'https://connect.facebook.net/en_US/fbevents.js');
           fbq('init', ${process.env.FACEBOOK_PIXEL});
           fbq('track', 'PageView');
         `,
         }}
         />
-        <noscript><img src="https://www.facebook.com/tr?id=1151339979478836&ev=PageView&noscript=1" alt='facebook' height="1" width="1" className="display:none" />
-          {/* <img height="1" width="1" className="display:none"/> */}
-        </noscript>
       </head>
+      
       <body className={`${inter.className} h-full dark:bg-slate-800`}>
         <SessionProviders session={session}>
           <CheckoutProvider>
@@ -73,28 +92,33 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
                   warning: 'text-yellow-400 p-4 rounded-lg',
                   info: ' bg-blue-300 text-black p-4 rounded-lg',
                 },
-              }} />
+              }}
+            />
+            
             <Suspense fallback={null}>
               <PixelTracker />
             </Suspense>
+            
             <Αnnouncement />
+            
             <MenuProvider>
               <Header user={session?.user?.name?.split('@')[0]} menuData={menuData} />
               <main className='mx-2 sm:mx-4 md:mx-8'>
                 {children}
               </main>
               <Footer />
-              {/* <EpayIcons /> */}
               <BestPriceBadge />
-              {/* <Copyright /> */}
               <CookieBannerWrapper />
-              <MobileTabMenu menuData={menuData}  />
+              <MobileTabMenu menuData={menuData} />
             </MenuProvider>
           </CheckoutProvider>
         </SessionProviders>
+        
         <BestPriceScript />
+        
+        {/* ✅ GA φορτώνει ΜΕΤΑ το consent mode */}
+        <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />
       </body>
-      
     </html>
   )
 }
