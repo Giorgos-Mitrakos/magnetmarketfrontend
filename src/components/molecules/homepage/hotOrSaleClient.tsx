@@ -46,12 +46,6 @@ const HotOrSaleClient = memo(({ id, title, type, initialData }: HotOrSaleClientP
     if (!hasTracked && hasProducts && initialData) {
       // Χρησιμοποίησε requestIdleCallback ή μεγαλύτερο timeout
       const timeoutId = setTimeout(() => {
-        console.log('[HotOrSale] Attempting to track:', {
-          list: title,
-          items: initialData.length,
-          type: type,
-          gtagExists: typeof window !== 'undefined' && typeof window.gtag !== 'undefined'
-        })
 
         trackViewItemList(initialData, title, `homepage_${type}_${id}`)
         setHasTracked(true)

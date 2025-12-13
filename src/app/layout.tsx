@@ -58,8 +58,6 @@ export default async function RootLayout({
               'ad_user_data': ${hasConsent ? "'granted'" : "'denied'"},
               'wait_for_update': 500
             });
-            
-            console.log('[Consent Mode] Initial state:', ${hasConsent ? "'GRANTED'" : "'DENIED'"});
           `}
         </Script>
 

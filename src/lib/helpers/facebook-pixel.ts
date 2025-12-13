@@ -7,6 +7,11 @@ declare global {
     }
 }
 
+// ============================================
+// DEV MODE CHECK
+// ============================================
+const isDev = process.env.NODE_ENV === 'development';
+
 // Helper για να ελέγξουμε αν το fbq είναι διαθέσιμο
 const isFBPixelLoaded = (): boolean => {
     return typeof window !== 'undefined' && typeof window.fbq !== 'undefined';
@@ -23,7 +28,7 @@ const isFBPixelLoaded = (): boolean => {
 export const fbTrackPageView = () => {
     if (!isFBPixelLoaded()) return;
     window.fbq!('track', 'PageView');
-    console.log('[FB Pixel] PageView tracked');
+    if (isDev) console.log('[FB Pixel] PageView tracked');
 };
 
 /**
@@ -46,7 +51,7 @@ export const fbTrackViewContent = (
         currency: 'EUR'
     });
 
-    console.log('[FB Pixel] ViewContent:', item.name);
+    if (isDev) console.log('[FB Pixel] ViewContent:', item.name);
 };
 
 /**
@@ -59,7 +64,7 @@ export const fbTrackSearch = (searchTerm: string) => {
         search_string: searchTerm
     });
 
-    console.log('[FB Pixel] Search:', searchTerm);
+    if (isDev) console.log('[FB Pixel] Search:', searchTerm);
 };
 
 /**
@@ -79,7 +84,7 @@ export const fbTrackAddToCart = (item: ICartItem) => {
         currency: 'EUR'
     });
 
-    console.log('[FB Pixel] AddToCart:', item.name);
+    if (isDev) console.log('[FB Pixel] AddToCart:', item.name);
 };
 
 /**
@@ -98,7 +103,7 @@ export const fbTrackAddToWishlist = (item: ICartItem) => {
         currency: 'EUR'
     });
 
-    console.log('[FB Pixel] AddToWishlist:', item.name);
+    if (isDev) console.log('[FB Pixel] AddToWishlist:', item.name);
 };
 
 /**
@@ -122,7 +127,7 @@ export const fbTrackInitiateCheckout = (items: ICartItem[]) => {
         currency: 'EUR'
     });
 
-    console.log('[FB Pixel] InitiateCheckout:', {
+    if (isDev) console.log('[FB Pixel] InitiateCheckout:', {
         items: items.length,
         value: totalValue
     });
@@ -146,7 +151,7 @@ export const fbTrackAddPaymentInfo = (items: ICartItem[]) => {
         currency: 'EUR'
     });
 
-    console.log('[FB Pixel] AddPaymentInfo');
+    if (isDev) console.log('[FB Pixel] AddPaymentInfo');
 };
 
 /**
@@ -178,7 +183,7 @@ export const fbTrackPurchase = (
         currency: 'EUR'
     });
 
-    console.log('[FB Pixel] Purchase:', {
+    if (isDev) console.log('[FB Pixel] Purchase:', {
         transaction_id: transactionId,
         value: totalValue,
         items: items.length
@@ -192,7 +197,7 @@ export const fbTrackContact = () => {
     if (!isFBPixelLoaded()) return;
 
     window.fbq!('track', 'Contact');
-    console.log('[FB Pixel] Contact form submitted');
+    if (isDev) console.log('[FB Pixel] Contact form submitted');
 };
 
 /**
@@ -202,7 +207,7 @@ export const fbTrackLead = () => {
     if (!isFBPixelLoaded()) return;
 
     window.fbq!('track', 'Lead');
-    console.log('[FB Pixel] Lead captured');
+    if (isDev) console.log('[FB Pixel] Lead captured');
 };
 
 /**
@@ -212,5 +217,5 @@ export const fbTrackCustomEvent = (eventName: string, parameters?: any) => {
     if (!isFBPixelLoaded()) return;
 
     window.fbq!('trackCustom', eventName, parameters);
-    console.log('[FB Pixel] Custom event:', eventName, parameters);
+    if (isDev) console.log('[FB Pixel] Custom event:', eventName, parameters);
 };
