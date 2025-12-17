@@ -4,12 +4,17 @@ export interface IconLinkProps {
     icon: React.ReactNode;
     url: string;
     "aria-label": string;
+    onClick?: () => void; // ✅ Add optional onClick
 }
 
 function IconLink(props: IconLinkProps) {
     return (
-        <Link href={props.url} className=" text-siteColors-purple dark:text-slate-800 text-xl p-3 xs:text-2xl sm:p-4 md:text-3xl"
-            aria-label={props["aria-label"]}>
+        <Link 
+            href={props.url} 
+            className="text-siteColors-purple dark:text-slate-800 text-xl p-3 xs:text-2xl sm:p-4 md:text-3xl"
+            aria-label={props["aria-label"]}
+            onClick={props.onClick} // ✅ Pass onClick to Link
+        >
             {props.icon}
         </Link>
     )

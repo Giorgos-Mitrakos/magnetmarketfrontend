@@ -1,6 +1,7 @@
 
 import BlockManager from '@/components/molecules/homepage/blockManager';
 import Newsletter from '@/components/molecules/newsletter'
+import ScrollDepthTracker from '@/components/molecules/ScrollTracker';
 import { organizationStructuredData } from '@/lib/helpers/structureData';
 import { getHomepageData } from '@/lib/queries/homepage';
 import { Metadata } from 'next'
@@ -40,7 +41,7 @@ export default async function Home() {
         id="structured-data"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
+      />      
       <main className="w-full space-y-16">
         <BlockManager blocks={data.body} />
         <Newsletter />

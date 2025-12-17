@@ -1,12 +1,13 @@
 'use client'
 import { createContext, useState } from 'react'
+import { trackMobileMenuToggle } from '@/lib/helpers/advanced-analytics'
 
 interface IMenuContext {
     isMenuOpen: boolean,
     isSearchOpen: boolean
     isCategoriesOpen: boolean,
     isSubCategoriesOpen: boolean,
-    toggleMenuDrawer: () => void,
+    toggleMenuDrawer: (location?: 'top-left' | 'bottom-nav') => void,
     toggleSearchDrawer: () => void,
     openMenuDrawer: () => void;
     closeMenuDrawer: () => void;
@@ -43,9 +44,16 @@ export const MenuProvider = ({ children }: any) => {
     const [isSubCategoriesOpen, setIsSubCategoriesOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-    const toggleMenuDrawer = () => {
-        setIsMenuOpen(!isMenuOpen)
-
+    const toggleMenuDrawer = (location: 'top-left' | 'bottom-nav' = 'bottom-nav') => {
+        const nextState = !isMenuOpen
+        
+        // ✅ Track menu interaction with correct location
+        trackMobileMenuToggle(
+            nextState ? 'open' : 'close',
+            location
+        )
+        
+        setIsMenuOpen(nextState)
         isSubCategoriesOpen && closeSubCategoryDrawer()
         isCategoriesOpen && closeCategoryDrawer()
         isSearchOpen && closeSearchDrawer()
@@ -53,7 +61,6 @@ export const MenuProvider = ({ children }: any) => {
 
     const toggleSearchDrawer = () => {
         setIsSearchOpen(!isSearchOpen)
-
         isSubCategoriesOpen && closeSubCategoryDrawer()
         isCategoriesOpen && closeCategoryDrawer()
         isMenuOpen && closeMenuDrawer()
@@ -68,10 +75,14 @@ export const MenuProvider = ({ children }: any) => {
     }
 
     const openMenuDrawer = () => {
+        // ✅ Track menu open
+        trackMobileMenuToggle('open', 'top-left')
         setIsMenuOpen(true)
     }
 
     const closeMenuDrawer = () => {
+        // ✅ Track menu close
+        trackMobileMenuToggle('close', 'top-left')
         setIsMenuOpen(false)
     }
 
@@ -92,6 +103,7 @@ export const MenuProvider = ({ children }: any) => {
     }
 
     const closeMenu = () => {
+        // Don't track here - already tracked by toggleMenuDrawer
         setIsSubCategoriesOpen(false)
         setIsCategoriesOpen(false)
         setIsMenuOpen(false)

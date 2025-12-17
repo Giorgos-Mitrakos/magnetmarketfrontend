@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { DropdownFilter, DropdownItem } from '../organisms/categoryPageHeader';
 import { FaCaretDown } from 'react-icons/fa';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { trackSortUsage } from '@/lib/helpers/advanced-analytics';
 
 
 export default function Dropdown({ items, filter }: DropdownFilter) {
@@ -36,6 +37,13 @@ export default function Dropdown({ items, filter }: DropdownFilter) {
     const handleItemClick = (item: DropdownItem) => {
         setSelectedItem(item.title)
         toggle()
+
+        // ✅ Track sort usage (only for sort filter)
+        if (filter === 'sort') {
+            const sortValue = item.route || 'default'; // "default" if empty route
+            trackSortUsage(sortValue);
+        }
+
         const params = new URLSearchParams(searchParams)
         if(filter==='pageSize'){
             params.delete('page')

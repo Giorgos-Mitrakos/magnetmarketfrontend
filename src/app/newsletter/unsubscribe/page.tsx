@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { trackNewsletterUnsubscribe } from '@/lib/helpers/advanced-analytics';
 
 export default function UnsubscribeConfirmPage() {
     const [isLoading, setIsLoading] = useState(false);
@@ -31,6 +32,8 @@ export default function UnsubscribeConfirmPage() {
             });
 
             if (response.ok) {
+                // ✅ Track successful unsubscribe
+                trackNewsletterUnsubscribe(email || undefined);
                 router.push('/newsletter/unsubscribe/success');
             } else {
                 const errorData = await response.json();

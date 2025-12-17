@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useCheckout } from '@/context/checkout';
 import { toast } from 'sonner';
+import { trackCouponInteraction } from '@/lib/helpers/advanced-analytics';
 
 export default function CouponForm() {
     const { checkout, dispatch, validationError, validateCoupon, applyCoupon } = useCheckout()
@@ -26,6 +27,8 @@ export default function CouponForm() {
             // Validate new coupon first
             const validation = await validateCoupon(code, checkout.cart)
             if (!validation.valid) {
+                // TRACK: Αποτυχία Validation
+                trackCouponInteraction('apply', false, code.split('-')[1]);
                 toast.error(validation.message, {
                     position: 'top-right',
                 })
@@ -37,10 +40,14 @@ export default function CouponForm() {
             setIsApplying(true)
             const applianceCoupon = await applyCoupon(code, checkout.cart)
             if (!applianceCoupon.success) {
+                // TRACK: Αποτυχία Εφαρμογής
+                trackCouponInteraction('apply', false, code.split('-')[1]);
                 toast.error(applianceCoupon.message, {
                     position: 'top-right',
                 })
             } else {
+                // TRACK: Επιτυχής Εφαρμογή 🎉
+                trackCouponInteraction('apply', true, code.split('-')[1]);
                 toast.success(applianceCoupon.message, {
                     position: 'top-right',
                 })

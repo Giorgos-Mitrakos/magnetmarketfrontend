@@ -42,6 +42,9 @@ export interface IOrder {
             name: string;
             cost: number;
         };
+        billing_address: {
+            email: string
+        },
         payment: {
             name: string;
         };

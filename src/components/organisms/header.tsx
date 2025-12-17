@@ -14,6 +14,7 @@ import { MenuContext } from "@/context/menu";
 import { useCheckout } from "@/context/checkout";
 import { IImageAttr } from "@/lib/interfaces/image";
 import { usePathname } from 'next/navigation'
+import { trackCartIconClick } from "@/lib/helpers/advanced-analytics";
 
 const SearchInput = dynamic(() => import('@/components/molecules/searchInput'), {
     ssr: false,
@@ -46,15 +47,22 @@ export default function Header({ user, menuData }: HeaderProps) {
             <header className="flex justify-between py-2 px-2 sm:px-6 md:px-8 w-full h-auto bg-white dark:bg-black"
                 aria-label="Κεφαλίδα">
                 <div className='flex lg:hidden font-extrabold text-2xl items-end'>
-                    <ToggleMobileMenu />
+                    <ToggleMobileMenu location="top-left" />
                 </div>
                 <div className="">
                     <Logo />
                 </div>
                 <div className="lg:hidden flex items-end justify-end">
                     <div className="inline-flex items-center group relative">
-                        <Link href="/shopping-cart/" className='m-4' onClick={() => closeMenu()}
-                            aria-label="Σύνδεσμος ανακατεύθυνσης στο καλάθι σας">
+                        <Link
+                            href="/shopping-cart/"
+                            className='m-4'
+                            onClick={() => {
+                                trackCartIconClick('mobile-top-right')
+                                closeMenu()
+                            }}
+                            aria-label="Σύνδεσμος ανακατεύθυνσης στο καλάθι σας"
+                        >
                             <FaOpencart className="text-2xl" aria-label="Κουμπί ανακατεύθυνσης στο καλάθι σας" />
                         </Link>
                         <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-siteColors-pink border-2 border-white rounded-full top-1 right-1 dark:border-gray-900">
@@ -68,7 +76,7 @@ export default function Header({ user, menuData }: HeaderProps) {
                 <HeaderActions user={user} />
             </header>
             {/* Floating Offers Button */}
-            {pathname  !== '/offers' && !pathname.includes('/checkout/') && !pathname.includes('/shopping-cart') && (
+            {pathname !== '/offers' && !pathname.includes('/checkout/') && !pathname.includes('/shopping-cart') && (
                 <Link
                     href="/offers"
                     className="fixed top-36 right-6 z-40 flex items-center gap-2 px-5 py-3 rounded-full text-base font-bold transition-all duration-300 group bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 shadow-2xl hover:shadow-[0_0_30px_rgba(249,115,22,0.8)] hover:scale-110"

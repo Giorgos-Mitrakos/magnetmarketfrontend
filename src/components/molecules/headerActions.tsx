@@ -8,6 +8,7 @@ import { signIn, signOut, useSession } from "next-auth/react"
 // import { useCart } from "@/context/cart";
 import Minicart from "../organisms/minicart";
 import { useCheckout } from "@/context/checkout";
+import { trackCartIconClick } from "@/lib/helpers/advanced-analytics";
 
 const SearchInput = dynamic(() => import('./searchInput'), { ssr: false })
 
@@ -20,7 +21,7 @@ const SearchInput = dynamic(() => import('./searchInput'), { ssr: false })
 const HeaderActions = ({ user }: any) => {
 
     const { data: session, status } = useSession()
-    
+
     const { checkout } = useCheckout()
 
     return (
@@ -45,14 +46,19 @@ const HeaderActions = ({ user }: any) => {
                         url='https://www.google.com'
                         aria-label="Τα αγαπημένα σου!" /> */}
                     <div className="inline-flex items-center group relative">
-                        <IconLink icon={<FaOpencart
-                            className=" dark:text-slate-200"
-                            aria-label="Καλάθι" />}
+                        <IconLink
+                            icon={<FaOpencart
+                                className=" dark:text-slate-200"
+                                aria-label="Καλάθι" />}
                             url='/shopping-cart'
-                            aria-label={`Το καλάθι σου!`} />
+                            aria-label="Το καλάθι σου!"
+                            onClick={() => trackCartIconClick('header')}
+                        />
                         <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-siteColors-pink border-2 border-white rounded-full top-1 right-1 dark:border-gray-900">
-                            {checkout.cart.reduce((previousValue, currentValue, currentIndex) => { return previousValue + currentValue.quantity }, 0)}</div>
-
+                            {checkout.cart.reduce((previousValue, currentValue, currentIndex) => {
+                                return previousValue + currentValue.quantity
+                            }, 0)}
+                        </div>
                     </div>
                 </div>
             </div>}

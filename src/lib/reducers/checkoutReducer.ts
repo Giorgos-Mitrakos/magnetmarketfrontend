@@ -1,6 +1,6 @@
 // lib/reducers/checkoutReducer.ts (ή όπου έχετε τον reducer)
 
-import { trackAddPaymentInfo, trackAddShippingInfo, trackCartEvent, trackPurchase, trackViewCart, isTransactionTracked } from "../helpers/analytics";
+import { trackAddPaymentInfo, trackAddShippingInfo, trackCartEvent, trackPurchase, trackViewCart, isTransactionTracked, trackAddToCart, trackRemoveFromCart } from "../helpers/analytics";
 import { saveCheckoutToLocalStorage } from "../helpers/storage-helper";
 import { CheckoutAction, ICheckoutState } from "../interfaces/shipping";
 
@@ -87,7 +87,7 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
                 newState = { ...state, cart: updatedItems };
             }
 
-            trackCartEvent('add_to_cart', [newItem]);
+            trackAddToCart( newItem);
             break;
         }
 
@@ -100,7 +100,7 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
             }
             else {
                 newState = { ...state, cart: filteredItems };
-                trackCartEvent("remove_from_cart", [action.payload]);
+                trackRemoveFromCart(action.payload);
             }
             break;
         }
@@ -114,7 +114,7 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
             );
 
             newState = { ...state, cart: updatedItems };
-            trackCartEvent("add_to_cart", [action.payload.item]);
+            trackAddToCart(action.payload.item);
             break;
         }
 
@@ -127,7 +127,7 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
             );
 
             newState = { ...state, cart: updatedItems };
-            trackCartEvent("remove_from_cart", [action.payload.item]);
+            trackRemoveFromCart(action.payload.item);
             break;
         }
 
@@ -142,9 +142,9 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
         }
 
         case 'HYDRATE_CART': {
-            if (action.payload.cart.length > 0) {
-                trackViewCart(action.payload.cart);
-            }
+            // if (action.payload.cart.length > 0) {
+            //     trackViewCart(action.payload.cart);
+            // }
             return action.payload;
         }
 

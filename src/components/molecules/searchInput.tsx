@@ -38,9 +38,6 @@ function SearchInput() {
                             className='text-siteColors-purple dark:text-slate-800 text-2xl mb-1' />}
                 </button>}
             <form onSubmit={(e) => {
-                sendGAEvent('event', 'search', {
-                    text
-                });
                 e.preventDefault()
                 router.push(`/search?search=${text}`)
                 setText("")

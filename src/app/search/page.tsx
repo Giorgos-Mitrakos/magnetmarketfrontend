@@ -1,4 +1,5 @@
 import PaginationBar from "@/components/molecules/pagination"
+import SearchTracker from "@/components/molecules/SearchTracker"
 import CategoryPageHeader from "@/components/organisms/categoryPageHeader"
 import MobileSearchFilters from "@/components/organisms/mobileSearchFilters"
 import ProductCard from "@/components/organisms/productCard"
@@ -102,6 +103,11 @@ export default async function SearchPage({ searchParams }: SearchProps) {
 
     return (
         <>
+            <SearchTracker
+                searchTerm={searchParams.search as string}
+                resultsCount={response?.meta.pagination.total || 0}
+                products={response?.products}
+            />
             <Script
                 id="structured-data"
                 type="application/ld+json"

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { trackNewsletterSignup } from '@/lib/helpers/advanced-analytics';
 
 export default function SubscribePage() {
     const [email, setEmail] = useState('');
@@ -28,10 +29,14 @@ export default function SubscribePage() {
 
             switch (data.message) {
                 case "suceess subscribe":
+                    // ✅ Track successful signup from dedicated page
+                    trackNewsletterSignup('page');
                     router.push('/newsletter/subscribe/success');
                     break;
 
                 case "suceess activate":
+                    // ✅ Track reactivation
+                    trackNewsletterSignup('page');
                     router.push('/newsletter/subscribe/success?message=Η εγγραφή στο newsletter ενεργοποιήθηκε ξανά!');
                     break;
 

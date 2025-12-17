@@ -11,6 +11,7 @@ import dynamic from 'next/dynamic';
 import { ToggleMobileMenu } from '../atoms/toggleMobileMenu';
 import { useCheckout } from '@/context/checkout';
 import { MenuData } from './mainMenu';
+import { trackCartIconClick } from '@/lib/helpers/advanced-analytics';
 
 const SearchInput = dynamic(() => import('@/components/molecules/searchInput'), {
     ssr: false,
@@ -44,20 +45,22 @@ export default function MobileTabMenu({ menuData }: { menuData: MenuData[] }) {
                 <button className='py-4 xs:px-4' onClick={toggleSearchDrawer}>
                     <AiOutlineSearch aria-label="Κουμπί εμφάνισης της αναζήτησης" />
                 </button>
-                <ToggleMobileMenu />
+                <ToggleMobileMenu location="bottom-nav" />
                 <Link href="/account" className='py-4 xs:px-4' onClick={() => closeMenu()}
                     aria-label="Σύνδεσμος ανακατεύθυνσης στο λογαριασμό σας">
                     <AiOutlineUser aria-label="Κουμπί ανακατεύθυνσης στο λογαριασμό σας" />
                 </Link>
-                <div className="inline-flex items-center group relative">
-                    <Link href="/shopping-cart/" className='py-4 xs:px-4' onClick={() => closeMenu()}
-                        aria-label="Σύνδεσμος ανακατεύθυνσης στο καλάθι σας">
-                        <FaOpencart aria-label="Κουμπί ανακατεύθυνσης στο καλάθι σας" />
-                    </Link>
-                    <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-siteColors-pink border-2 border-white rounded-full top-1 right-1 dark:border-gray-900">
-                        {checkout.cart.reduce((previousValue, currentValue, currentIndex) => { return previousValue + currentValue.quantity }, 0)}
-                    </div>
-                </div>
+                <Link
+                    href="/shopping-cart/"
+                    className='py-4 xs:px-4'
+                    onClick={() => {
+                        trackCartIconClick('mobile-bottom-nav')
+                        closeMenu()
+                    }}
+                    aria-label="Σύνδεσμος ανακατεύθυνσης στο καλάθι σας"
+                >
+                    <FaOpencart aria-label="Κουμπί ανακατεύθυνσης στο καλάθι σας" />
+                </Link>
             </div>
         </div>
     )

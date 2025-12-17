@@ -15,7 +15,7 @@ import SiteFeatures from "@/components/organisms/siteFeatures"
 import useProductPrice from "@/hooks/useProductPrice"
 import { getStrapiMedia } from "@/repositories/medias"
 import { ICartItem } from "@/lib/interfaces/cart"
-import { trackCartEvent } from "@/lib/helpers/analytics"
+import { trackBeginCheckout, trackViewCart } from "@/lib/helpers/analytics"
 import { useCheckout } from "@/context/checkout"
 import { addToCartToast, removeItemToast } from "@/lib/toasts/cartToasts"
 
@@ -33,7 +33,7 @@ export default function CartComp() {
         if (!checkout.cart || hasPageBeenRendered.current) return
 
         if (checkout.cart.length > 0 && checkout.totals.subtotal > 0) {
-            trackCartEvent('view_cart', checkout.cart)
+            trackViewCart(checkout.cart)
             hasPageBeenRendered.current = true
         }
     }, [checkout.cart, checkout.totals.subtotal])
@@ -71,7 +71,7 @@ export default function CartComp() {
                         <CartSummary />
                         {checkout.cart.length > 0 && (
                             <Link
-                                onClick={() => trackCartEvent('begin_checkout', checkout.cart)}
+                                onClick={() => trackBeginCheckout(checkout.cart)}
                                 href={status === "authenticated"
                                     ? "/checkout/customer-informations"
                                     : "/login?callbackUrl=/checkout/customer-informations"

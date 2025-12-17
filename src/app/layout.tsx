@@ -18,6 +18,7 @@ import BestPriceBadge from '@/components/atoms/bestPriceBadge';
 import { getMenu } from '@/lib/queries/categoryQuery';
 import CookieBannerWrapper from '@/components/molecules/homepage/cookieBannerWrapper';
 import { cookies } from 'next/headers';
+import ScrollTracker from '@/components/molecules/ScrollTracker';
 
 const PixelTracker = dynamic(() => import("../components/atoms/pixelTracker"), { ssr: false });
 const inter = Inter({ subsets: ['greek'] })
@@ -79,7 +80,7 @@ export default async function RootLayout({
         />
       </head>
       
-      <body className={`${inter.className} h-full dark:bg-slate-800`}>
+      <body className={`${inter.className} h-full dark:bg-slate-800`}>        
         <SessionProviders session={session}>
           <CheckoutProvider>
             <Toaster
@@ -101,7 +102,8 @@ export default async function RootLayout({
             
             <MenuProvider>
               <Header user={session?.user?.name?.split('@')[0]} menuData={menuData} />
-              <main className='mx-2 sm:mx-4 md:mx-8'>
+              <main className='mx-2 sm:mx-4 md:mx-8 relative'>
+                <ScrollTracker />
                 {children}
               </main>
               <Footer />

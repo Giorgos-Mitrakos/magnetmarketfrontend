@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FiMail, FiCheck, FiArrowRight } from 'react-icons/fi';
+import { trackNewsletterSignup } from "@/lib/helpers/advanced-analytics";
 
 const Newsletter = () => {
     const router = useRouter();
@@ -40,6 +41,8 @@ const Newsletter = () => {
 
                 switch (data.message) {
                     case "suceess subscribe":
+                        // ✅ Track successful signup from footer
+                        trackNewsletterSignup('footer');
                         toast.success(
                             <p className='font-semibold'>Η εγγραφή σας έγινε με επιτυχία!</p>, {
                             position: 'top-right',
@@ -48,6 +51,8 @@ const Newsletter = () => {
                         break;
     
                     case "suceess activate":
+                        // ✅ Track reactivation as signup
+                        trackNewsletterSignup('footer');
                         toast.info(<p className='font-semibold'>Η αποστολή newsletter ενεργοποιήθηκε!</p>, {
                             position: 'top-right',
                         });

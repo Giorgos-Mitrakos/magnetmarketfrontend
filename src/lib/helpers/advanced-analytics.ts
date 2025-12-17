@@ -78,12 +78,12 @@ export const trackViewItemList = (
   }
 
   const formattedItems = items.slice(0, 10).map((item, index) => {
-    const brand = typeof item.brand === 'string' 
-      ? item.brand 
+    const brand = typeof item.brand === 'string'
+      ? item.brand
       : item.brand?.name || 'Unknown';
-    
-    const price = item.is_sale && item.sale_price 
-      ? item.sale_price 
+
+    const price = item.is_sale && item.sale_price
+      ? item.sale_price
       : item.price;
 
     let categoryName = 'Uncategorized';
@@ -101,7 +101,7 @@ export const trackViewItemList = (
         categoryName = parent2?.name || category2 || category3;
       }
     }
-    
+
     return {
       item_id: item.id.toString(),
       item_name: item.name,
@@ -115,7 +115,7 @@ export const trackViewItemList = (
   });
 
   const identifier = listId || listName.toLowerCase().replace(/\s+/g, '_');
-  
+
   sendEvent('view_item_list', {
     item_list_id: identifier,
     item_list_name: listName,
@@ -147,12 +147,12 @@ export const trackProductImpression = (
   listName: string,
   position: number
 ) => {
-  const brand = typeof item.brand === 'string' 
-    ? item.brand 
+  const brand = typeof item.brand === 'string'
+    ? item.brand
     : item.brand?.name || 'Unknown';
-  
-  const price = item.is_sale && item.sale_price 
-    ? item.sale_price 
+
+  const price = item.is_sale && item.sale_price
+    ? item.sale_price
     : item.price;
 
   let categoryName = 'Uncategorized';
@@ -195,15 +195,15 @@ export const trackProductImpression = (
 // ============================================
 
 export const trackViewItem = (item: any) => {
-  const brand = typeof item.brand === 'string' 
-    ? item.brand 
+  const brand = typeof item.brand === 'string'
+    ? item.brand
     : item.brand?.name || 'Unknown';
-  
-  const price = item.is_sale && item.sale_price 
-    ? item.sale_price 
+
+  const price = item.is_sale && item.sale_price
+    ? item.sale_price
     : item.price;
 
-  const discount = item.is_sale && item.sale_price 
+  const discount = item.is_sale && item.sale_price
     ? Number((item.price - item.sale_price).toFixed(2))
     : 0;
 
@@ -255,12 +255,12 @@ export const trackImageInteraction = (
 };
 
 export const trackAddToWishlist = (item: any) => {
-  const brand = typeof item.brand === 'string' 
-    ? item.brand 
+  const brand = typeof item.brand === 'string'
+    ? item.brand
     : item.brand?.name || 'Unknown';
-  
-  const price = item.is_sale && item.sale_price 
-    ? item.sale_price 
+
+  const price = item.is_sale && item.sale_price
+    ? item.sale_price
     : item.price;
 
   let categoryName = 'Uncategorized';
@@ -301,7 +301,7 @@ export const trackAddToWishlist = (item: any) => {
 // ============================================
 
 export const trackFilterUsage = (
-  filterType: 'category' | 'price' | 'brand' | 'availability',
+  filterType: string,
   filterValue: string
 ) => {
   const identifier = `filter:${filterType}:${filterValue}`;
@@ -339,10 +339,11 @@ export const trackVideoPlay = (videoTitle: string, productId?: number) => {
 // 5. CONVERSION OPTIMIZATION EVENTS
 // ============================================
 
-export const trackCouponInteraction = (action: 'focus' | 'apply' | 'remove', success?: boolean) => {
+export const trackCouponInteraction = (action: 'focus' | 'apply' | 'remove', success?: boolean, couponCode?: string) => {
   const identifier = `coupon:${action}:${success}`;
   sendEvent('coupon_interaction', {
     coupon_action: action,
+    coupon_code: couponCode || 'n/a',
     success: success
   }, identifier);
 };
@@ -355,10 +356,18 @@ export const trackStockAlert = (productId: number, productName: string) => {
   }, identifier);
 };
 
-export const trackNewsletterSignup = (location: 'footer' | 'popup' | 'checkout') => {
+export const trackNewsletterSignup = (location: 'footer' | 'popup' | 'checkout' | 'page' | 'account' | 'post-purchase') => {
   const identifier = `newsletter:${location}`;
   sendEvent('newsletter_signup', {
     signup_location: location
+  }, identifier);
+};
+
+export const trackNewsletterUnsubscribe = (email?: string) => {
+  const identifier = `newsletter_unsubscribe:${Date.now()}`;
+  sendEvent('newsletter_unsubscribe', {
+    // Don't send actual email for privacy
+    has_email: !!email
   }, identifier);
 };
 

@@ -16,7 +16,6 @@ export type FormInputRef = {
 };
 
 const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
-    console.log(props)
     const { checkout, dispatch } = useCheckout()
     const { data: countriesData, loading, error } = useNoRevalideteQuery({ query: GET_COUNTRY_LIST, jwt: '' })
 

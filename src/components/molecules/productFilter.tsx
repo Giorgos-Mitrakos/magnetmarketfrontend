@@ -1,6 +1,7 @@
 'use client'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { memo, useEffect, useState } from 'react';
+import { trackFilterUsage } from '@/lib/helpers/advanced-analytics';
 
 interface FilterProps {
     title: string,
@@ -39,12 +40,20 @@ const ProductFilter = (props: FilterProps) => {
     }, [searchParams])
 
     const handleItemClick = (filter: string) => {
+        const filterValue = filter.toLowerCase();
+        const isCurrentlySelected = search.includes(filterValue);
+        
+        // ✅ Track filter usage - send filterBy directly from backend
+        if (!isCurrentlySelected) {
+            trackFilterUsage(props.filterBy, filterValue);
+        }
+        
         const params = new URLSearchParams(searchParams)
-        if (search.includes(filter.toLowerCase())) {
-            params.delete(props.filterBy, filter.toLowerCase())
+        if (isCurrentlySelected) {
+            params.delete(props.filterBy, filterValue)
         }
         else {
-            params.append(props.filterBy, filter.toLowerCase())
+            params.append(props.filterBy, filterValue)
         }
 
         if (params.has("page"))

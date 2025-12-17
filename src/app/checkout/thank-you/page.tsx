@@ -9,6 +9,7 @@ import { FaRegImage, FaCheckCircle, FaTruck, FaCreditCard, FaCalendarAlt, FaEuro
 import { getOrder } from "@/lib/queries/order";
 import { IOrder } from "@/lib/interfaces/order";
 import PurchaseTracker from "@/components/molecules/PurchaseTracker";
+import PostPurchaseNewsletter from "@/components/molecules/PostPurchaseNewsletter";
 
 export interface IOrderCookie {
     orderId: number
@@ -21,7 +22,7 @@ export default async function Success() {
     const order: IOrderCookie = orderCookie ? JSON.parse(orderCookie.value) : null
     const approvalCode = ApprovalCodeCookie ? JSON.parse(ApprovalCodeCookie.value) : null
 
-    const result = await getOrder(order.orderId)
+    const result = order ? await getOrder(order?.orderId) : null
     const { order: data, deliverydays } = result as IOrder
 
     if (!order || !deliverydays) {
@@ -98,17 +99,21 @@ export default async function Success() {
         quantity: product.quantity
     }));
 
+    // ✅ Extract user email from order (if available)
+    const userEmail = data.billing_address.email || undefined;
+
+
     return (
         <>
             {/* ✅ ΣΩΣΤΗ ΣΕΙΡΑ:
                 1. PurchaseTracker - Κάνει GA tracking ΚΑΙ clear το cart
                 2. ΔΕΝ χρειαζόμαστε ClearCartItems - το κάνει ο reducer
             */}
-            <PurchaseTracker 
-                orderData={orderDataForGATracking} 
+            <PurchaseTracker
+                orderData={orderDataForGATracking}
                 appliedCoupon={data.coupon?.code || null}
             />
-            
+
             <div className="min-h-screen bg-gradient-to-br from-siteColors-lightblue/10 via-siteColors-blue/10 to-siteColors-pink/10 mb-16 py-8 px-4">
                 <div className="max-w-6xl mx-auto">
                     {/* Header Section */}
@@ -133,6 +138,11 @@ export default async function Success() {
                         )}
                     </div>
 
+                    {/* ✅ Newsletter Section - HIGH VISIBILITY */}
+                    <div className="mb-8">
+                        <PostPurchaseNewsletter userEmail={userEmail} />
+                    </div>
+
                     <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
                         {/* Order Summary */}
                         <div className="bg-gradient-to-r from-siteColors-lightblue to-siteColors-pink p-4 text-white">
@@ -147,7 +157,7 @@ export default async function Success() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {data && data.products.map(item => (
                                     <div key={item.id} className="flex border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                                        <div className="relative w-24 h-24 flex-shrink-0">
+                                        <div className="relative w-24 h-24 m-2 flex-shrink-0">
                                             {
                                                 item.image?.formats ? (
                                                     <Image
@@ -251,9 +261,9 @@ export default async function Success() {
                     )}
 
                     {/* ✅ BestPrice Tracking */}
-                    <BestPriceOrderTracking 
-                        orderDetails={orderDetailsForBestPrice} 
-                        products={productsForBestPrice} 
+                    <BestPriceOrderTracking
+                        orderDetails={orderDetailsForBestPrice}
+                        products={productsForBestPrice}
                     />
                 </div>
             </div>
