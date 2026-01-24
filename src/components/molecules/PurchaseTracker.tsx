@@ -1,5 +1,4 @@
 // components/checkout/PurchaseTracker.tsx
-
 'use client';
 
 import { useEffect, useRef } from 'react';
@@ -21,6 +20,7 @@ interface PurchaseTrackerProps {
       slug: string;
       image: any;
       price: number;
+      status: string;
       sale_price: number | null;
       is_sale: boolean;
       quantity: number;
@@ -90,6 +90,7 @@ export default function PurchaseTracker({ orderData, appliedCoupon }: PurchaseTr
         category: product.category || null,
         sku: product.sku,
         variant: product.variant,
+        status: product.status, // ✅ Πρόσθεσα το status field που έλειπε
       }));
 
       // Υπολογισμός tax (24% VAT)
@@ -102,7 +103,7 @@ export default function PurchaseTracker({ orderData, appliedCoupon }: PurchaseTr
         total: orderData.total,
         shipping,
         tax,
-        coupon: appliedCoupon
+        coupon: appliedCoupon,
       });
 
       // ✅ Dispatch PURCHASE_COMPLETE action
@@ -114,13 +115,12 @@ export default function PurchaseTracker({ orderData, appliedCoupon }: PurchaseTr
           shipping,
           tax,
           items: cartItems,
-          coupon: appliedCoupon || undefined
-        }
+          coupon: appliedCoupon || undefined,
+        },
       });
 
       hasTracked.current = true;
       console.log('[PurchaseTracker] ✅ Dispatched PURCHASE_COMPLETE successfully');
-
     } catch (error) {
       console.error('[PurchaseTracker] Error dispatching PURCHASE_COMPLETE:', error);
     }

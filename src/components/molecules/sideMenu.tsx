@@ -1,11 +1,11 @@
 import Link from 'next/link';
-import { sideMenuType } from '../templates/categoryPage';
+import { SideMenuType } from '../templates/categoryPage';
 
 export interface MenuProps {
     category1: string,
     category2: string | null,
     category3: string | null
-    sideMenu: sideMenuType
+    sideMenu: SideMenuType
 }
 
 const Menu = async ({ category1, category2, category3, sideMenu }: MenuProps) => {

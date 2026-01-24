@@ -4,11 +4,11 @@ import * as Yup from 'yup'
 import Radio from "../atoms/radio"
 import CustomInput from "../atoms/input"
 import { forwardRef, useImperativeHandle, useCallback } from "react"
-import { IProfile } from "@/app/checkout/customer-informations/page"
 import { useNoRevalideteQuery, useQuery } from "@/repositories/clientRepository"
 import { GET_COUNTRY_LIST, GET_COUNTRY_STATES, GET_REGION_POSTALS, GET_STATE_REGIONS } from "@/lib/queries/addressQuery"
 import { useCheckout } from "@/context/checkout"
 import { ICountries, ICustomerInfo, IRegionPostals, IRegions, IStates } from "@/lib/interfaces/addresses"
+import { IProfile } from "./checkout/CustomerInfoClient"
 
 export type FormInputRef = {
     submitForm: () => void;

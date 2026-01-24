@@ -7,6 +7,7 @@ export interface IOrderProduct {
     name: string;
     slug: string;
     brand: string | null;
+    status: string;
     image: IImageAttr;
     price: number;
     sale_price: number | null;
