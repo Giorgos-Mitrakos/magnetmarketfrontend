@@ -1,70 +1,179 @@
+// app/page.tsx - ΒΕΛΤΙΩΜΕΝΗ ΑΡΧΙΚΗ ΣΕΛΙΔΑ
 
-import BlockManager from '@/components/molecules/homepage/blockManager';
+import BlockManager from '@/components/molecules/homepage/blockManager'
 import Newsletter from '@/components/molecules/newsletter'
-import ScrollDepthTracker from '@/components/molecules/ScrollTracker';
-import { organizationStructuredData } from '@/lib/helpers/structureData';
-import { getHomepageData } from '@/lib/queries/homepage';
+import { getHomepageData } from '@/lib/queries/homepage'
+import { generateHomepageStructuredData } from '@/lib/helpers/structuredDataHelpers'
 import { Metadata } from 'next'
-import Script from 'next/script';
+
+export const revalidate = 3600 // Revalidate κάθε 1 ώρα
 
 export default async function Home() {
-
   const data = await getHomepageData()
-
-  const breadcrumbs = [
-    {
-      title: "Home",
-      slug: "/"
-    }
-  ]
-
-  const BreadcrumbList = breadcrumbs.map((breabcrumb, i) => ({
-    "@type": "ListItem",
-    "position": i + 1,
-    "name": breabcrumb.title,
-    "item": `${process.env.NEXT_URL}${breabcrumb.slug}`
-  }))
-
-  const BreadcrumbStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": BreadcrumbList
-  }
-
-  const structuredData = []
-  structuredData.push(BreadcrumbStructuredData)
-  structuredData.push(organizationStructuredData)
-
+  
   return (
-    <>
-      <Script
-        id="structured-data"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />      
-      <main className="w-full space-y-16">
-        <BlockManager blocks={data.body} />
-        <Newsletter />
-      </main>
-    </>
+    <main className="w-full space-y-16">
+      <BlockManager blocks={data.body} />
+      <Newsletter />
+    </main>
   )
 }
 
-export const metadata: Metadata = {
-  title: 'Magnet Μarket Η τεχνολογία στο δικό σου πεδίο!',
-  description: 'Μην το ψάχνεις, εδώ θα βρείς τις καλύτερες τιμές και προσφορές σε υπολογιστές, laptop, smartwatch, κάμερες, εκτυπωτές, οθόνες, τηλεοράσεις και άλλα προϊόντα.',
-  keywords: "Computers, Laptops, Notebooks, laptop, Computer, Hardware, Notebook, Peripherals, Greece, Technology, Mobile phones, Laptops, PCs, Scanners, Printers, Modems, Monitors, Software, Antivirus, Windows, Intel Chipsets, AMD, HP, LOGITECH, ACER, TOSHIBA, SAMSUNG, Desktop, Servers, Telephones, DVD, CD, DVDR, CDR, DVD-R, CD-R, periferiaka, Systems, MP3, Υπολογιστής, ΥΠΟΛΟΓΙΣΤΗΣ, ΠΕΡΙΦΕΡΕΙΑΚΑ, περιφερειακά, Χαλκίδα, ΧΑΛΚΙΔΑ, Ελλάδα, ΕΛΛΑΔΑ, Τεχνολογία, τεχνολογία, ΤΕΧΝΟΛΟΓΙΑ, κινητό, ΚΙΝΗΤΟ, κινητά, ΚΙΝΗΤΑ, οθόνη, ΟΘΟΝΗ, οθόνες, ΟΘΟΝΕΣ, ΕΚΤΥΠΩΤΕΣ, εκτυπωτές, σαρωτές, ΣΑΡΩΤΕΣ, εκτυπωτής",
-  alternates: {
-    canonical: `${process.env.NEXT_URL}/`,
-  },
-  verification: { other: { "msvalidate.01": "5F57CFA85BD6BCF4DE69C7AEDF67B332" } },
-  openGraph: {
-    url: 'www.magnetmarket.gr',
-    type: 'website',
-    images: [`${process.env.NEXT_URL}/_next/static/media/MARKET MAGNET-LOGO.79db5357.svg`],
-    siteName: "www.magnetmarket.gr",
-    emails: ["info@magnetmarket.gr"],
-    phoneNumbers: ['2221121657'],
-    countryName: 'Ελλάδα',
+/* ==================== METADATA ==================== */
+
+export async function generateMetadata(): Promise<Metadata> {
+  // Fetch homepage data για dynamic structured data
+  const data = await getHomepageData()
+  
+  const title = 'Magnet Market - Η τεχνολογία στο δικό σου πεδίο!'
+  const description = 'Ανακάλυψε τις καλύτερες τιμές σε υπολογιστές, laptops, smartphones, smartwatches, κάμερες, εκτυπωτές, οθόνες και τηλεοράσεις. Γρήγορη παράδοση σε όλη την Ελλάδα με εγγύηση ελληνικής αντιπροσωπείας.'
+  
+  const baseUrl = process.env.NEXT_URL || 'https://magnetmarket.gr'
+  
+  /* -------------------- Extract Data for Structured Data -------------------- */
+  
+  // Extract categories από το CategoriesBanner block
+  const categoriesBlock = data.body?.find(
+    (block: any) => block.__component === 'homepage.categories-banner'
+  )
+  const featuredCategories = categoriesBlock?.categories?.slice(0, 8) || []
+  
+  // Extract brands από το BrandsBanner block
+  const brandsBlock = data.body?.find(
+    (block: any) => block.__component === 'homepage.brands-banner'
+  )
+  const featuredBrands = brandsBlock?.brands?.slice(0, 12) || []
+  
+  // Extract hero carousel images
+  const carouselBlock = data.body?.find(
+    (block: any) => block.__component === 'global.carousel'
+  )
+  const heroImages = carouselBlock?.carousel?.map((item: any) => 
+    `${process.env.NEXT_PUBLIC_API_URL}${item.image.url}`
+  ) || []
+  
+  /* -------------------- Structured Data -------------------- */
+  
+  const structuredData = generateHomepageStructuredData({
+    featuredCategories: featuredCategories.map((cat: any) => ({
+      name: cat.name,
+      slug: cat.slug,
+      imageUrl: cat.image?.url ? `${process.env.NEXT_PUBLIC_API_URL}${cat.image.url}` : null,
+    })),
+    featuredBrands: featuredBrands.map((brand: any) => ({
+      name: brand.name,
+      slug: brand.slug,
+      logoUrl: brand.logo?.url ? `${process.env.NEXT_PUBLIC_API_URL}${brand.logo.url}` : null,
+    })),
+    heroImages,
+  })
+  
+  /* -------------------- Metadata Object -------------------- */
+  
+  const metadata: Metadata = {
+    title,
+    description,
+    
+    keywords: [
+      // Γενικά
+      'ηλεκτρονικό κατάστημα',
+      'τεχνολογία',
+      'Χαλκίδα',
+      'Νέα Αρτάκη',
+      'Εύβοια',
+      'Ελλάδα',
+      
+      // Προϊόντα
+      'υπολογιστές',
+      'laptops',
+      'smartphones',
+      'tablets',
+      'smartwatches',
+      'κάμερες',
+      'εκτυπωτές',
+      'οθόνες',
+      'τηλεοράσεις',
+      'gaming',
+      'περιφερειακά',
+      
+      // Brands
+      'HP',
+      'Dell',
+      'Lenovo',
+      'Asus',
+      'Acer',
+      'Samsung',
+      'Apple',
+      'Xiaomi',
+      'Logitech',
+      'Canon',
+      'Epson',
+      
+      // SEO phrases
+      'καλύτερες τιμές',
+      'προσφορές',
+      'γρήγορη παράδοση',
+      'εγγύηση ελληνικής αντιπροσωπείας',
+    ].join(', '),
+    
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+        'max-video-preview': -1,
+      },
+    },
+    
+    alternates: {
+      canonical: `${baseUrl}/`,
+    },
+    
+    verification: {
+      other: {
+        'msvalidate.01': '0316C00C62960A7CD7E176FD68572160',
+      },
+    },
+    
+    openGraph: {
+      title,
+      description,
+      url: baseUrl,
+      siteName: 'Magnet Market',
+      locale: 'el_GR',
+      type: 'website',
+      // Uncomment όταν δημιουργήσεις hero images
+      // images: heroImages.length > 0 ? heroImages : [
+      //   {
+      //     url: `${baseUrl}/og-image.jpg`,
+      //     width: 1200,
+      //     height: 630,
+      //     alt: 'Magnet Market - Ηλεκτρονικό Κατάστημα Τεχνολογίας',
+      //   },
+      // ],
+      emails: ['info@magnetmarket.gr'],
+      phoneNumbers: ['+302221121657'],
+      countryName: 'Ελλάδα',
+    },
+    
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      // Uncomment όταν δημιουργήσεις images
+      // images: heroImages.length > 0 ? [heroImages[0]] : [`${baseUrl}/og-image.jpg`],
+      site: '@magnetmarket', // Αν έχεις Twitter
+      creator: '@magnetmarket',
+    },
+    
+    // Structured Data στο other field
+    other: {
+      'application/ld+json': JSON.stringify(structuredData),
+    },
   }
+  
+  return metadata
 }

@@ -66,6 +66,10 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
     switch (action.type) {
         case "ADD_ITEM": {
             const newItem = action.payload;
+            if (newItem.status === "OutOfStock" || newItem.status === "Discontinued") {
+                newState = state
+                break;
+            }
 
             const existingItemIndex = state.cart.findIndex(
                 item => item.id === newItem.id
@@ -87,7 +91,7 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
                 newState = { ...state, cart: updatedItems };
             }
 
-            trackAddToCart( newItem);
+            trackAddToCart(newItem);
             break;
         }
 

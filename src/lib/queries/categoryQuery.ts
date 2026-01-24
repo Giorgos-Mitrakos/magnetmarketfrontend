@@ -1,3 +1,4 @@
+import { SideMenuType } from "@/components/templates/categoryPage";
 import { FilterProps } from "../interfaces/filters";
 import { IImageAttr } from "../interfaces/image";
 import { IProductCard } from "../interfaces/product";
@@ -36,7 +37,7 @@ export async function getCategoryProducts(mainCategory: string, category: string
             searchParams: { mainCategory, slug: category, ...searchParams }
         }),
         next: {
-            revalidate: cacheTime, // Χρήση της μεταβλητής cacheTime
+            revalidate: 1, // Χρήση της μεταβλητής cacheTime
         }
     };
 
@@ -53,7 +54,12 @@ export async function getCategoryProducts(mainCategory: string, category: string
     return data as {
         products: IProductCard[],
         meta: { pagination: { total: number, page: number, pageSize: number, pageCount: number } },
-        availableFilters: FilterProps[]
+        availableFilters: FilterProps[],
+        breadcrumbs: {
+            title: string,
+            slug: string
+        }[],
+        sideMenu: SideMenuType
     }
 }
 
@@ -68,7 +74,7 @@ export async function getCategoryMetadata(slug: string) {
         headers: myHeaders,
         body: JSON.stringify({ slug: slug }),
         next: {
-            revalidate: 600, // Χρήση της μεταβλητής cacheTime
+            revalidate: 3600, // Χρήση της μεταβλητής cacheTime
         }
     };
 
@@ -88,7 +94,9 @@ export async function getCategoryMetadata(slug: string) {
         slug: string,
         image: IImageAttr,
         categories: {
-            name: string
+            id: string,
+            name: string,
+            slug: string
         }[]
     }
 }
@@ -103,7 +111,7 @@ export async function getCategoriesMapping() {
         method: "GET",
         headers: myHeaders,
         next: {
-            revalidate:  60 * 60, // Χρήση της μεταβλητής cacheTime
+            revalidate: 60 * 60, // Χρήση της μεταβλητής cacheTime
         }
     };
 
@@ -141,7 +149,7 @@ export async function getMenu() {
         method: "GET",
         headers: myHeaders,
         next: {
-            revalidate:  60 * 60, // Χρήση της μεταβλητής cacheTime
+            revalidate: 60 * 60, // Χρήση της μεταβλητής cacheTime
         }
     };
 

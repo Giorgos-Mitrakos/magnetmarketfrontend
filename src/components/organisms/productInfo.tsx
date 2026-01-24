@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from "react"
+import './ProductInfo.css'
 
 interface ProductInfoClientProps {
     description: string | null,
@@ -20,8 +21,20 @@ const ProductInfoClient = ({ description, chars }: ProductInfoClientProps) => {
 
     useEffect(() => {
         if (description && typeof window !== 'undefined') {
+            // Decode HTML entities
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = description;
+            const decodedHTML = textarea.value;
+            
             import('dompurify').then((DOMPurify) => {
-                setSanitizedHTML(DOMPurify.default.sanitize(description));
+                const config = {
+                    ALLOWED_TAGS: ['strong', 'em', 'b', 'i', 'u', 'p', 'br', 'ul', 'ol', 'li', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'img', 'a', 'div', 'span'],
+                    ALLOWED_ATTR: ['class', 'src', 'href', 'alt', 'title', 'width', 'height'],
+                    KEEP_CONTENT: true,
+                };
+                
+                const cleaned = DOMPurify.default.sanitize(decodedHTML, config);
+                setSanitizedHTML(cleaned);
             });
         }
     }, [description]);
@@ -67,8 +80,11 @@ const ProductInfoClient = ({ description, chars }: ProductInfoClientProps) => {
             
             <div>
                 {description && active === "description" && (
-                    <div className="p-6 bg-gray-50 dark:bg-gray-700 rounded-lg prose prose-lg max-w-none dark:prose-invert" role="tabpanel">
-                        <div dangerouslySetInnerHTML={{ __html: sanitizedHTML }} className="text-gray-700 dark:text-gray-200" />
+                    <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg" role="tabpanel">
+                        <div 
+                            dangerouslySetInnerHTML={{ __html: sanitizedHTML }} 
+                            className="product-description"
+                        />
                     </div>
                 )}
                 

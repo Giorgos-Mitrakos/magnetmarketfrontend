@@ -2,14 +2,22 @@ import { gql } from "graphql-request";
 
 export const GET_PRODUCTS_SITEMAP = gql`
 query getProductsSitemap{
-    products(pagination:{limit:-1}){
-    data{
-      attributes{
-        slug
-        updatedAt
+        products(
+      filters: {
+        publishedAt: { notNull: true }  # ✅ Όχι drafts
+        status: { ne: "Discontinued" }   # ✅ Όχι Discontinued
+      }
+      pagination: { limit: -1 }
+      sort: ["updatedAt:desc"]
+    ) {
+      data {
+        id
+        attributes {
+          slug
+          updatedAt
+        }
       }
     }
-  }
 }
 `
 

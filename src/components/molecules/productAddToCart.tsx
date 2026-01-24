@@ -14,29 +14,46 @@ function ProductAddToCart({ product }: { product: IProductCard }) {
   const { data } = useProductPrice(product.id)
   const { dispatch } = useCheckout()
 
+  const isAskForPrice = product.status === 'AskForPrice';
+  const isOutOfStock = product.status === 'OutOfStock';
+
   const item: ICartItem = {
     id: product.id,
     name: product.name,
     slug: product.slug,
+    status: product.status,
     image: product.image,
     weight: product.weight,
     price: product.price,
     brand: product.brand?.name || null,
     quantity: 1,
-    isAvailable: true,
+    isAvailable: !isAskForPrice, // Προσθήκη ένδειξης διαθεσιμότητας
     is_sale: product.is_sale,
     sale_price: product.sale_price,
     category: product.category
   }
 
   const handleAddProductClick = () => {
+    if (isAskForPrice || isOutOfStock) return; // Αν είναι AskForPrice, μην κάνεις τίποτα
+
     dispatch({ type: "ADD_ITEM", payload: item })
     addToCartToast(item)
   }
 
-  const displayPrice = product.is_sale && product.sale_price 
-    ? product.sale_price 
+  const displayPrice = product.is_sale && product.sale_price
+    ? product.sale_price
     : product.price;
+
+  const buttonClasses = {
+    mobile: {
+      active: "flex items-center justify-center px-6 py-3 bg-gradient-to-r from-siteColors-purple to-siteColors-pink text-white rounded-lg font-semibold hover:from-siteColors-pink hover:to-siteColors-purple transition-all duration-200 shadow-md hover:shadow-lg",
+      disabled: "flex items-center justify-center px-6 py-3 bg-gray-300 dark:bg-slate-600 text-gray-500 dark:text-slate-400 rounded-lg font-semibold cursor-not-allowed"
+    },
+    desktop: {
+      active: "w-full flex items-center justify-center px-6 py-4 bg-gradient-to-r from-siteColors-blue to-siteColors-lightblue text-white rounded-xl font-semibold text-lg hover:from-siteColors-lightblue hover:to-siteColors-blue transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105",
+      disabled: "w-full flex items-center justify-center px-6 py-4 bg-gray-300 dark:bg-slate-600 text-gray-500 dark:text-slate-400 rounded-xl font-semibold text-lg cursor-not-allowed"
+    }
+  };
 
   return (
     <>
@@ -58,15 +75,28 @@ function ProductAddToCart({ product }: { product: IProductCard }) {
                 <FaRegImage className="w-8 h-8 text-gray-400" />
               )}
             </div>
-            
+
             <div className="flex flex-col">
-              <span className="text-lg font-bold text-siteColors-purple dark:text-slate-200">
-                {displayPrice.toFixed(2)} €
-              </span>
-              {product.is_sale && (
-                <span className="text-sm line-through text-gray-500 dark:text-slate-400">
-                  {product.price.toFixed(2)} €
-                </span>
+              {isAskForPrice ? (
+                <div className="flex flex-col">
+                  <span className="text-lg font-bold text-siteColors-purple dark:text-siteColors-purple-light">
+                    Ζητήστε Τιμή
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    (Κάλεσέ μας)
+                  </span>
+                </div>
+              ) : (
+                <>
+                  <span className="text-lg font-bold text-siteColors-purple dark:text-slate-200">
+                    {displayPrice.toFixed(2)} €
+                  </span>
+                  {product.is_sale && (
+                    <span className="text-sm line-through text-gray-500 dark:text-slate-400">
+                      {product.price.toFixed(2)} €
+                    </span>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -74,10 +104,12 @@ function ProductAddToCart({ product }: { product: IProductCard }) {
           {/* Add to Cart Button */}
           <button
             onClick={handleAddProductClick}
-            className="flex items-center justify-center px-6 py-3 bg-gradient-to-r from-siteColors-purple to-siteColors-pink text-white rounded-lg font-semibold hover:from-siteColors-pink hover:to-siteColors-purple transition-all duration-200 shadow-md hover:shadow-lg"
+            disabled={isAskForPrice || isOutOfStock}
+            className={isAskForPrice || isOutOfStock ? buttonClasses.mobile.disabled : buttonClasses.mobile.active}
+            aria-label={isAskForPrice ? "Δεν είναι διαθέσιμο για αγορά" : "Προσθήκη στο καλάθι"}
           >
             <FaOpencart className="mr-2" />
-            <span>Προσθήκη</span>
+            <span>{isAskForPrice ? "Μη Διαθέσιμο" : "Προσθήκη"}</span>
           </button>
         </div>
       </div>
@@ -86,7 +118,9 @@ function ProductAddToCart({ product }: { product: IProductCard }) {
       <div className="hidden md:block mt-6">
         <button
           onClick={handleAddProductClick}
-          className="w-full flex items-center justify-center px-6 py-4 bg-gradient-to-r from-siteColors-blue to-siteColors-lightblue text-white rounded-xl font-semibold text-lg hover:from-siteColors-lightblue hover:to-siteColors-blue transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+          disabled={isAskForPrice || isOutOfStock}
+          className={isAskForPrice || isOutOfStock ? buttonClasses.desktop.disabled : buttonClasses.desktop.active}
+          aria-label={isAskForPrice ? "Δεν είναι διαθέσιμο για αγορά" : "Προσθήκη στο καλάθι"}
         >
           <FaOpencart className="mr-3 text-xl" />
           <span>Προσθήκη στο Καλάθι</span>

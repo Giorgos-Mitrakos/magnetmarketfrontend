@@ -1,100 +1,126 @@
-'use client';
+// app/newsletter/subscribe/page.tsx
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { trackNewsletterSignup } from '@/lib/helpers/advanced-analytics';
+import { Metadata } from 'next'
+import { 
+  organizationStructuredData, 
+  storeStructuredData 
+} from '@/lib/helpers/structureData'
+import type { 
+  BreadcrumbList, 
+  WebPage, 
+  WebSite 
+} from 'schema-dts'
+import SubscribeClient from '@/components/organisms/newsletter/subscribe-client'
+
+const BASE_URL = process.env.NEXT_URL || 'https://magnetmarket.gr'
+
+/* -------------------------------------------------------------------------- */
+/*                          Structured Data (Module Level)                     */
+/* -------------------------------------------------------------------------- */
+
+// WebSite
+const websiteNode: WebSite = {
+  '@type': 'WebSite',
+  '@id': `${BASE_URL}/#website`,
+  url: BASE_URL,
+  name: 'Magnet Market',
+  publisher: {
+    '@id': `${BASE_URL}/#organization`,
+  },
+}
+
+// BreadcrumbList
+const breadcrumbList: BreadcrumbList = {
+  '@type': 'BreadcrumbList',
+  '@id': `${BASE_URL}/newsletter/subscribe#breadcrumb`,
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Home',
+      item: BASE_URL,
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'Newsletter',
+      item: `${BASE_URL}/newsletter/subscribe`,
+    },
+  ],
+}
+
+// WebPage
+const webPage: WebPage = {
+  '@type': 'WebPage',
+  '@id': `${BASE_URL}/newsletter/subscribe#webpage`,
+  url: `${BASE_URL}/newsletter/subscribe`,
+  name: 'Εγγραφή στο Newsletter',
+  description: 'Εγγραφείτε στο newsletter μας για να λαμβάνετε αποκλειστικές προσφορές και νέα',
+  isPartOf: {
+    '@id': `${BASE_URL}/#website`,
+  },
+  about: {
+    '@id': `${BASE_URL}/#organization`,
+  },
+  breadcrumb: {
+    '@id': `${BASE_URL}/newsletter/subscribe#breadcrumb`,
+  },
+  inLanguage: 'el-GR',
+}
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    organizationStructuredData,
+    storeStructuredData,
+    websiteNode,
+    breadcrumbList,
+    webPage,
+  ],
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                  Page                                       */
+/* -------------------------------------------------------------------------- */
 
 export default function SubscribePage() {
-    const [email, setEmail] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const router = useRouter();
+  return <SubscribeClient />
+}
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
+/* -------------------------------------------------------------------------- */
+/*                                Metadata                                     */
+/* -------------------------------------------------------------------------- */
 
-        try {
-            const response = await fetch('/api/newsletter/subscribe', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email
-                }),
-            });
+export const metadata: Metadata = {
+  title: 'Εγγραφή στο Newsletter | Magnet Market',
+  description: 'Εγγραφείτε στο newsletter του Magnet Market και μην χάσετε καμία προσφορά! Λάβετε αποκλειστικές εκπτώσεις και νέα για τεχνολογία.',
+  keywords: 'newsletter, εγγραφή newsletter, προσφορές, εκπτώσεις, magnet market newsletter',
+  
+  robots: {
+    index: true, // ✅ Newsletter signup page CAN be indexed
+    follow: true,
+  },
+  
+  alternates: {
+    canonical: `${BASE_URL}/newsletter/subscribe`,
+  },
 
-            const data = await response.json()
+  openGraph: {
+    title: 'Εγγραφή στο Newsletter | Magnet Market',
+    description: 'Μην χάσετε καμία προσφορά! Εγγραφείτε στο newsletter μας.',
+    url: `${BASE_URL}/newsletter/subscribe`,
+    siteName: 'magnetmarket.gr',
+    type: 'website',
+    locale: 'el_GR',
+  },
 
-            switch (data.message) {
-                case "suceess subscribe":
-                    // ✅ Track successful signup from dedicated page
-                    trackNewsletterSignup('page');
-                    router.push('/newsletter/subscribe/success');
-                    break;
+  twitter: {
+    card: 'summary',
+    title: 'Εγγραφή στο Newsletter | Magnet Market',
+    description: 'Μην χάσετε καμία προσφορά! Εγγραφείτε στο newsletter μας.',
+  },
 
-                case "suceess activate":
-                    // ✅ Track reactivation
-                    trackNewsletterSignup('page');
-                    router.push('/newsletter/subscribe/success?message=Η εγγραφή στο newsletter ενεργοποιήθηκε ξανά!');
-                    break;
-
-                case "This attribute must be unique":
-                    router.push('/newsletter/subscribe/error?message=Έχετε κάνει ήδη εγγραφή στο newsletter μας!');
-                    break;
-
-                default:
-                    break;
-            }
-        } catch (error) {
-            console.error('Subscription error:', error);
-            router.push('newsletter/subscribe/error?message=Subscription failed');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    return (
-        <div className="bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="px-6 py-8">
-                    <div className="text-center">
-                        <h2 className="text-3xl font-bold text-siteColors-purple">Εγγραφή στο Newsletter</h2>
-                        <p className="mt-2 text-slate-600">
-                            Για να μην χάνεις καμία προσφορά!!!
-                        </p>
-                    </div>
-
-                    <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-                                Email
-                            </label>
-                            <input
-                                id="email"
-                                name="email"
-                                type="email"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="your@email.com"
-                            />
-                        </div>
-
-                        <div>
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                            >
-                                {isLoading ? 'Εγγραφή...' : 'Εγγραφή'}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    );
+  other: {
+    'application/ld+json': JSON.stringify(structuredData).replaceAll('&quot;', '"'),
+  },
 }

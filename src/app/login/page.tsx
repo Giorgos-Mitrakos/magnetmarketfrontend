@@ -1,65 +1,151 @@
-import LoginComp from '@/components/organisms/loginComp'
-import Script from 'next/script'
-import { organizationStructuredData } from '@/lib/helpers/structureData'
+// src/app/login/page.tsx
+
 import { Metadata } from 'next'
+import LoginComp from '@/components/organisms/loginComp'
+import { 
+  organizationStructuredData, 
+  storeStructuredData 
+} from '@/lib/helpers/structureData'
+import type { 
+  BreadcrumbList, 
+  WebPage, 
+  WebSite 
+} from 'schema-dts'
 
+const BASE_URL = process.env.NEXT_URL || 'https://magnetmarket.gr'
 
-export default function Login() {
+/* -------------------------------------------------------------------------- */
+/*                            Structured Data                                  */
+/* -------------------------------------------------------------------------- */
 
-    const breadcrumbs = [
-            {
-                title: "Home",
-                slug: "/"
-            },
-            {
-                title: "Είσοδος",
-                slug: "/login"
-            }
-        ]
-    
-        const BreadcrumbList = breadcrumbs.map((breabcrumb, i) => ({
-            "@type": "ListItem",
-            "position": i + 1,
-            "name": breabcrumb.title,
-            "item": `${process.env.NEXT_URL}${breabcrumb.slug}`
-        }))
-    
-        const BreadcrumbStructuredData = {
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": BreadcrumbList
-        }
-    
-        const structuredData = []
-        structuredData.push(BreadcrumbStructuredData)
-        structuredData.push(organizationStructuredData)
+function getStructuredData() {
+  // BreadcrumbList
+  const breadcrumbList: BreadcrumbList = {
+    '@type': 'BreadcrumbList',
+    '@id': `${BASE_URL}/login#breadcrumb`,
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: BASE_URL,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Είσοδος',
+        item: `${BASE_URL}/login`,
+      },
+    ],
+  }
 
-    return (
-        <>
-            <Script
-                id="structured-data"
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-            />
-            <LoginComp />
-        </>
-    )
+  // WebSite (για SearchAction)
+  const websiteNode: WebSite = {
+    '@type': 'WebSite',
+    '@id': `${BASE_URL}/#website`,
+    url: BASE_URL,
+    name: 'Magnet Market',
+    publisher: {
+      '@id': `${BASE_URL}/#organization`,
+    },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${BASE_URL}/search?q={search_term_string}`,
+      },
+      // @ts-ignore - query-input is valid but not in types
+      'query-input': 'required name=search_term_string',
+    },
+  }
+
+  // WebPage
+  const webPage: WebPage = {
+    '@type': 'WebPage',
+    '@id': `${BASE_URL}/login#webpage`,
+    url: `${BASE_URL}/login`,
+    name: 'Σύνδεση Λογαριασμού',
+    description: 'Συνδεθείτε στον λογαριασμό σας για να συνεχίσετε τις αγορές σας',
+    isPartOf: {
+      '@id': `${BASE_URL}/#website`,
+    },
+    about: {
+      '@id': `${BASE_URL}/#organization`,
+    },
+    breadcrumb: {
+      '@id': `${BASE_URL}/login#breadcrumb`,
+    },
+    inLanguage: 'el-GR',
+  }
+
+  // @graph Assembly
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      organizationStructuredData,
+      storeStructuredData,
+      websiteNode,
+      breadcrumbList,
+      webPage,
+    ],
+  }
 }
 
+/* -------------------------------------------------------------------------- */
+/*                                  Page                                       */
+/* -------------------------------------------------------------------------- */
+
+export default function Login() {
+  return <LoginComp />
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                Metadata                                     */
+/* -------------------------------------------------------------------------- */
+
 export const metadata: Metadata = {
-    title: 'Magnet Μarket - Η τεχνολογία στο δικό σου πεδίο! - Εγγραφή',
-    description: 'Μην το ψάχνεις, συνδέσου με το λογαριασμό σου και αγόρασε στις καλύτερες τίμες, υπολογιστές, laptop, smartwatch, κάμερες, εκτυπωτές, οθόνες, τηλεοράσεις, κ.α.',
-    keywords: "Computers, Laptops, Notebooks, laptop, Computer, Hardware, Notebook, Peripherals, Greece, Technology, Mobile phones, Laptops, PCs, Scanners, Printers, Modems, Monitors, Software, Antivirus, Windows, Intel Chipsets, AMD, HP, LOGITECH, ACER, TOSHIBA, SAMSUNG, Desktop, Servers, Telephones, DVD, CD, DVDR, CDR, DVD-R, CD-R, periferiaka, Systems, MP3, Υπολογιστής, ΥΠΟΛΟΓΙΣΤΗΣ, ΠΕΡΙΦΕΡΕΙΑΚΑ, περιφερειακά, Χαλκίδα, ΧΑΛΚΙΔΑ, Ελλάδα, ΕΛΛΑΔΑ, Τεχνολογία, τεχνολογία, ΤΕΧΝΟΛΟΓΙΑ, κινητό, ΚΙΝΗΤΟ, κινητά, ΚΙΝΗΤΑ, οθόνη, ΟΘΟΝΗ, οθόνες, ΟΘΟΝΕΣ, ΕΚΤΥΠΩΤΕΣ, εκτυπωτές, σαρωτές, ΣΑΡΩΤΕΣ, εκτυπωτής",
-    alternates: {
-        canonical: `${process.env.NEXT_URL}/login`,
-    },
-    openGraph: {
-        url: 'magnetmarket.gr/register',
-        type: 'website',
-        images: [`${process.env.NEXT_URL}/_next/static/media/MARKET MAGNET-LOGO.79db5357.svg`],
-        siteName: "magnetmarket.gr",
-        emails: ["info@magnetmarket.gr"],
-        phoneNumbers: ['2221121657'],
-        countryName: 'Ελλάδα',
-    }
+  title: 'Σύνδεση Λογαριασμού | Magnet Market',
+  description: 'Συνδεθείτε στον λογαριασμό σας στο Magnet Market και αγοράστε υπολογιστές, laptops, smartphones και άλλα προϊόντα τεχνολογίας στις καλύτερες τιμές.',
+  keywords: 'σύνδεση, login, λογαριασμός, magnet market, είσοδος χρήστη',
+  
+  robots: {
+    index: false, // Δεν θέλουμε indexing σε auth pages
+    follow: true,
+  },
+
+  alternates: {
+    canonical: `${BASE_URL}/login`,
+  },
+
+  openGraph: {
+    title: 'Σύνδεση Λογαριασμού | Magnet Market',
+    description: 'Συνδεθείτε στον λογαριασμό σας για να συνεχίσετε τις αγορές σας',
+    url: `${BASE_URL}/login`,
+    siteName: 'magnetmarket.gr',
+    type: 'website',
+    locale: 'el_GR',
+    images: [
+      {
+        url: `${BASE_URL}/_next/static/media/MARKET MAGNET-LOGO.79db5357.svg`,
+        width: 1200,
+        height: 630,
+        alt: 'Magnet Market Logo',
+      },
+    ],
+  },
+
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Σύνδεση Λογαριασμού | Magnet Market',
+    description: 'Συνδεθείτε στον λογαριασμό σας για να συνεχίσετε τις αγορές σας',
+    images: [`${BASE_URL}/_next/static/media/MARKET MAGNET-LOGO.79db5357.svg`],
+  },
+
+  // Additional metadata
+  other: {
+    'contact:email': 'info@magnetmarket.gr',
+    'contact:phone_number': '+30 2221121657',
+    'contact:country': 'GR',
+    'application/ld+json': JSON.stringify(getStructuredData()).replaceAll('&quot;', '"'),
+  },
 }

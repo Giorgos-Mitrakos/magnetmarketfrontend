@@ -11,6 +11,7 @@ import { IProductCard } from "@/lib/interfaces/product"
 import { trackSelectItem } from "@/lib/helpers/analytics"
 import { fbTrackViewContent } from "@/lib/helpers/facebook-pixel"
 import { useCallback } from "react"
+import ProductAvailability from "../atoms/productAvailability"
 
 // Main Product Card Component
 export type ProductCardProps = {
@@ -20,12 +21,14 @@ export type ProductCardProps = {
     position?: number      // ✅ Νέο prop για tracking
 }
 
-const ProductCard = ({ 
-    product, 
+const ProductCard = ({
+    product,
     listName = 'Products',
     listId,
-    position 
+    position
 }: ProductCardProps) => {
+
+    const isAskForPrice = product.status === 'AskForPrice';
 
     // ✅ Handler για product click tracking
     const handleProductClick = useCallback(() => {
@@ -102,16 +105,16 @@ const ProductCard = ({
                     <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Κωδ: {product.id}</p>
                 </div>
 
+                {/* ✅ Χρήση του νέου ProductAvailability component */}
+                {!isAskForPrice &&
                 <div className="flex items-center justify-center mt-2">
-                    <p className={`text-sm font-medium px-2 py-1 rounded-full ${product && product.inventory > 0 && product.is_in_house
-                        ? 'text-green-800 dark:text-green-300 bg-green-100 dark:bg-green-900/30'
-                        : 'text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30'}`}
-                        aria-label="Διαθεσιμότητα">
-                        {product && product.inventory > 0 && product.is_in_house
-                            ? 'Άμεσα διαθέσιμο'
-                            : "Παράδοση σε 1 – 3 ημέρες"}
-                    </p>
-                </div>
+                    <ProductAvailability
+                        status={product.status}
+                        inventory={product.inventory}
+                        isInHouse={product.is_in_house}
+                        variant="badge"
+                    />
+                </div>}
 
                 <ProductCardPrice product={product} />
                 <ProductCardFoot product={product} />

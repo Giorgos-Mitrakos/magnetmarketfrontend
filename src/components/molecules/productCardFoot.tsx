@@ -12,10 +12,14 @@ const ProductCardFoot = ({ product }: { product: IProductCard }) => {
     const { dispatch } = useCheckout()
     const router = useRouter()
 
+    const isAskForPrice = product.status === 'AskForPrice';
+    const isOutOfStock = product.status === 'OutOfStock';
+
     const item: ICartItem = {
         id: product.id,
         name: product.name,
         slug: product.slug,
+        status: product.status,
         image: product.image || null,
         weight: product.weight,
         price: product.price,
@@ -28,6 +32,7 @@ const ProductCardFoot = ({ product }: { product: IProductCard }) => {
     }
 
     const handleAddProductClick = (product: ICartItem) => {
+        if (isAskForPrice || isOutOfStock) return; // Αν είναι AskForPrice, μην κάνεις τίποτα
         dispatch({ type: "ADD_ITEM", payload: product })
         addToCartToast(product)
     }
@@ -66,15 +71,21 @@ const ProductCardFoot = ({ product }: { product: IProductCard }) => {
 
             <button
                 onClick={(e) => {
+                    if (isAskForPrice || isOutOfStock) return;
                     e.preventDefault()
                     e.stopPropagation()
                     handleAddProductClick(item)
                 }}
-                className="flex justify-center items-center p-2 rounded-lg
-                  bg-gradient-to-br from-siteColors-lightblue to-siteColors-blue
-                  hover:from-siteColors-pink hover:to-siteColors-purple 
-                  transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
-                aria-label="Προσθήκη προϊόντος στο καλάθι σου">
+                disabled={isAskForPrice || isOutOfStock}
+                className={`flex justify-center items-center p-2 rounded-lg bg-
+                ${isAskForPrice || isOutOfStock
+                        ? 'bg-gray-300 dark:bg-slate-600 text-gray-500 dark:text-slate-400 cursor-not-allowed'
+                        : 'bg-gradient-to-br from-siteColors-lightblue to-siteColors-blue hover:from-siteColors-pink hover:to-siteColors-purple transform hover:scale-105'
+                    }
+                transition-all duration-300 shadow-md hover:shadow-lg`}
+                aria-label={isAskForPrice ? "Ζητήστε τιμή" : "Προσθήκη στο καλάθι"}
+                title={isAskForPrice ? "Καλέστε για τιμή" : ""}>
+
                 <FaOpencart aria-hidden="true" />
             </button>
         </div>

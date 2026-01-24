@@ -7,6 +7,7 @@ export interface ICartItem {
     name: string,
     brand: string | null,
     slug: string,
+    status: string,
     image: IImageAttr,
     price: number,
     quantity: number,

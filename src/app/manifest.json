@@ -1,0 +1,80 @@
+{
+  "name": "Magnet Market - Ηλεκτρονικό Κατάστημα Τεχνολογίας",
+  "short_name": "Magnet Market",
+  "description": "Ανακάλυψε τις καλύτερες τιμές σε προϊόντα τεχνολογίας, laptops και smartphones.",
+  "lang": "el",
+  "dir": "ltr",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#6e276f",
+  "icons": [
+    {
+      "src": "/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Magnet Market Mobile App"
+    },
+    {
+      "src": "/screenshot-desktop.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Magnet Market Desktop Version"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Το Καλάθι μου",
+      "short_name": "Καλάθι",
+      "description": "Δείτε τα προϊόντα στο καλάθι σας",
+      "url": "/cart",
+      "icons": [
+        {
+          "src": "/web-app-manifest-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Προσφορές",
+      "short_name": "Προσφορές",
+      "description": "Δείτε τις τελευταίες προσφορές μας",
+      "url": "/offers",
+      "icons": [
+        {
+          "src": "/web-app-manifest-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Αναζήτηση",
+      "short_name": "Αναζήτηση",
+      "description": "Αναζητήστε προϊόντα τεχνολογίας",
+      "url": "/search",
+      "icons": [
+        {
+          "src": "/web-app-manifest-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

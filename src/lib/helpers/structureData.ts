@@ -1,70 +1,42 @@
-export const organizationStructuredData = {
-  "@context": "https://schema.org",
-  "@type": ["Organization", "OnlineBusiness"], // Use both types for better coverage
-  "name": "ΨΗΦΙΑΚΟΙ ΟΡΙΖΟΝΤΕΣ Ο.Ε.",
-  "legalName": "ΨΗΦΙΑΚΟΙ ΟΡΙΖΟΝΤΕΣ Ο.Ε.",
-  "alternateName": "Magnet Market",
-  "description": "Ηλεκτρονικό κατάστημα ειδών τεχνολογίας",
-  "url": "https://magnetmarket.gr",
-  "logo": "https://magnetmarket.gr/MARKET MAGNET-LOGO.png", // Add absolute path to your logo
-  "image": "https://magnetmarket.gr/MM-LOGO-220-02.jpg", // Add main image
-  "email": "info@magnetmarket.gr",
-  "telephone": "+30-2221121657", // Add country code
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "Απολλόδωρου του Κυζικηνού",
-    "addressLocality": "Νέα Αρτάκη",
-    "addressCountry": "GR",
-    "addressRegion": "Ευβοίας",
-    "postalCode": "34600"
+import type { OfferShippingDetails, Organization, Store } from 'schema-dts';
+
+export const organizationStructuredData: Organization = {
+  '@type': 'Organization',
+  '@id': 'https://magnetmarket.gr/#organization',
+
+  name: 'ΨΗΦΙΑΚΟΙ ΟΡΙΖΟΝΤΕΣ Ο.Ε.',
+  legalName: 'ΨΗΦΙΑΚΟΙ ΟΡΙΖΟΝΤΕΣ Ο.Ε.',
+  alternateName: 'Magnet Market',
+  description: 'Ηλεκτρονικό κατάστημα ειδών τεχνολογίας',
+
+  url: 'https://magnetmarket.gr',
+  logo: 'https://magnetmarket.gr/MARKET%20MAGNET-LOGO.png',
+  image: 'https://magnetmarket.gr/MM-LOGO-220-02.jpg',
+
+  email: 'info@magnetmarket.gr',
+  telephone: '+30-2221121657',
+  vatID: "801632015",
+  taxID: "801632015",
+
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Απολλόδωρου του Κυζικηνού',
+    addressLocality: 'Νέα Αρτάκη',
+    addressRegion: 'Ευβοίας',
+    postalCode: '34600',
+    addressCountry: 'GR',
   },
-  "geo": {
-    "@type": "GeoCoordinates",
-    "latitude": 38.512482,
-    "longitude": 23.638548
-  },
-  "openingHoursSpecification": [
-    {
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday"
-      ],
-      "opens": "09:00",
-      "closes": "17:00"
-    },
-    {
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": "Saturday",
-      "opens": "11:00",
-      "closes": "14:00"
-    }
-  ],
-  "vatID": "801632015",
-  "taxID": "801632015",
-  "sameAs": [
-    "https://www.facebook.com/magnetmarket.gr/",
-    "https://www.instagram.com/magnetmarket.gr/",
-    "https://www.skroutz.gr/shop/20095/Magnet-Market",
-    "https://www.skroutz.cy/shop/20095/Magnet-Market",
-    "https://shopflix.gr/merchants/MER814/magnet-market",
-    "https://www.xo.gr/profile/profile-911678212/el/",
-    "https://www.vrisko.gr/details/170iag2kbj5c2a_f2j_g_5407_364346",
-    "https://www.bestprice.gr/m/12328/magnet-market.html"
-  ],
-  "hasMerchantReturnPolicy": {
+
+  hasMerchantReturnPolicy: {
     "@type": "MerchantReturnPolicy",
-    "applicableCountry": "GR",
-    "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-    "merchantReturnDays": 14,
-    "returnMethod": "https://schema.org/ReturnByMail",
-    "returnFees": "https://schema.org/FreeReturn"
+    applicableCountry: "GR",
+    returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+    merchantReturnDays: 14,
+    returnMethod: "https://schema.org/ReturnByMail",
+    returnFees: "https://schema.org/FreeReturn"
   },
-  "priceRange": "€€", // Add price range indicator
-  "founders": [ // Optional but good for local business
+
+  founders: [ // Optional but good for local business
     {
       "@type": "Person",
       "name": "Κουλογιάννης Κωνσταντίνος" // Add actual founder name if available
@@ -73,31 +45,115 @@ export const organizationStructuredData = {
       "@type": "Person",
       "name": "Μητράκος Γιώργος" // Add actual founder name if available
     }
-  ]
+  ],
+
+  sameAs: [
+    'https://www.facebook.com/magnetmarket.gr/',
+    'https://www.instagram.com/magnetmarket.gr/',
+    'https://www.skroutz.gr/shop/20095/Magnet-Market',
+    'https://www.bestprice.gr/m/12328/magnet-market.html',
+    'https://shopflix.gr/merchants/MER814/magnet-market',
+    'https://www.xo.gr/profile/profile-911678212/el/',
+    'https://www.vrisko.gr/details/170iag2kbj5c2a_f2j_g_5407_364346',
+  ],
 };
 
-export const localBusinessStructuredData = {
-  "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  "name": "Magnet Market",
-  "description": "Ηλεκτρονικό κατάστημα ειδών τεχνολογίας",
-  "url": "https://magnetmarket.gr",
-  "telephone": "+30-2221121657",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "Απολλόδωρου του Κυζικηνού",
-    "addressLocality": "Νέα Αρτάκη",
-    "addressCountry": "GR",
-    "postalCode": "34600"
+export const storeStructuredData: Store = {
+  '@type': 'Store',
+  '@id': 'https://magnetmarket.gr/#store',
+
+  name: 'Magnet Market',
+  url: 'https://magnetmarket.gr',
+
+  parentOrganization: {
+    '@id': 'https://magnetmarket.gr/#organization',
   },
-  "geo": {
-    "@type": "GeoCoordinates",
-    "latitude": 38.512482,
-    "longitude": 23.638548
+
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Απολλόδωρου του Κυζικηνού',
+    addressLocality: 'Νέα Αρτάκη',
+    postalCode: '34600',
+    addressCountry: 'GR',
   },
-  "openingHours": [
-    "Mo-Fr 09:00-17:00",
-    "Sa 11:00-14:00"
+
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '09:00',
+      closes: '17:00',
+    },
   ],
-  "priceRange": "€€"
+
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: 38.512482,
+    longitude: 23.638548,
+  },
+
+  priceRange: '€€',
+};
+
+// Χερσαίοι προορισμοί
+export const mainlandShipping: OfferShippingDetails = {
+  '@type': 'OfferShippingDetails',
+  shippingDestination: {
+    '@type': 'DefinedRegion',
+    addressCountry: 'GR',
+    name: 'Mainland Greece', // Προαιρετικό
+  },
+  shippingRate: {
+    '@type': 'MonetaryAmount',
+    value: '4.5',
+    currency: 'EUR',
+  },
+  deliveryTime: {
+    '@type': 'ShippingDeliveryTime',
+    handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' },
+    transitTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 3, unitCode: 'DAY' },
+  },
+  description: 'Ισχύει για πακέτα έως 3 κιλά',
+};
+
+// Νησιωτικοί προορισμοί
+export const islandsShipping: OfferShippingDetails = {
+  '@type': 'OfferShippingDetails',
+  shippingDestination: {
+    '@type': 'DefinedRegion',
+    addressCountry: 'GR',
+    name: 'Greek Islands',
+  },
+  shippingRate: {
+    '@type': 'MonetaryAmount',
+    value: '5.5',
+    currency: 'EUR',
+  },
+  deliveryTime: {
+    '@type': 'ShippingDeliveryTime',
+    handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' },
+    transitTime: { '@type': 'QuantitativeValue', minValue: 2, maxValue: 4, unitCode: 'DAY' },
+  },
+  description: 'Ισχύει για πακέτα έως 3 κιλά',
+};
+
+// Δυσπρόσιτοι προορισμοί
+export const remoteShipping: OfferShippingDetails = {
+  '@type': 'OfferShippingDetails',
+  shippingDestination: {
+    '@type': 'DefinedRegion',
+    addressCountry: 'GR',
+    name: 'Remote Areas',
+  },
+  shippingRate: {
+    '@type': 'MonetaryAmount',
+    value: '7.5',
+    currency: 'EUR',
+  },
+  deliveryTime: {
+    '@type': 'ShippingDeliveryTime',
+    handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' },
+    transitTime: { '@type': 'QuantitativeValue', minValue: 3, maxValue: 6, unitCode: 'DAY' },
+  },
+  description: 'Ισχύει για πακέτα έως 3 κιλά',
 };

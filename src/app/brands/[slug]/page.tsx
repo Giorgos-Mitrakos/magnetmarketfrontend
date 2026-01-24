@@ -1,13 +1,18 @@
+// app/brands/[slug]/page.tsx - OPTIMIZED VERSION
+
+import { Metadata, ResolvingMetadata } from "next"
 import Breadcrumb from "@/components/molecules/breadcrumb"
 import PaginationBar from "@/components/molecules/pagination"
 import BrandFilters from "@/components/organisms/brandFilters"
 import CategoryPageHeader from "@/components/organisms/categoryPageHeader"
 import MobileBrandFilters from "@/components/organisms/mobileBrandFilters"
 import ProductCard from "@/components/organisms/productCard"
-import { organizationStructuredData } from "@/lib/helpers/structureData"
-import { IProductCard, IProductPage } from "@/lib/interfaces/product"
-import { Metadata, ResolvingMetadata } from "next"
-import Script from "next/script"
+import { generateBrandProductsStructuredData } from "@/lib/helpers/structuredDataHelpers"
+import { IProductCard } from "@/lib/interfaces/product"
+
+export const revalidate = 600 // Revalidate κάθε 10 λεπτά
+
+/* ==================== Types ==================== */
 
 type SearchParamsProps = {
     [key: string]: string | string[] | undefined
@@ -18,187 +23,326 @@ type MetadataProps = {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-async function getBrandProducts({ brand, searchParams }: {
-    brand: string,
-    searchParams: SearchParamsProps
-}) {
+type PageProps = {
+    params: Promise<{ slug: string }>
+    searchParams: Promise<SearchParamsProps>
+}
 
+interface BrandProductsResponse {
+    products: IProductCard[]
+    meta: {
+        pagination: {
+            total: number
+            page: number
+            pageSize: number
+            pageCount: number
+        }
+    }
+    filters: Array<{
+        title: string
+        filterBy: string
+        filterValues: Array<{
+            name: string
+            slug: string
+            numberOfItems: number
+        }>
+    }>
+    brandInfo?: {
+        name: string
+        description?: string
+        logo?: { url: string; alternativeText?: string }
+    }
+}
+
+/* ==================== Data Fetching ==================== */
+
+async function getBrandProducts({
+    brand,
+    searchParams,
+}: {
+    brand: string
+    searchParams: SearchParamsProps
+}): Promise<BrandProductsResponse> {
     const { sort, page, pageSize, Κατηγορίες } = searchParams
 
-    // Smart caching - διαφορετικό cache time ανάλογα με το context
-    let cacheTime = 900; // Default 15 λεπτά
+    // Smart caching strategy
+    let cacheTime = 900 // Default 15 λεπτά
 
-    // Πρώτη σελίδα cache περισσότερο (πιο σημαντική για SEO)
     if (!page || page === '1') {
-        cacheTime = 600; // 10 λεπτά για την πρώτη σελίδα
+        cacheTime = 600 // 10 λεπτά για πρώτη σελίδα
     }
 
-    // Φιλτραρισμένα αποτελέσματα cache λιγότερο (πιο δυναμικά)
     if (Κατηγορίες || (sort && sort !== 'price:asc')) {
-        cacheTime = 300; // 5 λεπτά για φιλτραρισμένα
+        cacheTime = 300 // 5 λεπτά για φιλτραρισμένα
     }
 
-    // Σελίδες μετά την πρώτη cache λιγότερο
     if (page && Number(page) > 1) {
-        cacheTime = 600; // 10 λεπτά για επόμενες σελίδες
+        cacheTime = 600 // 10 λεπτά για επόμενες σελίδες
     }
 
-
-    const myHeaders = new Headers();
-
+    const myHeaders = new Headers()
     myHeaders.append('Content-Type', 'application/json')
-    myHeaders.append('Authorization', `Bearer ${process.env.ADMIN_JWT_SECRET}`,)
+    myHeaders.append('Authorization', `Bearer ${process.env.ADMIN_JWT_SECRET}`)
 
-    const myInit = {
-        method: "POST",
-        headers: myHeaders,
-        body: JSON.stringify({
-            brand: brand,
-            searchParams: { sort, page, pageSize, Κατηγορίες }
-        }),
-        next: { 
-            revalidate: cacheTime, // Χρήση της μεταβλητής cacheTime
+    const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/brands/getBrandProducts`,
+        {
+            method: 'POST',
+            headers: myHeaders,
+            body: JSON.stringify({
+                brand: brand,
+                searchParams: { sort, page, pageSize, Κατηγορίες },
+            }),
+            next: {
+                revalidate: cacheTime,
+            },
         }
-    };
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/brands/getBrandProducts`,
-        myInit,
     )
 
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`)
     }
 
-    const data = await response.json();
-
-    return data as {
-        products: IProductCard[],
-        meta: { pagination: { total: number, page: number, pageSize: number, pageCount: number } },
-        filters: {
-            title: string,
-            filterBy:string,
-            filterValues: {
-                name: string,
-                slug: string,
-                numberOfItems: number
-            }[]
-        }[]
-    }
+    return await response.json()
 }
 
-export default async function SearchPage({ params, searchParams }:
-    {
-        params: Promise<{ slug: string }>,
-        searchParams: Promise<SearchParamsProps>
-    }) {
+/* ==================== Page Component ==================== */
 
-    // Await για τα params και searchParams
-    const resolvedParams = await params;
-    const resolvedSearchParams = await searchParams;
+export default async function BrandProductsPage({
+    params,
+    searchParams,
+}: PageProps) {
+    const resolvedParams = await params
+    const resolvedSearchParams = await searchParams
 
-    const response = await getBrandProducts({ 
-        brand: resolvedParams.slug, 
-        searchParams: resolvedSearchParams 
+    const response = await getBrandProducts({
+        brand: resolvedParams.slug,
+        searchParams: resolvedSearchParams,
     })
 
+    const currentPage = Number(resolvedSearchParams.page) || 1
+    const brandName = resolvedParams.slug.toUpperCase()
+
+    // Breadcrumbs
     const breadcrumbs = [
         {
-            title: "Home",
-            slug: "/"
+            title: 'Home',
+            slug: '/',
         },
         {
-            title: "Brands",
-            slug: "/brands"
+            title: 'Κατασκευαστές',
+            slug: '/brands',
         },
         {
-            title: resolvedParams.slug.toUpperCase(),
-            slug: `/brands/${resolvedParams.slug}`
-        }
+            title: brandName,
+            slug: `/brands/${resolvedParams.slug}`,
+        },
     ]
 
-    const BreadcrumbList = breadcrumbs.map((breabcrumb, i) => ({
-        "@type": "ListItem",
-        "position": i + 1,
-        "name": breabcrumb.title,
-        "item": `${process.env.NEXT_URL}${breabcrumb.slug}`
-    }))
-
-    const BreadcrumbStructuredData = {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": BreadcrumbList
-    }
-
-    const structuredData = []
-    structuredData.push(BreadcrumbStructuredData)
-    structuredData.push(organizationStructuredData)
-
     return (
-        <>
-            <Script
-                id="structured-data"
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-            />
+        <div className="min-h-screen">
             <Breadcrumb breadcrumbs={breadcrumbs} />
-            <h1 className="w-full mt-8 text-2xl font-semibold text-center text-siteColors-purple dark:text-slate-300">
-                {breadcrumbs[breadcrumbs.length - 1].title}
-            </h1>
-            <div className="grid pt-4 w-full bg-white dark:bg-slate-800">
+
+            {/* Page Header */}
+            <header className="w-full mt-8 mb-6 text-center">
+                <h1 className="text-3xl md:text-4xl font-bold text-siteColors-purple dark:text-siteColors-pink mb-2">
+                    Προϊόντα {brandName}
+                </h1>
+                <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    Ανακαλύψτε {response.meta.pagination.total} προϊόντα από {brandName} με εγγύηση ελληνικής αντιπροσωπείας
+                </p>
+            </header>
+
+            {/* Main Content */}
+            <div 
+              className="grid pt-4 w-full bg-white dark:bg-slate-800"
+              itemScope
+              itemType="https://schema.org/CollectionPage"
+            >
                 <div className="grid lg:grid-cols-4 gap-4">
-                    <div className="hidden lg:flex lg:flex-col bg-slate-100 dark:bg-slate-700 p-4 rounded">
+                    {/* Desktop Filters */}
+                    <aside 
+                      className="hidden lg:flex lg:flex-col bg-slate-100 dark:bg-slate-700 p-4 rounded"
+                      aria-label="Φίλτρα προϊόντων"
+                    >
                         <BrandFilters filters={response.filters} />
-                    </div>
+                    </aside>
+
+                    {/* Products Grid */}
                     <div className="flex flex-col pr-4 col-span-3 w-full">
                         <CategoryPageHeader totalItems={response.meta.pagination.total} />
-                        <section className="grid gap-1 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 place-content-center">
-                            {response.products.map(product => (
-                                <div key={product.id}>
-                                    <ProductCard product={product} />
+                        
+                        <section 
+                          className="grid gap-1 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 place-content-center"
+                          aria-label={`Προϊόντα ${brandName}`}
+                        >
+                            {response.products.length > 0 ? (
+                                response.products.map((product) => (
+                                    <article key={product.id}>
+                                        <ProductCard product={product} />
+                                    </article>
+                                ))
+                            ) : (
+                                <div className="col-span-full text-center py-12">
+                                    <p className="text-gray-500 dark:text-gray-400 text-lg">
+                                        Δεν βρέθηκαν προϊόντα για αυτά τα φίλτρα
+                                    </p>
                                 </div>
-                            ))}
+                            )}
                         </section>
+
+                        {/* Mobile Filters */}
                         <MobileBrandFilters filters={response.filters} />
-                        <PaginationBar 
-                            totalItems={response.meta.pagination.total}
-                            currentPage={response.meta.pagination.page}
-                            itemsPerPage={response.meta.pagination.pageSize} 
-                        />
+
+                        {/* Pagination */}
+                        {response.meta.pagination.pageCount > 1 && (
+                            <PaginationBar
+                                totalItems={response.meta.pagination.total}
+                                currentPage={response.meta.pagination.page}
+                                itemsPerPage={response.meta.pagination.pageSize}
+                            />
+                        )}
                     </div>
                 </div>
             </div>
-        </>
+
+            {/* SEO Content */}
+            {currentPage === 1 && (
+                <aside className="mt-16 prose prose-lg dark:prose-invert max-w-4xl mx-auto px-4">
+                    <h2 className="text-2xl font-bold text-siteColors-purple dark:text-siteColors-pink mb-4">
+                        Γιατί να επιλέξετε {brandName};
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-300">
+                        Η {brandName} είναι ένας από τους κορυφαίους κατασκευαστές στον τομέα της τεχνολογίας. 
+                      Στο Magnet Market θα βρείτε την πλήρη γκάμα προϊόντων {brandName} με εγγύηση ελληνικής 
+                      αντιπροσωπείας, άμεση διαθεσιμότητα και τις καλύτερες τιμές της αγοράς.
+                    </p>
+                </aside>
+            )}
+        </div>
     )
 }
+
+/* ==================== Metadata ==================== */
 
 export async function generateMetadata(
     { params, searchParams }: MetadataProps,
     parent: ResolvingMetadata
 ): Promise<Metadata> {
+    const resolvedParams = await params
+    const resolvedSearchParams = await searchParams
 
-    // Await για τα params
-    const resolvedParams = await params;
+    const response = await getBrandProducts({
+        brand: resolvedParams.slug,
+        searchParams: resolvedSearchParams,
+    })
 
-    let metadata: Metadata = {
-        title: `Magnet Μarket - Προϊόντα ${resolvedParams.slug.toUpperCase()}`,
-        description: 'Μην το ψάχνεις εδώ θα βρεις τις καλύτερες τίμες σε υπολογιστές, laptop, smartwatch, κάμερες, εκτυπωτές, οθόνες, τηλεοράσεις, κ.α.',
-        keywords: "Computers, Laptops, Notebooks, laptop, Computer, Hardware, Notebook, Peripherals, Greece, Technology, Mobile phones, Laptops, PCs, Scanners, Printers, Modems, Monitors, Software, Antivirus, Windows, Intel Chipsets, AMD, HP, LOGITECH, ACER, TOSHIBA, SAMSUNG, Desktop, Servers, Telephones, DVD, CD, DVDR, CDR, DVD-R, CD-R, periferiaka, Systems, MP3, Υπολογιστής, ΥΠΟΛΟΓΙΣΤΗΣ, ΠΕΡΙΦΕΡΕΙΑΚΑ, περιφερειακά, Χαλκίδα, ΧΑΛΚΙΔΑ, Ελλάδα, ΕΛΛΑΔΑ, Τεχνολογία, τεχνολογία, ΤΕΧΝΟΛΟΓΙΑ, κινητό, ΚΙΝΗΤΟ, κινητά, ΚΙΝΗΤΑ, οθόνη, ΟΘΟΝΗ, οθόνες, ΟΘΟΝΕΣ, ΕΚΤΥΠΩΤΕΣ, εκτυπωτές, σαρωτές, ΣΑΡΩΤΕΣ, εκτυπωτής",
-        alternates: {
-            canonical: `${process.env.NEXT_URL}/brands/${resolvedParams.slug}`,
+    const currentPage = Number(resolvedSearchParams.page) || 1
+    const brandName = resolvedParams.slug.toUpperCase()
+    const baseUrl = process.env.NEXT_URL || 'https://magnetmarket.gr'
+    const pageUrl = `${baseUrl}/brands/${resolvedParams.slug}`
+    const fullUrl = currentPage > 1 ? `${pageUrl}?page=${currentPage}` : pageUrl
+
+    // Title με pagination
+    const title = currentPage > 1
+        ? `${brandName} Προϊόντα - Σελίδα ${currentPage} | Magnet Market`
+        : `${brandName} Προϊόντα | Magnet Market`
+
+    // Description
+    const description = `Ανακαλύψτε ${response.meta.pagination.total} προϊόντα ${brandName} στο Magnet Market. Laptops, υπολογιστές, περιφερειακά και άλλα με εγγύηση ελληνικής αντιπροσωπείας στις καλύτερες τιμές.`
+
+    // Extract available categories για keywords
+    const availableCategories = response.filters
+        .find((f) => f.filterBy === 'Κατηγορίες')
+        ?.filterValues.map((v) => v.name) || []
+
+    // ✅ Check αν η σελίδα έχει φίλτρα
+    const hasFilters = resolvedSearchParams.Κατηγορίες !== undefined
+    const isFirstPage = currentPage === 1
+
+    /* -------------------- Structured Data -------------------- */
+    const structuredData = generateBrandProductsStructuredData({
+        brandName,
+        brandSlug: resolvedParams.slug,
+        products: response.products,
+        currentPage,
+        totalPages: response.meta.pagination.pageCount,
+        baseUrl: fullUrl,
+        availableCategories,
+    })
+
+    /* -------------------- Metadata Object -------------------- */
+    return {
+        title,
+        description,
+
+        keywords: [
+            brandName,
+            'προϊόντα',
+            'τεχνολογία',
+            ...availableCategories.slice(0, 10),
+            'laptops',
+            'υπολογιστές',
+            'περιφερειακά',
+            'Χαλκίδα',
+            'εγγύηση ελληνικής αντιπροσωπείας',
+        ].join(', '),
+
+        robots: {
+            // ✅ ΣΗΜΑΝΤΙΚΟ: noindex για φιλτραρισμένες σελίδες
+            index: !hasFilters, // Μόνο η κύρια σελίδα indexάρεται
+            follow: true, // Πάντα follow για να ανακαλύψει products
+            googleBot: {
+                index: !hasFilters,
+                follow: true,
+                'max-image-preview': 'large',
+                'max-snippet': -1,
+            },
         },
+
+        alternates: {
+            // ✅ ΣΩΣΤΟ: Canonical πάντα στο base URL (χωρίς φίλτρα)
+            // Μόνο το pagination παραμένει
+            canonical: currentPage > 1 ? `${pageUrl}?page=${currentPage}` : pageUrl,
+            
+            ...(currentPage > 1 && {
+                // @ts-ignore
+                prev: currentPage === 2 ? pageUrl : `${pageUrl}?page=${currentPage - 1}`,
+            }),
+            ...(currentPage < response.meta.pagination.pageCount && {
+                // @ts-ignore
+                next: `${pageUrl}?page=${currentPage + 1}`,
+            }),
+        },
+
         openGraph: {
-            url: 'www.magnetmarket.gr',
+            title,
+            description,
+            url: fullUrl,
+            siteName: 'Magnet Market',
+            locale: 'el_GR',
             type: 'website',
-            images: [`${process.env.NEXT_URL}/_next/static/media/MARKET MAGNET-LOGO.79db5357.svg`],
-            siteName: "www.magnetmarket.gr",
-            emails: ["info@magnetmarket.gr"],
-            phoneNumbers: ['2221121657'],
-            countryName: 'Ελλάδα',
-        }
+            // Uncomment όταν δημιουργήσεις brand-specific OG images
+            // images: [
+            //   {
+            //     url: `${baseUrl}/og-brand-${resolvedParams.slug}.jpg`,
+            //     width: 1200,
+            //     height: 630,
+            //     alt: `${brandName} Προϊόντα - Magnet Market`,
+            //   },
+            // ],
+        },
+
+        twitter: {
+            card: 'summary_large_image',
+            title,
+            description,
+            // images: [`${baseUrl}/og-brand-${resolvedParams.slug}.jpg`],
+        },
+
+        // Structured Data
+        other: {
+            'application/ld+json': JSON.stringify(structuredData),
+        },
     }
-
-    return metadata
 }
-
-// ΑΦΑΙΡΕΣΗ του force-static αφού χρησιμοποιούμε searchParams
-// export const dynamic = 'force-static';

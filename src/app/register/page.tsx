@@ -1,65 +1,148 @@
+// src/app/register/page.tsx
 
-import { organizationStructuredData } from '@/lib/helpers/structureData';
-import Script from 'next/script';
-import { Metadata } from 'next';
-import RegisterComp from '@/components/organisms/registerComp';
+import { Metadata } from 'next'
+import RegisterComp from '@/components/organisms/registerComp'
+import { 
+  organizationStructuredData, 
+  storeStructuredData 
+} from '@/lib/helpers/structureData'
+import type { 
+  BreadcrumbList, 
+  WebPage, 
+  WebSite 
+} from 'schema-dts'
 
-export default function Register() {
+const BASE_URL = process.env.NEXT_URL || 'https://magnetmarket.gr'
 
-    const breadcrumbs = [
-        {
-            title: "Home",
-            slug: "/"
-        },
-        {
-            title: "Εγγραφή",
-            slug: "/register"
-        }
-    ]
+/* -------------------------------------------------------------------------- */
+/*                          Structured Data (Module Level)                     */
+/* -------------------------------------------------------------------------- */
 
-    const BreadcrumbList = breadcrumbs.map((breabcrumb, i) => ({
-        "@type": "ListItem",
-        "position": i + 1,
-        "name": breabcrumb.title,
-        "item": `${process.env.NEXT_URL}${breabcrumb.slug}`
-    }))
-
-    const BreadcrumbStructuredData = {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": BreadcrumbList
-    }
-
-    const structuredData = []
-    structuredData.push(BreadcrumbStructuredData)
-    structuredData.push(organizationStructuredData)
-
-    return (
-        <>
-            <Script
-                id="structured-data"
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-            />
-            <RegisterComp />
-        </>
-    )
+// WebSite
+const websiteNode: WebSite = {
+  '@type': 'WebSite',
+  '@id': `${BASE_URL}/#website`,
+  url: BASE_URL,
+  name: 'Magnet Market',
+  publisher: {
+    '@id': `${BASE_URL}/#organization`,
+  },
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: `${BASE_URL}/search?q={search_term_string}`,
+    },
+    // @ts-ignore - query-input is valid but not in types
+    'query-input': 'required name=search_term_string',
+  },
 }
 
-export const metadata: Metadata = {
-    title: 'Magnet Μarket - Η τεχνολογία στο δικό σου πεδίο! - Εγγραφή',
-    description: 'Μην το ψάχνεις, κάνε εγγραφή και αγόρασε στις καλύτερες τίμες, υπολογιστές, laptop, smartwatch, κάμερες, εκτυπωτές, οθόνες, τηλεοράσεις, gadgets κ.α.',
-    keywords: "Computers, Laptops, Notebooks, laptop, Computer, Hardware, Notebook, Peripherals, Greece, Technology, Mobile phones, Laptops, PCs, Scanners, Printers, Modems, Monitors, Software, Antivirus, Windows, Intel Chipsets, AMD, HP, LOGITECH, ACER, TOSHIBA, SAMSUNG, Desktop, Servers, Telephones, DVD, CD, DVDR, CDR, DVD-R, CD-R, periferiaka, Systems, MP3, Υπολογιστής, ΥΠΟΛΟΓΙΣΤΗΣ, ΠΕΡΙΦΕΡΕΙΑΚΑ, περιφερειακά, Χαλκίδα, ΧΑΛΚΙΔΑ, Ελλάδα, ΕΛΛΑΔΑ, Τεχνολογία, τεχνολογία, ΤΕΧΝΟΛΟΓΙΑ, κινητό, ΚΙΝΗΤΟ, κινητά, ΚΙΝΗΤΑ, οθόνη, ΟΘΟΝΗ, οθόνες, ΟΘΟΝΕΣ, ΕΚΤΥΠΩΤΕΣ, εκτυπωτές, σαρωτές, ΣΑΡΩΤΕΣ, εκτυπωτής",
-    alternates: {
-        canonical: `${process.env.NEXT_URL}/register`,
+// BreadcrumbList
+const breadcrumbList: BreadcrumbList = {
+  '@type': 'BreadcrumbList',
+  '@id': `${BASE_URL}/register#breadcrumb`,
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Home',
+      item: BASE_URL,
     },
-    openGraph: {
-        url: 'magnetmarket.gr/register',
-        type: 'website',
-        images: [`${process.env.NEXT_URL}/_next/static/media/MARKET MAGNET-LOGO.79db5357.svg`],
-        siteName: "magnetmarket.gr",
-        emails: ["info@magnetmarket.gr"],
-        phoneNumbers: ['2221121657'],
-        countryName: 'Ελλάδα',
-    }
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'Εγγραφή',
+      item: `${BASE_URL}/register`,
+    },
+  ],
+}
+
+// WebPage
+const webPage: WebPage = {
+  '@type': 'WebPage',
+  '@id': `${BASE_URL}/register#webpage`,
+  url: `${BASE_URL}/register`,
+  name: 'Εγγραφή Νέου Λογαριασμού',
+  description: 'Δημιουργήστε λογαριασμό για να απολαμβάνετε τις υπηρεσίες μας',
+  isPartOf: {
+    '@id': `${BASE_URL}/#website`,
+  },
+  about: {
+    '@id': `${BASE_URL}/#organization`,
+  },
+  breadcrumb: {
+    '@id': `${BASE_URL}/register#breadcrumb`,
+  },
+  inLanguage: 'el-GR',
+}
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    organizationStructuredData,
+    storeStructuredData,
+    websiteNode,
+    breadcrumbList,
+    webPage,
+  ],
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                  Page                                       */
+/* -------------------------------------------------------------------------- */
+
+export default function Register() {
+  return <RegisterComp />
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                Metadata                                     */
+/* -------------------------------------------------------------------------- */
+
+export const metadata: Metadata = {
+  title: 'Εγγραφή Νέου Λογαριασμού | Magnet Market',
+  description: 'Δημιουργήστε δωρεάν λογαριασμό στο Magnet Market και αγοράστε υπολογιστές, laptops, smartphones και άλλα προϊόντα τεχνολογίας στις καλύτερες τιμές.',
+  keywords: 'εγγραφή, δημιουργία λογαριασμού, magnet market, νέος λογαριασμός, register',
+  
+  robots: {
+    index: false, // ❌ NO indexing - auth pages
+    follow: true,
+  },
+
+  alternates: {
+    canonical: `${BASE_URL}/register`,
+  },
+
+  openGraph: {
+    title: 'Εγγραφή Νέου Λογαριασμού | Magnet Market',
+    description: 'Δημιουργήστε δωρεάν λογαριασμό για να απολαμβάνετε τις υπηρεσίες μας',
+    url: `${BASE_URL}/register`,
+    siteName: 'magnetmarket.gr',
+    type: 'website',
+    locale: 'el_GR',
+    images: [
+      {
+        url: `${BASE_URL}/_next/static/media/MARKET MAGNET-LOGO.79db5357.svg`,
+        width: 1200,
+        height: 630,
+        alt: 'Magnet Market Logo',
+      },
+    ],
+  },
+
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Εγγραφή Νέου Λογαριασμού | Magnet Market',
+    description: 'Δημιουργήστε δωρεάν λογαριασμό για να απολαμβάνετε τις υπηρεσίες μας',
+    images: [`${BASE_URL}/_next/static/media/MARKET MAGNET-LOGO.79db5357.svg`],
+  },
+
+  // Additional metadata
+  other: {
+    'contact:email': 'info@magnetmarket.gr',
+    'contact:phone_number': '+30 2221121657',
+    'contact:country': 'GR',
+    'application/ld+json': JSON.stringify(structuredData).replaceAll('&quot;', '"'),
+  },
 }

@@ -1,4 +1,5 @@
 import { IImageAttr, IImageFormats, TadditionalImages, Timage } from "./image"
+import { ProductStatus } from '@/lib/helpers/availabilityHelper';
 
 interface ISeoAttr {
     metaTitle: string
@@ -68,7 +69,7 @@ export interface IProductAttr {
     is_hot: boolean
     inventory: number
     is_in_house: boolean
-    status: string
+    status: ProductStatus
     weight: number
     height: number
     width: number
@@ -131,7 +132,7 @@ export interface IProductPriceProps {
                 sale_price: number
                 is_hot: boolean
                 is_sale: boolean
-                status: string
+                status: ProductStatus
                 is_in_house: boolean
                 inventory: number
             }
@@ -157,7 +158,7 @@ export interface IProductPage {
     is_hot: boolean
     inventory: number
     is_in_house: boolean
-    status: string
+    status: ProductStatus
     weight: number
     height: number
     width: number
@@ -247,7 +248,7 @@ export interface IProductCard {
     is_hot: boolean
     inventory: number
     is_in_house: boolean
-    status: string
+    status: ProductStatus
     weight: number
     category: {
         id: number
@@ -303,6 +304,7 @@ export interface ISimilarProductPage {
     is_hot: boolean
     inventory: number
     is_in_house: boolean
+    status: string
     image: {
         name: string
         alternativeText: string
