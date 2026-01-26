@@ -105,16 +105,28 @@ export default async function CustomPage({ params }: { params: { page: string } 
   const data = await getPageData(params.page)
   const pageData = data.pages.data[0].attributes
 
+  // Generate structured data
+  const structuredData = generatePageStructuredData(pageData.title, params.page)
+
   return (
-    <div className="mx-4 py-12 px-4 bg-slate-50 dark:bg-slate-700 rounded">
-      <h1 className="font-bold text-xl text-center mb-8">
-        {pageData.title}
-      </h1>
-      <div
-        className="lg:mx-20 prose dark:prose-invert max-w-none"
-        dangerouslySetInnerHTML={{ __html: pageData.mainText }}
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ 
+          __html: JSON.stringify(structuredData).replaceAll('&quot;', '"')
+        }}
+        suppressHydrationWarning
       />
-    </div>
+      <div className="mx-4 py-12 px-4 bg-slate-50 dark:bg-slate-700 rounded">
+        <h1 className="font-bold text-xl text-center mb-8">
+          {pageData.title}
+        </h1>
+        <div
+          className="lg:mx-20 prose dark:prose-invert max-w-none"
+          dangerouslySetInnerHTML={{ __html: pageData.mainText }}
+        />
+      </div>
+    </>
   )
 }
 
@@ -126,14 +138,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const data = await getPageData(params.page)
   const pageData = data.pages.data[0].attributes
 
-  // Generate structured data
-  const structuredData = generatePageStructuredData(pageData.title, params.page)
-
   // Determine if page should be indexed based on type
   const noindexPages = ['terms', 'privacy', 'returns', 'payment-methods']
   const shouldIndex = !noindexPages.includes(params.page)
 
-  
   const description = (pageData.mainText || pageData.title)
     .substring(0, 160)
     .trim()
@@ -179,8 +187,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
     },
 
-    other: {
-      'application/ld+json': JSON.stringify(structuredData).replaceAll('&quot;', '"'),
-    },
+    // ΑΦΑΙΡΕΘΗΚΕ το other: { 'application/ld+json' }
   }
 }

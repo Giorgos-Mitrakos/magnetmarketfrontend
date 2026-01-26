@@ -1,5 +1,4 @@
 // app/checkout/success/page.tsx
-
 import { Metadata } from 'next'
 import { getCookies } from '@/lib/helpers/actions'
 import SuccessClient from '@/components/organisms/checkout/SuccessClient'
@@ -7,26 +6,13 @@ import SuccessClient from '@/components/organisms/checkout/SuccessClient'
 const BASE_URL = process.env.NEXT_URL || 'https://magnetmarket.gr'
 
 /* -------------------------------------------------------------------------- */
-/*                          Structured Data (Module Level)                     */
-/* -------------------------------------------------------------------------- */
-
-const orderConfirmationStructuredData = {
-  '@context': 'https://schema.org',
-  '@type': 'OrderConfirmationPage',
-  name: 'Επιβεβαίωση Παραγγελίας',
-  description: 'Η παραγγελία σας ολοκληρώθηκε με επιτυχία',
-  // NO URL - κάθε παραγγελία είναι unique, δεν θέλουμε indexing
-}
-
-/* -------------------------------------------------------------------------- */
 /*                                  Page                                       */
 /* -------------------------------------------------------------------------- */
-
 export default async function ThankYouPage() {
-  // Keep all your existing logic
   const orderCookie = await getCookies({ name: '_mmo' })
   const ApprovalCodeCookie = await getCookies({ name: '_apc' })
   
+  // ℹ️ NO structured data needed - success pages are noindex
   return (
     <SuccessClient 
       orderCookie={orderCookie}
@@ -38,7 +24,6 @@ export default async function ThankYouPage() {
 /* -------------------------------------------------------------------------- */
 /*                                Metadata                                     */
 /* -------------------------------------------------------------------------- */
-
 export const metadata: Metadata = {
   title: 'Ευχαριστούμε για την Παραγγελία | Magnet Market',
   description: 'Η παραγγελία σας ολοκληρώθηκε με επιτυχία. Θα λάβετε email επιβεβαίωσης σύντομα.',
@@ -61,16 +46,11 @@ export const metadata: Metadata = {
   
   // NO OpenGraph - we don't want people sharing order confirmations
   // NO Twitter Cards - private transaction page
-
-  other: {
-    'application/ld+json': JSON.stringify(orderConfirmationStructuredData).replaceAll('&quot;', '"'),
-  },
+  // NO structured data - noindex page
 }
 
 /* -------------------------------------------------------------------------- */
 /*                            Dynamic Configuration                            */
 /* -------------------------------------------------------------------------- */
-
-// Prevent static generation - success page is always dynamic
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

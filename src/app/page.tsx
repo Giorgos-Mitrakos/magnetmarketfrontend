@@ -11,26 +11,7 @@ export const revalidate = 3600 // Revalidate κάθε 1 ώρα
 export default async function Home() {
   const data = await getHomepageData()
   
-  return (
-    <main className="w-full space-y-16">
-      <BlockManager blocks={data.body} />
-      <Newsletter />
-    </main>
-  )
-}
-
-/* ==================== METADATA ==================== */
-
-export async function generateMetadata(): Promise<Metadata> {
-  // Fetch homepage data για dynamic structured data
-  const data = await getHomepageData()
-  
-  const title = 'Magnet Market - Η τεχνολογία στο δικό σου πεδίο!'
-  const description = 'Ανακάλυψε τις καλύτερες τιμές σε υπολογιστές, laptops, smartphones, smartwatches, κάμερες, εκτυπωτές, οθόνες και τηλεοράσεις. Γρήγορη παράδοση σε όλη την Ελλάδα με εγγύηση ελληνικής αντιπροσωπείας.'
-  
-  const baseUrl = process.env.NEXT_URL || 'https://magnetmarket.gr'
-  
-  /* -------------------- Extract Data for Structured Data -------------------- */
+  /* ==================== Structured Data Generation ==================== */
   
   // Extract categories από το CategoriesBanner block
   const categoriesBlock = data.body?.find(
@@ -52,8 +33,6 @@ export async function generateMetadata(): Promise<Metadata> {
     `${process.env.NEXT_PUBLIC_API_URL}${item.image.url}`
   ) || []
   
-  /* -------------------- Structured Data -------------------- */
-  
   const structuredData = generateHomepageStructuredData({
     featuredCategories: featuredCategories.map((cat: any) => ({
       name: cat.name,
@@ -68,7 +47,30 @@ export async function generateMetadata(): Promise<Metadata> {
     heroImages,
   })
   
-  /* -------------------- Metadata Object -------------------- */
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ 
+          __html: JSON.stringify(structuredData) 
+        }}
+        suppressHydrationWarning
+      />
+      <main className="w-full space-y-16">
+        <BlockManager blocks={data.body} />
+        <Newsletter />
+      </main>
+    </>
+  )
+}
+
+/* ==================== METADATA ==================== */
+
+export async function generateMetadata(): Promise<Metadata> {
+  const title = 'Magnet Market - Η τεχνολογία στο δικό σου πεδίο!'
+  const description = 'Ανακάλυψε τις καλύτερες τιμές σε υπολογιστές, laptops, smartphones, smartwatches, κάμερες, εκτυπωτές, οθόνες και τηλεοράσεις. Γρήγορη παράδοση σε όλη την Ελλάδα με εγγύηση ελληνικής αντιπροσωπείας.'
+  
+  const baseUrl = process.env.NEXT_URL || 'https://magnetmarket.gr'
   
   const metadata: Metadata = {
     title,
@@ -169,10 +171,7 @@ export async function generateMetadata(): Promise<Metadata> {
       creator: '@magnetmarket',
     },
     
-    // Structured Data στο other field
-    other: {
-      'application/ld+json': JSON.stringify(structuredData),
-    },
+    // ΑΦΑΙΡΕΘΗΚΕ το other: { 'application/ld+json' }
   }
   
   return metadata

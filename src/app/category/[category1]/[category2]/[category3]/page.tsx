@@ -19,6 +19,7 @@ type PageProps = {
 
 export default async function Category3Page({ params, searchParams }: PageProps) {
     const { category1, category2, category3 } = params
+    const currentPage = Number(searchParams.page) || 1
 
     const response = await getCategoryProducts(
         category1,
@@ -26,19 +27,48 @@ export default async function Category3Page({ params, searchParams }: PageProps)
         searchParams
     )
 
+    const categoryMetadata = await getCategoryMetadata(category3)
+    
+    const baseUrl = `${process.env.NEXT_URL}/category/${category1}/${category2}/${category3}`
+    const fullUrl = currentPage > 1 ? `${baseUrl}?page=${currentPage}` : baseUrl
+    
+    const description = `Ανακάλυψε ${categoryMetadata.name} στο Magnet Market. Εγγύηση ελληνικής αντιπροσωπείας, καλύτερες τιμές, γρήγορη παράδοση.`
+
+    /* ==================== Structured Data ==================== */
+    
+    // Level 3 δεν έχει συνήθως subcategories, άρα μόνο main structured data
+    const mainStructuredData = generateCategoryStructuredData({
+        breadcrumbs: response.breadcrumbs,
+        categoryName: categoryMetadata.name,
+        categoryDescription: description,
+        products: response.products,
+        currentPage,
+        totalPages: response.meta.pagination.pageCount,
+        baseUrl: fullUrl,
+    })
+
     const { availableFilters, products, meta, breadcrumbs, sideMenu } = response
 
     return (
-        <CategoryPageTemplate
-            category1={category1}
-            category2={category2}
-            category3={category3}
-            availableFilters={availableFilters}
-            products={products}
-            meta={meta}
-            sideMenu={sideMenu}
-            breadcrumbs={breadcrumbs}
-        />
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ 
+                    __html: JSON.stringify([mainStructuredData]) 
+                }}
+                suppressHydrationWarning
+            />
+            <CategoryPageTemplate
+                category1={category1}
+                category2={category2}
+                category3={category3}
+                availableFilters={availableFilters}
+                products={products}
+                meta={meta}
+                sideMenu={sideMenu}
+                breadcrumbs={breadcrumbs}
+            />
+        </>
     )
 }
 
@@ -77,17 +107,6 @@ export async function generateMetadata(
 
     const description = `Ανακάλυψε ${response.name} στο Magnet Market. Εγγύηση ελληνικής αντιπροσωπείας, καλύτερες τιμές, γρήγορη παράδοση.`
 
-    // Level 3 δεν έχει συνήθως subcategories, άρα μόνο main structured data
-    const mainStructuredData = generateCategoryStructuredData({
-        breadcrumbs: productsData.breadcrumbs,
-        categoryName: response.name,
-        categoryDescription: description,
-        products: productsData.products,
-        currentPage,
-        totalPages: productsData.meta.pagination.pageCount,
-        baseUrl: fullUrl,
-    })
-
     let metadata: Metadata = {
         title,
         description,
@@ -113,9 +132,7 @@ export async function generateMetadata(
                 next: `${baseUrl}?page=${currentPage + 1}`,
             }),
         },
-        other: {
-            'application/ld+json': JSON.stringify([mainStructuredData]),
-        },
+        // ΑΦΑΙΡΕΘΗΚΕ το other: { 'application/ld+json' }
     }
 
     if (response.image) {

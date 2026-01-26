@@ -58,7 +58,7 @@ export function getAvailabilityInfo(
     if (status === 'LowStock') {
         return {
             message: 'Παράδοση σε 1-3 ημέρες',
-            color: 'amber',
+            color: 'blue',
             isAvailable: true
         };
     }
@@ -76,7 +76,7 @@ export function getAvailabilityInfo(
     if (status === 'IsExpected') {
         return {
             message: 'Αναμένεται',
-            color: 'orange',
+            color: 'amber',
             isAvailable: true
         };
     }

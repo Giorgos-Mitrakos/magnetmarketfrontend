@@ -122,6 +122,25 @@ export default async function BrandProductsPage({
 
     const currentPage = Number(resolvedSearchParams.page) || 1
     const brandName = resolvedParams.slug.toUpperCase()
+    const baseUrl = process.env.NEXT_URL || 'https://magnetmarket.gr'
+    const pageUrl = `${baseUrl}/brands/${resolvedParams.slug}`
+    const fullUrl = currentPage > 1 ? `${pageUrl}?page=${currentPage}` : pageUrl
+
+    // Extract available categories για structured data
+    const availableCategories = response.filters
+        .find((f) => f.filterBy === 'Κατηγορίες')
+        ?.filterValues.map((v) => v.name) || []
+
+    /* -------------------- Structured Data -------------------- */
+    const structuredData = generateBrandProductsStructuredData({
+        brandName,
+        brandSlug: resolvedParams.slug,
+        products: response.products,
+        currentPage,
+        totalPages: response.meta.pagination.pageCount,
+        baseUrl: fullUrl,
+        availableCategories,
+    })
 
     // Breadcrumbs
     const breadcrumbs = [
@@ -140,86 +159,95 @@ export default async function BrandProductsPage({
     ]
 
     return (
-        <div className="min-h-screen">
-            <Breadcrumb breadcrumbs={breadcrumbs} />
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ 
+                    __html: JSON.stringify(structuredData) 
+                }}
+                suppressHydrationWarning
+            />
+            <div className="min-h-screen">
+                <Breadcrumb breadcrumbs={breadcrumbs} />
 
-            {/* Page Header */}
-            <header className="w-full mt-8 mb-6 text-center">
-                <h1 className="text-3xl md:text-4xl font-bold text-siteColors-purple dark:text-siteColors-pink mb-2">
-                    Προϊόντα {brandName}
-                </h1>
-                <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                    Ανακαλύψτε {response.meta.pagination.total} προϊόντα από {brandName} με εγγύηση ελληνικής αντιπροσωπείας
-                </p>
-            </header>
+                {/* Page Header */}
+                <header className="w-full mt-8 mb-6 text-center">
+                    <h1 className="text-3xl md:text-4xl font-bold text-siteColors-purple dark:text-siteColors-pink mb-2">
+                        Προϊόντα {brandName}
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                        Ανακαλύψτε {response.meta.pagination.total} προϊόντα από {brandName} με εγγύηση ελληνικής αντιπροσωπείας
+                    </p>
+                </header>
 
-            {/* Main Content */}
-            <div 
-              className="grid pt-4 w-full bg-white dark:bg-slate-800"
-              itemScope
-              itemType="https://schema.org/CollectionPage"
-            >
-                <div className="grid lg:grid-cols-4 gap-4">
-                    {/* Desktop Filters */}
-                    <aside 
-                      className="hidden lg:flex lg:flex-col bg-slate-100 dark:bg-slate-700 p-4 rounded"
-                      aria-label="Φίλτρα προϊόντων"
-                    >
-                        <BrandFilters filters={response.filters} />
-                    </aside>
-
-                    {/* Products Grid */}
-                    <div className="flex flex-col pr-4 col-span-3 w-full">
-                        <CategoryPageHeader totalItems={response.meta.pagination.total} />
-                        
-                        <section 
-                          className="grid gap-1 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 place-content-center"
-                          aria-label={`Προϊόντα ${brandName}`}
+                {/* Main Content */}
+                <div 
+                  className="grid pt-4 w-full bg-white dark:bg-slate-800"
+                  itemScope
+                  itemType="https://schema.org/CollectionPage"
+                >
+                    <div className="grid lg:grid-cols-4 gap-4">
+                        {/* Desktop Filters */}
+                        <aside 
+                          className="hidden lg:flex lg:flex-col bg-slate-100 dark:bg-slate-700 p-4 rounded"
+                          aria-label="Φίλτρα προϊόντων"
                         >
-                            {response.products.length > 0 ? (
-                                response.products.map((product) => (
-                                    <article key={product.id}>
-                                        <ProductCard product={product} />
-                                    </article>
-                                ))
-                            ) : (
-                                <div className="col-span-full text-center py-12">
-                                    <p className="text-gray-500 dark:text-gray-400 text-lg">
-                                        Δεν βρέθηκαν προϊόντα για αυτά τα φίλτρα
-                                    </p>
-                                </div>
+                            <BrandFilters filters={response.filters} />
+                        </aside>
+
+                        {/* Products Grid */}
+                        <div className="flex flex-col pr-4 col-span-3 w-full">
+                            <CategoryPageHeader totalItems={response.meta.pagination.total} />
+                            
+                            <section 
+                              className="grid gap-1 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 place-content-center"
+                              aria-label={`Προϊόντα ${brandName}`}
+                            >
+                                {response.products.length > 0 ? (
+                                    response.products.map((product) => (
+                                        <article key={product.id}>
+                                            <ProductCard product={product} />
+                                        </article>
+                                    ))
+                                ) : (
+                                    <div className="col-span-full text-center py-12">
+                                        <p className="text-gray-500 dark:text-gray-400 text-lg">
+                                            Δεν βρέθηκαν προϊόντα για αυτά τα φίλτρα
+                                        </p>
+                                    </div>
+                                )}
+                            </section>
+
+                            {/* Mobile Filters */}
+                            <MobileBrandFilters filters={response.filters} />
+
+                            {/* Pagination */}
+                            {response.meta.pagination.pageCount > 1 && (
+                                <PaginationBar
+                                    totalItems={response.meta.pagination.total}
+                                    currentPage={response.meta.pagination.page}
+                                    itemsPerPage={response.meta.pagination.pageSize}
+                                />
                             )}
-                        </section>
-
-                        {/* Mobile Filters */}
-                        <MobileBrandFilters filters={response.filters} />
-
-                        {/* Pagination */}
-                        {response.meta.pagination.pageCount > 1 && (
-                            <PaginationBar
-                                totalItems={response.meta.pagination.total}
-                                currentPage={response.meta.pagination.page}
-                                itemsPerPage={response.meta.pagination.pageSize}
-                            />
-                        )}
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* SEO Content */}
-            {currentPage === 1 && (
-                <aside className="mt-16 prose prose-lg dark:prose-invert max-w-4xl mx-auto px-4">
-                    <h2 className="text-2xl font-bold text-siteColors-purple dark:text-siteColors-pink mb-4">
-                        Γιατί να επιλέξετε {brandName};
-                    </h2>
-                    <p className="text-gray-600 dark:text-gray-300">
-                        Η {brandName} είναι ένας από τους κορυφαίους κατασκευαστές στον τομέα της τεχνολογίας. 
-                      Στο Magnet Market θα βρείτε την πλήρη γκάμα προϊόντων {brandName} με εγγύηση ελληνικής 
-                      αντιπροσωπείας, άμεση διαθεσιμότητα και τις καλύτερες τιμές της αγοράς.
-                    </p>
-                </aside>
-            )}
-        </div>
+                {/* SEO Content */}
+                {currentPage === 1 && (
+                    <aside className="mt-16 prose prose-lg dark:prose-invert max-w-4xl mx-auto px-4">
+                        <h2 className="text-2xl font-bold text-siteColors-purple dark:text-siteColors-pink mb-4">
+                            Γιατί να επιλέξετε {brandName};
+                        </h2>
+                        <p className="text-gray-600 dark:text-gray-300">
+                            Η {brandName} είναι ένας από τους κορυφαίους κατασκευαστές στον τομέα της τεχνολογίας. 
+                          Στο Magnet Market θα βρείτε την πλήρη γκάμα προϊόντων {brandName} με εγγύηση ελληνικής 
+                          αντιπροσωπείας, άμεση διαθεσιμότητα και τις καλύτερες τιμές της αγοράς.
+                        </p>
+                    </aside>
+                )}
+            </div>
+        </>
     )
 }
 
@@ -258,18 +286,6 @@ export async function generateMetadata(
 
     // ✅ Check αν η σελίδα έχει φίλτρα
     const hasFilters = resolvedSearchParams.Κατηγορίες !== undefined
-    const isFirstPage = currentPage === 1
-
-    /* -------------------- Structured Data -------------------- */
-    const structuredData = generateBrandProductsStructuredData({
-        brandName,
-        brandSlug: resolvedParams.slug,
-        products: response.products,
-        currentPage,
-        totalPages: response.meta.pagination.pageCount,
-        baseUrl: fullUrl,
-        availableCategories,
-    })
 
     /* -------------------- Metadata Object -------------------- */
     return {
@@ -340,9 +356,6 @@ export async function generateMetadata(
             // images: [`${baseUrl}/og-brand-${resolvedParams.slug}.jpg`],
         },
 
-        // Structured Data
-        other: {
-            'application/ld+json': JSON.stringify(structuredData),
-        },
+        // ΑΦΑΙΡΕΘΗΚΕ το other: { 'application/ld+json' }
     }
 }

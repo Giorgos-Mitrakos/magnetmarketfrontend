@@ -1,5 +1,4 @@
 // app/newsletter/subscribe/page.tsx
-
 import { Metadata } from 'next'
 import { 
   organizationStructuredData, 
@@ -15,82 +14,94 @@ import SubscribeClient from '@/components/organisms/newsletter/subscribe-client'
 const BASE_URL = process.env.NEXT_URL || 'https://magnetmarket.gr'
 
 /* -------------------------------------------------------------------------- */
-/*                          Structured Data (Module Level)                     */
+/*                          Structured Data Helper                             */
 /* -------------------------------------------------------------------------- */
-
-// WebSite
-const websiteNode: WebSite = {
-  '@type': 'WebSite',
-  '@id': `${BASE_URL}/#website`,
-  url: BASE_URL,
-  name: 'Magnet Market',
-  publisher: {
-    '@id': `${BASE_URL}/#organization`,
-  },
-}
-
-// BreadcrumbList
-const breadcrumbList: BreadcrumbList = {
-  '@type': 'BreadcrumbList',
-  '@id': `${BASE_URL}/newsletter/subscribe#breadcrumb`,
-  itemListElement: [
-    {
-      '@type': 'ListItem',
-      position: 1,
-      name: 'Home',
-      item: BASE_URL,
-    },
-    {
-      '@type': 'ListItem',
-      position: 2,
-      name: 'Newsletter',
-      item: `${BASE_URL}/newsletter/subscribe`,
-    },
-  ],
-}
-
-// WebPage
-const webPage: WebPage = {
-  '@type': 'WebPage',
-  '@id': `${BASE_URL}/newsletter/subscribe#webpage`,
-  url: `${BASE_URL}/newsletter/subscribe`,
-  name: 'Εγγραφή στο Newsletter',
-  description: 'Εγγραφείτε στο newsletter μας για να λαμβάνετε αποκλειστικές προσφορές και νέα',
-  isPartOf: {
+function generateSubscribeStructuredData() {
+  // WebSite
+  const websiteNode: WebSite = {
+    '@type': 'WebSite',
     '@id': `${BASE_URL}/#website`,
-  },
-  about: {
-    '@id': `${BASE_URL}/#organization`,
-  },
-  breadcrumb: {
-    '@id': `${BASE_URL}/newsletter/subscribe#breadcrumb`,
-  },
-  inLanguage: 'el-GR',
-}
+    url: BASE_URL,
+    name: 'Magnet Market',
+    publisher: {
+      '@id': `${BASE_URL}/#organization`,
+    },
+  }
 
-const structuredData = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    organizationStructuredData,
-    storeStructuredData,
-    websiteNode,
-    breadcrumbList,
-    webPage,
-  ],
+  // BreadcrumbList
+  const breadcrumbList: BreadcrumbList = {
+    '@type': 'BreadcrumbList',
+    '@id': `${BASE_URL}/newsletter/subscribe#breadcrumb`,
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: BASE_URL,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Newsletter',
+        item: `${BASE_URL}/newsletter/subscribe`,
+      },
+    ],
+  }
+
+  // WebPage
+  const webPage: WebPage = {
+    '@type': 'WebPage',
+    '@id': `${BASE_URL}/newsletter/subscribe#webpage`,
+    url: `${BASE_URL}/newsletter/subscribe`,
+    name: 'Εγγραφή στο Newsletter',
+    description: 'Εγγραφείτε στο newsletter μας για να λαμβάνετε αποκλειστικές προσφορές και νέα',
+    isPartOf: {
+      '@id': `${BASE_URL}/#website`,
+    },
+    about: {
+      '@id': `${BASE_URL}/#organization`,
+    },
+    breadcrumb: {
+      '@id': `${BASE_URL}/newsletter/subscribe#breadcrumb`,
+    },
+    inLanguage: 'el-GR',
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      organizationStructuredData,
+      storeStructuredData,
+      websiteNode,
+      breadcrumbList,
+      webPage,
+    ],
+  }
 }
 
 /* -------------------------------------------------------------------------- */
 /*                                  Page                                       */
 /* -------------------------------------------------------------------------- */
-
 export default function SubscribePage() {
-  return <SubscribeClient />
+  const structuredData = generateSubscribeStructuredData()
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ 
+          __html: JSON.stringify(structuredData).replaceAll('&quot;', '"')
+        }}
+        suppressHydrationWarning
+      />
+      <SubscribeClient />
+    </>
+  )
 }
 
 /* -------------------------------------------------------------------------- */
 /*                                Metadata                                     */
 /* -------------------------------------------------------------------------- */
-
 export const metadata: Metadata = {
   title: 'Εγγραφή στο Newsletter | Magnet Market',
   description: 'Εγγραφείτε στο newsletter του Magnet Market και μην χάσετε καμία προσφορά! Λάβετε αποκλειστικές εκπτώσεις και νέα για τεχνολογία.',
@@ -120,7 +131,5 @@ export const metadata: Metadata = {
     description: 'Μην χάσετε καμία προσφορά! Εγγραφείτε στο newsletter μας.',
   },
 
-  other: {
-    'application/ld+json': JSON.stringify(structuredData).replaceAll('&quot;', '"'),
-  },
+  // ΑΦΑΙΡΕΘΗΚΕ το other: { 'application/ld+json' }
 }

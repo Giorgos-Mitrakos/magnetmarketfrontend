@@ -198,8 +198,77 @@ export default async function ProductPage({
       ]
       : []
 
+  /* ==================== Structured Data Generation ==================== */
+  
+  const productImages: string[] = [];
+  if (product.image) {
+    productImages.push(`${process.env.NEXT_PUBLIC_API_URL}${product.image.url}`);
+  }
+  if (product.additionalImages) {
+    product.additionalImages.forEach(img =>
+      productImages.push(`${process.env.NEXT_PUBLIC_API_URL}${img.url}`)
+    );
+  }
+
+  const breadcrumbNode: BreadcrumbList = {
+    '@type': 'BreadcrumbList',
+    '@id': `${process.env.NEXT_URL}/product/${product.slug}#breadcrumb`,
+    itemListElement: breadcrumbs.map((b, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: b.title,
+      item: `${process.env.NEXT_URL}${b.slug}`,
+    })),
+  };
+
+  const brandNode: Brand | undefined = product.brand
+    ? {
+      '@type': 'Brand',
+      '@id': `${process.env.NEXT_URL}/#brand-${product.brand.slug}`,
+      name: product.brand.name,
+      logo: product.brand.logo
+        ? `${process.env.NEXT_PUBLIC_API_URL}${product.brand.logo.url}`
+        : undefined,
+    }
+    : undefined;
+
+  const productNode: Product = {
+    '@type': 'Product',
+    '@id': `${process.env.NEXT_URL}/product/${product.slug}`,
+    name: product.name,
+    description: product.description
+      ?.replace(/<[^>]*>/g, '')
+      .substring(0, 300),
+    sku: product.id.toString(),
+    mpn: product.mpn,
+    gtin13: product.barcode,
+    image: productImages,
+    category: product.category?.name,
+    brand: brandNode,
+    offers: {
+      ...getOfferData(product),
+    },
+  };
+
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      organizationStructuredData,
+      storeStructuredData,
+      productNode,
+      breadcrumbNode,
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ 
+          __html: JSON.stringify(structuredData).replaceAll('&quot;', '"')
+        }}
+        suppressHydrationWarning
+      />
       <div className="min-h-screen">
         <SiteFeatures />
         <Breadcrumb breadcrumbs={breadcrumbs} />
@@ -275,65 +344,6 @@ export async function generateMetadata(
     );
   }
 
-  /* --------------------------- Breadcrumbs --------------------------- */
-  const breadcrumbs = generateBreadcrumbsRecursive(product);
-
-  const breadcrumbNode: BreadcrumbList = {
-    '@type': 'BreadcrumbList',
-    '@id': `${process.env.NEXT_URL}/product/${product.slug}#breadcrumb`,
-    itemListElement: breadcrumbs.map((b, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      name: b.title,
-      item: `${process.env.NEXT_URL}${b.slug}`,
-    })),
-  };
-
-  /* ------------------------------ Brand ------------------------------ */
-  const brandNode: Brand | undefined = product.brand
-    ? {
-      '@type': 'Brand',
-      '@id': `${process.env.NEXT_URL}/#brand-${product.brand.slug}`,
-      name: product.brand.name,
-      logo: product.brand.logo
-        ? `${process.env.NEXT_PUBLIC_API_URL}${product.brand.logo.url}`
-        : undefined,
-    }
-    : undefined;
-
-  /* ------------------------------ Product ---------------------------- */
-  const productNode: Product = {
-    '@type': 'Product',
-    '@id': `${process.env.NEXT_URL}/product/${product.slug}`,
-    name: product.name,
-    description: product.description
-      ?.replace(/<[^>]*>/g, '')
-      .substring(0, 300),
-    sku: product.id.toString(),
-    mpn: product.mpn,
-    gtin13: product.barcode,
-    image: images,
-    category: product.category?.name,
-
-    // ✅ ΠΕΡΝΑΣ ΟΛΟ ΤΟ OBJECT
-    brand: brandNode,
-
-    offers: {
-      ...getOfferData(product),
-    },
-  };
-
-  /* ------------------------------ @graph ----------------------------- */
-  const structuredData = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      organizationStructuredData,
-      storeStructuredData,
-      productNode,
-      breadcrumbNode,
-    ],
-  };
-
   /* ------------------------------ Metadata --------------------------- */
   return {
     title: `Magnet Market – ${product.name}`,
@@ -353,9 +363,7 @@ export async function generateMetadata(
       images,
       type: 'website',
     },
-    other: {
-      'application/ld+json': JSON.stringify(structuredData).replaceAll('&quot;', '"'),
-    },
+    // ΑΦΑΙΡΕΘΗΚΕ το other: { 'application/ld+json' }
   };
 }
 

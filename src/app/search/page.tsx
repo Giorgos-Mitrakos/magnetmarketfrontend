@@ -104,77 +104,79 @@ async function getFilteredProducts(searchParams: {
 }
 
 /* -------------------------------------------------------------------------- */
-/*                          Structured Data (Module Level)                     */
+/*                          Structured Data Helper                             */
 /* -------------------------------------------------------------------------- */
 
-// WebSite με SearchAction
-const websiteNode: WebSite = {
-    '@type': 'WebSite',
-    '@id': `${BASE_URL}/#website`,
-    url: BASE_URL,
-    name: 'Magnet Market',
-    publisher: {
-        '@id': `${BASE_URL}/#organization`,
-    },
-    potentialAction: {
-        '@type': 'SearchAction',
-        target: {
-            '@type': 'EntryPoint',
-            urlTemplate: `${BASE_URL}/search?search={search_term_string}`,
-        },
-        // @ts-ignore - query-input is valid but not in types
-        'query-input': 'required name=search_term_string',
-    },
-}
-
-// BreadcrumbList
-const breadcrumbList: BreadcrumbList = {
-    '@type': 'BreadcrumbList',
-    '@id': `${BASE_URL}/search#breadcrumb`,
-    itemListElement: [
-        {
-            '@type': 'ListItem',
-            position: 1,
-            name: 'Home',
-            item: BASE_URL,
-        },
-        {
-            '@type': 'ListItem',
-            position: 2,
-            name: 'Αναζήτηση',
-            item: `${BASE_URL}/search`,
-        },
-    ],
-}
-
-// SearchResultsPage
-const searchResultsPage: SearchResultsPage = {
-    '@type': 'SearchResultsPage',
-    '@id': `${BASE_URL}/search#webpage`,
-    url: `${BASE_URL}/search`,
-    name: 'Αναζήτηση Προϊόντων',
-    description: 'Αναζητήστε προϊόντα τεχνολογίας στο Magnet Market',
-    isPartOf: {
+function generateSearchStructuredData() {
+    // WebSite με SearchAction
+    const websiteNode: WebSite = {
+        '@type': 'WebSite',
         '@id': `${BASE_URL}/#website`,
-    },
-    about: {
-        '@id': `${BASE_URL}/#organization`,
-    },
-    breadcrumb: {
-        '@id': `${BASE_URL}/search#breadcrumb`,
-    },
-    inLanguage: 'el-GR',
-}
+        url: BASE_URL,
+        name: 'Magnet Market',
+        publisher: {
+            '@id': `${BASE_URL}/#organization`,
+        },
+        potentialAction: {
+            '@type': 'SearchAction',
+            target: {
+                '@type': 'EntryPoint',
+                urlTemplate: `${BASE_URL}/search?search={search_term_string}`,
+            },
+            // @ts-ignore - query-input is valid but not in types
+            'query-input': 'required name=search_term_string',
+        },
+    }
 
-const structuredData = {
-    '@context': 'https://schema.org',
-    '@graph': [
-        organizationStructuredData,
-        storeStructuredData,
-        websiteNode,
-        breadcrumbList,
-        searchResultsPage,
-    ],
+    // BreadcrumbList
+    const breadcrumbList: BreadcrumbList = {
+        '@type': 'BreadcrumbList',
+        '@id': `${BASE_URL}/search#breadcrumb`,
+        itemListElement: [
+            {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Home',
+                item: BASE_URL,
+            },
+            {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Αναζήτηση',
+                item: `${BASE_URL}/search`,
+            },
+        ],
+    }
+
+    // SearchResultsPage
+    const searchResultsPage: SearchResultsPage = {
+        '@type': 'SearchResultsPage',
+        '@id': `${BASE_URL}/search#webpage`,
+        url: `${BASE_URL}/search`,
+        name: 'Αναζήτηση Προϊόντων',
+        description: 'Αναζητήστε προϊόντα τεχνολογίας στο Magnet Market',
+        isPartOf: {
+            '@id': `${BASE_URL}/#website`,
+        },
+        about: {
+            '@id': `${BASE_URL}/#organization`,
+        },
+        breadcrumb: {
+            '@id': `${BASE_URL}/search#breadcrumb`,
+        },
+        inLanguage: 'el-GR',
+    }
+
+    return {
+        '@context': 'https://schema.org',
+        '@graph': [
+            organizationStructuredData,
+            storeStructuredData,
+            websiteNode,
+            breadcrumbList,
+            searchResultsPage,
+        ],
+    }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -186,8 +188,18 @@ export default async function SearchPage({ searchParams }: SearchProps) {
 
     const isInitialState = !searchParams.search // Ελέγχουμε αν ο χρήστης έχει γράψει κάτι
 
+    // Generate structured data
+    const structuredData = generateSearchStructuredData()
+
     return (
         <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ 
+                    __html: JSON.stringify(structuredData).replaceAll('&quot;', '"')
+                }}
+                suppressHydrationWarning
+            />
             <SearchTracker
                 searchTerm={(searchParams.search as string) || ''}
                 resultsCount={response?.meta?.pagination?.total ?? 0}
@@ -315,7 +327,5 @@ export const metadata: Metadata = {
         images: [`${BASE_URL}/_next/static/media/MARKET MAGNET-LOGO.79db5357.svg`],
     },
 
-    other: {
-        'application/ld+json': JSON.stringify(structuredData).replaceAll('&quot;', '"'),
-    },
+    // ΑΦΑΙΡΕΘΗΚΕ το other: { 'application/ld+json' }
 }

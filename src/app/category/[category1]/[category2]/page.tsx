@@ -19,6 +19,7 @@ type PageProps = {
 
 export default async function Category2Page({ params, searchParams }: PageProps) {
     const { category1, category2 } = params
+    const currentPage = Number(searchParams.page) || 1
     
     const response = await getCategoryProducts(
         category1,
@@ -26,19 +27,64 @@ export default async function Category2Page({ params, searchParams }: PageProps)
         searchParams
     )
     
+    const categoryMetadata = await getCategoryMetadata(category2)
+    
+    const baseUrl = `${process.env.NEXT_URL}/category/${category1}/${category2}`
+    const fullUrl = currentPage > 1 ? `${baseUrl}?page=${currentPage}` : baseUrl
+    
+    const description = categoryMetadata.categories?.length > 0
+        ? `Ανακάλυψε ${categoryMetadata.name} στο Magnet Market. Διαθέσιμες κατηγορίες: ${categoryMetadata.categories.map(c => c.name).join(', ')}. Εγγύηση ελληνικής αντιπροσωπείας, καλύτερες τιμές.`
+        : `Ανακάλυψε ${categoryMetadata.name} στο Magnet Market. Εγγύηση ελληνικής αντιπροσωπείας, καλύτερες τιμές, γρήγορη παράδοση.`
+    
+    /* ==================== Structured Data ==================== */
+    
+    const mainStructuredData = generateCategoryStructuredData({
+        breadcrumbs: response.breadcrumbs,
+        categoryName: categoryMetadata.name,
+        categoryDescription: description,
+        products: response.products,
+        currentPage,
+        totalPages: response.meta.pagination.pageCount,
+        baseUrl: fullUrl,
+    })
+    
+    const subcategoriesStructuredData = categoryMetadata.categories?.length > 0
+        ? {
+            '@context': 'https://schema.org',
+            ...generateSubcategoriesItemList({
+                categoryName: categoryMetadata.name,
+                categories: categoryMetadata.categories,
+                baseUrl,
+            })
+          }
+        : null
+    
+    const allStructuredData = subcategoriesStructuredData
+        ? [mainStructuredData, subcategoriesStructuredData]
+        : [mainStructuredData]
+    
     const { availableFilters, products, meta, breadcrumbs, sideMenu } = response
 
     return (
-        <CategoryPageTemplate
-            category1={category1}
-            category2={category2}
-            category3={null}
-            availableFilters={availableFilters}
-            products={products}
-            meta={meta}
-            sideMenu={sideMenu}
-            breadcrumbs={breadcrumbs}
-        />
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ 
+                    __html: JSON.stringify(allStructuredData) 
+                }}
+                suppressHydrationWarning
+            />
+            <CategoryPageTemplate
+                category1={category1}
+                category2={category2}
+                category3={null}
+                availableFilters={availableFilters}
+                products={products}
+                meta={meta}
+                sideMenu={sideMenu}
+                breadcrumbs={breadcrumbs}
+            />
+        </>
     )
 }
 
@@ -77,31 +123,6 @@ export async function generateMetadata(
         ? `Ανακάλυψε ${response.name} στο Magnet Market. Διαθέσιμες κατηγορίες: ${response.categories.map(c => c.name).join(', ')}. Εγγύηση ελληνικής αντιπροσωπείας, καλύτερες τιμές.`
         : `Ανακάλυψε ${response.name} στο Magnet Market. Εγγύηση ελληνικής αντιπροσωπείας, καλύτερες τιμές, γρήγορη παράδοση.`
     
-    const mainStructuredData = generateCategoryStructuredData({
-        breadcrumbs: productsData.breadcrumbs,
-        categoryName: response.name,
-        categoryDescription: description,
-        products: productsData.products,
-        currentPage,
-        totalPages: productsData.meta.pagination.pageCount,
-        baseUrl: fullUrl,
-    })
-    
-    const subcategoriesStructuredData = response.categories?.length > 0
-        ? {
-            '@context': 'https://schema.org',
-            ...generateSubcategoriesItemList({
-                categoryName: response.name,
-                categories: response.categories,
-                baseUrl,
-            })
-          }
-        : null
-    
-    const allStructuredData = subcategoriesStructuredData
-        ? [mainStructuredData, subcategoriesStructuredData]
-        : [mainStructuredData]
-    
     let metadata: Metadata = {
         title,
         description,
@@ -127,9 +148,7 @@ export async function generateMetadata(
                 next: `${baseUrl}?page=${currentPage + 1}`,
             }),
         },
-        other: {
-            'application/ld+json': JSON.stringify(allStructuredData),
-        },
+        // ΑΦΑΙΡΕΘΗΚΕ το other: { 'application/ld+json' }
     }
     
     if (response.image) {

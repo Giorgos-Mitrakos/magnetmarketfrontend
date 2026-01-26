@@ -88,11 +88,27 @@ export const storeStructuredData: Store = {
 
   geo: {
     '@type': 'GeoCoordinates',
-    latitude: 38.512482,
-    longitude: 23.638548,
+    latitude: 38.50405304255828,
+    longitude: 23.638401898227063,
   },
 
   priceRange: '€€',
+
+  areaServed: {
+    '@type': 'GeoCircle',
+    geoMidpoint: {
+      '@type': 'GeoCoordinates',
+      latitude: 38.50405304255828,
+      longitude: 23.638401898227063,
+    },
+    geoRadius: '50000', // 50km delivery radius
+  },
+
+  paymentAccepted: ['Cash', 'Credit Card', 'Debit Card', 'Bank Transfer'],
+
+  currenciesAccepted: 'EUR',
+
+  knowsLanguage: ['el', 'en'], // Greek, English
 };
 
 // Χερσαίοι προορισμοί
