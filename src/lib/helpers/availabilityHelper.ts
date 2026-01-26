@@ -28,7 +28,7 @@ export function getAvailabilityInfo(
 ): AvailabilityInfo {
 
     // 1. InStock με inventory > 0 και in_house
-    if (status === 'InStock' && inventory > 0 && isInHouse) {
+    if (inventory > 0 && isInHouse) {
         return {
             message: 'Άμεσα διαθέσιμο',
             color: 'green',
