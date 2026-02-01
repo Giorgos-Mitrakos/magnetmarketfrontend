@@ -31,6 +31,12 @@ const getHeaderColors = (type: string) => {
       return 'bg-[#246eb5] dark:bg-gradient-to-br dark:from-[#153a61] dark:to-[#1e5a95] text-white dark:text-slate-200'
     case 'sale':
       return 'bg-[#6e276f] dark:bg-gradient-to-br dark:from-[#3d183e] dark:to-[#5a205b] text-white dark:text-slate-200'
+    case 'expected':
+      // Πορτοκαλί χρώμα για expected products
+      return 'bg-[#f97316] dark:bg-gradient-to-br dark:from-[#9a3412] dark:to-[#ea580c] text-white dark:text-slate-200'
+    case 'backorder':
+      // Κόκκινο χρώμα για backorder products
+      return 'bg-[#dc2626] dark:bg-gradient-to-br dark:from-[#991b1b] dark:to-[#b91c1c] text-white dark:text-slate-200'
     default:
       return 'bg-[#24488f] dark:bg-gradient-to-br dark:from-[#132247] dark:to-[#1d3a72] text-white dark:text-slate-200'
   }
@@ -75,8 +81,8 @@ const HotOrSaleClient = memo(({ id, title, type, initialData }: HotOrSaleClientP
               </div>
             </div>
           ) : (
-            <Carousel 
-              products={initialData} 
+            <Carousel
+              products={initialData}
               listName={title}
               listId={`homepage_${type}_${id}`}
             />
