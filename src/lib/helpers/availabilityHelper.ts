@@ -84,7 +84,7 @@ export function getAvailabilityInfo(
     // 7. AskForPrice
     if (status === 'AskForPrice') {
         return {
-            message: 'Ζητήστε τιμή',
+            message: '',
             color: 'gray',
             isAvailable: false
         };

@@ -245,6 +245,7 @@ export default async function RootLayout({
                   info: 'bg-blue-300 text-black p-4 rounded-lg',
                 },
               }}
+              duration={2000}
             />
 
             <Suspense fallback={null}>

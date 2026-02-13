@@ -64,7 +64,7 @@ export const addToCartToast = (item: ICartItem) => {
             </div>
         ),
         position: 'top-right',
-        duration: 4000,
+        duration: 2000,
         className: '!bg-white dark:!bg-gray-900 !shadow-lg !rounded-xl !border !border-gray-200 dark:!border-gray-700 !p-4',
         style: {
             borderLeft: '4px solid #10B981'
@@ -86,7 +86,7 @@ export const removeItemToast = (item: ICartItem) => {
         </div>
     ), {
         position: 'top-right',
-        duration: 3000,
+        duration: 2000,
         className: '!bg-white dark:!bg-gray-900 !shadow-lg !rounded-xl !border !border-gray-200 dark:!border-gray-700 !p-4',
         style: {
             borderLeft: '4px solid #EF4444'

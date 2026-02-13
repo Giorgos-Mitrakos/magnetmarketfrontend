@@ -1,16 +1,28 @@
 'use client'
+import { useState } from 'react';
 import { getPrices } from "@/lib/helpers/priceHelper";
 import { IProductPage } from "@/lib/interfaces/product";
-import ProductAvailability from "@/components/atoms/productAvailability"; // ✅ Import
-import { FaPhone } from "react-icons/fa6";
+import ProductAvailability from "@/components/atoms/productAvailability";
+import { FaPhone, FaEnvelope, FaBell } from "react-icons/fa6";
+import AskForPriceModal from "@/components/modals/AskForPriceModal";
+import NotifyMeModal from "@/components/modals/NotifyMeModal";
+import { FaCalendarAlt } from 'react-icons/fa';
+import ExpectedDateModal from '../modals/ExpectedDateModal';
 
 function ProductPrice({ product }: { product: IProductPage }) {
+  const [showAskForPriceModal, setShowAskForPriceModal] = useState(false);
+  const [showNotifyMeModal, setShowNotifyMeModal] = useState(false);
+  const [showExpectedDateModal, setShowExpectedDateModal] = useState(false);
+
   const { profit, discount } = getPrices({
     price: product.price,
     sale_price: product.sale_price
   });
   const hasDiscount = product.is_sale && product.sale_price;
   const isAskForPrice = product.status === 'AskForPrice';
+  const isOutOfStock = product.status === 'OutOfStock';
+  const IsExpected = product.status === 'IsExpected';
+  const showNotifyButton = isOutOfStock;
 
   // Handler για αποφυγή του εξωτερικού Link
   const handleAction = (e: React.MouseEvent, type: 'tel' | 'mail') => {
@@ -26,55 +38,46 @@ function ProductPrice({ product }: { product: IProductPage }) {
   // Αν είναι AskForPrice, επιστροφή μόνο του μηνύματος
   if (isAskForPrice) {
     return (
-      <div className="mt-6">
-        <div className="flex flex-col">
-          <span className="text-sm text-slate-500 dark:text-slate-300 mb-1">Τιμή</span>
-          <div className="bg-gradient-to-r from-siteColors-purple/10 to-siteColors-pink/10 dark:from-siteColors-purple/20 dark:to-siteColors-pink/20 p-4 rounded-lg border border-siteColors-purple/30">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-siteColors-purple dark:bg-siteColors-purple-light flex items-center justify-center">
-                <FaPhone className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <span className="text-lg font-bold text-siteColors-purple dark:text-siteColors-purple-light">
-                  Ζητήστε Τιμή
-                </span>
+      <>
+        <div className="mt-6">
+          <div className="flex flex-col">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex flex-col mt-4">
                 <button
-                  onClick={(e) => handleAction(e, 'mail')}
-                  aria-label="Στείλτε μας email για προσφορά"
-                  className="text-xs text-gray-600 dark:text-gray-400 hover:text-siteColors-blue dark:hover:text-siteColors-lightblue hover:underline text-center block mt-1 truncate w-full"
+                  onClick={() => setShowAskForPriceModal(true)}
+                  className="flex items-center justify-center gap-2 bg-siteColors-purple hover:bg-siteColors-purple-dark text-white font-medium py-2 px-4 rounded-lg transition-colors"
                 >
-                  info@magnetmarket.gr
+                  <FaEnvelope className="w-4 h-4" />
+                  Ζητήστε Τιμή
                 </button>
-                <div className="text-xs text-gray-600 dark:text-gray-400 hover:text-siteColors-blue dark:hover:text-siteColors-lightblue block mt-1 truncate w-full">
-                  <span>Τηλ:</span>
-                  <button
-                    onClick={(e) => handleAction(e, 'tel')}
-                    aria-label="Καλέστε μας για προσφορά"
-                    
-                  >
-                    2221121657
-                  </button>
-                </div>
               </div>
             </div>
+            <ProductAvailability
+              status={product.status}
+              inventory={product.inventory}
+              isInHouse={product.is_in_house}
+              variant="text"
+              className="mt-3"
+            />
           </div>
-          {/* <ProductAvailability
-            status={product.status}
-            inventory={product.inventory}
-            isInHouse={product.is_in_house}
-            variant="text"
-            className="mt-1"
-          /> */}
         </div>
-      </div>
+
+        <AskForPriceModal
+          isOpen={showAskForPriceModal}
+          onClose={() => setShowAskForPriceModal(false)}
+          productName={product.name}
+          productId={product.id}
+        />
+      </>
     );
   }
 
+  // Κανονική τιμή
   return (
     <div className="mt-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         {/* Price Display */}
-        <div className="flex flex-col">
+        <div className="flex flex-col flex-1">
           <span className="text-sm text-slate-500 dark:text-slate-300 mb-1">Τιμή</span>
           <div className="flex items-center gap-2">
             {hasDiscount ? (
@@ -101,7 +104,42 @@ function ProductPrice({ product }: { product: IProductPage }) {
             variant="text"
             className="mt-1"
           />
+
+          {/* Notify Button - Βελτιωμένο styling */}
+          {showNotifyButton && (
+            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+              <button
+                onClick={() => setShowNotifyMeModal(true)}
+                className="flex items-center justify-center gap-2 w-full bg-white dark:bg-slate-900 border-2 border-siteColors-purple dark:border-siteColors-purple-light text-siteColors-purple dark:text-gray-200 hover:bg-siteColors-purple/5 dark:hover:bg-siteColors-purple/10 font-medium py-3 px-4 rounded-lg transition-all duration-200"
+              >
+                <FaBell className="w-4 h-4" />
+                <span>Ειδοποιήστε με όταν είναι διαθέσιμο</span>
+              </button>
+
+              {/* Προαιρετική μικρή περιγραφή */}
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center">
+                Θα λάβετε email μόλις επανέλθει σε διαθεσιμότητα
+              </p>
+            </div>
+          )}
+          {/* Expected Date Button (IsExpected) - ΝΕΟ */}
+          {IsExpected && (
+            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+              <button
+                onClick={() => setShowExpectedDateModal(true)}
+                className="flex items-center justify-center gap-2 w-full bg-white dark:bg-slate-900 border-2 border-siteColors-purple dark:border-siteColors-purple-light text-siteColors-purple dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-900/20 font-medium py-3 px-4 rounded-lg transition-all duration-200"
+              >
+                <FaCalendarAlt className="w-4 h-4" />
+                <span>Πότε το περιμένετε;</span>
+              </button>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center">
+                Ενημερωθείτε για την ημερομηνία διαθεσιμότητας
+              </p>
+            </div>
+          )}
         </div>
+
+
 
         {/* Discount/Profit Badge */}
         {hasDiscount && discount && profit && (
@@ -119,6 +157,20 @@ function ProductPrice({ product }: { product: IProductPage }) {
           </div>
         )}
       </div>
+
+      <NotifyMeModal
+        isOpen={showNotifyMeModal}
+        onClose={() => setShowNotifyMeModal(false)}
+        productName={product.name}
+        productId={product.id}
+      />
+
+      <ExpectedDateModal
+        isOpen={showExpectedDateModal}
+        onClose={() => setShowExpectedDateModal(false)}
+        productName={product.name}
+        productId={product.id}
+      />
     </div>
   );
 }

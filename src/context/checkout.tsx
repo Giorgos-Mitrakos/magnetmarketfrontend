@@ -472,7 +472,8 @@ export const CheckoutProvider = ({ children }: any) => {
     return (
         <CheckoutContext.Provider
             value={{
-                checkout, dispatch,
+                checkout, 
+                dispatch,
                 validationError,
                 validateCoupon,
                 applyCoupon

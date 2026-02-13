@@ -12,6 +12,7 @@ import type {
   WebPage, 
   WebSite 
 } from 'schema-dts'
+import Image from 'next/image'
 
 const BASE_URL = process.env.NEXT_URL || 'https://magnetmarket.gr'
 

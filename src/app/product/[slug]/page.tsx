@@ -33,6 +33,7 @@ import type {
 
 import { IProductPage, TProductPage } from '@/lib/interfaces/product'
 import { ProductStatus } from '@/lib/helpers/availabilityHelper'
+import ProductImageWidgetWrapper from '@/components/molecules/productImageWidgetWrapper'
 
 export const dynamic = 'force-dynamic'
 export const dynamicParams = true
@@ -199,7 +200,7 @@ export default async function ProductPage({
       : []
 
   /* ==================== Structured Data Generation ==================== */
-  
+
   const productImages: string[] = [];
   if (product.image) {
     productImages.push(`${process.env.NEXT_PUBLIC_API_URL}${product.image.url}`);
@@ -248,13 +249,63 @@ export default async function ProductPage({
     offers: {
       ...getOfferData(product),
     },
+
+    // Αν έχεις βάρος/διαστάσεις
+    weight: product.weight ? {
+      '@type': 'QuantitativeValue',
+      value: product.weight,
+      unitCode: 'KGM' // ή 'GRM'
+    } : undefined,
+
+    // Διαστάσεις
+    width: product.width ? {
+      '@type': 'QuantitativeValue',
+      value: product.width,
+      unitCode: 'CMT'
+    } : undefined,
+
+    height: product.height ? {
+      '@type': 'QuantitativeValue',
+      value: product.height,
+      unitCode: 'CMT'
+    } : undefined,
+
+    depth: product.length ? {
+      '@type': 'QuantitativeValue',
+      value: product.length,
+      unitCode: 'CMT'
+    } : undefined,
+
+    // URL εικόνας χωρίς watermark (αν έχεις)
+    logo: product.brand?.logo
+      ? `${process.env.NEXT_PUBLIC_API_URL}${product.brand.logo.url}`
+      : undefined
+
   };
+
+  const webPageNode = {
+    '@type': 'WebPage',
+    '@id': `${process.env.NEXT_URL}/product/${product.slug}#webpage`,
+    url: `${process.env.NEXT_URL}/product/${product.slug}`,
+    name: product.name,
+    description: product.short_description,
+    isPartOf: {
+      '@id': `${process.env.NEXT_URL}/#website`
+    },
+    breadcrumb: {
+      '@id': `${process.env.NEXT_URL}/product/${product.slug}#breadcrumb`
+    },
+    mainEntity: {
+      '@id': `${process.env.NEXT_URL}/product/${product.slug}`
+    }
+  }
 
   const structuredData = {
     '@context': 'https://schema.org',
     '@graph': [
       organizationStructuredData,
       storeStructuredData,
+      webPageNode,
       productNode,
       breadcrumbNode,
     ],
@@ -264,7 +315,7 @@ export default async function ProductPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ 
+        dangerouslySetInnerHTML={{
           __html: JSON.stringify(structuredData).replaceAll('&quot;', '"')
         }}
         suppressHydrationWarning
@@ -276,14 +327,11 @@ export default async function ProductPage({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
           <div className="lg:col-span-9">
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-gray-800">
-                {images.length > 0 ? (
-                  <ProductImageWidget images={images} />
-                ) : (
-                  <div className="flex h-96 items-center justify-center">
-                    <FaRegImage className="h-40 w-40" />
-                  </div>
-                )}
+              <div className="bg-white dark:bg-gray-800 min-w-0 overflow-hidden">
+                <ProductImageWidgetWrapper
+                  productImage={product.image}
+                  additionalImages={product.additionalImages}
+                />
               </div>
 
               <div className="bg-white dark:bg-gray-800 p-6">

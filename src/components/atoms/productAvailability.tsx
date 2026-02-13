@@ -17,7 +17,7 @@ export const ProductAvailability: React.FC<ProductAvailabilityProps> = ({
     status,
     inventory = 0,
     isInHouse = false,
-    variant = 'badge',
+    variant = 'text',
     className = ''
 }) => {
     const availabilityInfo = getAvailabilityInfo(status, inventory, isInHouse);

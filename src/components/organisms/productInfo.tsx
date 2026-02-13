@@ -83,7 +83,7 @@ const ProductInfoClient = ({ description, chars }: ProductInfoClientProps) => {
                     <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg" role="tabpanel">
                         <div 
                             dangerouslySetInnerHTML={{ __html: sanitizedHTML }} 
-                            className="product-description"
+                            className=" dark:text-gray-300"
                         />
                     </div>
                 )}
