@@ -19,55 +19,40 @@
 body {
   color: rgb(var(--foreground-rgb));
   box-sizing: content-box;
-  /* background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb)); */
 
   ::-webkit-scrollbar {
     width: 8px;
   }
-
-  /* Track */
   ::-webkit-scrollbar-track {
     box-shadow: inset 0 0 5px rgb(208, 202, 192);
     border-radius: 5px;
   }
-
-  /* Handle */
   ::-webkit-scrollbar-thumb {
     background: grey;
     border-radius: 5px;
   }
 }
 
-
 @layer utilities {
   .custom-scrollbar {
     scrollbar-color: gray rgb(208, 202, 192);
     scrollbar-width: thin;
   }
-
   .scrollbar::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
-
   .scrollbar::-webkit-scrollbar-track {
     border-radius: 100vh;
     background: #eeedf7;
     width: 10px;
     height: 10px;
   }
-
   .scrollbar::-webkit-scrollbar-thumb {
     background: #9b9fa9;
     border-radius: 100vh;
     border: 2px solid #edf1f7;
   }
-
   .scrollbar::-webkit-scrollbar-thumb:hover {
     background: #246eb5;
   }
@@ -77,8 +62,67 @@ body {
   .labelForInputForms {
     @apply text-sm font-semibold text-left;
   }
-
   .inputForms {
     @apply border rounded-lg focus:ring-2 focus:outline-none p-2 w-full;
+  }
+
+  /* =====================================================
+     prose-content: χρησιμοποιείται ΜΟΝΟ στο pages/[page]
+     (terms, privacy, κλπ) για HTML που έρχεται από Strapi.
+     Αντικαθιστά το @tailwindcss/typography plugin.
+     ===================================================== */
+  .prose-content {
+    @apply leading-relaxed text-gray-700 dark:text-gray-200;
+  }
+  .prose-content h1 {
+    @apply text-2xl font-bold mb-4 mt-6 text-gray-900 dark:text-gray-100;
+  }
+  .prose-content h2 {
+    @apply text-xl font-bold mb-3 mt-5 text-gray-900 dark:text-gray-100;
+  }
+  .prose-content h3 {
+    @apply text-lg font-semibold mb-2 mt-4 text-gray-800 dark:text-gray-200;
+  }
+  .prose-content h4 {
+    @apply text-base font-semibold mb-2 mt-3 text-gray-800 dark:text-gray-200;
+  }
+  .prose-content p {
+    @apply mb-4 leading-relaxed;
+  }
+  .prose-content ul {
+    @apply list-disc list-inside mb-4 space-y-1;
+  }
+  .prose-content ol {
+    @apply list-decimal list-inside mb-4 space-y-1;
+  }
+  .prose-content li {
+    @apply leading-relaxed;
+  }
+  .prose-content a {
+    @apply text-[#246eb5] hover:underline;
+  }
+  .prose-content strong {
+    @apply font-semibold text-gray-900 dark:text-gray-100;
+  }
+  .prose-content em {
+    @apply italic;
+  }
+  .prose-content blockquote {
+    @apply border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-gray-600 dark:text-gray-400 my-4;
+  }
+  .prose-content table {
+    @apply w-full border-collapse mb-4 text-sm;
+  }
+  .prose-content th {
+    @apply border border-gray-200 dark:border-gray-600 p-2 bg-gray-100 dark:bg-gray-800 font-semibold text-left;
+  }
+  .prose-content td {
+    @apply border border-gray-200 dark:border-gray-600 p-2;
+  }
+  .prose-content hr {
+    @apply border-gray-200 dark:border-gray-700 my-6;
+  }
+  .prose-content img {
+    @apply max-w-full h-auto rounded my-4;
   }
 }

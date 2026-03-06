@@ -29,6 +29,11 @@ const nextConfig = {
       },
     ],
   },
+
+  // Αφαίρεσε console.logs από production
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
 }
 
 module.exports = nextConfig

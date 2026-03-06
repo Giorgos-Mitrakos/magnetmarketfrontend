@@ -6,38 +6,27 @@ import Link from 'next/link'
 import { IBrands } from '@/lib/interfaces/brands'
 import { generateBrandsStructuredData } from '@/lib/helpers/structuredDataHelpers'
 
-export const revalidate = 3600 // Revalidate κάθε 1 ώρα
-
-/* ==================== Data Fetching ==================== */
+export const revalidate = 3600
 
 async function getBrandsData() {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/brands/all`,
-    {
-      next: { revalidate: 3600 },
-    }
+    { next: { revalidate: 3600 } }
   )
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`)
-  }
-
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
   const data = await response.json()
   return data as { data: IBrands[]; meta: { total: number } }
 }
 
-/* ==================== Page Component ==================== */
-
 export default async function BrandsPage() {
   const brands = await getBrandsData()
 
-  /* -------------------- Structured Data -------------------- */
   const structuredData = generateBrandsStructuredData({
     brands: brands.data.map(brand => ({
       name: brand.name,
       slug: brand.slug,
-      logoUrl: brand.logo?.url 
-        ? `${process.env.NEXT_PUBLIC_API_URL}${brand.logo.url}` 
+      logoUrl: brand.logo?.url
+        ? `${process.env.NEXT_PUBLIC_API_URL}${brand.logo.url}`
         : null,
     })),
   })
@@ -46,37 +35,33 @@ export default async function BrandsPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ 
-          __html: JSON.stringify(structuredData) 
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         suppressHydrationWarning
       />
-      <section 
+      <section
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
         itemScope
         itemType="https://schema.org/CollectionPage"
       >
-        {/* Page Header */}
         <header className="text-center mb-12">
-          <h1 
+          <h1
             className="text-4xl font-bold text-siteColors-purple dark:text-siteColors-pink mb-4"
             itemProp="name"
           >
             Κατασκευαστές Προϊόντων Τεχνολογίας
           </h1>
-          <p 
+          <p
             className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto"
             itemProp="description"
           >
             Ανακαλύψτε {brands.meta.total} συνεργάτες μας και τα προϊόντα τους που φέρνουν την τεχνολογία στο δικό σας πεδίο
           </p>
-          
-          {/* Brand count badge */}
+
           <div className="mt-6 inline-flex items-center gap-2 bg-siteColors-purple/10 dark:bg-siteColors-purple/20 px-4 py-2 rounded-full">
-            <svg 
-              className="w-5 h-5 text-siteColors-purple dark:text-siteColors-pink" 
-              fill="none" 
-              stroke="currentColor" 
+            <svg
+              className="w-5 h-5 text-siteColors-purple dark:text-siteColors-pink"
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
@@ -88,28 +73,25 @@ export default async function BrandsPage() {
           </div>
         </header>
 
-        {/* Brands Grid */}
-        <div 
+        <div
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6"
           role="list"
           aria-label="Λίστα κατασκευαστών"
         >
           {brands.data.map((brand) => (
-            <article 
-              key={brand.id} 
+            <article
+              key={brand.id}
               className="group"
               itemScope
               itemType="https://schema.org/Brand"
               role="listitem"
             >
-              <Link 
-                href={`/brands/${brand.slug}`} 
+              <Link
+                href={`/brands/${brand.slug}`}
                 className="block focus:outline-none focus:ring-2 focus:ring-siteColors-purple focus:ring-offset-2 rounded-xl"
                 aria-label={`Δείτε προϊόντα ${brand.name}`}
               >
                 <div className="relative bg-white dark:bg-slate-700 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 p-6 h-full flex items-center justify-center border border-gray-100 dark:border-slate-600 group-hover:border-siteColors-lightblue/30">
-                  
-                  {/* Brand Logo */}
                   <div className="relative w-full h-24 flex items-center justify-center">
                     <Image
                       height={96}
@@ -118,20 +100,15 @@ export default async function BrandsPage() {
                       alt={brand.logo.alternativeText || `${brand.name} logo`}
                       title={`Προϊόντα ${brand.name}`}
                       className="object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-300"
-                      style={{
-                        filter: 'grayscale(20%) contrast(110%)',
-                      }}
+                      style={{ filter: 'grayscale(20%) contrast(110%)' }}
                       loading="lazy"
                       itemProp="logo"
                     />
-                    
-                    {/* Hidden brand name for SEO */}
                     <meta itemProp="name" content={brand.name} />
                     <meta itemProp="url" content={`${process.env.NEXT_URL}/brands/${brand.slug}`} />
                   </div>
 
-                  {/* Hover overlay with brand name */}
-                  <div 
+                  <div
                     className="absolute inset-0 bg-gradient-to-t from-siteColors-purple/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl flex items-end justify-center p-3"
                     aria-hidden="true"
                   >
@@ -145,14 +122,13 @@ export default async function BrandsPage() {
           ))}
         </div>
 
-        {/* Empty state */}
         {brands.data.length === 0 && (
           <div className="text-center py-12">
             <div className="bg-siteColors-lightblue/10 dark:bg-siteColors-lightblue/20 rounded-full p-4 inline-flex mb-4">
-              <svg 
-                className="w-12 h-12 text-siteColors-purple dark:text-siteColors-pink" 
-                fill="none" 
-                stroke="currentColor" 
+              <svg
+                className="w-12 h-12 text-siteColors-purple dark:text-siteColors-pink"
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
               >
@@ -168,14 +144,14 @@ export default async function BrandsPage() {
           </div>
         )}
 
-        {/* SEO Content Section */}
-        <aside className="mt-16 prose prose-lg dark:prose-invert max-w-4xl mx-auto">
+        {/* ✅ Αφαιρέθηκαν τα prose classes — απλό στατικό κείμενο με Tailwind */}
+        <aside className="mt-16 max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold text-siteColors-purple dark:text-siteColors-pink mb-4">
             Επώνυμα Προϊόντα Τεχνολογίας
           </h2>
-          <p className="text-gray-600 dark:text-gray-300">
-            Στο Magnet Market συνεργαζόμαστε με τους κορυφαίους κατασκευαστές τεχνολογίας για να σας προσφέρουμε 
-            προϊόντα υψηλής ποιότητας με εγγύηση ελληνικής αντιπροσωπείας. Ανακαλύψτε laptops, υπολογιστές, 
+          <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+            Στο Magnet Market συνεργαζόμαστε με τους κορυφαίους κατασκευαστές τεχνολογίας για να σας προσφέρουμε
+            προϊόντα υψηλής ποιότητας με εγγύηση ελληνικής αντιπροσωπείας. Ανακαλύψτε laptops, υπολογιστές,
             smartphones, tablets, περιφερειακά και πολλά άλλα από τις αγαπημένες σας μάρκες.
           </p>
         </aside>
@@ -184,43 +160,24 @@ export default async function BrandsPage() {
   )
 }
 
-/* ==================== Metadata ==================== */
-
 export async function generateMetadata(): Promise<Metadata> {
   const brands = await getBrandsData()
-  
+
   const title = 'Κατασκευαστές Προϊόντων Τεχνολογίας | Magnet Market'
   const description = `Ανακαλύψτε ${brands.meta.total} επώνυμους κατασκευαστές προϊόντων τεχνολογίας. Laptops, υπολογιστές, smartphones, tablets και περιφερειακά με εγγύηση ελληνικής αντιπροσωπείας στις καλύτερες τιμές.`
-  
+
   const baseUrl = process.env.NEXT_URL || 'https://magnetmarket.gr'
-  
-  // Extract top brands για keywords
   const topBrands = brands.data.slice(0, 20).map(b => b.name)
-  
-  /* -------------------- Metadata Object -------------------- */
+
   return {
     title,
     description,
-    
     keywords: [
-      'κατασκευαστές',
-      'brands',
-      'επώνυμα προϊόντα',
-      'τεχνολογία',
+      'κατασκευαστές', 'brands', 'επώνυμα προϊόντα', 'τεχνολογία',
       ...topBrands,
-      'HP',
-      'Dell',
-      'Lenovo',
-      'Asus',
-      'Acer',
-      'Samsung',
-      'Apple',
-      'Xiaomi',
-      'Canon',
-      'Epson',
-      'Logitech',
+      'HP', 'Dell', 'Lenovo', 'Asus', 'Acer', 'Samsung',
+      'Apple', 'Xiaomi', 'Canon', 'Epson', 'Logitech',
     ].join(', '),
-    
     robots: {
       index: true,
       follow: true,
@@ -231,37 +188,19 @@ export async function generateMetadata(): Promise<Metadata> {
         'max-snippet': -1,
       },
     },
-    
     alternates: {
       canonical: `${baseUrl}/brands`,
     },
-    
     openGraph: {
-      title,
-      description,
+      title, description,
       url: `${baseUrl}/brands`,
       siteName: 'Magnet Market',
       locale: 'el_GR',
       type: 'website',
-      // Uncomment όταν δημιουργήσεις το og-brands.jpg
-      // images: [
-      //   {
-      //     url: `${baseUrl}/og-brands.jpg`,
-      //     width: 1200,
-      //     height: 630,
-      //     alt: 'Κατασκευαστές Προϊόντων Τεχνολογίας - Magnet Market',
-      //   },
-      // ],
     },
-    
     twitter: {
       card: 'summary_large_image',
-      title,
-      description,
-      // Uncomment όταν δημιουργήσεις το og-brands.jpg
-      // images: [`${baseUrl}/og-brands.jpg`],
+      title, description,
     },
-    
-    // ΑΦΑΙΡΕΘΗΚΕ το other: { 'application/ld+json' }
   }
 }

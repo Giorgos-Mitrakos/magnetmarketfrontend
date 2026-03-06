@@ -13,8 +13,8 @@ interface ProductInfoClientProps {
 
 const ProductInfoClient = ({ processedDescription, chars }: ProductInfoClientProps) => {
     const [active, setActive] = useState(
-        processedDescription ? 'description' : 
-        chars && chars.length > 0 ? 'specification' : 
+        processedDescription ? 'description' :
+        chars && chars.length > 0 ? 'specification' :
         null
     );
 
@@ -28,13 +28,13 @@ const ProductInfoClient = ({ processedDescription, chars }: ProductInfoClientPro
                 <ul className="flex flex-wrap -mb-px" role="tablist">
                     {processedDescription && (
                         <li className="mr-2" role="presentation">
-                            <button 
-                                className={`inline-block py-3 px-6 text-lg font-medium text-center rounded-t-lg border-b-2 transition-colors ${active === "description" 
-                                    ? "border-siteColors-blue text-siteColors-blue dark:text-siteColors-lightblue dark:border-siteColors-lightblue" 
-                                    : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"}`} 
-                                type="button" 
-                                role="tab" 
-                                aria-controls="Description" 
+                            <button
+                                className={`inline-block py-3 px-6 text-lg font-medium text-center rounded-t-lg border-b-2 transition-colors ${active === "description"
+                                    ? "border-siteColors-blue text-siteColors-blue dark:text-siteColors-lightblue dark:border-siteColors-lightblue"
+                                    : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"}`}
+                                type="button"
+                                role="tab"
+                                aria-controls="Description"
                                 aria-selected={active === "description"}
                                 onClick={() => setActive("description")}
                             >
@@ -44,13 +44,13 @@ const ProductInfoClient = ({ processedDescription, chars }: ProductInfoClientPro
                     )}
                     {chars && chars.length > 0 && (
                         <li className="mr-2" role="presentation">
-                            <button 
-                                className={`inline-block py-3 px-6 text-lg font-medium text-center rounded-t-lg border-b-2 transition-colors ${active === "specification" 
-                                    ? "border-siteColors-blue text-siteColors-blue dark:text-siteColors-lightblue dark:border-siteColors-lightblue" 
-                                    : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"}`} 
-                                type="button" 
-                                role="tab" 
-                                aria-controls="Specification" 
+                            <button
+                                className={`inline-block py-3 px-6 text-lg font-medium text-center rounded-t-lg border-b-2 transition-colors ${active === "specification"
+                                    ? "border-siteColors-blue text-siteColors-blue dark:text-siteColors-lightblue dark:border-siteColors-lightblue"
+                                    : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"}`}
+                                type="button"
+                                role="tab"
+                                aria-controls="Specification"
                                 aria-selected={active === "specification"}
                                 onClick={() => setActive("specification")}
                             >
@@ -60,20 +60,24 @@ const ProductInfoClient = ({ processedDescription, chars }: ProductInfoClientPro
                     )}
                 </ul>
             </div>
-            
+
             <div>
                 {processedDescription && active === "description" && (
-                    <div className="p-6 bg-gray-50 dark:bg-gray-700 rounded-lg prose prose-lg max-w-none dark:prose-invert" role="tabpanel">
-                        <div dangerouslySetInnerHTML={sanitizedData()} className="text-gray-700 dark:text-gray-200" />
+                    <div className="p-6 bg-gray-50 dark:bg-gray-700 rounded-lg" role="tabpanel">
+                        {/* ✅ product-description class από ProductInfo.css — δεν χρειάζεται prose */}
+                        <div
+                            dangerouslySetInnerHTML={sanitizedData()}
+                            className="product-description"
+                        />
                     </div>
                 )}
-                
+
                 {chars && chars.length > 0 && active === "specification" && (
                     <div className="bg-white dark:bg-gray-700 rounded-lg shadow-sm overflow-hidden" role="tabpanel">
                         <div className="grid grid-cols-1 md:grid-cols-2">
                             {chars.map((char, index) => (
-                                <div 
-                                    key={char.id} 
+                                <div
+                                    key={char.id}
                                     className={`flex p-4 ${index % 2 === 0 ? 'md:border-r border-gray-100 dark:border-gray-600' : ''} ${index < chars.length - (chars.length % 2 === 0 ? 0 : 1) ? 'border-b border-gray-100 dark:border-gray-600' : ''}`}
                                 >
                                     <div className="w-1/3 md:w-2/5 mr-2 font-medium text-gray-700 dark:text-gray-300">

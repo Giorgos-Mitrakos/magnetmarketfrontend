@@ -7,7 +7,7 @@ const BestPriceScript = () => {
         <>
             <Script
                 id="bestprice-init"
-                strategy="afterInteractive"
+                strategy="lazyOnload"
                 dangerouslySetInnerHTML={{
                     __html: `
             (function (a, b, c, d, s) {
