@@ -176,7 +176,7 @@ export default async function RootLayout({
     <html lang="el" suppressHydrationWarning>
       <head>
         {/* Preconnect to external domains */}
-        <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL} />
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL}  crossOrigin="anonymous" />
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_API_URL} />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://www.google-analytics.com" />

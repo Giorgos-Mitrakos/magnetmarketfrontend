@@ -22,7 +22,12 @@ const DoubleBanner = ({
                 bannerPosition="homepage_double_banner_right"
                 bannerType="double"
             >
-                <NextImage media={rightBanner} height={360} width={720} />
+                <NextImage 
+                    media={rightBanner} 
+                    height={360} 
+                    width={720}
+                    sizes="(max-width: 768px) 100vw, 50vw"  // 🔑 mobile: full width, desktop: half
+                />
             </TrackableLink>
             
             <TrackableLink
@@ -34,7 +39,12 @@ const DoubleBanner = ({
                 bannerPosition="homepage_double_banner_left"
                 bannerType="double"
             >
-                <NextImage media={leftBanner} height={360} width={720} />
+                <NextImage 
+                    media={leftBanner} 
+                    height={360} 
+                    width={720}
+                    sizes="(max-width: 768px) 100vw, 50vw"  // 🔑
+                />
             </TrackableLink>
         </div>
     )

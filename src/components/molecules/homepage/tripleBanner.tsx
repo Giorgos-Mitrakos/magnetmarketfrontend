@@ -25,7 +25,12 @@ const TripleBanner = ({
                 bannerPosition="homepage_triple_banner_right"
                 bannerType="triple"
             >
-                <NextImage media={rightTripleBanner} height={256} width={512} />
+                <NextImage 
+                    media={rightTripleBanner} 
+                    height={256} 
+                    width={512}
+                    sizes="(max-width: 768px) 100vw, 33vw"  // 🔑 mobile: full width, desktop: 1/3
+                />
             </TrackableLink>
             
             <TrackableLink
@@ -37,7 +42,12 @@ const TripleBanner = ({
                 bannerPosition="homepage_triple_banner_middle"
                 bannerType="triple"
             >
-                <NextImage media={middleTripleBanner} height={256} width={512} />
+                <NextImage 
+                    media={middleTripleBanner} 
+                    height={256} 
+                    width={512}
+                    sizes="(max-width: 768px) 100vw, 33vw"  // 🔑
+                />
             </TrackableLink>
             
             <TrackableLink
@@ -49,7 +59,12 @@ const TripleBanner = ({
                 bannerPosition="homepage_triple_banner_left"
                 bannerType="triple"
             >
-                <NextImage media={leftTripleBanner} height={256} width={512} />
+                <NextImage 
+                    media={leftTripleBanner} 
+                    height={256} 
+                    width={512}
+                    sizes="(max-width: 768px) 100vw, 33vw"  // 🔑
+                />
             </TrackableLink>
         </div>
     )

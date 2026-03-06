@@ -1,4 +1,3 @@
-// import { getStrapiMedia } from "../../../utils/medias"
 import { getStrapiMedia } from "@/repositories/medias";
 import Image from "next/image"
 
@@ -9,20 +8,22 @@ interface IProps {
   }
   width: number
   height: number
+  priority?: boolean   // 🔑 νέο — για LCP images
+  sizes?: string       // 🔑 νέο — για responsive images
+  className?: string   // 🔑 νέο — για custom styling
 }
 
-const NextImage = (props: IProps) => {
-  if (!props.media) {
-    return <NextImage {...props} />
+const NextImage = ({ media, width, height, priority = false, sizes, className }: IProps) => {
+  // 🔑 fix: αν δεν υπάρχει media, επέστρεψε null (όχι recursive call)
+  if (!media) {
+    return null
   }
 
-  const { url, alternativeText } = props.media
-  const { width, height } = props;
+  const { url, alternativeText } = media
 
   return (
     <Image
-      // layout='responsive'
-      className="object-contain"
+      className={className || "object-contain"}
       width={width}
       height={height}
       src={getStrapiMedia(url)!}
@@ -31,6 +32,9 @@ const NextImage = (props: IProps) => {
       aria-label={alternativeText || ""}
       blurDataURL={getStrapiMedia(url)!}
       placeholder="blur"
+      priority={priority}                    // 🔑 προσθέτει fetchpriority=high
+      loading={priority ? 'eager' : 'lazy'}  // 🔑 αφαιρεί lazy για LCP
+      sizes={sizes}                          // 🔑 σωστό responsive μέγεθος
     />
   )
 }

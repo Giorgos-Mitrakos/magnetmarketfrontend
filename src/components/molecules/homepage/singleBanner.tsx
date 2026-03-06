@@ -1,6 +1,6 @@
 import NextImage from "@/components/atoms/nextImage";
 import { IHomeSingleBanner } from "@/lib/queries/homepage";
-import { TrackableLink } from "@/components/atoms/TrackableLink"; // ✅ Import
+import { TrackableLink } from "@/components/atoms/TrackableLink";
 
 const SingleBanner = ({ 
     id,
@@ -20,7 +20,13 @@ const SingleBanner = ({
                     bannerPosition="homepage_single_banner"
                     bannerType="single"
                 >
-                    <NextImage media={singleBanner} height={768} width={1536} />
+                    <NextImage 
+                        media={singleBanner} 
+                        height={768} 
+                        width={1536}
+                        priority={true}   // 🔑 LCP image — πάντα eager
+                        sizes="100vw"     // 🔑 full width — κατεβάζει σωστό μέγεθος
+                    />
                 </TrackableLink>
             )}
         </div>
