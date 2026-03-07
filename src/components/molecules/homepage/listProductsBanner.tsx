@@ -1,40 +1,9 @@
 // Server Component - χωρίς 'use client'
 import { Suspense } from 'react'
-import Carousel from "@/components/atoms/carousel"
-import { IImageAttr } from "@/lib/interfaces/image"
-import { IProductBrand, IProductCard } from "@/lib/interfaces/product"
+import dynamic from 'next/dynamic'
+import { IProductCard } from "@/lib/interfaces/product"
 import { ProductCardSkeleton } from '@/components/organisms/productCard'
 
-// Interfaces - ίδια όπως πριν
-interface Product {
-  id: number
-  attributes: {
-    name: string
-    slug: string
-    mpn: string
-    barcode: string
-    price: number
-    sale_price: number
-    is_sale: boolean
-    is_hot: boolean
-    inventory: number
-    is_in_house: boolean
-    weight: number
-    status: string
-    brand: IProductBrand
-    image: { data: IImageAttr }
-  }
-}
-
-interface ListProductsBannerProps {
-  id: string
-  title: string
-  subtitle?: string
-  products: IProductCard[] | null
-  loading?: boolean
-}
-
-// Server Component για Skeleton
 function ListProductsBannerSkeleton() {
   return (
     <section className="my-8 pb-10 rounded-xl bg-gradient-to-br from-siteColors-purple via-siteColors-pink to-siteColors-lightblue px-4 shadow-lg min-h-[550px] flex items-center">
@@ -53,7 +22,27 @@ function ListProductsBannerSkeleton() {
   )
 }
 
-// Server Component για Header
+// ✅ Dynamic import — φορτώνει το Swiper μόνο όταν χρειάζεται
+// ✅ loading χρησιμοποιεί το πλήρες skeleton για να μην πηδάει το layout
+const Carousel = dynamic(() => import('@/components/atoms/carousel'), {
+  ssr: false,
+  loading: () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {Array.from({ length: 4 }, (_, i) => (
+        <ProductCardSkeleton key={i} />
+      ))}
+    </div>
+  )
+})
+
+interface ListProductsBannerProps {
+  id: string
+  title: string
+  subtitle?: string
+  products: IProductCard[] | null
+  loading?: boolean
+}
+
 function BannerHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <div className="text-center mb-8">
@@ -71,7 +60,6 @@ function BannerHeader({ title, subtitle }: { title: string; subtitle?: string })
   )
 }
 
-// Server Component για Empty State
 function EmptyState() {
   return (
     <div className="text-center py-12 bg-white/20 rounded-lg">
@@ -81,7 +69,6 @@ function EmptyState() {
   )
 }
 
-// Main Server Component
 export default function ListProductsBanner({
   id,
   title,
@@ -89,11 +76,8 @@ export default function ListProductsBanner({
   products,
   loading = false
 }: ListProductsBannerProps) {
-
-  // Server-side logic - χωρίς state και effects
   const hasProducts = products && products.length > 0
 
-  // Αν loading, δείξε skeleton
   if (loading || !products) {
     return <ListProductsBannerSkeleton />
   }
@@ -105,12 +89,18 @@ export default function ListProductsBanner({
     >
       <div className="mx-auto w-full py-8">
         <BannerHeader title={title} subtitle={subtitle} />
-
         {hasProducts ? (
-          <Suspense fallback={<ListProductsBannerSkeleton />}>
-            <Carousel products={products}
-              listName={title} // ✅ Pass listName to Carousel
-              listId={`homepage_${title}_${id}`} // ✅ Pass listId
+          <Suspense fallback={
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {Array.from({ length: 4 }, (_, i) => (
+                <ProductCardSkeleton key={i} />
+              ))}
+            </div>
+          }>
+            <Carousel
+              products={products}
+              listName={title}
+              listId={`homepage_${title}_${id}`}
             />
           </Suspense>
         ) : (
