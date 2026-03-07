@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =====================================================
+   Swiper CSS - centralized εδώ αντί για κάθε component
+   Αφαίρεσε τα swiper imports από:
+   - heroCarousel.tsx
+   - BrandsSwiper.tsx
+   - carousel.tsx
+   - CategoriesSwiper.tsx
+   ===================================================== */
+@import 'swiper/css';
+@import 'swiper/css/navigation';
+@import 'swiper/css/pagination';
+@import 'swiper/css/effect-fade';
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;

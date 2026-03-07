@@ -9,9 +9,6 @@ import ProductCard from '@/components/organisms/productCard'
 import { IProductCard } from '@/lib/interfaces/product'
 import { HiChevronLeft, HiChevronRight } from 'react-icons/hi'
 
-import 'swiper/css'
-import 'swiper/css/navigation'
-
 interface CarouselProps {
   products: IProductCard[]
   listName?: string  // ✅ Νέο prop για tracking

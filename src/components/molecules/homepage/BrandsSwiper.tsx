@@ -5,10 +5,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Autoplay, Navigation } from 'swiper/modules'
 
-// Import Swiper styles
-import 'swiper/css'
-import 'swiper/css/navigation'
-
 // Processed brand interface (από server)
 interface ProcessedBrand {
     id: string
