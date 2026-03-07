@@ -6,6 +6,10 @@ import Link from "next/link"
 import { FaRegImage } from "react-icons/fa"
 import { Autoplay, Pagination } from 'swiper/modules'
 
+// Import Swiper styles
+import 'swiper/css'
+import 'swiper/css/pagination'
+
 interface ProcessedCategory {
   id: string
   name: string

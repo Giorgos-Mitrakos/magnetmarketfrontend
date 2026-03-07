@@ -11,6 +11,11 @@ import { useRef, useState, useCallback, useMemo } from 'react';
 import type { Swiper as SwiperType } from 'swiper';
 import { TrackableLink } from '@/components/atoms/TrackableLink'; 
 
+import 'swiper/css';
+import 'swiper/css/effect-fade';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
+
 interface HeroCarouselProps {
   carousel: IHeroCarouselBanner[];
   autoplayDelay?: number;
