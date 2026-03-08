@@ -44,5 +44,11 @@
     "@types/dompurify": "^3.2.0",
     "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.35"
-  }
+  },
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 Firefox versions",
+    "last 2 Safari versions",
+    "last 2 Edge versions"
+  ]
 }
