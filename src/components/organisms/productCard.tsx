@@ -49,11 +49,6 @@ const ProductCard = ({
         }
         fbTrackViewContent(cartItem as any)
 
-        console.log('[ProductCard] Click tracked:', {
-            product: product.name,
-            list: listName,
-            position: position
-        })
     }, [product, listName, position])
 
     return (
@@ -76,17 +71,10 @@ const ProductCard = ({
                                 product.image.formats?.small?.url ||
                                 product.image.url
                             )!}
-                            blurDataURL={getStrapiMedia(
-                                product.image.formats?.small?.url ||
-                                product.image.url
-                            )!}
                             alt={product.image.alternativeText || product.name}
                             quality={80}
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
                             fill
-                            style={{
-                                objectFit: 'contain',
-                            }}
                         />
                     ) : (
                         <div className="h-40 w-full flex items-center justify-center">
