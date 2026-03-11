@@ -16,6 +16,7 @@ function ProductAddToCart({ product }: { product: IProductCard }) {
 
   const isAskForPrice = product.status === 'AskForPrice';
   const isOutOfStock = product.status === 'OutOfStock';
+  const isExpacted = product.status === 'IsExpected';
 
   const item: ICartItem = {
     id: product.id,
@@ -34,7 +35,7 @@ function ProductAddToCart({ product }: { product: IProductCard }) {
   }
 
   const handleAddProductClick = () => {
-    if (isAskForPrice || isOutOfStock) return; // Αν είναι AskForPrice, μην κάνεις τίποτα
+    if (isAskForPrice || isOutOfStock || isExpacted) return; // Αν είναι AskForPrice, μην κάνεις τίποτα
 
     dispatch({ type: "ADD_ITEM", payload: item })
     addToCartToast(item)
@@ -104,8 +105,8 @@ function ProductAddToCart({ product }: { product: IProductCard }) {
           {/* Add to Cart Button */}
           <button
             onClick={handleAddProductClick}
-            disabled={isAskForPrice || isOutOfStock}
-            className={isAskForPrice || isOutOfStock ? buttonClasses.mobile.disabled : buttonClasses.mobile.active}
+            disabled={isAskForPrice || isOutOfStock || isExpacted}
+            className={isAskForPrice || isOutOfStock || isExpacted ? buttonClasses.mobile.disabled : buttonClasses.mobile.active}
             aria-label={isAskForPrice ? "Δεν είναι διαθέσιμο για αγορά" : "Προσθήκη στο καλάθι"}
           >
             <FaOpencart className="mr-2" />
@@ -118,8 +119,8 @@ function ProductAddToCart({ product }: { product: IProductCard }) {
       <div className="hidden md:block mt-6">
         <button
           onClick={handleAddProductClick}
-          disabled={isAskForPrice || isOutOfStock}
-          className={isAskForPrice || isOutOfStock ? buttonClasses.desktop.disabled : buttonClasses.desktop.active}
+          disabled={isAskForPrice || isOutOfStock || isExpacted}
+          className={isAskForPrice || isOutOfStock || isExpacted ? buttonClasses.desktop.disabled : buttonClasses.desktop.active}
           aria-label={isAskForPrice ? "Δεν είναι διαθέσιμο για αγορά" : "Προσθήκη στο καλάθι"}
         >
           <FaOpencart className="mr-3 text-xl" />

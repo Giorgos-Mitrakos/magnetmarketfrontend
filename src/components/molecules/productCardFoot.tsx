@@ -14,6 +14,7 @@ const ProductCardFoot = ({ product }: { product: IProductCard }) => {
 
     const isAskForPrice = product.status === 'AskForPrice';
     const isOutOfStock = product.status === 'OutOfStock';
+    const isExpacted = product.status === 'IsExpected';
 
     const item: ICartItem = {
         id: product.id,
@@ -32,7 +33,7 @@ const ProductCardFoot = ({ product }: { product: IProductCard }) => {
     }
 
     const handleAddProductClick = (product: ICartItem) => {
-        if (isAskForPrice || isOutOfStock) return; // Αν είναι AskForPrice, μην κάνεις τίποτα
+        if (isAskForPrice || isOutOfStock || isExpacted) return; // Αν είναι AskForPrice, μην κάνεις τίποτα
         dispatch({ type: "ADD_ITEM", payload: product })
         addToCartToast(product)
     }
@@ -71,14 +72,14 @@ const ProductCardFoot = ({ product }: { product: IProductCard }) => {
 
             <button
                 onClick={(e) => {
-                    if (isAskForPrice || isOutOfStock) return;
+                    if (isAskForPrice || isOutOfStock || isExpacted) return;
                     e.preventDefault()
                     e.stopPropagation()
                     handleAddProductClick(item)
                 }}
-                disabled={isAskForPrice || isOutOfStock}
+                disabled={isAskForPrice || isOutOfStock || isExpacted}
                 className={`flex justify-center items-center p-2 rounded-lg bg-
-                ${isAskForPrice || isOutOfStock
+                ${isAskForPrice || isOutOfStock || isExpacted
                         ? 'bg-gray-300 dark:bg-slate-600 text-gray-500 dark:text-slate-400 cursor-not-allowed'
                         : 'bg-gradient-to-br from-siteColors-lightblue to-siteColors-blue hover:from-siteColors-pink hover:to-siteColors-purple transform hover:scale-105'
                     }
