@@ -66,13 +66,6 @@ export default function CookieBannerClient({ consent }: { consent: boolean }) {
         ${animate ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}
       `}
     >
-      <button
-        onClick={() => handleConsent(false)}
-        className="absolute top-3 right-3 text-gray-400 hover:text-gray-700"
-      >
-        <FaTimes size={16} />
-      </button>
-
       <div className="flex items-start mb-3">
         <div className="bg-blue-600 p-2 rounded-lg mr-3 flex items-center justify-center">
           <FaCookieBite className="h-5 w-5 text-white" />
