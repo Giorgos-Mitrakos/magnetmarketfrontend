@@ -31,6 +31,8 @@ export interface IOrderProduct {
         }>;
     } | null;
     sku?: string;
+    mpn?: string;
+    barcode?: string;
     variant?: string;
 }
 

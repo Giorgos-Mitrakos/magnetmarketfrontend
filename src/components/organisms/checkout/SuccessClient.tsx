@@ -1,8 +1,6 @@
-// app/checkout/success/page.tsx
 
 import Banks from "@/components/atoms/banks";
 import BestPriceOrderTracking from "@/components/atoms/bestPriceOrderTracking"
-import { getCookies } from "@/lib/helpers/actions"
 import { Metadata } from "next"
 import Image from "next/image"
 import { FaRegImage, FaCheckCircle, FaTruck, FaCreditCard, FaCalendarAlt, FaEuroSign, FaExclamationTriangle } from "react-icons/fa";
@@ -10,6 +8,8 @@ import { getOrder } from "@/lib/queries/order";
 import { IOrder } from "@/lib/interfaces/order";
 import PurchaseTracker from "@/components/molecules/PurchaseTracker";
 import PostPurchaseNewsletter from "@/components/molecules/PostPurchaseNewsletter";
+import GoogleCustomerReviews from "@/components/organisms/checkout/GoogleCustomerReviews";
+import { calculateEstimatedDeliveryDate } from "@/lib/helpers/deliveryHelper";
 import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 
 export interface IOrderCookie {
@@ -99,20 +99,45 @@ export default async function SuccessClient({ orderCookie, ApprovalCodeCookie }:
         quantity: product.quantity
     }));
 
-    // ✅ Extract user email from order (if available)
+    // ✅ Extract user email from order
     const userEmail = data.billing_address.email || undefined;
 
+    // ✅ Υπολογισμός estimated delivery date για Google Customer Reviews
+    // Χρησιμοποιούμε το late delivery date (πιο ασφαλές)
+    const googleDeliveryDate = calculateEstimatedDeliveryDate(
+        new Date(),
+        Math.ceil((lateDeviveryDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+    );
+
+    // ✅ Prepare products με GTINs/MPNs για Google
+    // Χρησιμοποιούμε barcode (προτεραιότητα) ή mpn (fallback)
+    const productsWithGTIN = data.products
+        .map(p => {
+            const identifier = p.barcode || p.mpn;
+            return identifier ? { gtin: identifier.toString() } : null;
+        })
+        .filter((p): p is { gtin: string } => p !== null); // Remove nulls
+    
+    console.log(`[GoogleReviews] Products with identifiers: ${productsWithGTIN.length}/${data.products.length}`);
 
     return (
         <>
-            {/* ✅ ΣΩΣΤΗ ΣΕΙΡΑ:
-                1. PurchaseTracker - Κάνει GA tracking ΚΑΙ clear το cart
-                2. ΔΕΝ χρειαζόμαστε ClearCartItems - το κάνει ο reducer
-            */}
+            {/* ✅ TRACKING COMPONENTS */}
             <PurchaseTracker
                 orderData={orderDataForGATracking}
                 appliedCoupon={data.coupon?.code || null}
             />
+
+            {/* ✅ GOOGLE CUSTOMER REVIEWS */}
+            {userEmail && (
+                <GoogleCustomerReviews
+                    orderId={data.id.toString()}
+                    email={userEmail}
+                    deliveryCountry="GR"
+                    estimatedDeliveryDate={googleDeliveryDate}
+                    products={productsWithGTIN.length > 0 ? productsWithGTIN : undefined}
+                />
+            )}
 
             <div className="min-h-screen bg-gradient-to-br from-siteColors-lightblue/10 via-siteColors-blue/10 to-siteColors-pink/10 mb-16 py-8 px-4">
                 <div className="max-w-6xl mx-auto">
@@ -269,22 +294,4 @@ export default async function SuccessClient({ orderCookie, ApprovalCodeCookie }:
             </div>
         </>
     )
-}
-
-export const metadata: Metadata = {
-    title: 'Magnetmarket - Ευχαριστούμε για την παραγγελία',
-    description: 'Μην το ψάχνεις, εδώ θα βρείς τις καλύτερες τίμες και προσφορές σε υπολογιστές, laptop, smartwatch, κάμερες, εκτυπωτές, οθόνες, τηλεοράσεις και άλλα προϊόντα.',
-    keywords: "Computers, Laptops, Notebooks, laptop, Computer, Hardware, Notebook, Peripherals, Greece, Technology, Mobile phones, Laptops, PCs, Scanners, Printers, Modems, Monitors, Software, Antivirus, Windows, Intel Chipsets, AMD, HP, LOGITECH, ACER, TOSHIBA, SAMSUNG, Desktop, Servers, Telephones, DVD, CD, DVDR, CDR, DVD-R, CD-R, periferiaka, Systems, MP3, Υπολογιστής, ΥΠΟΛΟΓΙΣΤΗΣ, ΠΕΡΙΦΕΡΕΙΑΚΑ, περιφερειακά, Χαλκίδα, ΧΑΛΚΙΔΑ, Ελλάδα, ΕΛΛΑΔΑ, Τεχνολογία, τεχνολογία, ΤΕΧΝΟΛΟΓΙΑ, κινητό, ΚΙΝΗΤΟ, κινητά, ΚΙΝΗΤΑ, οθόνη, ΟΘΟΝΗ, οθόνες, ΟΘΟΝΕΣ, ΕΚΤΥΠΩΤΕΣ, εκτυπωτές, σαρωτές, ΣΑΡΩΤΕΣ, εκτυπωτής",
-    alternates: {
-        canonical: `${process.env.NEXT_URL}/checkout/confirm/success`,
-    },
-    openGraph: {
-        url: 'magnetmarket.gr/checkout/thank-you',
-        type: 'website',
-        images: [`${process.env.NEXT_URL}/MARKET MAGNET-LOGO.svg`],
-        siteName: "www.magnetmarket.gr",
-        emails: ["info@magnetmarket.gr"],
-        phoneNumbers: ['2221121657'],
-        countryName: 'Ελλάδα',
-    }
 }

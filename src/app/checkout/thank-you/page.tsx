@@ -1,4 +1,4 @@
-// app/checkout/success/page.tsx
+// app/checkout/ta=hank-you/page.tsx
 import { Metadata } from 'next'
 import { getCookies } from '@/lib/helpers/actions'
 import SuccessClient from '@/components/organisms/checkout/SuccessClient'
