@@ -1,13 +1,13 @@
 'use client'
-import { createContext, useContext, useEffect, useMemo, useReducer, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useReducer, useState } from "react";
 import { sendGAEvent } from "@next/third-parties/google";
 import { getCookies, saveCookies } from "@/lib/helpers/actions";
 import { CheckoutAction, ICheckoutState, IShippingMethods } from "@/lib/interfaces/shipping";
 import { checkoutReducer, initialCheckoutState } from "@/lib/reducers/checkoutReducer";
 import { loadCheckoutFromLocalStorage } from "@/lib/helpers/storage-helper";
 import { calculateTotals, createCategories, getInstallmentsArray } from "@/lib/helpers/checkout";
-import { fetcher } from "@/repositories/repository";
-import { GET_SHIPPING_METHODS } from "@/lib/queries/shippingQuery";
+import { buildQuotePayload } from "@/lib/helpers/checkoutPayload";
+import { toast } from "sonner";
 import { ICartItem } from "@/lib/interfaces/cart";
 import { ICouponApplianceResponse, ICouponValidationResponse } from "@/lib/interfaces/coupon";
 import { flattenJSON } from "@/lib/helpers/helpers";
@@ -58,11 +58,14 @@ export const CheckoutProvider = ({ children }: any) => {
 
         const fetchShipping = async () => {
 
-            const data = await fetcher({ query: GET_SHIPPING_METHODS, variables: { jwt: '' } })
-            const shippings = data as IShippingMethods
-
-            if (data) {
+            // Ενεργές μέθοδοι αποστολής + τρόποι πληρωμής (Strapi v3, REST)
+            try {
+                const response = await fetch('/api/storefront/shipping-methods')
+                if (!response.ok) throw new Error(`Response status: ${response.status}`)
+                const shippings = await response.json() as IShippingMethods
                 dispatch({ type: "SAVE_AVAILABLE_SHIPPINGS", payload: shippings })
+            } catch (error) {
+                console.error('Shipping methods:', error)
             }
 
             // return shippings
@@ -83,24 +86,38 @@ export const CheckoutProvider = ({ children }: any) => {
         }
     }, [isClient]);
 
+    // Η τελευταία κατάσταση του ταμείου για το παρακάτω effect: τρέχει μόνο όταν
+    // αλλάζει κάτι που επηρεάζει το κόστος, αλλά διαβάζει πάντα την τρέχουσα κατάσταση
+    const checkoutRef = useRef(checkout)
+    checkoutRef.current = checkout
+
     useEffect(() => {
 
         const timer = setTimeout(() => {
-            // if (checkout.cart.length > 0) {
+            const checkout = checkoutRef.current
 
             calculateTotals(checkout).then((totals) => {
 
                 dispatch({ type: 'RECALCULATE_TOTALS', payload: totals });
 
+                // Το κουπόνι δεν ισχύει πια (π.χ. άλλαξε το καλάθι ή το email)
+                if (checkout.appliedCoupon && totals.couponError) {
+                    dispatch({ type: "REMOVE_COUPON" })
+                    toast.error(`Το κουπόνι αφαιρέθηκε: ${totals.couponError}`, { position: 'top-right' })
+                }
+
                 const installmentsArray = getInstallmentsArray(checkout, totals)
 
                 dispatch({ type: 'SAVE_INSTALLMENTS_ARRAY', payload: installmentsArray });
             });
-            // }
         }, 200); // 200ms debounce
 
         return () => clearTimeout(timer);
-    }, [checkout.cart, checkout.shippingMethod, checkout.paymentMethod, checkout.appliedCoupon, checkout.installments]);
+    }, [checkout.cart, checkout.shippingMethod, checkout.paymentMethod, checkout.appliedCoupon, checkout.installments,
+        checkout.addresses.billing.state, checkout.addresses.billing.city, checkout.addresses.billing.zipCode,
+        checkout.addresses.billing.isInvoice, checkout.addresses.billing.afm, checkout.islandVatDeclared,
+        checkout.addresses.shipping.state, checkout.addresses.shipping.city, checkout.addresses.shipping.zipCode,
+        checkout.addresses.different_shipping]);
 
     // Watch for email changes and remove coupon if needed
     useEffect(() => {
@@ -127,15 +144,11 @@ export const CheckoutProvider = ({ children }: any) => {
     const validateCoupon = async (code: string, cart: ICartItem[]): Promise<ICouponValidationResponse> => {
         if (!cart) throw Error("Το καλάθι είναι άδειο")
         try {
+            // Ο έλεγχος γίνεται με το quote του Strapi (ίδιοι κανόνες με την παραγγελία)
             const response = await fetch('/api/coupons/validate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    code,
-                    userEmail: checkout.addresses.billing.email,
-                    cartItems: cart,
-                    cartTotal: checkout.totals.subtotal
-                })
+                body: JSON.stringify(buildQuotePayload({ ...checkout, cart }, code))
             })
 
             if (!response.ok) {
@@ -143,8 +156,8 @@ export const CheckoutProvider = ({ children }: any) => {
                 throw new Error(error.message)
             }
 
-            const data = await response.json()
-            setValidationError(null)
+            const data = await response.json() as ICouponValidationResponse
+            setValidationError(data.valid ? null : (data.message ?? null))
             return data
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Coupon validation failed'
@@ -156,20 +169,12 @@ export const CheckoutProvider = ({ children }: any) => {
     const applyCoupon = async (code: string, cart: ICartItem[]): Promise<ICouponApplianceResponse> => {
         if (!cart) throw Error("Το καλάθι είναι άδειο")
         try {
-            const validation = await validateCoupon(code, cart)
-            if (!validation.valid || !validation.coupon) {
-                throw new Error('Το κουπόνι δεν είναι έγκυρο')
-            }
-
+            // Καμία «δέσμευση» του κουπονιού εδώ: η χρήση καταγράφεται μόνο
+            // μαζί με την παραγγελία. Το κουπόνι ξαναελέγχεται σε κάθε υπολογισμό.
             const applyResponse = await fetch('/api/coupons/apply', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    code,
-                    userEmail: checkout.addresses.billing.email,
-                    cartItems: cart,
-                    cartTotal: checkout?.totals.subtotal
-                })
+                body: JSON.stringify(buildQuotePayload({ ...checkout, cart }, code))
             })
 
             if (!applyResponse.ok) {
@@ -177,19 +182,21 @@ export const CheckoutProvider = ({ children }: any) => {
                 throw new Error(error.message)
             }
 
-            const result = await applyResponse.json()
+            const result = await applyResponse.json() as ICouponApplianceResponse
+            if (!result.success || !result.coupon) {
+                setValidationError(result.message ?? 'Το κουπόνι δεν είναι έγκυρο')
+                return result
+            }
 
             dispatch({ type: "APPLY_COUPON", payload: result.coupon })
-            // setAppliedCoupon(result.coupon)
             setValidationError(null)
-            // Store the email used when applying the coupon
+            // Το email με το οποίο εφαρμόστηκε (αλλαγή email → αφαίρεση κουπονιού)
             await saveCookies({
                 name: "_mm_cue", value: {
                     email: checkout.addresses.billing.email
                 }
             })
             return result
-            // localStorage.setItem('couponUserEmail', checkout.addresses.billing.email);
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to apply coupon'
             setValidationError(message)
@@ -486,4 +493,4 @@ export const CheckoutProvider = ({ children }: any) => {
 }
 
 
-export const useCheckout = () => useContext(CheckoutContext)
+export const useCheckout = () => useContext(CheckoutContext)

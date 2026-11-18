@@ -47,7 +47,7 @@ const Installments = () => {
                 >
                     {checkout.installmentsArray.map(x => (
                         <option key={x.installments} value={JSON.stringify(x)}>
-                            {x.installments === 1 ? 'Αμεση πληρωμή' : `${x.installments} Δόσεις x ${parseNumber(x.monthlyInstallment).toFixed(2)}€`}
+                            {x.installments === 1 ? 'Εφάπαξ πληρωμή' : `${x.installments} Δόσεις x ${parseNumber(x.monthlyInstallment).toFixed(2)}€`}
                         </option>
                     ))}
                 </select>

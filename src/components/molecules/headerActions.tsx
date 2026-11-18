@@ -1,14 +1,15 @@
 "use client"
 
-import { FaOpencart, FaRegHeart } from "react-icons/fa";
-import { AiOutlineUser } from "react-icons/ai";
+import { FaOpencart } from "react-icons/fa";
 import IconLink from "@/components/atoms/iconLink"
 import dynamic from 'next/dynamic'
-import { signIn, signOut, useSession } from "next-auth/react"
+import { signIn, useSession } from "next-auth/react"
 // import { useCart } from "@/context/cart";
 import Minicart from "../organisms/minicart";
 import { useCheckout } from "@/context/checkout";
 import { trackCartIconClick } from "@/lib/helpers/advanced-analytics";
+import WishlistHeaderLink from "@/components/atoms/WishlistHeaderLink";
+import AccountMenu from "./AccountMenu";
 
 const SearchInput = dynamic(() => import('./searchInput'), { ssr: false })
 
@@ -25,26 +26,16 @@ const HeaderActions = ({ user }: any) => {
     const { checkout } = useCheckout()
 
     return (
-        <div className="hidden place-self-end lg:flex lg:flex-col h-full w-40">
-            {status !== "loading" && <div className="flex flex-row-reverse w-full justify-between xs:grid xs:grid-cols-2">
-                <div className="flex flex-col group relative h-auto w-auto justify-start items-start">
-                    <IconLink icon={<AiOutlineUser
-                        className=" dark:text-slate-200"
-                        aria-label="Άνθρωπος" />}
-                        url='/account'
-                        aria-label="Προφίλ" />
-                    {user &&
-                        <div className="absolute hidden group-hover:block -bottom-8 ring p-2 bg-white dark:bg-slate-700">
-                            <button onClick={() => signOut({ callbackUrl: process.env.NEXT_URL })} aria-label="Αποσύνδεση">Sign out</button>
-                        </div>}
-                </div>
+        <div className="hidden place-self-end lg:flex lg:flex-col h-full w-56">
+            {status !== "loading" && <div className="flex flex-row-reverse w-full justify-between xs:grid xs:grid-cols-[auto_1fr] xs:gap-1">
+                {/* Μενού λογαριασμού (λογαριασμός, παραγγελίες, αγαπημένα, αποσύνδεση) */}
+                <AccountMenu user={user} />
                 <div className="flex justify-start items-center">
                     {/* <SearchInput /> */}
-                    {/* <IconLink icon={<FaRegHeart
-                        className=" dark:text-slate-200"
-                        aria-label="Καρδιά" />}
-                        url='https://www.google.com'
-                        aria-label="Τα αγαπημένα σου!" /> */}
+                    <WishlistHeaderLink
+                        className="text-siteColors-purple dark:text-slate-200 text-xl p-3 xs:text-2xl sm:p-4 md:text-3xl"
+                        badgeClassName="top-1 right-0"
+                    />
                     <div className="inline-flex items-center group relative">
                         <IconLink
                             icon={<FaOpencart
@@ -64,7 +55,7 @@ const HeaderActions = ({ user }: any) => {
             </div>}
             <p className=" text-xs font-semibold text-siteColors-purple dark:text-slate-200 pr-2"
                 aria-label="Όνομα συνδεδεμένου λογαριασμού">
-                {user ? <span className="text-wrap">Γεια σου {user}!</span> :
+                {user ? <span className="block truncate" title={user}>Γεια σου, {user}!</span> :
                     <button className="uppercase text-xs font-semibold text-siteColors-purple dark:text-slate-200"
                         onClick={() => signIn()} aria-label="Σύνδεση">Είσοδος</button>}
             </p>
@@ -75,4 +66,4 @@ const HeaderActions = ({ user }: any) => {
     )
 }
 
-export default HeaderActions
+export default HeaderActions

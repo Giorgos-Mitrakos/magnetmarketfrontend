@@ -1,7 +1,10 @@
 // app/checkout/customer-info/CustomerInfoClient.tsx
 "use client"
+// (2026-10-24) Βήμα 1: η μετάβαση στο βήμα 2 γίνεται μόνο αφού ελεγχθούν ΚΑΙ αποθηκευτούν
+// τα στοιχεία (όχι με χρονόμετρο 100ms)· αν δεν φορτώσει το προφίλ, η φόρμα εμφανίζεται
+// κανονικά (κενή)· στο κινητό το «Συνέχεια» είναι αμέσως κάτω από τη φόρμα.
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Addresses, { FormInputRef } from '@/components/organisms/addresses'
@@ -9,7 +12,7 @@ import CartAside from '@/components/organisms/cartItemsAside'
 import CartSummary from '@/components/atoms/cartSummary'
 import CheckoutProgress from '@/components/molecules/checkoutProgress'
 import PaymentSecurityBadges from '@/components/atoms/securePaymentBadge'
-import { useApiRequest } from '@/repositories/clientRepository'
+import { useAccount } from '@/hooks/useAccount'
 import { trackCartEvent } from '@/lib/helpers/analytics'
 import { useCheckout } from '@/context/checkout'
 
@@ -62,7 +65,13 @@ export interface IProfile {
 
 export default function CustomerInfoClient() {
     const router = useRouter()
-    const { checkout, dispatch } = useCheckout()
+    const { checkout } = useCheckout()
+    // Το καλάθι φορτώνει από τον browser μετά το πρώτο render
+    const [hydrated, setHydrated] = useState(false)
+    useEffect(() => {
+        const t = setTimeout(() => setHydrated(true), 500)
+        return () => clearTimeout(t)
+    }, [])
     const [processing, setProcessing] = useState(false)
     const { data: session, status } = useSession()
     
@@ -70,28 +79,53 @@ export default function CustomerInfoClient() {
         data: IProfile
         loading: boolean
         error: any 
-    } = useApiRequest({
-        method: "GET",
-        api: "/api/user-address/getUser",
-        jwt: `${session?.user?.jwt}`
-    })
+    } = useAccount<IProfile>('profile') as { data: IProfile, loading: boolean, error: any }
 
     const formikRef = useRef<FormInputRef | null>(null)
 
+    // Άδειο καλάθι (π.χ. ολοκληρώθηκε η παραγγελία σε άλλη καρτέλα) → πίσω στο καλάθι
+    useEffect(() => {
+        if (hydrated && !checkout.cart.length) router.replace('/shopping-cart')
+    }, [hydrated, checkout.cart.length, router])
+
     const handleNextOnClick = async () => {
-        if (!checkout.cart) return
-        
+        if (!checkout.cart.length || processing) return
         setProcessing(true)
-        formikRef.current?.submitForm()
-        
-        setTimeout(() => {
-            if (formikRef.current?.isSubmitting) {
-                router.push('/checkout/order-informations')
+        try {
+            const ok = await formikRef.current?.submitForm()
+            if (ok) {
                 trackCartEvent('add_shipping_info', checkout.cart)
+                router.push('/checkout/order-informations')
+                return // το κουμπί μένει σε «Περιμένετε...» μέχρι να αλλάξει η σελίδα
             }
-            setProcessing(false)
-        }, 100)
+        } catch {
+            // τίποτα — τα μηνύματα φαίνονται στη φόρμα
+        }
+        setProcessing(false)
     }
+
+    const continueButton = (className = '') => (
+        <button
+            type="button"
+            onClick={handleNextOnClick}
+            disabled={processing || !checkout.cart.length || loading}
+            className={`w-full bg-gradient-to-r from-siteColors-purple to-siteColors-pink 
+                     hover:from-siteColors-pink hover:to-siteColors-purple 
+                     text-white font-semibold py-4 px-6 rounded-xl shadow-lg 
+                     transition-all duration-200 hover:shadow-xl 
+                     disabled:opacity-50 disabled:cursor-not-allowed
+                     focus:outline-none focus:ring-2 focus:ring-siteColors-purple focus:ring-offset-2 ${className}`}
+        >
+            {processing ? (
+                <span className="flex items-center justify-center">
+                    <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" aria-hidden="true"></span>
+                    Περιμένετε...
+                </span>
+            ) : (
+                'Συνέχεια στην αποστολή & πληρωμή'
+            )}
+        </button>
+    )
 
     // Loading state
     if (status === "loading") {
@@ -146,20 +180,18 @@ export default function CustomerInfoClient() {
                                     Φόρτωση στοιχείων...
                                 </span>
                             </div>
-                        ) : error ? (
-                            <div 
-                                className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4"
-                                role="alert"
-                            >
-                                <p className="text-red-800 dark:text-red-200">
-                                    Σφάλμα φόρτωσης στοιχείων. Παρακαλώ δοκιμάστε ξανά.
-                                </p>
-                            </div>
                         ) : (
                             <div className="space-y-6">
+                                {error && (
+                                    <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200" role="status">
+                                        Δεν φορτώθηκαν τα αποθηκευμένα στοιχεία σας — συμπληρώστε τα παρακάτω.
+                                    </p>
+                                )}
                                 <Addresses user={data?.user} ref={formikRef} />
                             </div>
                         )}
+                        {/* Κινητό: η συνέχεια αμέσως μετά τη φόρμα */}
+                        <div className="mt-8 lg:hidden">{continueButton()}</div>
                     </div>
                 </section>
 
@@ -179,27 +211,8 @@ export default function CustomerInfoClient() {
                             <CartAside />
                         </div>
 
-                        {/* Continue Button */}
-                        <button
-                            onClick={handleNextOnClick}
-                            disabled={processing || !checkout.cart}
-                            className="w-full bg-gradient-to-r from-siteColors-purple to-siteColors-pink 
-                                     hover:from-siteColors-pink hover:to-siteColors-purple 
-                                     text-white font-semibold py-4 px-6 rounded-xl shadow-lg 
-                                     transition-all duration-200 hover:shadow-xl 
-                                     disabled:opacity-50 disabled:cursor-not-allowed
-                                     focus:outline-none focus:ring-2 focus:ring-siteColors-purple focus:ring-offset-2"
-                            aria-label="Συνέχεια στην επόμενη σελίδα"
-                        >
-                            {processing ? (
-                                <span className="flex items-center justify-center">
-                                    <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" aria-hidden="true"></span>
-                                    Περιμένετε...
-                                </span>
-                            ) : (
-                                'Συνέχεια'
-                            )}
-                        </button>
+                        {/* Continue Button (υπολογιστής) */}
+                        {continueButton('hidden lg:block')}
 
                         {/* Security Badges */}
                         <PaymentSecurityBadges />
@@ -208,4 +221,4 @@ export default function CustomerInfoClient() {
             </div>
         </div>
     )
-}
+}

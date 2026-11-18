@@ -1,51 +1,62 @@
-import { sendGAEvent } from "@next/third-parties/google"
 import { ICartItem } from "../interfaces/cart"
 import { ICheckoutState, IInstallmentsArray, Totals } from "../interfaces/shipping"
+import { buildQuotePayload, IQuoteResponse } from "./checkoutPayload"
 
+/**
+ * Σύνολα καλαθιού/ταμείου από το Strapi (POST /api/checkout/quote →
+ * /api/orders/quote): υποσύνολο, έκπτωση κουπονιού, μεταφορικά, κόστος
+ * πληρωμής και τόκος δόσεων υπολογίζονται ΜΟΝΟ στον server — ίδιος κώδικας
+ * με τη δημιουργία της παραγγελίας, άρα ό,τι βλέπει ο πελάτης = ό,τι χρεώνεται.
+ */
 export async function calculateTotals(checkout: ICheckoutState): Promise<Totals> {
-    const subtotal = getCartTotal(checkout.cart)
-    let shipping = 0;
-    if (hasValidBillingAddress(checkout.addresses.billing)) {
-        shipping = await getShippingCost(checkout);
-    }
-    const payment = await getPaymentCost(checkout)
-
-    let discount = 0
-
-    if (checkout.appliedCoupon) {
-        const response = await getDiscount(checkout)
-        if (response.discountType === "free_shipping") {
-            shipping = 0
-        }
-        else {
-            discount = response.discount
-        }
-
+    const localSubtotal = getCartTotal(checkout.cart)
+    if (!checkout.cart.length) {
+        return { subtotal: 0, shipping: 0, payment: 0, discount: 0, interestCost: 0, total: 0, couponError: null, warnings: [] }
     }
 
-
-    const baseTotal = subtotal + shipping + payment - discount;
-
-    let total = baseTotal;
-    if (checkout.paymentMethod?.attributes?.installments
-        && checkout.installments > checkout.paymentMethod.attributes.installments.free_rate_months) {
-        const installmentCalc = calculateInstallment({
-            amount: baseTotal,
-            annualRate: checkout.paymentMethod.attributes.installments.annual_rate,
-            months: checkout.installments
+    try {
+        const response = await fetch('/api/checkout/quote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(buildQuotePayload(checkout)),
         })
-        total = installmentCalc.totalCost
-    }
+        const json = await response.json()
+        if (!response.ok) throw new Error(json?.message || `Response status: ${response.status}`)
+        const quote = json as IQuoteResponse
 
-    const interestCost = total - baseTotal
+        // Το paymentCost του Strapi περιέχει και τον τόκο των δόσεων — εδώ τα
+        // χωρίζουμε για την εμφάνιση («Κόστος πληρωμής» / «Τόκοι δόσεων»)
+        const basePayment = checkout.paymentMethod ? Number(checkout.paymentMethod.attributes?.price ?? 0) : 0
+        const payment = Math.min(basePayment, quote.paymentCost)
+        const interestCost = Math.max(0, Math.round((quote.paymentCost - payment) * 100) / 100)
 
-    return {
-        subtotal: subtotal,
-        shipping: shipping,
-        payment: payment,
-        discount: discount,
-        interestCost: interestCost,
-        total: total
+        return {
+            subtotal: quote.subtotal,
+            shipping: quote.shippingCost,
+            payment,
+            discount: quote.discount,
+            interestCost,
+            total: quote.total,
+            couponError: checkout.appliedCoupon ? quote.couponError : null,
+            warnings: quote.warnings ?? [],
+            islandVat: quote.islandVat ?? null,
+            bundleDiscount: quote.bundleDiscount ?? 0,
+            bundles: quote.bundles ?? [],
+        }
+    } catch (error) {
+        // Π.χ. ο τρόπος πληρωμής δεν επιτρέπεται για αυτό το ποσό: δείχνουμε
+        // τουλάχιστον την αξία των προϊόντων — το ακριβές μήνυμα θα το δει ο
+        // πελάτης στην ολοκλήρωση της παραγγελίας
+        return {
+            subtotal: localSubtotal,
+            shipping: 0,
+            payment: 0,
+            discount: 0,
+            interestCost: 0,
+            total: localSubtotal,
+            couponError: null,
+            warnings: [error instanceof Error ? error.message : 'Δεν υπολογίστηκαν τα σύνολα'],
+        }
     }
 };
 
@@ -107,90 +118,6 @@ export function getCartTotal(items: ICartItem[]) {
     return total
 }
 
-async function getShippingCost(checkout: ICheckoutState): Promise<number> {
-    if (!checkout.shippingMethod || !checkout.shippingMethod.id) return 0
-
-    const myHeaders = new Headers();
-
-    myHeaders.append('Content-Type', 'application/json')
-
-    const myInit = {
-        method: "POST",
-        headers: myHeaders,
-        body: JSON.stringify({ cart: checkout.cart, addresses: checkout.addresses, shippingMethod: checkout.shippingMethod })
-        // mode: "cors",
-        // cache: "default",
-    };
-
-    const response = await fetch(`/api/checkout/shipping`,
-        myInit,
-    )
-    if (!response.ok) {
-        throw new Error(`Response status: ${response.status}`);
-    }
-
-    const json = await response.json()
-
-    return json.cost
-}
-
-async function getPaymentCost(checkout: ICheckoutState): Promise<number> {
-    if (!checkout.paymentMethod || !checkout.paymentMethod.id) return 0
-    const myHeaders = new Headers();
-
-    myHeaders.append('Content-Type', 'application/json')
-
-    const myInit = {
-        method: "POST",
-        headers: myHeaders,
-        body: JSON.stringify({ paymentMethod: checkout.paymentMethod })
-        // mode: "cors",
-        // cache: "default",
-    };
-
-    const response = await fetch(`/api/checkout/payment`,
-        myInit,
-    )
-    if (!response.ok) {
-        throw new Error(`Response status: ${response.status}`);
-    }
-
-    const json = await response.json()
-
-    return json.cost
-}
-
-async function getDiscount(checkout: ICheckoutState): Promise<{ discountType: string, discount: number }> {
-    const myHeaders = new Headers();
-
-    myHeaders.append('Content-Type', 'application/json')
-
-    const myInit = {
-        method: "POST",
-        headers: myHeaders,
-        body: JSON.stringify({
-            code: checkout.appliedCoupon?.code,
-            userEmail: checkout.addresses.billing.email,
-            cart: checkout.cart,
-            cartTotal: checkout.totals.subtotal
-        })
-        // mode: "cors",
-        // cache: "default",
-    };
-
-    const response = await fetch(`/api/checkout/discount`,
-        myInit,
-    )
-
-    if (!response.ok) {
-        throw new Error(`Response status: ${response.status}`);
-    }
-
-    const json = await response.json()
-
-    return json
-}
-
 export function calculateInstallment({ amount, annualRate, months }: { amount: number, annualRate: number, months: number }) {
 
     let r = (annualRate / 100) / 12; // Μετατροπή ετήσιου επιτοκίου σε μηνιαίο
@@ -203,16 +130,6 @@ export function calculateInstallment({ amount, annualRate, months }: { amount: n
         monthlyInstallment: M.toFixed(2),
         totalCost: (M * n)
     };
-}
-
-function hasValidBillingAddress(address: ICheckoutState["addresses"]["billing"]): boolean {
-    return (
-        address.street.trim() !== '' &&
-        address.city.trim() !== '' &&
-        address.state.trim() !== '' &&
-        address.zipCode.trim() !== '' &&
-        address.country.trim() !== ''
-    );
 }
 
 export const createCategories = (item: ICartItem) => {
@@ -238,96 +155,49 @@ export const createCategories = (item: ICartItem) => {
     return categories
 }
 
-export const createOrder = async (checkout: ICheckoutState) => {
+export const createOrder = async (checkout: ICheckoutState): Promise<{
+    status: string, message: string, orderId: string | null, orderNumber?: string, amount?: number | null, installments?: number, reused?: boolean
+}> => {
     if (!checkout.addresses)
         return { message: "Κάποιο πρόβλημα δημιουργήθηκε με τις διευθύνσεις αποστολής-παράδοσης", status: "fail", orderId: null, amount: null }
     if (checkout.cart.length <= 0)
         return { message: "Το καλάθι είναι άδειο", status: "fail", orderId: null, amount: null }
-    if (!checkout.shippingMethod)
+    if (!checkout.shippingMethod?.id)
         return { message: "Δεν έχετε επιλέξει τρόπο αποστολής", status: "fail", orderId: null, amount: null }
     if (!checkout.paymentMethod)
         return { message: "Δεν έχετε επιλέξει τρόπο πληρωμής", status: "fail", orderId: null, amount: null }
 
-    // Ελέγχω αν όλα τα προϊόντα είναι διαθέσιμα
-    const isAllProductsAvailable = checkout.cart.every(item => item.isAvailable === true)
-
-    if (isAllProductsAvailable) {
-        const myHeaders = new Headers();
-        myHeaders.append('Content-Type', 'application/json')
-        myHeaders.append("authorization", `Bearer ${process.env.ADMIN_JWT_SECRET}`)
-
-        const myInit = {
-            method: "POST",
-            headers: myHeaders,
-            body: JSON.stringify({ checkout: checkout })
-            // mode: "cors",
-            // cache: "default",
-        };
-
-
-        const response = await fetch(`/api/checkout/createOrder`,
-            myInit,
-        )
-        if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
-        }
-
-        const json = await response.json()
-
-        sendPurchaseEvent(json.orderId, checkout)
-
-        return {
-            status: json.status,
-            message: json.message,
-            orderId: json.orderId,
-            amount: json.amount,
-            installments: json.installments
-        }
-    }
-    else {
-        return {
-            status: "fail",
-            message: "Κάποιο-α προϊόντα δεν είναι πλέον διαθέσιμα",
-            orderId: null
-        }
+    // Η διαθεσιμότητα/ποσότητες ελέγχονται ξανά στο Strapi (με κλείδωμα
+    // αποθέματος) — εδώ μόνο ο γρήγορος έλεγχος του καλαθιού
+    const isAllProductsAvailable = checkout.cart.every(item => item.isAvailable !== false)
+    if (!isAllProductsAvailable) {
+        return { status: "fail", message: "Κάποιο-α προϊόντα δεν είναι πλέον διαθέσιμα", orderId: null }
     }
 
+    const response = await fetch(`/api/checkout/createOrder`, {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checkout }),
+    })
+    if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+    }
+
+    const json = await response.json()
+
+    // Νέα προσπάθεια πληρωμής για την ίδια παραγγελία → όχι δεύτερο event
+    // (2026-10-25) Η αγορά στέλνεται στο Analytics ΜΟΝΟ από τη σελίδα «Ευχαριστούμε»
+    // (PurchaseTracker, με τα στοιχεία της παραγγελίας) — εδώ έφευγε δεύτερη φορά,
+    // και για πληρωμές με κάρτα ακόμα κι όταν η πληρωμή δεν ολοκληρωνόταν
+
+    return {
+        status: json.status,
+        message: json.message,
+        orderId: json.orderId ?? null,
+        orderNumber: json.orderNumber,
+        amount: json.amount ?? null,
+        installments: json.installments,
+        reused: !!json.reused
+    }
 }
-
-const sendPurchaseEvent = (orderId: number, checkout: ICheckoutState) => {
-    let items: any = []
-    checkout?.cart.forEach((item) => {
-
-        let itemPrice = item.is_sale && item.sale_price ? item.sale_price : item.price
-
-        const discount = item.is_sale && item.sale_price ? (item.price - item.sale_price).toFixed(2) : 0
-
-        const categories = createCategories(item)
-
-        items.push({
-            item_id: item.id,
-            item_name: item.name,
-            item_brand: item.brand,
-            discount: discount,
-            item_category: categories.item_category,
-            item_category2: categories.item_category2,
-            item_category3: categories.item_category3,
-            price: itemPrice,
-            quantity: item.quantity
-        })
-    })
-    let eventValue = {
-        value: {
-            currency: "EUR",
-            value: checkout?.totals.subtotal,
-            transaction_id: orderId,
-            shipping: checkout.totals.shipping,
-            items: items
-        }
-    }
-
-    sendGAEvent('event', 'purchase', {
-        eventValue
-    })
-};
 

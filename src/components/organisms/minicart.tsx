@@ -7,6 +7,7 @@ import { getStrapiMedia } from "@/repositories/medias"
 import ProductCardPrice from "../atoms/productCardPrice"
 import { FaRegImage } from "react-icons/fa6"
 import { useCheckout } from "@/context/checkout"
+import FreeShippingBar from "../atoms/FreeShippingBar"
 
 export default function Minicart() {
     const { checkout } = useCheckout()
@@ -53,8 +54,21 @@ export default function Minicart() {
                     </div>)
                 )}
             </div>
-            <p>Μερικό σύνολο:</p>
-            <Link href="/shopping-cart">Δείτε το καλάθι</Link>
+            {checkout.cart?.length > 0 && (
+                <p className="mt-3 flex justify-between font-semibold text-slate-700 dark:text-slate-200">
+                    <span>Μερικό σύνολο:</span>
+                    <span>
+                        {(checkout.totals?.subtotal > 0
+                            ? checkout.totals.subtotal
+                            : checkout.cart.reduce((s, i) => s + (i.is_sale && i.sale_price ? i.sale_price : i.price) * i.quantity, 0)
+                        ).toFixed(2)} €
+                    </span>
+                </p>
+            )}
+            <FreeShippingBar className="my-3" />
+            <Link href="/shopping-cart" className="block text-center font-semibold text-siteColors-blue hover:text-siteColors-pink">
+                Δείτε το καλάθι
+            </Link>
         </section>
     )
-}
+}

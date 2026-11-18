@@ -18,6 +18,11 @@ export default function CookieBannerClient({ consent }: { consent: boolean }) {
   }, [consent]);
 
   const updateConsent = (allowed: boolean) => {
+    // Facebook Pixel: ξεκινά σε «revoke» (layout.tsx) αν δεν υπάρχει συγκατάθεση
+    if (typeof window.fbq !== 'undefined') {
+      window.fbq('consent', allowed ? 'grant' : 'revoke');
+    }
+
     // Check if gtag exists
     if (typeof window.gtag === 'undefined') {
       return;

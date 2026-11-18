@@ -10,6 +10,7 @@ import type {
   WebSite 
 } from 'schema-dts'
 import SubscribeClient from '@/components/organisms/newsletter/subscribe-client'
+import { jsonLd } from '@/lib/helpers/jsonLd'
 
 const BASE_URL = process.env.NEXT_URL || 'https://magnetmarket.gr'
 
@@ -36,7 +37,7 @@ function generateSubscribeStructuredData() {
       {
         '@type': 'ListItem',
         position: 1,
-        name: 'Home',
+        name: 'Αρχική',
         item: BASE_URL,
       },
       {
@@ -90,7 +91,7 @@ export default function SubscribePage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ 
-          __html: JSON.stringify(structuredData).replaceAll('&quot;', '"')
+          __html: jsonLd(structuredData)
         }}
         suppressHydrationWarning
       />

@@ -12,6 +12,14 @@ import { trackSelectItem } from "@/lib/helpers/analytics"
 import { fbTrackViewContent } from "@/lib/helpers/facebook-pixel"
 import { useCallback } from "react"
 import ProductAvailability from "../atoms/productAvailability"
+import ProductCardBadges from "../atoms/productCardBadges"
+import SaleCountdown from "../atoms/SaleCountdown"
+
+// Δομή κάρτας («stretched link»): ο σύνδεσμος προς το προϊόν είναι ο τίτλος,
+// και με ένα ::after απλώνεται σε όλη την κάρτα — άρα όλη η κάρτα πατιέται.
+// Τα υπόλοιπα στοιχεία που πατιούνται (brand, κουμπιά) έχουν «relative z-10»
+// και βρίσκονται από πάνω. Έτσι δεν υπάρχουν κουμπιά/σύνδεσμοι μέσα σε <a>
+// (μη έγκυρο HTML).
 
 // Main Product Card Component
 export type ProductCardProps = {
@@ -49,19 +57,17 @@ const ProductCard = ({
         }
         fbTrackViewContent(cartItem as any)
 
-    }, [product, listName, position])
+    }, [product, listName])
 
     return (
-        <Link
-            href={`/product/${product.slug}`}
+        <article
             className="group relative h-full pt-2 pb-12 px-1 max-w-96 overflow-hidden transition-all duration-300 hover:scale-[1.02] block"
-            aria-label={`Σύνδεσμος για την αναλυτική σελίδα του προϊόντος ${product.name}`}
-            onClick={handleProductClick} // ✅ Tracking - μόνο ΕΔΩ στο κύριο Link
         >
-            <div className="grid h-full grid-rows-cardLayout shadow-md hover:shadow-xl dark:shadow-slate-700 dark:hover:shadow-slate-600 bg-white dark:bg-slate-800 rounded-xl m-1 p-4 transition-all duration-300">
+            <div className="grid h-full grid-rows-cardLayout has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-siteColors-lightblue shadow-md hover:shadow-xl dark:shadow-slate-700 dark:hover:shadow-slate-600 bg-white dark:bg-slate-800 rounded-xl m-1 p-4 transition-all duration-300">
                 <ProductCardHead product={product} />
 
                 <div className="grid w-full place-content-center bg-white relative min-h-[216px] rounded-lg overflow-hidden">
+                    <ProductCardBadges product={product} />
                     {product.image ? (
                         <Image
                             className="object-contain p-2 transition-transform duration-300 group-hover:scale-105"
@@ -85,9 +91,14 @@ const ProductCard = ({
 
                 <div className='mt-4 grid grid-rows-5 justify-between border-b border-gray-100 dark:border-slate-700 pb-3'>
                     <div className="row-span-4">
-                        <h2 className='w-full font-semibold text-base md:text-lg text-left break-words line-clamp-3 text-siteColors-purple dark:text-slate-200 dark:group-hover:text-slate-100 group-hover:text-siteColors-pink transition-colors duration-200'
-                            aria-label="Τίτλος προϊόντος">
-                            {product.name}
+                        <h2 className='w-full font-semibold text-base md:text-lg text-left break-words line-clamp-3 text-siteColors-purple dark:text-slate-200 dark:group-hover:text-slate-100 group-hover:text-siteColors-pink transition-colors duration-200'>
+                            <Link
+                                href={`/product/${product.slug}`}
+                                onClick={handleProductClick}
+                                className="after:absolute after:inset-0 after:content-[''] after:rounded-xl focus-visible:outline-none"
+                            >
+                                {product.name}
+                            </Link>
                         </h2>
                     </div>
                     <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Κωδ: {product.id}</p>
@@ -105,9 +116,10 @@ const ProductCard = ({
                 </div>}
 
                 <ProductCardPrice product={product} />
+                {product.is_sale && product.sale_ends_at && <SaleCountdown endsAt={product.sale_ends_at} />}
                 <ProductCardFoot product={product} />
             </div>
-        </Link>
+        </article>
     )
 }
 
@@ -165,4 +177,4 @@ const ProductCardSkeleton = () => {
 
 export { ProductCardSkeleton }
 
-export default ProductCard
+export default ProductCard

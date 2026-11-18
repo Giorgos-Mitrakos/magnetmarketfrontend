@@ -1,16 +1,23 @@
-import { getCookies } from "@/lib/helpers/actions"
+// (2026-10-25) «Αποτυχία πληρωμής»: κουμπί «Δοκιμάστε ξανά» (ίδια παραγγελία, ίδιο ή άλλο
+// τρόπο πληρωμής), σωστός σύνδεσμος καλαθιού (/shopping-cart — το /cart δεν υπάρχει),
+// πιο σαφή μηνύματα.
+import Link from "next/link"
 import Image from "next/image"
 import { FaRegImage, FaTimesCircle, FaExclamationTriangle, FaEuroSign } from "react-icons/fa";
 import { getOrder } from "@/lib/queries/order"
 import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { IOrderCookie } from "./SuccessClient";
 
+/** Εικόνα γραμμής παραγγελίας: σχετικό URL του Strapi ή πλήρες URL */
+const orderImageUrl = (url: string) => /^https?:\/\//i.test(url) ? url : `${process.env.NEXT_PUBLIC_API_URL}${url}`
+
+
 export default async function FailureClient({ orderCookie, rcfCookie }:
     { orderCookie: RequestCookie | undefined, rcfCookie: RequestCookie | undefined }) {
 
-    const order: IOrderCookie = orderCookie ? JSON.parse(orderCookie.value) : null
+    const order: IOrderCookie | null = orderCookie ? JSON.parse(orderCookie.value) : null
 
-    const result = await getOrder(order.orderId)
+    const result = await getOrder(order?.orderId)
 
     const data = result?.order
 
@@ -38,7 +45,7 @@ export default async function FailureClient({ orderCookie, rcfCookie }:
                             <div className="bg-red-50 p-4 rounded-lg mb-6 border border-red-200">
                                 <p className="text-red-800 font-medium">
                                     Η πληρωμή δεν ολοκληρώθηκε με επιτυχία. Εάν έχετε χρεωθεί,
-                                    η ποσό θα επιστραφεί αυτόματα στον λογαριασμό σας εντός λίγων ημερών.
+                                    το ποσό θα αποδεσμευτεί αυτόματα από την τράπεζά σας εντός λίγων ημερών.
                                 </p>
                             </div>
                             <div className="space-y-2 text-sm text-gray-700 mb-6">
@@ -47,12 +54,12 @@ export default async function FailureClient({ orderCookie, rcfCookie }:
                                 <p className="font-medium">Email: info@magnetmarket.gr</p>
                             </div>
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                <a
-                                    href="/cart"
+                                <Link
+                                    href="/shopping-cart"
                                     className="inline-block bg-siteColors-purple hover:bg-siteColors-purple/90 text-white font-medium py-3 px-6 rounded-lg transition-colors"
                                 >
                                     Επιστροφή στο Καλάθι
-                                </a>
+                                </Link>
                                 <a
                                     href="/"
                                     className="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-6 rounded-lg transition-colors"
@@ -103,16 +110,31 @@ export default async function FailureClient({ orderCookie, rcfCookie }:
                         </div>
                     </div>
                     <h1 className="text-3xl md:text-4xl font-bold text-red-600 dark:text-red-500 mb-2">
-                        Η παραγγελία σας δεν κατάφερε να ολοκληρωθεί!
+                        Η πληρωμή δεν ολοκληρώθηκε
                     </h1>
                     <p className="text-lg text-gray-600 dark:text-slate-200">
-                        Παρακαλούμε δοκιμάστε ξανά ή επικοινωνήστε με την υποστήριξη
+                        Τα προϊόντα παραμένουν στο καλάθι σας — μπορείτε να ξαναδοκιμάσετε με την ίδια ή με άλλη κάρτα
+                        ή να διαλέξετε άλλο τρόπο πληρωμής.
                     </p>
+                    <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                        <Link
+                            href="/checkout/order-informations"
+                            className="inline-block bg-gradient-to-r from-siteColors-purple to-siteColors-pink text-white font-semibold py-3 px-8 rounded-lg hover:opacity-90 transition-opacity"
+                        >
+                            Δοκιμάστε ξανά
+                        </Link>
+                        <Link
+                            href="/shopping-cart"
+                            className="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-6 rounded-lg transition-colors"
+                        >
+                            Το καλάθι μου
+                        </Link>
+                    </div>
                     <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4 max-w-2xl mx-auto">
                         <div className="flex items-start">
                             <FaExclamationTriangle className="text-red-500 mt-1 mr-3 flex-shrink-0" />
                             <div>
-                                <h3 className="font-medium text-red-800">Αρ. Παραγγελίας: {order.orderId}</h3>
+                                <h3 className="font-medium text-red-800">Αρ. Παραγγελίας: {data.id}</h3>
                                 {resultAnswer && (
                                     <p className="text-red-700 mt-2">{resultAnswer}</p>
                                 )}
@@ -125,20 +147,21 @@ export default async function FailureClient({ orderCookie, rcfCookie }:
                     {/* Order Summary Header */}
                     <div className="bg-gradient-to-r from-red-500 to-orange-500 p-4 text-white">
                         <h2 className="text-xl font-semibold">
-                            Προϊόντα Παραγγελίας <span className="font-normal">#{order.orderId}</span>
+                            Προϊόντα Παραγγελίας <span className="font-normal">#{data.id}</span>
                         </h2>
                     </div>
 
                     {/* Products Grid */}
                     <div className="p-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {data && data.products.map(item => (
-                                <div key={item.id} className="flex border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                            {data && data.products.map((item, index) => (
+                                <div key={`${item.documentId ?? item.id}-${index}`} className="flex border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                                     <div className="relative w-24 h-24 flex-shrink-0">
-                                        {item.image.formats ? (
+                                        {item.image?.formats ? (
                                             <Image
-                                                className="object-cover"
-                                                src={`${process.env.NEXT_PUBLIC_API_URL}${item.image.formats.small ? item.image.formats.small.url : item.image.url}`}
+                                                className="object-contain"
+                                                sizes="96px"
+                                                src={orderImageUrl(item.image.formats.small ? item.image.formats.small.url : item.image.url)}
                                                 alt={item.name}
                                                 fill
                                             />
@@ -185,7 +208,7 @@ export default async function FailureClient({ orderCookie, rcfCookie }:
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
                         <div className="p-4 border border-gray-200 rounded-lg">
                             <h4 className="font-medium text-siteColors-blue mb-2">Δοκιμάστε ξανά</h4>
-                            <p className="text-gray-600 text-sm">Ελέγξτε τα στοιχεία πληρωμής και δοκιμάστε ξανά</p>
+                            <p className="text-gray-600 text-sm">Ελέγξτε τα στοιχεία της κάρτας (λήξη, CVV, όριο) ή επιλέξτε αντικαταβολή / κατάθεση</p>
                         </div>
                         <div className="p-4 border border-gray-200 rounded-lg">
                             <h4 className="font-medium text-siteColors-blue mb-2">Επικοινωνήστε μαζί μας</h4>
@@ -196,4 +219,4 @@ export default async function FailureClient({ orderCookie, rcfCookie }:
             </div>
         </div>
     )
-}
+}

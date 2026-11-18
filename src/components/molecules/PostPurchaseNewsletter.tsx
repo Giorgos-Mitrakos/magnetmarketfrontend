@@ -25,17 +25,17 @@ export default function PostPurchaseNewsletter({ userEmail }: PostPurchaseNewsle
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email }),
+                body: JSON.stringify({ email, source: 'checkout' }),
             })
 
-            const data = await response.json()
+            const data = await response.json().catch(() => ({}))
 
-            if (data.message === 'suceess subscribe' || data.message === 'suceess activate') {
-                // ✅ Track successful signup from post-purchase
+            // (2026-10-14) Strapi v3: double opt-in — ο πελάτης παίρνει email επιβεβαίωσης
+            if (response.ok) {
                 trackNewsletterSignup('post-purchase')
                 setIsSubscribed(true)
-            } else if (data.message === 'This attribute must be unique') {
-                setError('Είστε ήδη εγγεγραμμένος στο newsletter!')
+            } else {
+                setError(data.message || 'Κάτι πήγε στραβά. Δοκιμάστε ξανά.')
             }
         } catch (err) {
             setError('Κάτι πήγε στραβά. Δοκιμάστε ξανά.')
@@ -56,7 +56,7 @@ export default function PostPurchaseNewsletter({ userEmail }: PostPurchaseNewsle
                     Ευχαριστούμε! 🎉
                 </h3>
                 <p className="text-green-700">
-                    Εγγραφήκατε επιτυχώς στο newsletter μας. Θα λαμβάνετε αποκλειστικές προσφορές!
+                    Σας στείλαμε email επιβεβαίωσης. Πατήστε τον σύνδεσμο που περιέχει για να ολοκληρωθεί η εγγραφή και να λαμβάνετε τις αποκλειστικές προσφορές μας!
                 </p>
             </div>
         )
@@ -113,7 +113,7 @@ export default function PostPurchaseNewsletter({ userEmail }: PostPurchaseNewsle
                             Εγγραφή...
                         </span>
                     ) : (
-                        'Εγγραφή & Κέρδισε 5% Έκπτωση'
+                        'Εγγραφή & Κέρδισε 5€ Έκπτωση'
                     )}
                 </button>
 
@@ -123,4 +123,4 @@ export default function PostPurchaseNewsletter({ userEmail }: PostPurchaseNewsle
             </form>
         </div>
     )
-}
+}

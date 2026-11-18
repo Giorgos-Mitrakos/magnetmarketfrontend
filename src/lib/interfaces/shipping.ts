@@ -14,6 +14,8 @@ export type ICheckoutState = {
     installmentsArray: IInstallmentsArray[],
     installments: number;
     totals: Totals;
+    /** Δήλωση για τον μειωμένο ΦΠΑ νησιών (προορισμός/εγκατάσταση στο νησί) */
+    islandVatDeclared?: boolean;
 };
 
 export type Totals = {
@@ -23,6 +25,41 @@ export type Totals = {
     discount: number;
     interestCost: number;
     total: number;
+    /** Το εφαρμοσμένο κουπόνι δεν ισχύει πια (π.χ. άλλαξε το καλάθι) */
+    couponError?: string | null;
+    /** Προειδοποιήσεις του Strapi (διαθεσιμότητα, κόστος αποστολής κ.λπ.) */
+    warnings?: string[];
+    /** Μειωμένος ΦΠΑ νησιών — applied ή μόνο ενημερωτικό μήνυμα */
+    islandVat?: IslandVatInfo | null;
+    /** (2026-10-23) Μέρος του discount από πακέτα «Αγοράστε τα μαζί» */
+    bundleDiscount?: number;
+    bundles?: AppliedBundle[];
+}
+
+/** (2026-10-23) Πακέτο «Αγοράστε τα μαζί» που εφαρμόστηκε στο καλάθι */
+export type AppliedBundle = {
+    documentId: string;
+    name: string;
+    percent: number;
+    sets: number;
+    amount: number;
+}
+
+export type IslandVatInfo = {
+    applied: boolean;
+    rate: number | null;
+    area: string | null;
+    check: string | null;
+    message: string | null;
+    /** Πόσο λιγότερο κοστίζουν τα προϊόντα σε σχέση με τις τιμές του site (24%) */
+    productsSaving?: number;
+    /** Μπορεί να εφαρμοστεί με τη δήλωση του πελάτη */
+    eligible?: boolean;
+    needsDeclaration?: boolean;
+    /** Το κείμενο της δήλωσης */
+    declaration?: string | null;
+    /** Θα ζητηθεί βεβαίωση έναρξης / υποκαταστήματος πριν το τιμολόγιο */
+    reviewRequired?: boolean;
 }
 
 
@@ -33,15 +70,19 @@ export interface IShippingMethods {
 }
 
 export interface IShippingMethod {
-    id: number
+    /** documentId του Strapi v3 */
+    id: string
     attributes: {
         name: string
+        is_free_shipping?: boolean
+        /** Δωρεάν μεταφορικά από αυτό το ποσό (αξία προϊόντων) — null = χωρίς όριο */
+        free_shipping_over?: number | null
         payments: IPaymentMethods
     }
 }
 
 export type ShippingMethodSelected = {
-    id: number | null,
+    id: string | null,
     shipping: string | null
 }
 
@@ -59,7 +100,8 @@ export enum PaymentMethodEnum {
 }
 
 export interface IPaymentMethod {
-    id: number
+    /** documentId του Strapi v3 */
+    id: string
     attributes: {
         name: string
         description: string
@@ -67,14 +109,14 @@ export interface IPaymentMethod {
         method: PaymentMethodEnum
         range: {
             minimum: number
-            maximum: number
-        }
+            maximum: number | null
+        } | null
         isActive: boolean
         installments: {
             max_installments: number
             free_rate_months: number
             annual_rate: number
-        }
+        } | null
     }
 }
 
@@ -111,6 +153,7 @@ type PaymentAction = { type: "SAVE_INSTALLMENTS"; payload: number }
 
 type CouponAction = { type: "APPLY_COUPON"; payload: ICoupon }
     | { type: "REMOVE_COUPON" }
+    | { type: "SET_ISLAND_VAT_DECLARED"; payload: boolean }
 
 type LocalStorageAction = { type: "CLEAR_LOCALESTORAGE" }
 
@@ -125,4 +168,4 @@ type PurchaseCompleteAction = {
 }
 
 // Actions for useReducer
-export type CheckoutAction = CartAction | AddressAction | ShippingAction | PaymentAction | CouponAction | LocalStorageAction | PurchaseCompleteAction;
+export type CheckoutAction = CartAction | AddressAction | ShippingAction | PaymentAction | CouponAction | LocalStorageAction | PurchaseCompleteAction;

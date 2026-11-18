@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest, res: NextResponse) {
+export async function POST(request: NextRequest) {
   // we will use params to access the data passed to the dynamic route
   // const user = params.user;
 
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest, res: NextResponse) {
   })
 }
 
-export async function GET(request: NextRequest, res: NextResponse) {
+export async function GET(request: NextRequest) {
   // we will use params to access the data passed to the dynamic route
   // const user = params.user;
 

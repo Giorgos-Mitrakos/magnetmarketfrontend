@@ -1,25 +1,42 @@
 "use client"
 
+import { useState } from "react"
+import { FaMinus, FaPlus } from "react-icons/fa6"
 import { FaOpencart } from "react-icons/fa"
-import useProductPrice from "@/hooks/useProductPrice"
 import Image from "next/image"
 import { getStrapiMedia } from "@/repositories/medias"
 import { FaRegImage } from "react-icons/fa6"
 import { IProductCard } from "@/lib/interfaces/product"
 import { ICartItem } from "@/lib/interfaces/cart"
 import { useCheckout } from "@/context/checkout"
-import { addToCartToast } from "@/lib/toasts/cartToasts"
+import { announceAddedToCart } from "@/lib/helpers/crossSellEvents"
+import WishlistButton from "@/components/atoms/WishlistButton"
+import PriceAlertButton from "@/components/atoms/PriceAlertButton"
+import { PreorderPassView } from "@/lib/interfaces/preorder"
+import { toast } from "sonner"
 
-function ProductAddToCart({ product }: { product: IProductCard }) {
-  const { data } = useProductPrice(product.id)
-  const { dispatch } = useCheckout()
+function ProductAddToCart({ product, preorder = null }: {
+  product: IProductCard
+  /** (2026-10-22) Έγκυρος σύνδεσμος προπαραγγελίας για προϊόν «Αναμένεται» */
+  preorder?: Extract<PreorderPassView, { valid: true }> | null
+}) {
+  const { checkout, dispatch } = useCheckout()
 
   const isAskForPrice = product.status === 'AskForPrice';
   const isOutOfStock = product.status === 'OutOfStock';
   const isExpacted = product.status === 'IsExpected';
+  const isPreorder = isExpacted && !!preorder;
+  const blocked = isAskForPrice || isOutOfStock || (isExpacted && !isPreorder);
+  // (2026-10-22) Επιλογή ποσότητας πριν την προσθήκη στο καλάθι
+  const [qty, setQty] = useState(1)
+  const inCartQty = checkout.cart.find(c => c.id === product.id)?.quantity ?? 0
+  const maxQty = isPreorder ? Math.max(0, preorder!.maxQuantity - inCartQty) : 99
+  const blockedLabel = isAskForPrice ? "Μη Διαθέσιμο" : isOutOfStock ? "Εξαντλήθηκε" : "Αναμένεται";
 
   const item: ICartItem = {
     id: product.id,
+    // documentId του Strapi v3 — με αυτό ταυτοποιείται το προϊόν στην παραγγελία
+    documentId: (product as { documentId?: string }).documentId,
     name: product.name,
     slug: product.slug,
     status: product.status,
@@ -27,19 +44,67 @@ function ProductAddToCart({ product }: { product: IProductCard }) {
     weight: product.weight,
     price: product.price,
     brand: product.brand?.name || null,
-    quantity: 1,
+    quantity: Math.max(1, Math.min(qty, maxQty || 1)),
     isAvailable: !isAskForPrice, // Προσθήκη ένδειξης διαθεσιμότητας
     is_sale: product.is_sale,
     sale_price: product.sale_price,
-    category: product.category
+    category: product.category,
+    ...(isPreorder ? { preorderToken: preorder!.token, preorderMax: preorder!.maxQuantity } : {}),
   }
 
   const handleAddProductClick = () => {
-    if (isAskForPrice || isOutOfStock || isExpacted) return; // Αν είναι AskForPrice, μην κάνεις τίποτα
+    if (blocked) return;
+    if (isPreorder) {
+      if (inCartQty + item.quantity > preorder!.maxQuantity) {
+        toast.error(`Με τον σύνδεσμο προπαραγγελίας μπορείτε να παραγγείλετε έως ${preorder!.maxQuantity} τεμ.`)
+        return
+      }
+    }
 
     dispatch({ type: "ADD_ITEM", payload: item })
-    addToCartToast(item)
+    announceAddedToCart(item)
+    setQty(1)
   }
+
+  const stepper = (size: 'md' | 'lg') => (
+    <div
+      className={`shrink-0 flex items-center rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 ${size === 'lg' ? 'h-14' : 'h-10'}`}
+      role="group"
+      aria-label="Ποσότητα"
+    >
+      <button
+        type="button"
+        className="px-3 h-full text-slate-600 dark:text-slate-300 disabled:opacity-40"
+        onClick={() => setQty(q => Math.max(1, q - 1))}
+        disabled={qty <= 1}
+        aria-label="Λιγότερα"
+      >
+        <FaMinus className="w-3 h-3" />
+      </button>
+      <input
+        type="number"
+        inputMode="numeric"
+        min={1}
+        max={maxQty || 1}
+        value={qty}
+        onChange={(e) => {
+          const n = Math.floor(Number(e.target.value))
+          setQty(Number.isFinite(n) ? Math.max(1, Math.min(n, maxQty || 1)) : 1)
+        }}
+        className="w-12 h-full text-center bg-transparent text-slate-800 dark:text-slate-100 font-semibold [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        aria-label="Ποσότητα"
+      />
+      <button
+        type="button"
+        className="px-3 h-full text-slate-600 dark:text-slate-300 disabled:opacity-40"
+        onClick={() => setQty(q => Math.min(maxQty || 1, q + 1))}
+        disabled={qty >= (maxQty || 1)}
+        aria-label="Περισσότερα"
+      >
+        <FaPlus className="w-3 h-3" />
+      </button>
+    </div>
+  )
 
   const displayPrice = product.is_sale && product.sale_price
     ? product.sale_price
@@ -92,7 +157,7 @@ function ProductAddToCart({ product }: { product: IProductCard }) {
                   <span className="text-lg font-bold text-siteColors-purple dark:text-slate-200">
                     {displayPrice.toFixed(2)} €
                   </span>
-                  {product.is_sale && (
+                  {product.is_sale && !!product.sale_price && (
                     <span className="text-sm line-through text-gray-500 dark:text-slate-400">
                       {product.price.toFixed(2)} €
                     </span>
@@ -102,33 +167,69 @@ function ProductAddToCart({ product }: { product: IProductCard }) {
             </div>
           </div>
 
-          {/* Add to Cart Button */}
+          {/* Αγαπημένα + Add to Cart Button */}
+          <div className="flex items-center gap-2">
+          <WishlistButton documentId={item.documentId} product={product} variant="compact" />
           <button
             onClick={handleAddProductClick}
-            disabled={isAskForPrice || isOutOfStock || isExpacted}
-            className={isAskForPrice || isOutOfStock || isExpacted ? buttonClasses.mobile.disabled : buttonClasses.mobile.active}
-            aria-label={isAskForPrice ? "Δεν είναι διαθέσιμο για αγορά" : "Προσθήκη στο καλάθι"}
+            disabled={blocked}
+            className={blocked ? buttonClasses.mobile.disabled : buttonClasses.mobile.active}
+            aria-label={blocked ? `Δεν είναι διαθέσιμο για αγορά (${blockedLabel})` : "Προσθήκη στο καλάθι"}
           >
             <FaOpencart className="mr-2" />
-            <span>{isAskForPrice ? "Μη Διαθέσιμο" : "Προσθήκη"}</span>
+            <span>{blocked ? blockedLabel : isPreorder ? "Προπαραγγελία" : "Προσθήκη"}</span>
           </button>
+          </div>
         </div>
       </div>
 
       {/* Desktop View */}
       <div className="hidden md:block mt-6">
-        <button
-          onClick={handleAddProductClick}
-          disabled={isAskForPrice || isOutOfStock || isExpacted}
-          className={isAskForPrice || isOutOfStock || isExpacted ? buttonClasses.desktop.disabled : buttonClasses.desktop.active}
-          aria-label={isAskForPrice ? "Δεν είναι διαθέσιμο για αγορά" : "Προσθήκη στο καλάθι"}
-        >
-          <FaOpencart className="mr-3 text-xl" />
-          <span>Προσθήκη στο Καλάθι</span>
-        </button>
+        <div className="flex items-center gap-3">
+          {!blocked && stepper('lg')}
+          {/* flex-1 min-w-0 + μία γραμμή: δίπλα στην ποσότητα το κουμπί δεν «φουσκώνει» σε δύο γραμμές */}
+          <button
+            onClick={handleAddProductClick}
+            disabled={blocked}
+            className={`${blocked ? buttonClasses.desktop.disabled : buttonClasses.desktop.active} flex-1 min-w-0 whitespace-nowrap`}
+            aria-label={blocked ? `Δεν είναι διαθέσιμο για αγορά (${blockedLabel})` : isPreorder ? "Προπαραγγελία: προσθήκη στο καλάθι" : "Προσθήκη στο καλάθι"}
+          >
+            <FaOpencart className="mr-3 text-xl shrink-0" />
+            <span className="truncate">{blocked ? blockedLabel : isPreorder ? "Προπαραγγελία" : "Προσθήκη στο Καλάθι"}</span>
+          </button>
+        </div>
+        <WishlistButton documentId={item.documentId} product={product} variant="page" className="mt-3" />
+        <PriceAlertButton
+          documentId={item.documentId}
+          productName={product.name}
+          price={product.price}
+          salePrice={product.sale_price}
+          isSale={product.is_sale}
+          status={product.status}
+          className="mt-3"
+        />
+      </div>
+
+      {/* Κινητό: η ειδοποίηση τιμής μέσα στη σελίδα (η κάτω μπάρα έχει ήδη καλάθι + καρδιά) */}
+      <div className="md:hidden mt-4">
+        {/* Κινητό: η ποσότητα εδώ — η «Προσθήκη» της κάτω μπάρας βάζει αυτή την ποσότητα */}
+        {!blocked && (
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-sm text-slate-600 dark:text-slate-300">Ποσότητα</span>
+            {stepper('md')}
+          </div>
+        )}
+        <PriceAlertButton
+          documentId={item.documentId}
+          productName={product.name}
+          price={product.price}
+          salePrice={product.sale_price}
+          isSale={product.is_sale}
+          status={product.status}
+        />
       </div>
     </>
   )
 }
 
-export default ProductAddToCart
+export default ProductAddToCart

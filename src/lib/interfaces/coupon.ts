@@ -1,5 +1,5 @@
 export interface ICoupon {
-    id: number;
+    id: number | string;
     code: string;
     discountType: 'percentage' | 'fixed_amount' | 'free_shipping';
     discountValue: number;

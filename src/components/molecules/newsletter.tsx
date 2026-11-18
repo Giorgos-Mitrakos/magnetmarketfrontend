@@ -4,13 +4,13 @@ import { useFormik } from "formik";
 import * as Yup from 'yup';
 import { toast } from "sonner";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { FiMail, FiCheck, FiArrowRight } from 'react-icons/fi';
 import { trackNewsletterSignup } from "@/lib/helpers/advanced-analytics";
 
 const Newsletter = () => {
-    const router = useRouter();
     const [isSubmiting, setIsSubmiting] = useState(false);
+    // Email που μόλις γράφτηκε (εμφανίζεται μήνυμα «ελέγξτε το email σας»)
+    const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
     const initialValues = {
         email: "",
@@ -33,51 +33,36 @@ const Newsletter = () => {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        email: values.email
+                        email: values.email,
+                        source: 'footer',
                     }),
                 });                
 
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
 
-                switch (data.message) {
-                    case "suceess subscribe":
-                        // ✅ Track successful signup from footer
-                        trackNewsletterSignup('footer');
-                        toast.success(
-                            <p className='font-semibold'>Η εγγραφή σας έγινε με επιτυχία!</p>, {
-                            position: 'top-right',
-                        });
-                        router.push('/newsletter/subscribe/success');
-                        break;
-    
-                    case "suceess activate":
-                        // ✅ Track reactivation as signup
-                        trackNewsletterSignup('footer');
-                        toast.info(<p className='font-semibold'>Η αποστολή newsletter ενεργοποιήθηκε!</p>, {
-                            position: 'top-right',
-                        });
-                        router.push('/newsletter/subscribe/success?message=Η εγγραφή στο newsletter ενεργοποιήθηκε ξανά!');
-                        break;
-    
-                    case "This attribute must be unique":
-                        router.push('/newsletter/subscribe/error?message=Έχετε κάνει ήδη εγγραφή στο newsletter μας!');
-                        break;
-    
-                    default:
-                        break;
+                // (2026-10-14) Strapi v3: double opt-in — η εγγραφή ολοκληρώνεται
+                // όταν ο πελάτης πατήσει τον σύνδεσμο στο email επιβεβαίωσης
+                if (response.ok) {
+                    trackNewsletterSignup('footer');
+                    setSubmittedEmail(values.email);
+                    toast.success(
+                        <div>
+                            <p className='font-semibold'>Σχεδόν έτοιμο!</p>
+                            <p className='text-sm'>{data.message || 'Σας στείλαμε email επιβεβαίωσης.'}</p>
+                        </div>, {
+                        position: 'top-right',
+                        duration: 8000,
+                    });
+                } else {
+                    setErrors({ email: data.message || 'Δεν ήταν δυνατή η εγγραφή αυτή τη στιγμή — δοκιμάστε ξανά αργότερα' });
+                    setIsSubmiting(false);
+                    return;
                 }
             }
-            catch (err: any) {
-                const errors: { [key: string]: string } = {};
-                err.response.errors?.forEach((element: any) => {
-                    if (element.message === "This attribute must be unique") {
-                        errors[element.extensions.error.details.errors[0].path[0]] = "* Έχετε κάνει ήδη εγγραφή στο newsletter μας";
-                    }
-                    else {
-                        errors[element.extensions.error.details.errors[0].path[0]] = element.message;
-                    }
-                });
-                setErrors(errors);
+            catch {
+                setErrors({ email: 'Δεν ήταν δυνατή η εγγραφή αυτή τη στιγμή — δοκιμάστε ξανά αργότερα' });
+                setIsSubmiting(false);
+                return;
             }
 
             resetForm();
@@ -155,6 +140,15 @@ const Newsletter = () => {
                                     <FiCheck className="h-4 w-4 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
                                     <p className='text-sm text-red-600'>{formik.errors.email}</p>
                                 </div>
+                            ) : submittedEmail ? (
+                                <div className="mt-3 flex items-start bg-green-50 border border-green-200 rounded-lg p-3" role="status">
+                                    <FiCheck className="h-5 w-5 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
+                                    <p className='text-sm text-green-800'>
+                                        Σας στείλαμε email επιβεβαίωσης στο <strong>{submittedEmail}</strong>.
+                                        Πατήστε τον σύνδεσμο που περιέχει για να ολοκληρωθεί η εγγραφή
+                                        (ελέγξτε και τα ανεπιθύμητα / spam).
+                                    </p>
+                                </div>
                             ) : (
                                 <p className="text-xs text-gray-500 mt-3">
                                     Με την εγγραφή σας αποδέχεστε τους Όρους Χρήσης και την Πολιτική Απορρήτου
@@ -168,4 +162,4 @@ const Newsletter = () => {
     );
 };
 
-export default Newsletter;
+export default Newsletter;

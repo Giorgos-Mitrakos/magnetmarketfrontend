@@ -6,20 +6,11 @@ import { FaLocationDot, FaInstagram, FaFacebookF } from "react-icons/fa6";
 import Link from "next/link";
 import EpayIcons from "../molecules/epayIcons";
 import Copyright from "../atoms/copyright";
-import { HTMLAttributeAnchorTarget } from "react";
-import { getFooter } from "@/lib/queries/footerQuery";
+import { getFooter, IFooterLink } from "@/lib/queries/footerQuery";
 
 export interface FooterSectionProps {
   label: string;
-  links:
-  {
-    id: number,
-    label: string,
-    isLink: boolean,
-    href: string,
-    target: HTMLAttributeAnchorTarget
-  }[]
-
+  links: IFooterLink[]
 }
 
 const FooterSection = (props: FooterSectionProps) => {
@@ -31,10 +22,10 @@ const FooterSection = (props: FooterSectionProps) => {
       <ul className="space-y-3">
         {props.links.map((link) => (
           <li key={link.id} className="w-auto">
-            {link.isLink ? (
+            {link.href ? (
               <Link
                 href={link.href}
-                target={link.target}
+                target={link.open_in_new_tab ? '_blank' : undefined}
                 className="relative inline-block py-1 font-medium after:duration-300 after:absolute after:content-[''] after:h-[2px] after:bg-white after:w-0 hover:after:w-full after:left-0 after:-bottom-0 after:rounded-xl transition-all hover:text-siteColors-pink"
                 aria-label={link.label}
               >
@@ -84,7 +75,7 @@ const Footer = async () => {
                   <a
                     href={`tel:${data.telephone}`}
                     className="hover:text-siteColors-pink font-bold transition-colors pt-1"
-                    aria-label={data.telephone}
+                    aria-label={data.telephone ?? undefined}
                   >
                     {data.telephone}
                   </a>
@@ -115,7 +106,7 @@ const Footer = async () => {
             {/* Footer Sections */}
             {data.sections.map((x) => (
               <div key={x.id}>
-                <FooterSection label={x.Label} links={x.links} />
+                <FooterSection label={x.label} links={x.links} />
               </div>
             ))}
 
@@ -125,7 +116,7 @@ const Footer = async () => {
               <p className="my-4 text-gray-100">Μείνετε συνδεδεμένοι μαζί μας για ενημερώσεις και προσφορές!</p>
               <div className="flex space-x-4 mt-6">
                 <Link
-                  href="https://www.facebook.com/magnetmarket.gr/"
+                  href={data.facebook_url || "https://www.facebook.com/magnetmarket.gr/"}
                   target="_blank"
                   className="bg-siteColors-pink p-3 rounded-full text-white hover:bg-white hover:text-siteColors-pink transition-colors shadow-md"
                   aria-label="Facebook"
@@ -133,7 +124,7 @@ const Footer = async () => {
                   <FaFacebookF className="text-xl" />
                 </Link>
                 <Link
-                  href="https://www.instagram.com/magnetmarket.gr/"
+                  href={data.instagram_url || "https://www.instagram.com/magnetmarket.gr/"}
                   target="_blank"
                   className="bg-siteColors-pink p-3 rounded-full text-white hover:bg-white hover:text-siteColors-pink transition-colors shadow-md"
                   aria-label="Instagram"

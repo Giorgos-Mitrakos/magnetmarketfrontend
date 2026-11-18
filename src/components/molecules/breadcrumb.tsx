@@ -7,7 +7,7 @@ const Breadcrumb = ({ breadcrumbs }: { breadcrumbs: { title: string, slug: strin
         <nav className="flex mt-4 mb-4" aria-label="Breadcrumb">
             <ul className="flex flex-wrap items-center space-x-1 text-sm">
                 {breadcrumbs.map((item, index) => {
-                    if (item.title === 'Home') {
+                    if (item.slug === '/' || item.title === 'Home') {
                         return (
                             <li key={index} className="inline-flex items-center">
                                 <Link 

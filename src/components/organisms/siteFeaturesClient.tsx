@@ -1,6 +1,6 @@
 'use client'
 import { memo, useEffect, useRef, useState } from 'react'
-import { FaRotate, FaRegCreditCard, FaRegComments } from "react-icons/fa6"
+import { FaRotate, FaRegCreditCard, FaRegComments, FaTruckFast, FaStore, FaGift, FaRegClock, FaPhone, FaAward } from "react-icons/fa6"
 import { AiOutlineSafety } from "react-icons/ai"
 import SiteFeature from "../molecules/siteFeature"
 
@@ -33,6 +33,18 @@ const getIcon = (iconType: string) => {
             return <FaRegComments {...iconProps} />
         case 'safety':
             return <AiOutlineSafety {...iconProps} />
+        case 'truck':
+            return <FaTruckFast {...iconProps} />
+        case 'store':
+            return <FaStore {...iconProps} />
+        case 'gift':
+            return <FaGift {...iconProps} />
+        case 'clock':
+            return <FaRegClock {...iconProps} />
+        case 'phone':
+            return <FaPhone {...iconProps} />
+        case 'award':
+            return <FaAward {...iconProps} />
         default:
             return <FaRotate {...iconProps} />
     }
@@ -49,6 +61,18 @@ const getIconAriaLabel = (iconType: string) => {
             return "Συνεφάκια ομιλίας"
         case 'safety':
             return "Ασπίδα"
+        case 'truck':
+            return "Φορτηγό μεταφοράς"
+        case 'store':
+            return "Κατάστημα"
+        case 'gift':
+            return "Δώρο"
+        case 'clock':
+            return "Ρολόι"
+        case 'phone':
+            return "Τηλέφωνο"
+        case 'award':
+            return "Βραβείο"
         default:
             return ""
     }

@@ -60,6 +60,9 @@ export default function GoogleCustomerReviews({
           email: email,
           delivery_country: deliveryCountry,
           estimated_delivery_date: estimatedDeliveryDate,
+
+          // OPTIONAL FIELDS - Ελληνικά
+          opt_in_style: 'CENTER_DIALOG', // CENTER_DIALOG ή BOTTOM_RIGHT_DIALOG
         };
 
         // OPTIONAL FIELDS - Προσθήκη GTINs/MPNs αν υπάρχουν

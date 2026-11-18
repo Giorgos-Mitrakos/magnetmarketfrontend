@@ -4,12 +4,14 @@ import { ClientSafeProvider, LiteralUnion, getProviders, getCsrfToken, signIn } 
 import Link from "next/link"
 import { useState, useEffect } from "react";
 import { useFormik } from "formik";
-import { BuiltInProviderType } from 'next-auth/providers'
+import { BuiltInProviderType } from 'next-auth/providers/index'
 import CustomInput from '@/components/atoms/input'
 import { useSearchParams } from 'next/navigation'
 import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaArrowRight } from 'react-icons/fa'
-import { FiTruck, FiHeart, FiClock, FiPercent } from 'react-icons/fi'
+import AccountBenefits from '@/components/atoms/AccountBenefits'
+import ResendConfirmation from '@/components/atoms/ResendConfirmation'
 import { FaBagShopping } from 'react-icons/fa6';
+import { safeRedirect } from '@/lib/helpers/safeRedirect';
 
 export interface ILoginData {
     email: string;
@@ -36,7 +38,13 @@ export default function LoginComp() {
     const [isLoading, setIsLoading] = useState(false);
 
     const searchParams = useSearchParams()
-    const callbackUrl = searchParams.get('callbackUrl')
+    // (2026-10-26) Μόνο σελίδες του site (όχι ξένες διευθύνσεις)
+    const rawCallback = searchParams.get('callbackUrl')
+    const callbackUrl = rawCallback ? safeRedirect(rawCallback, '') || null : null
+    const justRegistered = searchParams.get('registered') === 'true'
+    const justConfirmed = searchParams.get('confirmed') === '1'
+    const [loginError, setLoginError] = useState<string | null>(() => errorMessage(searchParams.get('error')))
+    const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null)
 
     useEffect(() => {
         async function getProv() {
@@ -61,12 +69,23 @@ export default function LoginComp() {
                 .required('*To email είναι υποχρεωτικό πεδίο!'),
             password: Yup.string().required("*Συμπληρώστε τον κωδικό σας!"),
         }),
-        onSubmit: (values) => {
+        onSubmit: async (values) => {
             setIsLoading(true);
-            signIn('credentials', {
+            setLoginError(null);
+            setUnconfirmedEmail(null);
+            const target = callbackUrl ? callbackUrl : "/"
+            const result = await signIn('credentials', {
                 ...values,
-                callbackUrl: callbackUrl ? callbackUrl : "/"
+                redirect: false,
+                callbackUrl: target
             });
+            if (result?.ok && !result.error) {
+                window.location.href = target;
+                return;
+            }
+            if (result?.error === 'EmailNotConfirmed') setUnconfirmedEmail(values.email);
+            setLoginError(errorMessage(result?.error ?? 'CredentialsSignin'));
+            setIsLoading(false);
         }
     });
 
@@ -81,7 +100,7 @@ export default function LoginComp() {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-800 py-8 px-4">
             <div className="max-w-6xl mx-auto flex flex-col lg:flex-row rounded-2xl overflow-hidden shadow-xl bg-white ">
                 {/* Left Panel - Branding & Features */}
-                <div className="w-full lg:w-2/5 bg-gradient-to-b from-siteColors-blue to-siteColors-purple text-white p-8 lg:p-12 flex flex-col justify-between">
+                <div className="order-2 lg:order-1 w-full lg:w-2/5 bg-gradient-to-b from-siteColors-blue to-siteColors-purple text-white p-8 lg:p-12 flex flex-col justify-between">
                     <div>
                         <div className="flex items-center mb-12">
                             <FaBagShopping className="h-8 w-8 mr-2" />
@@ -92,62 +111,39 @@ export default function LoginComp() {
                             Συνδεθείτε για να συνεχίσετε με τις αγορές σας και να απολαύσετε μια βελτιωμένη εμπειρία shopping.
                         </p>
 
-                        <div className="space-y-5">
-                            <div className="flex items-start">
-                                <div className="bg-siteColors-lightblue p-2 rounded-full mr-4 mt-1">
-                                    <FiTruck className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Γρήγορες Αγορές</h3>
-                                    <p className="text-blue-200 text-sm">Ολοκληρώστε γρήγορα τις αγορές σας</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-start">
-                                <div className="bg-siteColors-lightblue p-2 rounded-full mr-4 mt-1">
-                                    <FiPercent className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Προσωποποιημένες Προσφορές</h3>
-                                    <p className="text-blue-200 text-sm">Εξατομικευμένες εκπτώσεις για εσάς</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-start">
-                                <div className="bg-siteColors-lightblue p-2 rounded-full mr-4 mt-1">
-                                    <FiClock className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Ιστορικό Παραγγελιών</h3>
-                                    <p className="text-blue-200 text-sm">Πρόσβαση στο ιστορικό αγορών σας</p>
-                                </div>
-                            </div>
-
-                            {/* Το κρατάω για το μέλλον όπου θα φτιάξω αγαπημένα */}
-                            {/* <div className="flex items-start">
-                                <div className="bg-siteColors-lightblue p-2 rounded-full mr-4 mt-1">
-                                    <FiHeart className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Αγαπημένα Προϊόντα</h3>
-                                    <p className="text-blue-200 text-sm">Αποθηκεύστε τα αγαπημένα σας προϊόντα</p>
-                                </div>
-                            </div> */}
-                        </div>
+                        <AccountBenefits />
                     </div>
 
                     <div className="mt-8 text-blue-200 text-sm">
-                        <p>© 2025 MagnetMarket. All rights reserved.</p>
+                        <p>© {new Date().getFullYear()} MagnetMarket. Με επιφύλαξη παντός δικαιώματος.</p>
                     </div>
                 </div>
 
                 {/* Right Panel - Login Form */}
-                <div className="w-full lg:w-3/5 p-8 lg:p-12">
+                <div className="order-1 lg:order-2 w-full lg:w-3/5 p-6 sm:p-8 lg:p-12">
                     <div className="max-w-md mx-auto">
                         <div className="text-center mb-10">
                             <h2 className="text-3xl font-bold text-gray-800">Σύνδεση</h2>
                             <p className="text-gray-600 mt-2">Συμπληρώστε τα στοιχεία σας για να συνεχίσετε</p>
                         </div>
+
+                        {/* Μηνύματα κατάστασης */}
+                        {justConfirmed && !loginError && (
+                            <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800" role="status">
+                                <strong>Το email σας επιβεβαιώθηκε!</strong> Ο λογαριασμός σας είναι ενεργός — συνδεθείτε για να συνεχίσετε.
+                            </div>
+                        )}
+                        {justRegistered && !justConfirmed && !loginError && (
+                            <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800" role="status">
+                                Ο λογαριασμός σας δημιουργήθηκε. Αν σας ζητήθηκε επιβεβαίωση, πατήστε πρώτα τον σύνδεσμο στο email που σας στείλαμε.
+                            </div>
+                        )}
+                        {loginError && (
+                            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
+                                <p>{loginError}</p>
+                                {unconfirmedEmail && <ResendConfirmation email={unconfirmedEmail} className="mt-2" />}
+                            </div>
+                        )}
 
                         {/* Social Login Buttons */}
                         {providers && Object.values(providers).filter(provider => provider.name !== "Credentials").length > 0 && (
@@ -301,4 +297,21 @@ export default function LoginComp() {
         </div>
         </div >
     )
+}
+
+// Μετάφραση των κωδικών σφάλματος του next-auth / της Strapi σε φιλικό μήνυμα
+function errorMessage(code: string | null | undefined): string | null {
+    if (!code) return null
+    switch (code) {
+        case 'EmailNotConfirmed':
+            return 'Δεν έχετε επιβεβαιώσει ακόμη το email σας. Πατήστε τον σύνδεσμο στο email επιβεβαίωσης που σας στείλαμε και δοκιμάστε ξανά.'
+        case 'AccountBlocked':
+            return 'Ο λογαριασμός σας έχει απενεργοποιηθεί. Επικοινωνήστε μαζί μας για βοήθεια.'
+        case 'CredentialsSignin':
+            return 'Λάθος email ή κωδικός πρόσβασης.'
+        case 'OAuthAccountNotLinked':
+            return 'Υπάρχει ήδη λογαριασμός με αυτό το email. Συνδεθείτε με email και κωδικό.'
+        default:
+            return 'Η σύνδεση δεν ολοκληρώθηκε. Δοκιμάστε ξανά.'
+    }
 }

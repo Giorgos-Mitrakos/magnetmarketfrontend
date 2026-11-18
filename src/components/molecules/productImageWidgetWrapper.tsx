@@ -2,7 +2,7 @@
 import { useMemo } from 'react'
 import ProductImageWidget from './productImageWidget'
 
-export default function ProductImageWidgetWrapper({ productImage, additionalImages }: any) {
+export default function ProductImageWidgetWrapper({ productImage, additionalImages, productName }: any) {
   // Memoize το images array - θα έχει το ίδιο reference εκτός αν αλλάξουν τα inputs
   const images = useMemo(() => {
     if (!productImage && !additionalImages?.length) return []
@@ -11,7 +11,7 @@ export default function ProductImageWidgetWrapper({ productImage, additionalImag
       ...(productImage ? [productImage] : []),
       ...(additionalImages ?? []),
     ]
-  }, [productImage?.id, additionalImages?.length]) // Track με IDs, όχι references
+  }, [productImage, additionalImages]) // props από server component — σταθερά references
 
-  return <ProductImageWidget images={images} />
-}
+  return <ProductImageWidget images={images} productName={productName} />
+}

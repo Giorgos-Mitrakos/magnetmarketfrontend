@@ -4,46 +4,20 @@
 import { useEffect, useRef } from 'react';
 import { useCheckout } from '@/context/checkout';
 import { ICartItem } from '@/lib/interfaces/cart';
+import { IOrderProduct } from '@/lib/interfaces/order';
 import { isTransactionTracked } from '@/lib/helpers/analytics';
 
 interface PurchaseTrackerProps {
+  // Σύνοψη παραγγελίας από το Strapi v3 (id = αριθμός παραγγελίας)
   orderData: {
-    id: number;
+    id: number | string;
+    /** ΦΠΑ της παραγγελίας (17% στα νησιά) */
+    vatTotal?: number;
     total: number;
     shipping: {
       cost: number;
     };
-    products: Array<{
-      id: number;
-      name: string;
-      brand: string | null;
-      slug: string;
-      image: any;
-      price: number;
-      status: string;
-      sale_price: number | null;
-      is_sale: boolean;
-      quantity: number;
-      weight: number;
-      isAvailable: boolean;
-      category: {
-        id: number;
-        name: string;
-        slug?: string;
-        parents: Array<{
-          id: number;
-          name: string;
-          slug?: string;
-          parents: Array<{
-            id: number;
-            name: string;
-            slug?: string;
-          }>;
-        }>;
-      } | null;
-      sku?: string;
-      variant?: string;
-    }>;
+    products: IOrderProduct[];
   };
   appliedCoupon?: string | null;
 }
@@ -67,20 +41,18 @@ export default function PurchaseTracker({ orderData, appliedCoupon }: PurchaseTr
     const transactionId = orderData.id.toString();
 
     // Έλεγχος αν έχει ήδη καταγραφεί globally
-    if (isTransactionTracked(transactionId)) {
-      console.log(`[PurchaseTracker] Transaction ${transactionId} already tracked globally`);
-      hasTracked.current = true;
-      return;
-    }
+    // (2026-10-25) Ακόμα κι αν έχει ήδη καταγραφεί (π.χ. ανανέωση της σελίδας), το
+    // PURCHASE_COMPLETE αδειάζει το καλάθι — το reducer δεν ξαναστέλνει το event
 
     try {
       // Μετατροπή order products σε ICartItem format
       const cartItems: ICartItem[] = orderData.products.map(product => ({
-        id: product.id,
+        id: product.id ?? 0,
+        documentId: product.documentId ?? undefined,
         name: product.name,
         brand: product.brand,
         slug: product.slug || '',
-        image: product.image,
+        image: product.image as ICartItem['image'],
         price: product.price,
         sale_price: product.sale_price,
         is_sale: product.is_sale,
@@ -90,11 +62,11 @@ export default function PurchaseTracker({ orderData, appliedCoupon }: PurchaseTr
         category: product.category || null,
         sku: product.sku,
         variant: product.variant,
-        status: product.status, // ✅ Πρόσθεσα το status field που έλειπε
+        status: product.status ?? '',
       }));
 
-      // Υπολογισμός tax (24% VAT)
-      const tax = orderData.total * 0.24;
+      // ΦΠΑ μέσα στο σύνολο (24% → total·24/124), ή ο πραγματικός της παραγγελίας
+      const tax = orderData.vatTotal ?? Math.round((orderData.total * 24 / 124) * 100) / 100;
       const shipping = orderData.shipping.cost;
 
       console.log('[PurchaseTracker] Dispatching PURCHASE_COMPLETE:', {
@@ -127,4 +99,4 @@ export default function PurchaseTracker({ orderData, appliedCoupon }: PurchaseTr
   }, [orderData, appliedCoupon, dispatch]);
 
   return null;
-}
+}

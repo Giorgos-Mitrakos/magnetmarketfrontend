@@ -17,7 +17,7 @@ interface TrackableLinkProps {
     bannerId: string
     bannerName: string
     bannerPosition: string
-    bannerType?: 'hero' | 'single' | 'double' | 'triple' | 'side'
+    bannerType?: 'hero' | 'single' | 'double' | 'triple' | 'side' | 'row' | 'campaign' | 'deal' | 'solution'
 }
 
 /**

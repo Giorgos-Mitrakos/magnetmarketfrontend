@@ -15,27 +15,26 @@ const useSpeechRecognition = () => {
     const router = useRouter();
     const [text, setText] = useState("")
     const [isListening, setIsListening] = useState(false)
+    // (2026-10-17) Αυτόματη μετάβαση στα αποτελέσματα ΜΟΝΟ για φωνητική αναζήτηση.
+    // Όταν ο πελάτης πληκτρολογεί, βλέπει προτάσεις και πατά Enter ο ίδιος
+    // (πριν, η σελίδα άλλαζε μόνη της 2″ μετά το τελευταίο πλήκτρο).
+    const [voiceText, setVoiceText] = useState("")
 
     useEffect(() => {
-        const getData = setTimeout(() => {
-            if (text !== "" && text.length > 2) {
-                sendGAEvent('event', 'search', {
-                    text
-                })
-
-                router.push(`/search?search=${text}`)
-            }
-        }, 2000)
-
-        return () => clearTimeout(getData)
-    }, [text, router])
+        if (voiceText.trim().length > 2) {
+            sendGAEvent('event', 'search', { text: voiceText })
+            router.push(`/search?search=${encodeURIComponent(voiceText.trim())}`)
+        }
+    }, [voiceText, router])
 
     useEffect(() => {
         if (!recognition) return
 
         recognition.onresult = (event: SpeechRecognitionEvent) => {
 
-            setText(event.results[0][0].transcript)
+            const transcript = event.results[0][0].transcript
+            setText(transcript)
+            setVoiceText(transcript)
             recognition.stop()
             setIsListening(false)
         }
@@ -64,4 +63,4 @@ const useSpeechRecognition = () => {
     }
 }
 
-export default useSpeechRecognition
+export default useSpeechRecognition

@@ -1,11 +1,12 @@
 'use client'
 
 import { useFormik } from "formik"
+import PostalSuggestions from '@/components/atoms/PostalSuggestions'
 import * as Yup from 'yup'
 import CustomInput from "../atoms/input"
-import { useNoRevalideteQuery, useQuery } from "@/repositories/clientRepository"
-import { GET_COUNTRY_LIST, GET_COUNTRY_STATES, GET_REGION_POSTALS, GET_STATE_REGIONS } from "@/lib/queries/addressQuery"
+import { useGeo } from "@/hooks/useGeo"
 import { useState } from "react"
+import { isValidAfm, normalizeAfm, normalizePhone } from "./addresses"
 import { AiOutlineLoading3Quarters, AiOutlineSave, AiOutlineUser, AiOutlineHome, AiOutlineEnvironment } from "react-icons/ai"
 import { FaMapMarkerAlt, FaBuilding, FaReceipt, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa"
 
@@ -201,19 +202,145 @@ const StatusMessage = ({ type, message, onClose }: { type: 'success' | 'error'; 
     </div>
 )
 
-const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
+// Select με ετικέτα/σφάλμα — έξω από τη φόρμα, ώστε να μη «ξαναχτίζεται» σε κάθε πλήκτρο (2026-10-26)
+const SelectInput = ({ 
+    id, 
+    name, 
+    value, 
+    onChange, 
+    onBlur, 
+    label, 
+    children, 
+    loading = false,
+    error,
+    touched 
+}: {
+    id: string;
+    name: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+    onBlur: (e: React.FocusEvent<HTMLSelectElement>) => void;
+    label: string;
+    children: React.ReactNode;
+    loading?: boolean;
+    error?: string;
+    touched?: boolean;
+}) => (
+    <div className="relative">
+        <label htmlFor={id} className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            {label}
+        </label>
+        <div className="relative">
+            <select
+                id={id}
+                name={name}
+                value={value}
+                onChange={onChange}
+                onBlur={onBlur}
+                className={`w-full h-min p-2 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-siteColors-purple focus:border-siteColors-purple transition-all duration-200 appearance-none ${
+                    error && touched 
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                }`}
+            >
+                {children}
+            </select>
+            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                {loading ? (
+                    <LoadingSpinner size={16} />
+                ) : (
+                    <div className="w-2 h-2 border-r-2 border-b-2 border-gray-400 dark:border-gray-300 transform rotate-45 -translate-y-1/2" />
+                )}
+            </div>
+        </div>
+        {error && touched && (
+            <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
+                <FaExclamationTriangle className="w-3 h-3 mr-1" />
+                {error}
+            </p>
+        )}
+    </div>
+)
+
+
+// (2026-10-26) Ίδιοι έλεγχοι με το checkout (organisms/addresses.tsx)
+const REQ = '*Υποχρεωτικό πεδίο!'
+const compact = (v?: string | null) => String(v ?? '').replace(/[\s\-.()/]/g, '')
+const isTen = (v?: string) => /^\d{10}$/.test(normalizePhone(v))
+const isZip = (v?: string) => /^\d{5}$/.test(compact(v))
+const whenInvoice = (s: Yup.StringSchema, msg: string) =>
+    s.when('isInvoice', { is: 'true', then: (x) => x.required(msg) })
+const whenPerson = (s: Yup.StringSchema, msg: string) =>
+    s.when('isInvoice', { is: (v: string) => v !== 'true', then: (x) => x.required(msg) })
+const whenShip = (s: Yup.StringSchema, msg = REQ) =>
+    s.when('different_shipping', { is: true, then: (x) => x.required(msg) })
+
+const validationSchema = Yup.object({
+    isInvoice: Yup.string(),
+    different_shipping: Yup.boolean(),
+    companyName: whenInvoice(Yup.string(), '*Η επωνυμία είναι υποχρεωτική!'),
+    businessActivity: whenInvoice(Yup.string(), '*Η δραστηριότητα είναι υποχρεωτική!'),
+    afm: whenInvoice(Yup.string(), '*Το Α.Φ.Μ. είναι υποχρεωτικό!')
+        .test('afm', 'Μη έγκυρο Α.Φ.Μ. — ελέγξτε τα 9 ψηφία', function (v) {
+            return this.parent.isInvoice !== 'true' || !v || isValidAfm(v)
+        }),
+    doy: whenInvoice(Yup.string(), '*Η Δ.Ο.Υ. είναι υποχρεωτική!'),
+    firstname: whenPerson(Yup.string(), '*Το όνομα είναι υποχρεωτικό!'),
+    lastname: whenPerson(Yup.string(), '*Το επώνυμο είναι υποχρεωτικό!'),
+    street: Yup.string().required(REQ),
+    country: Yup.string().required(REQ),
+    state: Yup.string().required(REQ),
+    city: Yup.string().required(REQ),
+    zipCode: Yup.string().required(REQ).test('zip', 'Ο Τ.Κ. έχει 5 ψηφία', (v) => !v || isZip(v)),
+    telephone: Yup.string().test('phone', 'Το τηλέφωνο έχει 10 ψηφία', (v) => !v || isTen(v)),
+    mobilePhone: Yup.string().required(REQ).test('mobile', 'Το κινητό έχει 10 ψηφία', (v) => !v || isTen(v)),
+    ship_firstname: whenShip(Yup.string(), '*Το όνομα είναι υποχρεωτικό!'),
+    ship_lastname: whenShip(Yup.string(), '*Το επώνυμο είναι υποχρεωτικό!'),
+    ship_street: whenShip(Yup.string()),
+    ship_country: whenShip(Yup.string()),
+    ship_state: whenShip(Yup.string()),
+    ship_city: whenShip(Yup.string()),
+    ship_zipCode: whenShip(Yup.string()).test('zip', 'Ο Τ.Κ. έχει 5 ψηφία', function (v) {
+        return !this.parent.different_shipping || !v || isZip(v)
+    }),
+    ship_telephone: Yup.string().test('phone', 'Το τηλέφωνο έχει 10 ψηφία', function (v) {
+        return !this.parent.different_shipping || !v || isTen(v)
+    }),
+    ship_mobilePhone: whenShip(Yup.string()).test('mobile', 'Το κινητό έχει 10 ψηφία', function (v) {
+        return !this.parent.different_shipping || !v || isTen(v)
+    }),
+})
+
+/** Σειρά των πεδίων στη φόρμα — για τη μετάβαση στο πρώτο λάθος */
+const FIELD_ORDER = [
+    'companyName', 'businessActivity', 'afm', 'doy', 'firstname', 'lastname', 'street',
+    'country', 'state', 'city', 'zipCode', 'telephone', 'mobilePhone',
+    'ship_firstname', 'ship_lastname', 'ship_street', 'ship_country', 'ship_state', 'ship_city',
+    'ship_zipCode', 'ship_telephone', 'ship_mobilePhone',
+]
+
+function focusFirstError(errors: Record<string, unknown>) {
+    const first = FIELD_ORDER.find((k) => errors[k])
+    const el = first ? document.getElementById(first) : null
+    if (!el) return
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    ;(el as HTMLElement).focus({ preventScroll: true })
+}
+
+const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, onSaved }: {
     userInfo: IUserInfo,
     billingAddress: ICustomerInfo | null,
     shippingAddress: ICustomerInfo | null,
-    jwt: string
+    jwt?: string
+    /** Μετά την αποθήκευση: ανανέωση των δεδομένων του προφίλ (SWR) */
+    onSaved?: () => void
 }) => {
     const [saveStatus, setSaveStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
     const [showStatus, setShowStatus] = useState(false)
+    // Μήνυμα του Strapi (π.χ. «Συμπληρώστε στη διεύθυνση χρέωσης: Τ.Κ.»)
+    const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-    const { data: countriesData, loading: countriesLoading } = useNoRevalideteQuery({ 
-        query: GET_COUNTRY_LIST, 
-        jwt: '' 
-    })
+    const { data: countriesData, loading: countriesLoading } = useGeo('countries')
 
     const countries = countriesData as ICountries
 
@@ -249,9 +376,7 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
 
     const formik = useFormik({
         initialValues,
-        validationSchema: Yup.object({
-            // ... validation schema unchanged
-        }),
+        validationSchema,
         onSubmit: async (values) => {
             setSaveStatus('loading')
             setShowStatus(true)
@@ -264,17 +389,18 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                         username: values.username
                     },
                     billing: {
-                        isInvoice: values.isInvoice,
+                        // Η φόρμα κρατά "true"/"false" (radio) — στέλνουμε boolean
+                        isInvoice: String(values.isInvoice) === 'true',
                         firstname: values.firstname,
                         lastname: values.lastname,
                         street: values.street,
                         city: values.city,
                         state: values.state,
-                        zipCode: values.zipCode,
+                        zipCode: compact(values.zipCode),
                         country: values.country,
-                        telephone: values.telephone,
-                        mobilePhone: values.mobilePhone,
-                        afm: values.afm,
+                        telephone: normalizePhone(values.telephone),
+                        mobilePhone: normalizePhone(values.mobilePhone),
+                        afm: String(values.isInvoice) === 'true' ? normalizeAfm(values.afm) : values.afm,
                         doy: values.doy,
                         companyName: values.companyName,
                         businessActivity: values.businessActivity,
@@ -285,32 +411,33 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                         street: values.ship_street,
                         city: values.ship_city,
                         state: values.ship_state,
-                        zipCode: values.ship_zipCode,
+                        zipCode: compact(values.ship_zipCode),
                         country: values.ship_country,
-                        telephone: values.ship_telephone,
-                        mobilePhone: values.ship_mobilePhone,
+                        telephone: normalizePhone(values.ship_telephone),
+                        mobilePhone: normalizePhone(values.ship_mobilePhone),
                     }
                 }
 
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user-address/updateUser`, {
+                // Strapi v3 μέσω του Next.js (το JWT το βάζει ο server από το session)
+                const response = await fetch('/api/account/profile', {
                     method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json',
-                        "Authorization": `Bearer ${jwt}`,
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ addresses })
                 })
 
                 if (!response.ok) {
-                    throw new Error(`Response status: ${response.status}`)
+                    const json = await response.json().catch(() => null)
+                    throw new Error(json?.message || `Response status: ${response.status}`)
                 }
 
                 setSaveStatus('success')
+                onSaved?.()
                 setTimeout(() => {
                     setShowStatus(false)
                     setTimeout(() => setSaveStatus('idle'), 300)
                 }, 4000)
             } catch (error) {
+                setErrorMessage(error instanceof Error && !/^Response status/.test(error.message) ? error.message : null)
                 setSaveStatus('error')
                 setTimeout(() => {
                     setShowStatus(false)
@@ -321,104 +448,22 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
     })
 
     // API queries for address data (unchanged)
-    const { data: stateData, loading: loadingState } = useQuery({ 
-        query: GET_COUNTRY_STATES, 
-        variables: { country: formik.values.country }, 
-        jwt: '' 
-    })
-    const { data: regionData, loading: loadingRegions } = useQuery({ 
-        query: GET_STATE_REGIONS, 
-        variables: { state: formik.values.state }, 
-        jwt: '' 
-    })
-    const { data: postalData, loading: loadingPostals } = useQuery({ 
-        query: GET_REGION_POSTALS, 
-        variables: { region: formik.values.city }, 
-        jwt: '' 
-    })
+    const { data: stateData, loading: loadingState } = useGeo('states', { country: formik.values.country })
+    const { data: regionData, loading: loadingRegions } = useGeo('regions', { state: formik.values.state })
+    const { data: postalData, loading: loadingPostals } = useGeo('postals', { region: formik.values.city, state: formik.values.state })
 
-    const { data: shipStateData, loading: loadingShipState } = useQuery({ 
-        query: GET_COUNTRY_STATES, 
-        variables: { country: formik.values.ship_country }, 
-        jwt: '' 
-    })
-    const { data: shipRegionData, loading: loadingShipRegions } = useQuery({ 
-        query: GET_STATE_REGIONS, 
-        variables: { state: formik.values.ship_state }, 
-        jwt: '' 
-    })
-    const { data: shipPostalData, loading: loadingShipPostals } = useQuery({ 
-        query: GET_REGION_POSTALS, 
-        variables: { region: formik.values.ship_city }, 
-        jwt: '' 
-    })
+    const { data: shipStateData, loading: loadingShipState } = useGeo('states', { country: formik.values.ship_country })
+    const { data: shipRegionData, loading: loadingShipRegions } = useGeo('regions', { state: formik.values.ship_state })
+    const { data: shipPostalData, loading: loadingShipPostals } = useGeo('postals', { region: formik.values.ship_city, state: formik.values.ship_state })
 
+    // Μόνο μία χώρα (Ελλάδα): χωρίς επιλογή χώρας
+    const singleCountry = (countries?.countries?.data?.length ?? 0) <= 1
     const states = stateData as IStates
     const regions = regionData as IRegions
     const postals = postalData as IRegionPostals
     const shipStates = shipStateData as IStates
     const shipRegions = shipRegionData as IRegions
     const shipPostals = shipPostalData as IRegionPostals
-
-    // Enhanced Select Input Component
-    const SelectInput = ({ 
-        id, 
-        name, 
-        value, 
-        onChange, 
-        onBlur, 
-        label, 
-        children, 
-        loading = false,
-        error,
-        touched 
-    }: {
-        id: string;
-        name: string;
-        value: string;
-        onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-        onBlur: (e: React.FocusEvent<HTMLSelectElement>) => void;
-        label: string;
-        children: React.ReactNode;
-        loading?: boolean;
-        error?: string;
-        touched?: boolean;
-    }) => (
-        <div className="relative">
-            <label htmlFor={id} className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                {label}
-            </label>
-            <div className="relative">
-                <select
-                    id={id}
-                    name={name}
-                    value={value}
-                    onChange={onChange}
-                    onBlur={onBlur}
-                    className={`w-full h-min p-2 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-siteColors-purple focus:border-siteColors-purple transition-all duration-200 appearance-none ${
-                        error && touched 
-                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-                            : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-                    }`}
-                >
-                    {children}
-                </select>
-                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                    {loading ? (
-                        <LoadingSpinner size={16} />
-                    ) : (
-                        <div className="w-2 h-2 border-r-2 border-b-2 border-gray-400 dark:border-gray-300 transform rotate-45 -translate-y-1/2" />
-                    )}
-                </div>
-            </div>
-            {error && touched && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
-                    <FaExclamationTriangle className="w-3 h-3 mr-1" />
-                    {error}
-                </p>
-            )}
-        </div>
-    )
 
     return (
         <section className="space-y-8">
@@ -433,7 +478,20 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                 </p>
             </div>
 
-            <form onSubmit={formik.handleSubmit} className="space-y-8">
+            <form
+                noValidate
+                onSubmit={async (e) => {
+                    e.preventDefault()
+                    const errors = await formik.validateForm()
+                    if (Object.keys(errors).length) {
+                        formik.setTouched(Object.fromEntries(Object.keys(formik.values).map((k) => [k, true])), false)
+                        focusFirstError(errors as Record<string, unknown>)
+                        return
+                    }
+                    formik.submitForm()
+                }}
+                className="space-y-8"
+            >
                 {/* Basic Information Section */}
                 <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8">
                     <SectionHeader 
@@ -442,9 +500,10 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                         description="Τα βασικά σας στοιχεία λογαριασμού"
                     />
                     <FormFieldGroup>
+                        {formik.values.username && formik.values.username !== formik.values.email && (
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                                Username
+                                Όνομα χρήστη
                             </label>
                             <input
                                 disabled
@@ -453,9 +512,10 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                 value={formik.values.username}
                             />
                         </div>
+                        )}
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                                Email *
+                                Email
                             </label>
                             <input
                                 disabled
@@ -508,7 +568,7 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                         <SectionHeader 
                             title="Διεύθυνση Χρέωσης" 
                             icon={<FaBuilding />}
-                            description="Η διεύθυνση χρέωσης της πιστωτικής σας κάρτας"
+                            description="Τα στοιχεία που θα γράφει η απόδειξη ή το τιμολόγιο"
                         />
                         
                         <div className="space-y-6">
@@ -610,6 +670,7 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                             />
 
                             <FormFieldGroup>
+                                {!singleCountry && (
                                 <SelectInput
                                     id="country"
                                     name="country"
@@ -631,6 +692,7 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                         </option>
                                     ))}
                                 </SelectInput>
+                                )}
 
                                 <SelectInput
                                     id="state"
@@ -690,7 +752,6 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                             value={formik.values.zipCode}
                                             onChange={formik.handleChange}
                                             onBlur={formik.handleBlur}
-                                            list="postals-list"
                                             className={`w-full p-2 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-siteColors-purple focus:border-siteColors-purple transition-all duration-200 ${
                                                 formik.errors.zipCode && formik.touched.zipCode 
                                                     ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
@@ -704,13 +765,12 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                             </div>
                                         )}
                                     </div>
-                                    {postals?.regions?.data[0]?.attributes.postal_codes.data && (
-                                        <datalist id="postals-list">
-                                            {postals.regions.data[0].attributes.postal_codes.data.map(postal => (
-                                                <option key={postal.id} value={postal.attributes.postal.toString()} />
-                                            ))}
-                                        </datalist>
-                                    )}
+                                    <PostalSuggestions
+                                        inputId="zipCode"
+                                        codes={postals?.regions?.data[0]?.attributes.postal_codes.data.map(p => p.attributes.postal.toString()) ?? []}
+                                        value={formik.values.zipCode}
+                                        onPick={(c) => formik.setFieldValue('zipCode', c)}
+                                    />
                                     {formik.errors.zipCode && formik.touched.zipCode && (
                                         <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
                                             <FaExclamationTriangle className="w-3 h-3 mr-1" />
@@ -824,6 +884,7 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                 />
 
                                 <FormFieldGroup>
+                                    {!singleCountry && (
                                     <SelectInput
                                         id="ship_country"
                                         name="ship_country"
@@ -840,6 +901,7 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                             </option>
                                         ))}
                                     </SelectInput>
+                                    )}
 
                                     <SelectInput
                                         id="ship_state"
@@ -892,7 +954,6 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                                 value={formik.values.ship_zipCode}
                                                 onChange={formik.handleChange}
                                                 onBlur={formik.handleBlur}
-                                                list="ship-postals-list"
                                                 className={`w-full p-2 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-siteColors-purple focus:border-siteColors-purple transition-all duration-200 ${
                                                     formik.errors.ship_zipCode && formik.touched.ship_zipCode 
                                                         ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
@@ -906,13 +967,12 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                                                 </div>
                                             )}
                                         </div>
-                                        {shipPostals?.regions?.data[0]?.attributes.postal_codes.data && (
-                                            <datalist id="ship-postals-list">
-                                                {shipPostals.regions.data[0].attributes.postal_codes.data.map(postal => (
-                                                    <option key={postal.id} value={postal.attributes.postal.toString()} />
-                                                ))}
-                                            </datalist>
-                                        )}
+                                        <PostalSuggestions
+                                            inputId="ship_zipCode"
+                                            codes={shipPostals?.regions?.data[0]?.attributes.postal_codes.data.map(p => p.attributes.postal.toString()) ?? []}
+                                            value={formik.values.ship_zipCode}
+                                            onPick={(c) => formik.setFieldValue('ship_zipCode', c)}
+                                        />
                                         {formik.errors.ship_zipCode && formik.touched.ship_zipCode && (
                                             <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
                                                 <FaExclamationTriangle className="w-3 h-3 mr-1" />
@@ -988,7 +1048,7 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, jwt }: {
                     {saveStatus === 'error' && (
                         <StatusMessage
                             type="error"
-                            message="Σφάλμα κατά την αποθήκευση. Παρακαλώ δοκιμάστε ξανά."
+                            message={errorMessage || "Σφάλμα κατά την αποθήκευση. Παρακαλώ δοκιμάστε ξανά."}
                             onClose={() => setShowStatus(false)}
                         />
                     )}

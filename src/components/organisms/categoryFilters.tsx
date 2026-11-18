@@ -1,5 +1,5 @@
-
 import ProductFilter from '../molecules/productFilter';
+import PriceRangeFilter from '../molecules/PriceRangeFilter';
 import { FilterProps } from '@/lib/interfaces/filters';
 
 export interface CategoryFiltersProps {
@@ -9,7 +9,17 @@ export interface CategoryFiltersProps {
     searchParams: { [key: string]: string | string[] | undefined }
 }
 
-const CategoryFilters = ({ availableFilters }: { availableFilters: FilterProps[] }) => {
+const CategoryFilters = ({
+    availableFilters,
+    priceRange = null,
+    idPrefix = '',
+}: {
+    availableFilters: FilterProps[]
+    /** Εύρος τιμών για το «από / έως» (2026-10-18) */
+    priceRange?: { min: number, max: number } | null
+    /** Μοναδικά ids όταν τα φίλτρα εμφανίζονται δύο φορές (υπολογιστής + κινητό) */
+    idPrefix?: string
+}) => {
 
     return (
         <div className="mt-6 space-y-6">
@@ -23,14 +33,18 @@ const CategoryFilters = ({ availableFilters }: { availableFilters: FilterProps[]
                     </div>
                 </div>
             ) : (
-                availableFilters.map(filter => (
-                    <ProductFilter
-                        key={filter.title}
-                        title={filter.title}
-                        filterBy={filter.filterBy}
-                        filters={filter.filterValues}
-                    />
-                ))
+                <>
+                    <PriceRangeFilter range={priceRange} idPrefix={idPrefix} />
+                    {availableFilters.map(filter => (
+                        <ProductFilter
+                            key={filter.title}
+                            title={filter.title}
+                            filterBy={filter.filterBy}
+                            filters={filter.filterValues}
+                            idPrefix={idPrefix}
+                        />
+                    ))}
+                </>
             )}
         </div>
     )

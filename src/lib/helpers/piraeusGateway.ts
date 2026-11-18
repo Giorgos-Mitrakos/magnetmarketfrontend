@@ -1,6 +1,25 @@
-'use server'
+// lib/helpers/piraeusGateway.ts
+//
+// Πληρωμή μέσω Τράπεζας Πειραιώς (κάρτα / IRIS) — ΜΟΝΟ στον server του Next.js.
+//
+// (2026-10-14) Δεν είναι πια αρχείο 'use server': οι συναρτήσεις εδώ ΔΕΝ
+// πρέπει να καλούνται από τον browser (πριν, ο καθένας μπορούσε να εκδώσει
+// εισιτήριο με όποιο ποσό ήθελε ή να γράψει «απάντηση τράπεζας»). Τις
+// χρησιμοποιούν μόνο τα API routes του /api/checkout-piraeus-gateway.
+//
+// Ροή:
+//  1. ticket route: Strapi → στοιχεία παραγγελίας (ποσό/δόσεις ΑΠΟ ΤΗΝ
+//     ΠΑΡΑΓΓΕΛΙΑ) → IssueNewTicket στην τράπεζα → Strapi αποθηκεύει το εισιτήριο
+//  2. ο πελάτης πληρώνει στη σελίδα της τράπεζας
+//  3. success/fail route: έλεγχος υπογραφής (HMAC-SHA256 με κλειδί το
+//     αποθηκευμένο εισιτήριο) → Strapi καταγράφει το αποτέλεσμα (πληρωμένη /
+//     αποτυχημένη)
+//
+// .env.local: ACQUIRER_ID, MERCHANT_ID, POS_ID, PEIRAIWS_USERNAME,
+//             PEIRAIWS_PASSWORD, STOREFRONT_SECRET, NEXT_URL
 
-import { HmacSHA512, MD5 } from 'crypto-js';
+import { MD5 } from 'crypto-js';
+import { storefrontFetch } from './storefrontApi';
 const soap = require('soap');
 const CryptoJS = require('crypto-js');
 
@@ -13,143 +32,84 @@ export interface ITicketResponse {
     MinutesToExpiration: number
 }
 
-interface IBankResponse {
-    SupportReferenceID: FormDataEntryValue | null,
-    ResultCode: FormDataEntryValue | null,
-    ResultDescription: FormDataEntryValue | null,
-    StatusFlag: FormDataEntryValue | null,
-    ResponseCode: FormDataEntryValue | null,
-    ResponseDescription: FormDataEntryValue | null,
-    LanguageCode: FormDataEntryValue | null,
-    MerchantReference: FormDataEntryValue | null,
-    TransactionDateTime: FormDataEntryValue | null,
-    TransactionId: FormDataEntryValue | null,
-    CardType: FormDataEntryValue | null,
-    PackageNo: FormDataEntryValue | null,
-    ApprovalCode: FormDataEntryValue | null,
-    RetrievalRef: FormDataEntryValue | null,
-    AuthStatus: FormDataEntryValue | null,
-    Parameters: FormDataEntryValue | null,
-    HashKey: FormDataEntryValue | null,
-    PaymentMethod: FormDataEntryValue | null,
-    TraceID: FormDataEntryValue | null,
+/** Τα πεδία που στέλνει η τράπεζα (POST form) στα success / fail URLs */
+export const BANK_RESPONSE_FIELDS = [
+    'SupportReferenceID', 'ResultCode', 'ResultDescription', 'StatusFlag', 'ResponseCode',
+    'ResponseDescription', 'LanguageCode', 'MerchantReference', 'TransactionDateTime',
+    'TransactionId', 'CardType', 'PackageNo', 'ApprovalCode', 'RetrievalRef', 'AuthStatus',
+    'Parameters', 'HashKey', 'PaymentMethod', 'TraceID',
+] as const
+
+export type IBankResponse = Record<(typeof BANK_RESPONSE_FIELDS)[number], string>
+
+export function readBankResponse(form: FormData): IBankResponse {
+    const out: Record<string, string> = {}
+    for (const key of BANK_RESPONSE_FIELDS) {
+        const v = form.get(key)
+        out[key] = v == null ? '' : String(v)
+    }
+    return out as IBankResponse
 }
 
-
-export async function sendEmail({ title, data }: { title: string, data: string }) {
+/** Ειδοποίηση της ομάδας (email από το Strapi, με όριο ανά ώρα) */
+export async function notifyAdmin({ title, data }: { title: string, data: string }) {
     try {
-        const myInitData = {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${process.env.ADMIN_JWT_SECRET}`,
-            },
-            body: JSON.stringify({
-                to: 'giorgos_mitrakos@yahoo.com',
-                subject: title,
-                text: data
-            })
-        };
-
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/sendEmail`,
-            myInitData,
-        )
+        await storefrontFetch('/storefront/notify-admin', { body: { subject: title, text: data } })
     } catch (error) {
-
+        console.error('notifyAdmin:', error)
     }
 }
 
-export async function saveTicket({ orderId, TranTicket }: { orderId: number, TranTicket: string }) {
+/** Στοιχεία πληρωμής από την παραγγελία — ποτέ από τον browser */
+export async function preparePayment(orderDocumentId: string) {
+    return storefrontFetch<{ merchantReference: string, amount: number, installments: number, method: string }>(
+        '/storefront/payments/prepare',
+        { body: { orderDocumentId } }
+    )
+}
+
+export async function saveTicket({ merchantReference, tranTicket }: { merchantReference: string, tranTicket: string }) {
+    return storefrontFetch('/storefront/payments/ticket', { body: { merchantReference, tranTicket } })
+}
+
+export async function getTicket(merchantReference: string): Promise<string | null> {
+    if (!merchantReference) return null
     try {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/saveTicket`,
-            {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${process.env.ADMIN_JWT_SECRET}`,
-                },
-                body: JSON.stringify({
-                    orderId: orderId,
-                    TransTicket: TranTicket,
-                })
-            }
-        )
+        const res = await storefrontFetch<{ ticket: string | null }>('/storefront/payments/ticket-lookup', {
+            body: { merchantReference },
+        })
+        return res.ticket ?? null
     } catch (error) {
-        console.log(error)
+        console.error('getTicket:', error)
+        return null
     }
 }
 
-export async function getTicket({ bankResponse }: { bankResponse: IBankResponse }) {
-    try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/getTicket`,
-            {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${process.env.ADMIN_JWT_SECRET}`,
-                },
-                body: JSON.stringify({
-                    orderId: bankResponse.MerchantReference,
-                })
-            })
-
-        const ticket = await response.json()
-
-        return ticket
-    } catch (error) {
-        console.log(error)
-    }
+/** Καταγραφή αποτελέσματος στο Strapi. success μόνο ΜΕΤΑ τον έλεγχο υπογραφής. */
+export async function recordPaymentResult(bankResponse: IBankResponse, success: boolean) {
+    const { HashKey, Parameters, LanguageCode, ...bank } = bankResponse
+    void HashKey; void Parameters; void LanguageCode
+    return storefrontFetch<{ status: 'paid' | 'already_paid' | 'failed', documentId: string }>(
+        '/storefront/payments/result',
+        { body: { merchantReference: bankResponse.MerchantReference, success, bank } }
+    )
 }
 
-export async function saveBankResponse({ bankResponse }: { bankResponse: IBankResponse }) {
-    try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/saveBankResponse`,
-            {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${process.env.ADMIN_JWT_SECRET}`,
-                },
-                body: JSON.stringify({
-                    bankResponse: {
-                        SupportReferenceID: bankResponse.SupportReferenceID,
-                        ResultCode: bankResponse.ResultCode,
-                        MerchantReference: bankResponse.MerchantReference,
-                        StatusFlag: bankResponse.StatusFlag,
-                        ResponseCode: bankResponse.ResponseCode,
-                        ResponseDescription: bankResponse.ResponseDescription,
-                        ApprovalCode: bankResponse.ApprovalCode,
-                        PackageNo: bankResponse.PackageNo,
-                        AuthStatus: bankResponse.AuthStatus,
-                        TransactionId: bankResponse.TransactionId,
-                        PaymentMethod: bankResponse.PaymentMethod,
-                        TraceID: bankResponse.TraceID
-                    }
-                })
-            }
-        )
-
-        const res = response.json()
-
-        return res
-    } catch (error) {
-        console.log(error)
-    }
-}
-
-function convertResult({ status, result }: { status: string, result: any }) {
-    const data = JSON.parse(result)
+function convertResult({ status, result }: { status: string, result: any }): ITicketResponse {
+    const data = typeof result === 'string' ? JSON.parse(result) : result
     return {
         status: status,
-        ResultCode: data.IssueNewTicketResult.ResultCode,
-        ResultDescription: data.IssueNewTicketResult.ResultDescription,
-        TranTicket: data.IssueNewTicketResult.TranTicket,
-        TimeStamp: data.IssueNewTicketResult.TimeStamp,
-        MinutesToExpiration: data.IssueNewTicketResult.MinutesToExpiration
+        ResultCode: data?.IssueNewTicketResult?.ResultCode,
+        ResultDescription: data?.IssueNewTicketResult?.ResultDescription,
+        TranTicket: data?.IssueNewTicketResult?.TranTicket,
+        TimeStamp: data?.IssueNewTicketResult?.TimeStamp,
+        MinutesToExpiration: data?.IssueNewTicketResult?.MinutesToExpiration
     }
 }
 
-export async function getTransactionTicket({ orderId, amount, installments }: { orderId: number, amount: number, installments: number }) {
+/** IssueNewTicket (SOAP) — έκδοση εισιτηρίου συναλλαγής στην τράπεζα */
+export async function getTransactionTicket({ merchantReference, amount, installments }:
+    { merchantReference: string, amount: number, installments: number }): Promise<ITicketResponse> {
 
     const soapTicketData = {
         Request: {
@@ -158,7 +118,7 @@ export async function getTransactionTicket({ orderId, amount, installments }: { 
             MerchantId: process.env.MERCHANT_ID,
             PosId: parseInt(`${process.env.POS_ID}`),
             AcquirerId: process.env.ACQUIRER_ID,
-            MerchantReference: orderId,
+            MerchantReference: merchantReference,
             RequestType: '02',
             ExpirePreauth: 0,
             Amount: amount,
@@ -169,59 +129,36 @@ export async function getTransactionTicket({ orderId, amount, installments }: { 
         }
     }
 
-    try {
-        const url = 'https://paycenter.piraeusbank.gr/services/tickets/issuer.asmx?WSDL';
+    const url = 'https://paycenter.piraeusbank.gr/services/tickets/issuer.asmx?WSDL';
 
-        const response = await new Promise((resolve, reject) => {
-            soap.createClient(url, async function (err: any, client: any) {
-                let responseData = {}
+    try {
+        return await new Promise<ITicketResponse>((resolve) => {
+            soap.createClient(url, (err: any, client: any) => {
                 if (err) {
                     console.error(err);
-                    await sendEmail({ title: "Αποτυχημένο request", data: err.toString() })
-                } else {
-                    // SOAP client object is created successfully
-                    const responseData = await new Promise((resolve, reject) => {
-                        client.IssueNewTicket(soapTicketData, async function (err: any, result: any) {
-                            if (err) {
-                                const data = await err.toString()
-                                resolve(convertResult({ status: "fail", result: JSON.stringify(data) }))
-                            } else {
-                                // SOAP request is successful, and result contains the response data
-                                resolve(convertResult({ status: "success", result: JSON.stringify(result) }))
-                            }
-                        });
-                    })
-
-                    resolve(responseData)
+                    notifyAdmin({ title: "Πειραιώς: αποτυχία σύνδεσης για εισιτήριο", data: String(err) })
+                    resolve({ status: 'fail', ResultCode: '-1', ResultDescription: String(err) } as ITicketResponse)
+                    return
                 }
+                client.IssueNewTicket(soapTicketData, (err2: any, result: any) => {
+                    if (err2) {
+                        resolve({ status: 'fail', ResultCode: '-1', ResultDescription: String(err2) } as ITicketResponse)
+                    } else {
+                        resolve(convertResult({ status: "success", result }))
+                    }
+                });
             });
         })
-
-        return response
     } catch (error) {
-        const myInitData = {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json', },
-            body: JSON.stringify({
-                to: 'giorgos_mitrakos@yahoo.com',
-                subject: "Αποτυχημένο request",
-                text: error
-            })
-        };
-
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/order/sendEmail`,
-            myInitData,
-        )
-
-        return convertResult({ status: "fail", result: JSON.stringify(error) })
-
+        notifyAdmin({ title: "Πειραιώς: αποτυχία έκδοσης εισιτηρίου", data: String(error) })
+        return { status: 'fail', ResultCode: '-1', ResultDescription: String(error) } as ITicketResponse
     }
-
-
 }
 
-export async function checkAuthResponse({ bankResponse, ticket }: { bankResponse: IBankResponse, ticket: string }) {
+/** Έλεγχος υπογραφής της απάντησης της τράπεζας (HMAC-SHA256, κλειδί = εισιτήριο) */
+export function checkAuthResponse({ bankResponse, ticket }: { bankResponse: IBankResponse, ticket: string }): boolean {
     try {
+        if (!ticket || !bankResponse.HashKey) return false
         const message = [
             ticket,
             process.env.POS_ID,
@@ -236,11 +173,23 @@ export async function checkAuthResponse({ bankResponse, ticket }: { bankResponse
             bankResponse.StatusFlag].join(';')
 
         const hash = CryptoJS.HmacSHA256(message, ticket);
-
         const hashString = hash.toString(CryptoJS.enc.Hex).toUpperCase()
-        
-        return hashString === bankResponse.HashKey
+
+        return hashString === String(bankResponse.HashKey).toUpperCase()
     } catch (error) {
-        console.log(error)
+        console.error(error)
+        return false
     }
+}
+
+/** Σελίδα που κάνει redirect (η τράπεζα κάνει POST στο route μας) */
+export function redirectHtml(path: string) {
+    const safe = path.replace(/[^\w\-\/]/g, '')
+    return new Response(`<html>
+  <head>
+    <meta http-equiv="refresh" content="0;url=${safe}" />
+    <script>window.location.href = "${safe}"</script>
+  </head>
+  <body>Ανακατεύθυνση...</body>
+</html>`, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
 }

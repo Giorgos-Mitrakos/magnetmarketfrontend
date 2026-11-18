@@ -15,6 +15,9 @@
 # production
 /build
 
+# αναφορές του bundle analyzer (ANALYZE=true)
+/analyze/
+
 # misc
 .DS_Store
 *.pem
@@ -24,10 +27,11 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
-.env*.local
-next.config.js
-package-lock.json
+# local env files — κανένα .env στο git (κωδικοί τράπεζας, NEXTAUTH_SECRET κ.λπ.)
+# (2026-11-18) next.config.js και package-lock.json ΜΠΑΙΝΟΥΝ στο git: χωρίς το πρώτο
+# ο server δεν έχει τη ρύθμιση των εικόνων, χωρίς το δεύτερο δεν γίνεται npm ci.
+.env*
+!.env.example
 
 # vercel
 .vercel

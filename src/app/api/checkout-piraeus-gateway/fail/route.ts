@@ -1,122 +1,50 @@
-import { NextRequest, NextResponse } from "next/server";
-import { saveBankResponse, sendEmail } from "@/lib/helpers/piraeusGateway";
+// Η τράπεζα επιστρέφει εδώ (POST form) όταν η πληρωμή απέτυχε.
+//
+// (2026-10-14) Αν η υπογραφή επαληθευτεί, το Strapi καταγράφει την αποτυχία
+// και αποδεσμεύει απόθεμα/κουπόνι (η παραγγελία γίνεται «Αποτυχημένη» — ο
+// πελάτης ξαναδοκιμάζει από το καλάθι, που μένει γεμάτο).
+import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
+import { checkAuthResponse, getTicket, readBankResponse, recordPaymentResult, redirectHtml } from "@/lib/helpers/piraeusGateway";
+
+/** Κατηγορία μηνύματος για τη σελίδα αποτυχίας (cookie _rcf) */
+function resultCategory(resultCode: string): number {
+    const code = parseInt(resultCode)
+    if (Number.isNaN(code)) return 0
+    if (code === 0) return 1
+    if (code === 1048) return 2
+    if (code >= 500 && code < 600) return 3
+    if (code === 981) return 4
+    if (code === 1045 || code === 1072) return 5
+    if (code === 1) return 6
+    return 0
+}
 
 export async function POST(request: NextRequest) {
-
     try {
-        const transactionData = await request.formData();
+        const bankResponse = readBankResponse(await request.formData())
 
-        const response = {
-            SupportReferenceID: transactionData.get('SupportReferenceID'),
-            ResultCode: transactionData.get('ResultCode'),
-            ResultDescription: transactionData.get('ResultDescription'),
-            StatusFlag: transactionData.get('StatusFlag'),
-            ResponseCode: transactionData.get('ResponseCode'),
-            ResponseDescription: transactionData.get('ResponseDescription'),
-            LanguageCode: transactionData.get('LanguageCode'),
-            MerchantReference: transactionData.get('MerchantReference'),
-            TransactionDateTime: transactionData.get('TransactionDateTime'),
-            TransactionId: transactionData.get('TransactionId'),
-            CardType: transactionData.get('CardType'),
-            PackageNo: transactionData.get('PackageNo'),
-            ApprovalCode: transactionData.get('ApprovalCode'),
-            RetrievalRef: transactionData.get('RetrievalRef'),
-            AuthStatus: transactionData.get('AuthStatus'),
-            Parameters: transactionData.get('Parameters'),
-            HashKey: transactionData.get('HashKey'),
-            PaymentMethod: transactionData.get('PaymentMethod'),
-            TraceID: transactionData.get('TraceID'),
-        }
-
-        const res = JSON.stringify(response)
-
-        if (response.ResultCode) {
-            await saveBankResponse({ bankResponse: response })
-
-            let resultCode = 0
-
-            const intResultCode = parseInt(response.ResultCode.toString())
-            if (intResultCode === 0) {
-                resultCode = 1
-            }
-            else if (intResultCode === 1048) {
-                resultCode = 2
-            }
-            else if (intResultCode >= 500 && intResultCode < 600) {
-                resultCode = 3
-            }
-            else if (intResultCode === 981) {
-                resultCode = 4
-            }
-            else if (intResultCode === 1045 || intResultCode === 1072) {
-                resultCode = 5
-            }
-            else if (intResultCode === 1) {
-                resultCode = 6
-            }
-
-            if (resultCode !== 0) {
-                cookies().set("_rcf", JSON.stringify({ RCF: resultCode }),
-                    {
-                        path: "/", // Cookie is available on all paths
-                        httpOnly: true, // Can't be accessed via JavaScript
-                        secure: true, // Only sent over HTTPS
-                        sameSite: "lax", // Prevents CSRF attacks 
-                        maxAge: 10 * 60
-                    })
-            }
-
-            return new NextResponse(`
-                <html>
-                  <head>
-                    <meta http-equiv="refresh" content="0;url=/checkout/failure" />
-                    <script>window.location.href = "/checkout/failure"</script>
-                  </head>
-                  <body>Redirecting...</body>
-                </html>
-              `, {
-                headers: {
-                    'Content-Type': 'text/html',
-                },
-            })
-
-        }
-        else {
-            await saveBankResponse({ bankResponse: response })
-            sendEmail({ title: "No Success", data: `orderId:${response.MerchantReference?.toString()}` })
-
-            return new NextResponse(`
-                <html>
-                  <head>
-                    <meta http-equiv="refresh" content="0;url=/checkout/failure" />
-                    <script>window.location.href = "/checkout/failure"</script>
-                  </head>
-                  <body>Redirecting...</body>
-                </html>
-              `, {
-                headers: {
-                    'Content-Type': 'text/html',
-                },
+        const category = resultCategory(bankResponse.ResultCode)
+        if (category !== 0) {
+            const cookieStore = await cookies()
+            cookieStore.set("_rcf", JSON.stringify({ RCF: category }), {
+                path: "/",
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: "lax",
+                maxAge: 10 * 60,
             })
         }
 
+        // Καταγραφή μόνο με έγκυρη υπογραφή — αλλιώς ο καθένας θα μπορούσε να
+        // «ακυρώνει» παραγγελίες άλλων. Χωρίς υπογραφή η παραγγελία λήγει
+        // αυτόματα (ORDER_CARD_TIMEOUT_ENABLED στο Strapi).
+        const ticket = await getTicket(bankResponse.MerchantReference)
+        if (ticket && bankResponse.HashKey && checkAuthResponse({ bankResponse, ticket })) {
+            await recordPaymentResult(bankResponse, false)
+        }
     } catch (error) {
-        console.log(error)
-        sendEmail({ title: "Error in Respone", data: `Error: ${error}` })
-        
-        return new NextResponse(`
-            <html>
-              <head>
-                <meta http-equiv="refresh" content="0;url=/checkout/failure" />
-                <script>window.location.href = "/checkout/failure"</script>
-              </head>
-              <body>Redirecting...</body>
-            </html>
-          `, {
-            headers: {
-                'Content-Type': 'text/html',
-            },
-        })
+        console.error('Piraeus fail:', error)
     }
+    return redirectHtml('/checkout/failure')
 }

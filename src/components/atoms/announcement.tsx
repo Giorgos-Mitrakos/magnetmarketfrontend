@@ -1,43 +1,20 @@
-import { GET_ANNOUNCEMENT } from "@/lib/queries/announcementQuery";
-import { requestSSR } from "@/repositories/repository";
-import { 
-  FaBullhorn, 
-  FaTimes, 
-  FaExclamationTriangle, 
-  FaInfoCircle, 
+import { getAnnouncement } from "@/lib/queries/announcementQuery";
+import Link from "next/link";
+import {
+  FaExclamationTriangle,
+  FaInfoCircle,
   FaCalendarAlt,
-  FaExclamationCircle,
   FaFire
 } from "react-icons/fa";
 import AnnouncementClient from "./AnnouncementClient";
 
-interface IΑnnouncement {
-  announcement: {
-    data: {
-      attributes: {
-        text: string;
-        type?: 'info' | 'warning' | 'important' | 'event';
-        isClosable?: boolean;
-      }
-    }
-  }
-}
-
-async function getAnnouncementData() {
-  const data = await requestSSR({
-    query: GET_ANNOUNCEMENT
-  });
-
-  return data as IΑnnouncement
-}
-
 const Αnnouncement = async () => {
-  const announcement = await getAnnouncementData()
+  const announcement = await getAnnouncement()
 
-  if (!announcement.announcement.data)
+  if (!announcement)
     return null
 
-  const { text, type = 'info', isClosable = true } = announcement.announcement.data.attributes;
+  const { text, type = 'info', is_closable: isClosable = true, href, link_label, version } = announcement;
 
   // Determine styling based on announcement type
   const getStylesByType = () => {
@@ -85,7 +62,7 @@ const Αnnouncement = async () => {
   };
 
   return (
-    <AnnouncementClient closable={isClosable}>
+    <AnnouncementClient closable={isClosable} version={version}>
       <div className={`relative p-4 shadow-md rounded-b-lg ${styles.container}`}>
         <div className="flex items-start">
           <div className={`flex-shrink-0 mr-3 mt-0.5 ${styles.icon}`}>
@@ -93,6 +70,11 @@ const Αnnouncement = async () => {
           </div>
           <p className={`flex-1 font-medium ${styles.text}`}>
             {text}
+            {href && (
+              <Link href={href} className="ml-2 underline font-semibold">
+                {link_label || 'Περισσότερα'}
+              </Link>
+            )}
           </p>
         </div>
       </div>

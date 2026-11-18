@@ -42,14 +42,34 @@ const sendEvent = (eventName: string, params: any, identifier?: string) => {
 // DUPLICATE TRACKING PREVENTION (for purchases)
 // ============================================
 
+// (2026-10-25) Κρατιούνται και στον browser: μια ανανέωση της σελίδας «Ευχαριστούμε»
+// δεν στέλνει ξανά την αγορά στο Analytics
 const trackedTransactions = new Set<string>();
+const TRACKED_KEY = 'mm_tracked_tx';
+
+const readTracked = (): string[] => {
+    try {
+        const raw = typeof window !== 'undefined' ? window.localStorage.getItem(TRACKED_KEY) : null;
+        const arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr.map(String) : [];
+    } catch {
+        return [];
+    }
+};
 
 export const isTransactionTracked = (transactionId: string): boolean => {
-    return trackedTransactions.has(transactionId);
+    return trackedTransactions.has(transactionId) || readTracked().includes(transactionId);
 };
 
 export const markTransactionAsTracked = (transactionId: string): void => {
     trackedTransactions.add(transactionId);
+    try {
+        const list = readTracked().filter((x) => x !== transactionId);
+        list.push(transactionId);
+        window.localStorage.setItem(TRACKED_KEY, JSON.stringify(list.slice(-20)));
+    } catch {
+        // χωρίς αποθήκευση στον browser — μένει μόνο στη μνήμη
+    }
 };
 
 // ============================================

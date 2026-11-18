@@ -1,58 +1,44 @@
-import { HTMLAttributeAnchorTarget } from "react";
-
-
-interface IFooter {
+import { contentCache } from '../helpers/contentCache'
+export interface IFooterLink {
   id: number
-  telephone: string
-  opening_hours: string
-  address: string
-  city: string
-  postcode: string
-  email: string
-  sections: IFooterSection[]
+  label: string
+  /** null → εμφανίζεται ως απλό κείμενο */
+  href: string | null
+  open_in_new_tab: boolean
 }
 
 export interface IFooterSection {
   id: number
-  Label: string
-  links: {
-    id: number
-    label: string
-    isLink: boolean
-    href: string
-    target: HTMLAttributeAnchorTarget
-  }[]
+  label: string
+  links: IFooterLink[]
 }
 
-export async function getFooter() {
+export interface IFooter {
+  telephone: string | null
+  opening_hours: string | null
+  address: string | null
+  city: string | null
+  postcode: string | null
+  email: string | null
+  facebook_url: string | null
+  instagram_url: string | null
+  sections: IFooterSection[]
+}
+
+export async function getFooter(): Promise<IFooter | null> {
   try {
-    const myHeaders = new Headers();
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/footer/getFooter`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      next: contentCache(60 * 60, ['footer']),
+    })
 
-    myHeaders.append('Content-Type', 'application/json')
-    myHeaders.append('Authorization', `Bearer ${process.env.ADMIN_JWT_SECRET}`)
-
-    const myInit = {
-      method: "GET",
-      headers: myHeaders,
-      body:null,
-      next: {
-        revalidate: 24 * 60 * 60 // Χρήση της μεταβλητής cacheTime
-      }
-      // mode: "cors",
-      // cache: "default",
-    };
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/footer/getFooter`, myInit)
-
-    // Ελέγχω αν η response είναι επιτυχής
     if (!response.ok) {
       console.error('Footer API error:', response.status, response.statusText)
-      return null; // ← Επιστρέφω null αντί για undefined
+      return null
     }
 
-    const data = await response.json() as IFooter
-
-    return data
+    return (await response.json()) as IFooter
   } catch (error) {
     return null
   }

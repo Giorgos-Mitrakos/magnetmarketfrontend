@@ -11,56 +11,47 @@ interface FilterProps {
         slug?: string,
         numberOfItems: number
     }[]
+    /** Μοναδικά ids όταν το ίδιο φίλτρο εμφανίζεται δύο φορές στη σελίδα (υπολογιστής + κινητό) */
+    idPrefix?: string
 }
+
+/** Τιμή φίλτρου όπως μπαίνει στη διεύθυνση (πεζά) */
+const valueOf = (f: { name: string, slug?: string }) => (f.slug ? f.slug : f.name).toLowerCase()
 
 const ProductFilter = (props: FilterProps) => {
     const router = useRouter()
     const searchParams = useSearchParams()
     const pathname = usePathname()
-    const search = searchParams.getAll(props.filterBy)
-    const [selectedFilters, setSelectedFilters] = useState<string[]>(() => {
-        const filters: string[] = []
-        if (search) {
-            search.forEach(filter => {
-                filters.push(filter.toLowerCase())
-            });
-        }
-        return filters
-    })
+    const [selectedFilters, setSelectedFilters] = useState<string[]>(() =>
+        searchParams.getAll(props.filterBy).map(filter => filter.toLowerCase())
+    )
 
+    // Συγχρονισμός με το URL (π.χ. «πίσω» στον browser ή αφαίρεση από τα ενεργά φίλτρα)
     useEffect(() => {
-        const filters: string[] = []
-        if (search) {
-            search.forEach(filter => {
-                filters.push(filter.toLowerCase())
-            });
-        }
+        setSelectedFilters(searchParams.getAll(props.filterBy).map(filter => filter.toLowerCase()))
+    }, [searchParams, props.filterBy])
 
-        setSelectedFilters(filters)
-    }, [searchParams])
+    const handleItemClick = (filterValue: string) => {
+        const current = searchParams.getAll(props.filterBy).map(v => v.toLowerCase())
+        const isCurrentlySelected = current.includes(filterValue)
 
-    const handleItemClick = (filter: string) => {
-        const filterValue = filter.toLowerCase();
-        const isCurrentlySelected = search.includes(filterValue);
-        
-        // ✅ Track filter usage - send filterBy directly from backend
         if (!isCurrentlySelected) {
             trackFilterUsage(props.filterBy, filterValue);
         }
-        
-        const params = new URLSearchParams(searchParams)
-        if (isCurrentlySelected) {
-            params.delete(props.filterBy, filterValue)
-        }
-        else {
-            params.append(props.filterBy, filterValue)
-        }
 
-        if (params.has("page"))
-            params.delete("page")
+        const params = new URLSearchParams(searchParams.toString())
+        params.delete(props.filterBy)
+        const next = isCurrentlySelected ? current.filter(v => v !== filterValue) : [...current, filterValue]
+        next.forEach(v => params.append(props.filterBy, v))
+        params.delete("page")
 
-        router.replace(pathname + '?' + params)
+        // Άμεση ένδειξη στο checkbox, πριν φορτώσει η νέα λίστα
+        setSelectedFilters(next)
+        const qs = params.toString()
+        router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
     }
+
+    const prefix = `${props.idPrefix ?? ''}${props.filterBy}`.replace(/\s+/g, '-')
 
     return (
         <div className="mb-6">
@@ -68,39 +59,35 @@ const ProductFilter = (props: FilterProps) => {
                 {props.title}
             </h2>
             <div className='max-h-48 overflow-y-auto p-3 scrollbar border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 shadow-sm'>
-                {props.filters.map(filter => {
-                    const filterValue = filter.slug ? filter.slug.toLowerCase() : filter.name.toLowerCase();
+                {props.filters.map((filter, i) => {
+                    const filterValue = valueOf(filter);
                     const isSelected = selectedFilters.includes(filterValue);
-                    const isDisabled = filter.numberOfItems === 0;
-                    
+                    // Επιλεγμένο φίλτρο με 0 μένει ενεργό, για να μπορεί να αφαιρεθεί
+                    const isDisabled = filter.numberOfItems === 0 && !isSelected;
+                    const id = `${prefix}-${i}`
+
                     return (
-                        <div 
-                            key={filter.slug ? filter.slug : filter.name} 
-                            className={`flex items-center py-2 px-2 rounded-md transition-colors ${
-                                isSelected 
-                                    ? 'bg-blue-50 dark:bg-blue-900/20' 
-                                    : 'hover:bg-gray-50 dark:hover:bg-slate-700/50'
-                            } ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                            onClick={() => !isDisabled && handleItemClick(filter.slug ? filter.slug : filter.name)}
+                        <label
+                            key={filterValue}
+                            htmlFor={id}
+                            className={`flex items-center py-2 px-2 rounded-md transition-colors ${isSelected
+                                ? 'bg-blue-50 dark:bg-blue-900/20'
+                                : 'hover:bg-gray-50 dark:hover:bg-slate-700/50'
+                                } ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                         >
-                            <input 
-                                id={`${filter.name}-checkbox`} 
+                            <input
+                                id={id}
                                 type="checkbox"
                                 checked={isSelected}
                                 disabled={isDisabled}
-                                onChange={() => handleItemClick(filter.slug ? filter.slug : filter.name)}
-                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 
+                                onChange={() => handleItemClick(filterValue)}
+                                className="w-4 h-4 shrink-0 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 
                                     dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                                aria-label={`${isSelected ? 'Αποεπιλογή' : 'Επιλογή'} φίλτρου ${filter.name}`} 
                             />
-                            <label 
-                                htmlFor={`${filter.name}-checkbox`}
-                                className={`ml-3 text-sm ${isDisabled ? "text-gray-400 dark:text-slate-500" : "text-gray-700 dark:text-slate-300"} ${isSelected ? "font-medium" : ""}`}
-                                aria-label={`${filter.name} (${filter.numberOfItems})`}
-                            >
+                            <span className={`ml-3 text-sm ${isDisabled ? "text-gray-400 dark:text-slate-500" : "text-gray-700 dark:text-slate-300"} ${isSelected ? "font-medium" : ""}`}>
                                 {filter.name} <span className="text-gray-500 dark:text-slate-400 ml-1">({filter.numberOfItems})</span>
-                            </label>
-                        </div>
+                            </span>
+                        </label>
                     )
                 })}
             </div>

@@ -2,34 +2,37 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 })
 
+// Οι διευθύνσεις έρχονται ΜΟΝΟ από το .env (.env.local στην ανάπτυξη,
+// .env.production / μεταβλητές του server στην παραγωγή):
+//   NEXT_PUBLIC_API_URL, NEXT_URL, NEXTAUTH_URL
+// Προσοχή: οι NEXT_PUBLIC_* «ψήνονται» στο build — αλλαγή τους θέλει νέο build.
+const apiUrl = (() => {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1337')
+  } catch {
+    return new URL('http://localhost:1337')
+  }
+})()
+
+// Strapi σε τοπική διεύθυνση (localhost / 127.0.0.1 / ιδιωτικό δίκτυο) — συνήθως στην ανάπτυξη
+const isLocalApi = /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|\[?::1\]?$)/.test(apiUrl.hostname)
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  env: {
-    NEXT_PUBLIC_API_URL: 'http://localhost:1337',
-    NEXT_URL: 'http://localhost:3000',
-    ADMIN_JWT_SECRET: '8df513c886338387da6400d7c99c631b388d3d680f82207fdb1fa37a337e53c9ea103748d0cd4aebb2b7a490305d365c6477ab951b7b358804abeac9eee7b827dcba882fcd36cf433ca4c6726cabe504ecac880f9973923cd2299b84938d52b265113f6f3f6c042388e1f79735f57794aa64875c17bde943d07770ae95ddc9f4',
-    STRAPI_TOKEN: '9802e5d2c855e6815f50ed66d6e3f5aa5eb4b2839c70b4fa19541029ecfdcc9eedbd7f04e570863cf4fa4feba6f18b36aad969c42cccb060ad20fd7f0a9d042926542df0c632f7fb7315c52f80890f4d54e4c8ea45e625b8e26b7356a71be9be345e571ae28157f52515c9afa0294cb0422447f402e8acba183ba8af52905483',
-    STRAPI_CUSTOM_TOKEN: '3a6d77289ec18e648526934ef4b8c960a6181a0d636cd7f9a11d90e6c272a783ab772aab6e547ea0843e07cc657d2fc4d3e1e41acd24b2391ade4c81dcb4e073249ce0b0d3e8cb94e0b23429050783d703581ebc3d038cc5b67458136e762c9c21828f5218e98f68be42c00ed8855aefdc93a6f930f12a2ea0112e02a007a420',
-    GOOGLE_CLIENT_ID: '1013147080834-kk07ufs7vfbbuj01ftht9idqgm8n500e.apps.googleusercontent.com',
-    GOOGLE_CLIENT_SECRET: '',//'2ZCoq03s9HlbbMY36VardIgA',
-    BESTPRICE_360_KEY:"",//'BP-343303-HDswQ2v1Ax',
-    FACEBOOK_PIXEL: '',//'1151339979478836',
-    NEXTAUTH_SECRET: '2ZCoq03s9HlbbMY36VardIgA',
-    NEXTAUTH_URL: 'http://localhost:3000',
-    // NEXT_PUBLIC_GA_MEASUREMENT_ID: 'G-0DL7SDZL7E',
-    //#Peiraiws Bank
-    ACQUIRER_ID: '14',
-    MERCHANT_ID: '2141425445',
-    POS_ID: '2138072006',
-    PEIRAIWS_USERNAME: 'MA312637',
-    PEIRAIWS_PASSWORD: 'TE212132',
-  },
   images: {
+    // (2026-10-28) Next.js 16: επιτρέπονται μόνο οι ποιότητες που δηλώνονται εδώ
+    // (όσες χρησιμοποιούμε σε quality={…}). Άλλη τιμή → στρογγυλεύει στην πλησιέστερη.
+    qualities: [60, 75, 80, 85, 90],
+    // (2026-10-28) Next.js 16: μπλοκάρει εικόνες από τοπικές IP. Τις επιτρέπουμε μόνο
+    // όταν το Strapi είναι τοπικό (ανάπτυξη) — στην παραγωγή μένει κλειστό.
+    dangerouslyAllowLocalIP: isLocalApi,
+    // Εικόνες από το Strapi (ό,τι ορίζει το NEXT_PUBLIC_API_URL)
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '1337',
+        protocol: apiUrl.protocol.replace(':', ''),
+        hostname: apiUrl.hostname,
+        ...(apiUrl.port ? { port: apiUrl.port } : {}),
+        pathname: '/uploads/**',
       },
     ],
   },
@@ -37,6 +40,13 @@ const nextConfig = {
   // Αφαίρεσε console.logs από production
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
+  },
+
+  // (2026-11-18) Δοκιμαστικό site (π.χ. test.magnetmarket.gr): SITE_NOINDEX=true στο .env
+  // → καμία σελίδα στο Google (X-Robots-Tag σε όλες τις απαντήσεις + robots.txt «Disallow: /»).
+  async headers() {
+    if (process.env.SITE_NOINDEX !== 'true') return []
+    return [{ source: '/:path*', headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] }]
   },
 }
 

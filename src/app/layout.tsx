@@ -1,7 +1,6 @@
 // app/layout.tsx - OPTIMIZED VERSION
 
 import './globals.css'
-import dynamic from "next/dynamic"
 import { Inter } from 'next/font/google'
 import type { Metadata, Viewport } from 'next'
 import Header from '@/components/organisms/header'
@@ -9,6 +8,8 @@ import Footer from '@/components/organisms/footer'
 import Αnnouncement from '@/components/atoms/announcement'
 import MobileTabMenu from '@/components/organisms/mobileTabMenu'
 import { CheckoutProvider } from '@/context/checkout'
+import { WishlistProvider } from '@/context/wishlist'
+import CrossSellDialog from '@/components/organisms/CrossSellDialog'
 import { MenuProvider } from '@/context/menu'
 import { Toaster } from 'sonner'
 import SessionProviders from '@/components/molecules/sessionProvider'
@@ -22,8 +23,10 @@ import { getMenu } from '@/lib/queries/categoryQuery'
 import CookieBannerWrapper from '@/components/molecules/homepage/cookieBannerWrapper'
 import { cookies } from 'next/headers'
 import ScrollTracker from '@/components/molecules/ScrollTracker'
+import CompareBar from '@/components/compare/CompareBar'
 
-const PixelTracker = dynamic(() => import("../components/atoms/pixelTracker"), { ssr: false })
+// (2026-10-28) Next.js 16: το dynamic(…, { ssr: false }) γίνεται πλέον μέσα σε Client Component
+import PixelTracker from "@/components/atoms/PixelTrackerLazy"
 const inter = Inter({ subsets: ['greek', 'latin'], display: 'swap' })
 
 /* ==================== Viewport Configuration ==================== */
@@ -168,7 +171,7 @@ export default async function RootLayout({
   const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID as string
 
   // Check if user has given consent (server-side)
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const consentCookie = cookieStore.get('cookie_consent')
   const hasConsent = consentCookie?.value === 'true'
 
@@ -201,7 +204,8 @@ export default async function RootLayout({
           `}
         </Script>
 
-        {/* Facebook Pixel */}
+        {/* Facebook Pixel — χωρίς συγκατάθεση cookies μένει σε «revoke»: κρατά τα
+            events και δεν στέλνει τίποτα μέχρι το «Αποδοχή όλων» (fbq consent grant) */}
         <Script
           id="pixel-script"
           strategy='afterInteractive'
@@ -215,6 +219,7 @@ export default async function RootLayout({
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
+              ${hasConsent ? '' : "fbq('consent', 'revoke');"}
               fbq('init', '${process.env.FACEBOOK_PIXEL}');
               fbq('track', 'PageView');
             `,
@@ -223,6 +228,8 @@ export default async function RootLayout({
 
         {/* Noscript fallback for Facebook Pixel */}
         <noscript>
+          {/* Pixel παρακολούθησης χωρίς JavaScript: πρέπει να είναι σκέτο <img> (το next/image θέλει JS) */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             height="1"
             width="1"
@@ -236,6 +243,7 @@ export default async function RootLayout({
       <body className={`${inter.className} h-full dark:bg-slate-800`}>
         <SessionProviders session={session}>
           <CheckoutProvider>
+          <WishlistProvider>
             <Toaster
               toastOptions={{
                 classNames: {
@@ -270,7 +278,12 @@ export default async function RootLayout({
               <BestPriceBadge />
               <CookieBannerWrapper />
               <MobileTabMenu menuData={menuData} />
+              {/* «Προστέθηκε στο καλάθι» + «Συχνά αγοράζονται μαζί» */}
+              <CrossSellDialog />
+              {/* (2026-10-23) Μπάρα σύγκρισης προϊόντων (όταν έχουν επιλεγεί) */}
+              <CompareBar />
             </MenuProvider>
+          </WishlistProvider>
           </CheckoutProvider>
         </SessionProviders>
 

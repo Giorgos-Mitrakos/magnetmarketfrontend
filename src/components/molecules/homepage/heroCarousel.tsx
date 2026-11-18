@@ -2,10 +2,9 @@
 'use client';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
-import Image from 'next/image';
-import { getStrapiMedia } from '@/repositories/medias';
+import ResponsiveImage from './responsiveImage';
 import { EffectFade, Autoplay, Pagination, Navigation } from 'swiper/modules';
-import { IHeroCarouselBanner } from '@/lib/queries/homepage';
+import { IHeroSlide } from '@/lib/queries/homepage';
 import { HiChevronLeft, HiChevronRight, HiPlay, HiPause } from 'react-icons/hi';
 import { useRef, useState, useCallback, useMemo } from 'react';
 import type { Swiper as SwiperType } from 'swiper';
@@ -17,11 +16,13 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
 interface HeroCarouselProps {
-  carousel: IHeroCarouselBanner[];
+  carousel: IHeroSlide[];
   autoplayDelay?: number;
   showControls?: boolean;
   className?: string;
   trackingLocation?: string;
+  /** Το πρώτο banner φορτώνει αμέσως (όταν το carousel είναι το πρώτο block της σελίδας) */
+  priority?: boolean;
 }
 
 const HeroCarousel = ({
@@ -29,21 +30,19 @@ const HeroCarousel = ({
   autoplayDelay = 5000,
   showControls = true,
   className = '',
-  trackingLocation = 'homepage_hero'
+  trackingLocation = 'homepage_hero',
+  priority = true
 }: HeroCarouselProps) => {
   const swiperRef = useRef<SwiperType | null>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
 
   // Memoize processed carousel data
   const processedCarousel = useMemo(() => {
     return carousel?.map((banner, index) => ({
       ...banner,
-      imageUrl: getStrapiMedia(banner.image.url),
-      thumbnailUrl: getStrapiMedia(banner.image.formats?.thumbnail?.url || banner.image.url),
-      alt: banner.image.alternativeText || banner.link_label || `Banner ${index + 1}`,
-      priority: index === 0
+      alt: banner.image.alternativeText || banner.title || banner.link_label || `Banner ${index + 1}`,
+      priority: priority && index === 0
     })) || [];
   }, [carousel]);
 
@@ -53,7 +52,6 @@ const HeroCarousel = ({
 
   const handleSwiperInit = useCallback((swiper: SwiperType) => {
     swiperRef.current = swiper;
-    setIsLoading(false);
   }, []);
 
   const toggleAutoplay = useCallback(() => {
@@ -92,11 +90,7 @@ const HeroCarousel = ({
 
   return (
     <div className={`relative group overflow-hidden rounded-xl shadow-2xl h-full ${className}`}>
-      {isLoading && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center rounded-xl">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      )}
+      {/* (2026-10-26) Χωρίς spinner πάνω από το πρώτο banner: η εικόνα είναι ήδη στο HTML */}
 
       <Swiper
         onSwiper={handleSwiperInit}
@@ -143,36 +137,35 @@ const HeroCarousel = ({
             key={banner.id || index}
             className="w-full h-full relative"
           >
-            {/* ✅ Χρήση TrackableLink */}
-            <TrackableLink
-              href={banner.href}
-              className="block h-full w-full relative group/slide focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-xl"
-              bannerId={`banner_${banner.id || index}`}
-              bannerName={banner.title || banner.link_label || `Banner ${index + 1}`}
-              bannerPosition={`${trackingLocation}_slide_${index}`}
-              bannerType="hero"
-            >
-              <div className="relative h-full w-full">
-                <Image
-                  className="object-fill transition-transform duration-700 ease-out group-hover/slide:scale-105 rounded-xl"
-                  priority={banner.priority}
-                  loading={banner.priority ? 'eager' : 'lazy'}
-                  src={banner.imageUrl || '/placeholder-image.jpg'}
-                  alt={banner.alt}
-                  quality={85}
-                  fill
-                  placeholder={banner.thumbnailUrl ? 'blur' : 'empty'}
-                  blurDataURL={banner.thumbnailUrl || undefined}
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 80vw"
-                  onError={(e) => {
-                    console.warn(`Failed to load image: ${banner.imageUrl}`);
-                    const target = e.target as HTMLImageElement;
-                    target.src = '/placeholder-image.jpg';
-                    target.onerror = null;
-                  }}
-                />
-              </div>
-            </TrackableLink>
+            {(() => {
+              const img = (
+                <div className="relative h-full w-full">
+                  <ResponsiveImage
+                    image={banner.image}
+                    mobileImage={banner.mobile_image}
+                    alt={banner.alt}
+                    fill
+                    priority={banner.priority}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 80vw"
+                    className="object-fill transition-transform duration-700 ease-out group-hover/slide:scale-105 rounded-xl"
+                  />
+                </div>
+              )
+              if (!banner.href) return <div className="block h-full w-full relative">{img}</div>
+              return (
+                <TrackableLink
+                  href={banner.href}
+                  target={banner.open_in_new_tab ? '_blank' : undefined}
+                  className="block h-full w-full relative group/slide focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-xl"
+                  bannerId={`banner_${banner.id || index}`}
+                  bannerName={banner.title || banner.link_label || `Banner ${index + 1}`}
+                  bannerPosition={`${trackingLocation}_slide_${index}`}
+                  bannerType="hero"
+                >
+                  {img}
+                </TrackableLink>
+              )
+            })()}
           </SwiperSlide>
         ))}
       </Swiper>

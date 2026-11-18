@@ -1,8 +1,9 @@
 "use client"
-import { FaHeart, FaOpencart, FaRegEye } from "react-icons/fa"
+import { FaOpencart, FaRegEye } from "react-icons/fa"
+import WishlistButton from "@/components/atoms/WishlistButton"
 import { ICartItem } from "@/lib/interfaces/cart"
 import { useCheckout } from "@/context/checkout"
-import { addToCartToast } from "@/lib/toasts/cartToasts"
+import { announceAddedToCart } from "@/lib/helpers/crossSellEvents"
 import Link from "next/link"
 import { IProductCard } from "@/lib/interfaces/product"
 import { useRouter } from "next/navigation"
@@ -18,6 +19,8 @@ const ProductCardFoot = ({ product }: { product: IProductCard }) => {
 
     const item: ICartItem = {
         id: product.id,
+        // documentId του Strapi v3 — με αυτό ταυτοποιείται το προϊόν στην παραγγελία
+        documentId: (product as { documentId?: string }).documentId,
         name: product.name,
         slug: product.slug,
         status: product.status,
@@ -35,7 +38,7 @@ const ProductCardFoot = ({ product }: { product: IProductCard }) => {
     const handleAddProductClick = (product: ICartItem) => {
         if (isAskForPrice || isOutOfStock || isExpacted) return; // Αν είναι AskForPrice, μην κάνεις τίποτα
         dispatch({ type: "ADD_ITEM", payload: product })
-        addToCartToast(product)
+        announceAddedToCart(product)
     }
 
     // ✅ Handler για quick view
@@ -45,22 +48,10 @@ const ProductCardFoot = ({ product }: { product: IProductCard }) => {
         router.push(`/product/${product.slug}`)
     }
 
-    // ✅ Handler για wishlist (προσθήκη λειτουργίας αν χρειάζεται)
-    const handleWishlist = (e: React.MouseEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-        // Προσθέστε κώδικα για wishlist εδώ
-        console.log('Add to wishlist:', product.id)
-    }
-
     return (
-        <div className="grid grid-cols-3 gap-2 text-xl text-slate-50 mt-4">
-            <button
-                className="flex justify-center items-center p-2 text-slate-400 dark:text-slate-400 rounded-lg
-                  bg-gray-100 dark:bg-slate-700 hover:bg-siteColors-pink/20 hover:text-siteColors-pink dark:hover:bg-siteColors-pink/20 transition-all duration-200"
-                aria-label="Προσθήκη στα αγαπημένα">
-                <FaHeart aria-hidden="true" />
-            </button>
+        // relative z-10: τα κουμπιά βρίσκονται πάνω από τον σύνδεσμο της κάρτας
+        <div className="relative z-10 grid grid-cols-3 gap-2 text-xl text-slate-50 mt-4">
+            <WishlistButton documentId={product.documentId} product={product} variant="card" />
 
             <button
                 onClick={handleQuickView}
@@ -93,4 +84,4 @@ const ProductCardFoot = ({ product }: { product: IProductCard }) => {
     )
 }
 
-export default ProductCardFoot
+export default ProductCardFoot

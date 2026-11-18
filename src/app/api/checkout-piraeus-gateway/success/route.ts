@@ -1,141 +1,56 @@
-import { NextRequest, NextResponse } from "next/server";
-import { checkAuthResponse, getTicket, saveBankResponse, sendEmail } from "@/lib/helpers/piraeusGateway";
+// Η τράπεζα επιστρέφει εδώ (POST form) μετά από πληρωμή.
+//
+// (2026-10-14) Η πληρωμή θεωρείται επιτυχής ΜΟΝΟ αν η υπογραφή (HashKey)
+// επαληθευτεί με το εισιτήριο που αποθηκεύσαμε ΕΜΕΙΣ για αυτή την
+// παραγγελία. Το αποτέλεσμα το καταγράφει το Strapi (πληρωμένη →
+// «Επιβεβαιωμένη» + email στον πελάτη και στην ομάδα).
+import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
+import { checkAuthResponse, getTicket, notifyAdmin, readBankResponse, recordPaymentResult, redirectHtml } from "@/lib/helpers/piraeusGateway";
+
+const cookieOptions = {
+    path: "/",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: "lax" as const,
+    maxAge: 60 * 60,
+}
 
 export async function POST(request: NextRequest) {
-
+    let reference = ''
     try {
-        const transactionData = await request.formData();
+        const bankResponse = readBankResponse(await request.formData())
+        reference = bankResponse.MerchantReference
 
-        const response = {
-            SupportReferenceID: transactionData.get('SupportReferenceID'),
-            ResultCode: transactionData.get('ResultCode'),
-            ResultDescription: transactionData.get('ResultDescription'),
-            StatusFlag: transactionData.get('StatusFlag'),
-            ResponseCode: transactionData.get('ResponseCode'),
-            ResponseDescription: transactionData.get('ResponseDescription'),
-            LanguageCode: transactionData.get('LanguageCode'),
-            MerchantReference: transactionData.get('MerchantReference'),
-            TransactionDateTime: transactionData.get('TransactionDateTime'),
-            TransactionId: transactionData.get('TransactionId'),
-            CardType: transactionData.get('CardType'),
-            PackageNo: transactionData.get('PackageNo'),
-            ApprovalCode: transactionData.get('ApprovalCode'),
-            RetrievalRef: transactionData.get('RetrievalRef'),
-            AuthStatus: transactionData.get('AuthStatus'),
-            Parameters: transactionData.get('Parameters'),
-            HashKey: transactionData.get('HashKey'),
-            PaymentMethod: transactionData.get('PaymentMethod'),
-            TraceID: transactionData.get('TraceID'),
-        }
+        const ticket = await getTicket(bankResponse.MerchantReference)
+        const signatureOk = !!ticket && checkAuthResponse({ bankResponse, ticket })
 
-        const res = JSON.stringify(response)
-
-        const ticket = await getTicket({ bankResponse: JSON.parse(res) })
-
-        if (ticket.Flag !== "success") {
-            return new NextResponse(`
-                <html>
-                  <head>
-                    <meta http-equiv="refresh" content="0;url=/checkout/failure" />
-                    <script>window.location.href = "/checkout/failure"</script>
-                  </head>
-                  <body>Redirecting...</body>
-                </html>
-              `, {
-                headers: {
-                    'Content-Type': 'text/html',
-                },
+        if (!signatureOk) {
+            // Δεν καταγράφουμε τίποτα ως αποτέλεσμα: απάντηση χωρίς έγκυρη υπογραφή
+            notifyAdmin({
+                title: 'Πειραιώς: απάντηση με άκυρη υπογραφή',
+                data: `Παραγγελία ${reference}, StatusFlag ${bankResponse.StatusFlag}, ResultCode ${bankResponse.ResultCode}`,
             })
+            return redirectHtml('/checkout/failure')
         }
 
-        const isResponseAuth = await checkAuthResponse({ bankResponse: JSON.parse(res), ticket: ticket.ticket })
+        const success = bankResponse.StatusFlag === 'Success' && String(bankResponse.ResultCode) === '0'
+        const result = await recordPaymentResult(bankResponse, success)
 
-        if (!isResponseAuth) {
-            await saveBankResponse({ bankResponse: response })
-            return new NextResponse(`
-                <html>
-                  <head>
-                    <meta http-equiv="refresh" content="0;url=/checkout/failure" />
-                    <script>window.location.href = "/checkout/failure"</script>
-                  </head>
-                  <body>Redirecting...</body>
-                </html>
-              `, {
-                headers: {
-                    'Content-Type': 'text/html',
-                },
-            })
-        }
-
-        if (response.StatusFlag === 'Success' && response.ResultCode?.toString() === '0') {
-            await saveBankResponse({ bankResponse: response })
-            if (response.ApprovalCode) {
-                cookies().set("_apc", JSON.stringify({ ApprovalCode: response.ApprovalCode?.toString() }),
-                    {
-                        path: "/", // Cookie is available on all paths
-                        httpOnly: true, // Can't be accessed via JavaScript
-                        secure: true, // Only sent over HTTPS
-                        sameSite: "lax", // Prevents CSRF attacks 
-                        maxAge: 10 * 60
-                    })
+        const cookieStore = await cookies()
+        if (success) {
+            if (bankResponse.ApprovalCode) {
+                cookieStore.set("_apc", JSON.stringify({ ApprovalCode: bankResponse.ApprovalCode }), cookieOptions)
             }
-            if (response.MerchantReference) {
-                cookies().set("_mmo", JSON.stringify({
-                    orderId: response.MerchantReference?.toString()
-                }), {
-                    path: "/", // Cookie is available on all paths
-                    httpOnly: true, // Can't be accessed via JavaScript
-                    secure: true, // Only sent over HTTPS
-                    sameSite: "lax", // Prevents CSRF attacks 
-                    maxAge: 10 * 60
-                })
-            }
-
-            return new NextResponse(`
-                <html>
-                  <head>
-                    <meta http-equiv="refresh" content="0;url=/checkout/thank-you" />
-                    <script>window.location.href = "/checkout/thank-you"</script>
-                  </head>
-                  <body>Redirecting...</body>
-                </html>
-              `, {
-                headers: {
-                    'Content-Type': 'text/html',
-                },
-            })
-        }
-        else {
-            await saveBankResponse({ bankResponse: response })
-            return new NextResponse(`
-                <html>
-                  <head>
-                    <meta http-equiv="refresh" content="0;url=/checkout/failure" />
-                    <script>window.location.href = "/checkout/failure"</script>
-                  </head>
-                  <body>Redirecting...</body>
-                </html>
-              `, {
-                headers: {
-                    'Content-Type': 'text/html',
-                },
-            })
+            cookieStore.set("_mmo", JSON.stringify({ orderId: result.documentId }), cookieOptions)
+            return redirectHtml('/checkout/thank-you')
         }
 
+        cookieStore.set("_mmo", JSON.stringify({ orderId: result.documentId }), cookieOptions)
+        return redirectHtml('/checkout/failure')
     } catch (error) {
-        return new NextResponse(`
-            <html>
-              <head>
-                <meta http-equiv="refresh" content="0;url=/" />
-                <script>window.location.href = "/"</script>
-              </head>
-              <body>Redirecting...</body>
-            </html>
-          `, {
-            headers: {
-                'Content-Type': 'text/html',
-            },
-        })
+        console.error('Piraeus success:', error)
+        notifyAdmin({ title: 'Πειραιώς: σφάλμα στην επιστροφή από την τράπεζα', data: `Παραγγελία ${reference}: ${String(error)}` })
+        return redirectHtml('/checkout/failure')
     }
 }

@@ -1,0 +1,20 @@
+// Αγαπημένα του συνδεδεμένου πελάτη — Strapi /storefront/account/wishlist.
+// Το JWT το παίρνει ο server από το session· ο browser δεν το στέλνει.
+import { NextRequest, NextResponse } from "next/server";
+import { sessionJwt } from "@/lib/helpers/accountSession";
+import { publicErrorMessage, storefrontFetch, StorefrontApiError } from "@/lib/helpers/storefrontApi";
+
+export const dynamic = 'force-dynamic'
+
+const statusOf = (error: unknown) => error instanceof StorefrontApiError && error.status < 500 ? error.status : 500
+
+export async function GET(req: NextRequest) {
+    const jwt = await sessionJwt()
+    if (!jwt) return NextResponse.json({ message: 'Απαιτείται σύνδεση' }, { status: 401 })
+    const full = req.nextUrl.searchParams.get('full') === '1'
+    try {
+        return NextResponse.json(await storefrontFetch(`/storefront/account/wishlist${full ? '?full=1' : ''}`, { jwt }))
+    } catch (error) {
+        return NextResponse.json({ message: publicErrorMessage(error) }, { status: statusOf(error) })
+    }
+}

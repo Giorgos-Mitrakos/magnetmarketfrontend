@@ -1,37 +1,12 @@
 // app/newsletter/unsubscribe/page.tsx
-import { Metadata } from 'next'
-import UnsubscribeClient from '@/components/organisms/newsletter/unsubscribe-client'
+// (2026-10-14) Οι σύνδεσμοι διαγραφής εξυπηρετούνται πλέον από τη σελίδα
+// /email/unsubscribe — εδώ κρατάμε μόνο ανακατεύθυνση για τυχόν παλιούς συνδέσμους.
+import { redirect } from 'next/navigation'
 
-const BASE_URL = process.env.NEXT_URL || 'https://magnetmarket.gr'
-
-/* -------------------------------------------------------------------------- */
-/*                                  Page                                       */
-/* -------------------------------------------------------------------------- */
-export default function UnsubscribeConfirmPage() {
-  // ℹ️ NO structured data needed - transactional pages are noindex
-  return <UnsubscribeClient />
+export default async function UnsubscribeRedirect(props: { searchParams: Promise<{ token?: string | string[] }> }) {
+  const searchParams = await props.searchParams;
+  const token = Array.isArray(searchParams.token) ? searchParams.token[0] : searchParams.token
+  redirect(`/email/unsubscribe${token ? `?token=${encodeURIComponent(token)}` : ''}`)
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                Metadata                                     */
-/* -------------------------------------------------------------------------- */
-export const metadata: Metadata = {
-  title: 'Διαγραφή από Newsletter | Magnet Market',
-  description: 'Διαγραφή από τη λίστα παραληπτών του newsletter',
-  
-  robots: {
-    index: false, // ❌ NO indexing - transactional page με tokens
-    follow: false,
-  },
-  
-  // NO canonical - transactional page με query params
-  // NO OpenGraph - private action page
-  // NO Twitter Cards - private action page
-  // NO structured data - noindex page
-}
-
-/* -------------------------------------------------------------------------- */
-/*                            Dynamic Configuration                            */
-/* -------------------------------------------------------------------------- */
 export const dynamic = 'force-dynamic'
-export const revalidate = 0

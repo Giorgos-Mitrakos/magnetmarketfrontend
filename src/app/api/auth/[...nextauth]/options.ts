@@ -38,20 +38,27 @@ const authOptions: AuthOptions = {
         // (i.e., the request IP address)
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/local`, {
           method: 'POST',
+          // Strapi v5: μόνο identifier + password (άγνωστα πεδία απορρίπτονται)
           body: JSON.stringify({
-            username: credentials?.username,
             identifier: credentials?.email,
             password: credentials?.password,
           }),
           headers: { "Content-Type": "application/json" }
         })
-        const user = await res.json()
+        const user = await res.json().catch(() => null)
 
         // If no error and we have user data, return it
-        if (res.ok && user) {
+        if (res.ok && user?.jwt) {
           return { id: user.user.id, username: user.user.username, email: user.user.email, jwt: user.jwt }
         }
-        // Return null if user data could not be retrieved
+
+        // Συγκεκριμένοι λόγοι αποτυχίας → κωδικός σφάλματος που διαβάζει η σελίδα σύνδεσης
+        // (ό,τι πετάμε εδώ φτάνει στο signIn ως result.error)
+        const message = String(user?.error?.message ?? '').toLowerCase()
+        if (message.includes('not confirmed')) throw new Error('EmailNotConfirmed')
+        if (message.includes('blocked')) throw new Error('AccountBlocked')
+
+        // Λάθος email/κωδικός → 'CredentialsSignin'
         return null
       }
     }),
@@ -109,4 +116,4 @@ const authOptions: AuthOptions = {
 
 const  getSession = () => getServerSession(authOptions)
 
-export { authOptions, getSession }
+export { authOptions, getSession }

@@ -1,22 +1,24 @@
 import { IProductPriceProps } from "@/lib/interfaces/product"
-import { GET_PRODUCT_PRICE } from "@/lib/queries/productQuery"
-import { fetcher } from "@/repositories/repository"
 import { useEffect, useState } from "react"
 import useSWR from "swr"
 
-export default function useProductPrice(id: number) {
+// Τρέχουσα τιμή/διαθεσιμότητα από το Strapi v3 (REST), στην παλιά μορφή
+// product.data.attributes ώστε τα components του καλαθιού να μην αλλάξουν
+const priceFetcher = async (url: string): Promise<IProductPriceProps> => {
+    const response = await fetch(url)
+    if (!response.ok) throw new Error(`Response status: ${response.status}`)
+    return response.json()
+}
+
+export default function useProductPrice(id: number | string) {
     const [profit, setProfit] = useState<number>()
     const [discount, setDiscount] = useState<number>()
     const [isSale, setIsSale] = useState<boolean>(false)
     const [salePrice, setSalePrice] = useState<number>()
 
-    const query = GET_PRODUCT_PRICE
-    const variables = { id }
-    const { data, isLoading, error } = useSWR<IProductPriceProps, boolean, any>(
-        {
-            query: query,
-            variables: variables
-        }, fetcher)
+    const { data, isLoading, error } = useSWR<IProductPriceProps>(
+        id ? `/api/storefront/product-price/${encodeURIComponent(String(id))}` : null,
+        priceFetcher)
 
     useEffect(() => {
         if (!isLoading && data && data.product.data.attributes.sale_price > 0 && data.product.data.attributes.price) {
@@ -32,4 +34,4 @@ export default function useProductPrice(id: number) {
     }, [isLoading, data])
 
     return { profit, discount, isSale, salePrice, isLoading, error, data }
-}
+}

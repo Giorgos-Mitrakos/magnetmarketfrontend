@@ -2,41 +2,27 @@
 import { Suspense } from 'react'
 import SiteFeaturesClient from './siteFeaturesClient'
 
-// Static data - μπορεί να είναι server-side
-const features = [
-    {
-        id: 'free-return',
-        iconType: 'rotate',
-        ariaLabel: "Δωρεάν επιστροφή",
-        ariaDescription: "Δωρεάν επιστροφή για ελαττωματικά προϊόντα",
-        header: "Δωρεάν Επιστροφή",
-        content: "Για ελαττωματικά προϊόντα",
-    },
-    {
-        id: 'card-payments',
-        iconType: 'creditcard',
-        ariaLabel: "Πληρωμές με κάρτα",
-        ariaDescription: "Ασφαλείς πληρωμές με κάρτα",
-        header: "Πληρωμές με κάρτα",
-        content: "Ασφαλείς πληρωμές",
-    },
-    {
-        id: 'tech-support',
-        iconType: 'comments',
-        ariaLabel: "Τεχνική Υποστήριξη",
-        ariaDescription: "Τεχνική Υποστήριξη 10:00 - 18:00",
-        header: "Τεχνική Υποστήριξη",
-        content: "10:00 - 18:00",
-    },
-    {
-        id: 'warranty',
-        iconType: 'safety',
-        ariaLabel: "Εγγύηση",
-        ariaDescription: "Τα προϊόντα έρχονται με εγγύηση Ελληνικής Αντιπροσωπείας",
-        header: "Εγγύηση",
-        content: "Ελληνικής Αντιπροσωπείας",
-    }
+import { ISiteFeatureItem } from '@/lib/queries/homepage'
+
+// Οι παροχές έρχονται από το admin (block «Παροχές καταστήματος»).
+// Αν το backend δεν στείλει τίποτα, μένουν οι προεπιλεγμένες.
+const DEFAULT_ITEMS: ISiteFeatureItem[] = [
+    { id: 1, icon: 'rotate', title: 'Δωρεάν Επιστροφή', text: 'Για ελαττωματικά προϊόντα' },
+    { id: 2, icon: 'creditcard', title: 'Πληρωμές με κάρτα', text: 'Ασφαλείς πληρωμές' },
+    { id: 3, icon: 'comments', title: 'Τεχνική Υποστήριξη', text: '10:00 - 18:00' },
+    { id: 4, icon: 'safety', title: 'Εγγύηση', text: 'Ελληνικής Αντιπροσωπείας' },
 ]
+
+function toFeatures(items: ISiteFeatureItem[]) {
+    return items.map(item => ({
+        id: `feature-${item.id}`,
+        iconType: item.icon,
+        ariaLabel: item.title,
+        ariaDescription: item.text ? `${item.title} ${item.text}` : item.title,
+        header: item.title,
+        content: item.text,
+    }))
+}
 
 export interface SiteFeatureProps {
     siteFeatures: SiteFeatureProps[]
@@ -81,7 +67,10 @@ function SiteFeaturesSkeleton() {
 }
 
 // Main Server Component
-export default function SiteFeatures() {
+// Χωρίς items → οι προεπιλεγμένες. Σε server σελίδες χρησιμοποίησε το
+// SiteFeaturesFromAdmin, που φέρνει τις παροχές του block της αρχικής.
+export default function SiteFeatures({ items }: { items?: ISiteFeatureItem[] }) {
+    const features = toFeatures(items?.length ? items : DEFAULT_ITEMS)
     return (
         <Suspense fallback={<SiteFeaturesSkeleton />}>
             <SiteFeaturesClient features={features} />

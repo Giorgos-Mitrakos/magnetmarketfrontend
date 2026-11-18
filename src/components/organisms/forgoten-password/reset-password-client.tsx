@@ -126,6 +126,7 @@ export default function ResetPasswordClient() {
                     placeholder="Εισάγετε τον νέο κωδικό"
                   />
                 </div>
+                <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">Τουλάχιστον 8 χαρακτήρες, με κεφαλαίο, μικρό, αριθμό και σύμβολο.</p>
               </div>
 
               <div>

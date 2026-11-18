@@ -1,65 +1,70 @@
-// import { useSearchParams } from "next/navigation";
-
-import { getTransactionTicket, ITicketResponse, saveTicket, sendEmail } from "@/lib/helpers/piraeusGateway";
+// Έκδοση εισιτηρίου πληρωμής στην Τράπεζα Πειραιώς (κάρτα / IRIS).
+//
+// (2026-10-14) Το ποσό και οι δόσεις ΔΕΝ έρχονται πια από τον browser: τα
+// παίρνουμε από την παραγγελία στο Strapi (preparePayment). Η παραγγελία
+// πρέπει να είναι αυτή του cookie _mmo (τη γράφει ο server στη δημιουργία).
+import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { getTransactionTicket, notifyAdmin, preparePayment, saveTicket } from "@/lib/helpers/piraeusGateway";
+import { publicErrorMessage } from "@/lib/helpers/storefrontApi";
 
-
-export async function POST(request: NextRequest, res: NextResponse) {
-  // we will use params to access the data passed to the dynamic route
-  // const user = params.user;
+export async function POST(request: NextRequest) {
   try {
-    const data = await request.json()
+    const data = await request.json().catch(() => ({}))
+    const orderId = String(data?.orderId ?? '')
 
-    const { orderId, amount } = data
-    const installments = Number(data.installments) || 1;
+    let cookieOrderId = ''
+    try {
+      cookieOrderId = String(JSON.parse((await cookies()).get('_mmo')?.value ?? '{}')?.orderId ?? '')
+    } catch {
+      cookieOrderId = ''
+    }
+    if (!orderId || orderId !== cookieOrderId) {
+      return NextResponse.json({ error: 'Η παραγγελία δεν βρέθηκε' }, { status: 404 })
+    }
 
     const ACQUIRER_ID = process.env.ACQUIRER_ID
     const MERCHANT_ID = process.env.MERCHANT_ID
     const POS_ID = process.env.POS_ID
     const PEIRAIWS_USERNAME = process.env.PEIRAIWS_USERNAME
-
-    console.log({
-      ACQUIRER_ID,
-      MERCHANT_ID,
-      POS_ID,
-      PEIRAIWS_USERNAME
-    })
-
-    if (!ACQUIRER_ID || !MERCHANT_ID || !POS_ID || !PEIRAIWS_USERNAME) {
-      return new NextResponse(JSON.stringify({ error: 'Missing payment credentials' }), { status: 500 });
+    if (!ACQUIRER_ID || !MERCHANT_ID || !POS_ID || !PEIRAIWS_USERNAME || !process.env.PEIRAIWS_PASSWORD) {
+      console.error('Piraeus: λείπουν στοιχεία στο .env.local')
+      return NextResponse.json({ error: 'Η πληρωμή με κάρτα δεν είναι διαθέσιμη αυτή τη στιγμή' }, { status: 500 })
     }
 
+    // Ποσό / δόσεις / αριθμός παραγγελίας από το Strapi
+    const payment = await preparePayment(orderId)
 
-    // στέλνω στην τράπεζα τις πληροφορίες ώστε να μου αποστείλει πίσω το τικετ
-    const response = await getTransactionTicket({
-      orderId: orderId,
-      amount: amount,
-      installments: installments
+    const ticketResponse = await getTransactionTicket({
+      merchantReference: payment.merchantReference,
+      amount: payment.amount,
+      installments: payment.installments,
     })
 
-    const ticketResponse = await response as ITicketResponse
+    if (parseInt(String(ticketResponse.ResultCode)) !== 0 || !ticketResponse.TranTicket) {
+      console.error('Piraeus error:', ticketResponse)
+      notifyAdmin({
+        title: 'Πειραιώς: η τράπεζα δεν εξέδωσε εισιτήριο',
+        data: `Παραγγελία ${payment.merchantReference}: ${ticketResponse.ResultCode} ${ticketResponse.ResultDescription ?? ''}`,
+      })
+      return NextResponse.json({ error: 'Η τράπεζα δεν απάντησε. Παρακαλώ δοκιμάστε ξανά.' }, { status: 502 })
+    }
 
-    const paymentData = {
+    await saveTicket({ merchantReference: payment.merchantReference, tranTicket: ticketResponse.TranTicket })
+
+    // ParamBackLink: ΔΕΝ είναι URL — κατά το εγχειρίδιο της τράπεζας είναι
+    // query string («p1=v1&p2=v2») που προστίθεται στο Backlink URL που έχει
+    // δηλωθεί στην τράπεζα (κουμπί «Ακύρωση»). Το route /cancel δεν το χρειάζεται.
+    return NextResponse.json({
       AcquirerId: Number(ACQUIRER_ID),
       MerchantId: Number(MERCHANT_ID),
       PosId: Number(POS_ID),
       User: PEIRAIWS_USERNAME,
       LanguageCode: 'el-GR',
-      MerchantReference: orderId,
-      ParamBackLink: 'https://magnetmarket.gr/checkout/confirm/order-summary',
-    };
-
-
-    if (parseInt(ticketResponse.ResultCode) === 0) {
-      await saveTicket({ orderId: orderId, TranTicket: ticketResponse.TranTicket })
-    } else {
-      console.error('Piraeus error:', ticketResponse);
-      return new NextResponse(JSON.stringify({ error: 'Piraeus returned error', details: ticketResponse }), { status: 502 });
-    }
-
-    return new NextResponse(JSON.stringify(paymentData));
+      MerchantReference: payment.merchantReference,
+    })
   } catch (err) {
-    console.error('Unexpected error:', err);
-    return new NextResponse(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
+    console.error('Piraeus ticket:', err)
+    return NextResponse.json({ error: publicErrorMessage(err) }, { status: 500 })
   }
 }

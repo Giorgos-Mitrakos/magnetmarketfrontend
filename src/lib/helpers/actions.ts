@@ -3,7 +3,8 @@ import { cookies } from 'next/headers'
 
 export async function saveCookies({ name, value }: { name: string, value: object }) {
 
-    cookies().set({
+    const cookieStore = await cookies()
+    cookieStore.set({
         name: name,
         value: JSON.stringify(value),
         secure: true,
@@ -16,7 +17,7 @@ export async function saveCookies({ name, value }: { name: string, value: object
 
 export async function getCookies({ name }: { name: string }) {
 
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     const cookie = cookieStore.get(name)
     return cookie
     // cookies().set(name, JSON.stringify(value), { secure: true })

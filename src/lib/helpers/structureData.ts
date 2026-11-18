@@ -1,12 +1,27 @@
-import type { OfferShippingDetails, Organization, Store } from 'schema-dts';
+// (2026-10-26) Όνομα «Magnet Market» (η Ο.Ε. ως νομική επωνυμία), εξυπηρέτηση σε όλη
+// την Ελλάδα, επιστροφή με έξοδα του πελάτη. Μεταφορικά / ωράριο / τηλέφωνο έρχονται από
+// τις ρυθμίσεις της Strapi (lib/queries/storeInfo) — όχι σταθερά εδώ.
+import type { MerchantReturnPolicy, OfferShippingDetails, OpeningHoursSpecification, Organization, Store } from 'schema-dts';
+import type { ShippingTier, StoreInfo } from '../queries/storeInfo';
+
+/** Επιστροφές: 14 ημέρες, με courier/ταχυδρομείο, τα έξοδα επιστροφής τα πληρώνει ο πελάτης */
+export function returnPolicy(): MerchantReturnPolicy {
+  return {
+    '@type': 'MerchantReturnPolicy',
+    applicableCountry: 'GR',
+    returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+    merchantReturnDays: 14,
+    returnMethod: 'https://schema.org/ReturnByMail',
+    returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility',
+  }
+}
 
 export const organizationStructuredData: Organization = {
   '@type': 'Organization',
   '@id': 'https://magnetmarket.gr/#organization',
 
-  name: 'ΨΗΦΙΑΚΟΙ ΟΡΙΖΟΝΤΕΣ Ο.Ε.',
+  name: 'Magnet Market',
   legalName: 'ΨΗΦΙΑΚΟΙ ΟΡΙΖΟΝΤΕΣ Ο.Ε.',
-  alternateName: 'Magnet Market',
   description: 'Ηλεκτρονικό κατάστημα ειδών τεχνολογίας',
 
   url: 'https://magnetmarket.gr',
@@ -27,14 +42,7 @@ export const organizationStructuredData: Organization = {
     addressCountry: 'GR',
   },
 
-  hasMerchantReturnPolicy: {
-    "@type": "MerchantReturnPolicy",
-    applicableCountry: "GR",
-    returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
-    merchantReturnDays: 14,
-    returnMethod: "https://schema.org/ReturnByMail",
-    returnFees: "https://schema.org/FreeReturn"
-  },
+  hasMerchantReturnPolicy: returnPolicy(),
 
   founders: [ // Optional but good for local business
     {
@@ -77,14 +85,6 @@ export const storeStructuredData: Store = {
     addressCountry: 'GR',
   },
 
-  openingHoursSpecification: [
-    {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-      opens: '09:00',
-      closes: '17:00',
-    },
-  ],
 
   geo: {
     '@type': 'GeoCoordinates',
@@ -94,15 +94,8 @@ export const storeStructuredData: Store = {
 
   priceRange: '€€',
 
-  areaServed: {
-    '@type': 'GeoCircle',
-    geoMidpoint: {
-      '@type': 'GeoCoordinates',
-      latitude: 38.50405304255828,
-      longitude: 23.638401898227063,
-    },
-    geoRadius: '50000', // 50km delivery radius
-  },
+  // Αποστολές σε όλη την Ελλάδα (το φυσικό κατάστημα είναι στη Νέα Αρτάκη)
+  areaServed: { '@type': 'Country', name: 'GR' },
 
   paymentAccepted: ['Cash', 'Credit Card', 'Debit Card', 'Bank Transfer'],
 
@@ -111,65 +104,49 @@ export const storeStructuredData: Store = {
   knowsLanguage: ['el', 'en'], // Greek, English
 };
 
-// Χερσαίοι προορισμοί
-export const mainlandShipping: OfferShippingDetails = {
-  '@type': 'OfferShippingDetails',
-  shippingDestination: {
-    '@type': 'DefinedRegion',
-    addressCountry: 'GR',
-    name: 'Mainland Greece', // Προαιρετικό
-  },
-  shippingRate: {
-    '@type': 'MonetaryAmount',
-    value: '4.5',
-    currency: 'EUR',
-  },
-  deliveryTime: {
-    '@type': 'ShippingDeliveryTime',
-    handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' },
-    transitTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 3, unitCode: 'DAY' },
-  },
-  description: 'Ισχύει για πακέτα έως 3 κιλά',
-};
+/** Το κατάστημα με ωράριο / τηλέφωνο από τις ρυθμίσεις (αρχική σελίδα) */
+export function storeWithInfo(info: StoreInfo | null): Store {
+  if (!info) return storeStructuredData
+  const hours: OpeningHoursSpecification[] | undefined = info.openingHours?.map((h) => ({
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: h.days as any,
+    opens: h.opens,
+    closes: h.closes,
+  }))
+  return {
+    ...(storeStructuredData as unknown as Record<string, unknown>),
+    ...(info.contact.telephone ? { telephone: info.contact.telephone } : {}),
+    ...(info.contact.email ? { email: info.contact.email } : {}),
+    ...(hours?.length ? { openingHoursSpecification: hours } : {}),
+  } as Store
+}
 
-// Νησιωτικοί προορισμοί
-export const islandsShipping: OfferShippingDetails = {
-  '@type': 'OfferShippingDetails',
-  shippingDestination: {
-    '@type': 'DefinedRegion',
-    addressCountry: 'GR',
-    name: 'Greek Islands',
-  },
-  shippingRate: {
-    '@type': 'MonetaryAmount',
-    value: '5.5',
-    currency: 'EUR',
-  },
-  deliveryTime: {
-    '@type': 'ShippingDeliveryTime',
-    handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' },
-    transitTime: { '@type': 'QuantitativeValue', minValue: 2, maxValue: 4, unitCode: 'DAY' },
-  },
-  description: 'Ισχύει για πακέτα έως 3 κιλά',
-};
+/** Κόστος courier για δέμα με αυτό το βάρος (ίδιος υπολογισμός με το checkout) */
+function tierFee(t: ShippingTier, weightGrams: number): number {
+  const extraKg = Math.max(0, weightGrams - t.basicWeightGrams) / 1000
+  return Math.round((t.basicFee + extraKg * t.feePerKgAbove) * 100) / 100
+}
 
-// Δυσπρόσιτοι προορισμοί
-export const remoteShipping: OfferShippingDetails = {
-  '@type': 'OfferShippingDetails',
-  shippingDestination: {
-    '@type': 'DefinedRegion',
-    addressCountry: 'GR',
-    name: 'Remote Areas',
-  },
-  shippingRate: {
-    '@type': 'MonetaryAmount',
-    value: '7.5',
-    currency: 'EUR',
-  },
-  deliveryTime: {
-    '@type': 'ShippingDeliveryTime',
-    handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' },
-    transitTime: { '@type': 'QuantitativeValue', minValue: 3, maxValue: 6, unitCode: 'DAY' },
-  },
-  description: 'Ισχύει για πακέτα έως 3 κιλά',
-};
+/**
+ * Μεταφορικά ενός προϊόντος για τη Google (μία εγγραφή για την Ελλάδα, με την τιμή
+ * της ηπειρωτικής — αυτή που πληρώνουν οι περισσότεροι). Δωρεάν όταν η τιμή του
+ * προϊόντος φτάνει το όριο δωρεάν αποστολής. Χωρίς στοιχεία → τίποτα (όχι λάθος τιμή).
+ */
+export function shippingDetailsFor(price: number, weightGrams: number | null | undefined, info: StoreInfo | null): OfferShippingDetails[] | undefined {
+  const t = info?.shipping.mainland
+  if (!info || !t) return undefined
+  const free = info.shipping.freeOver != null && price >= info.shipping.freeOver
+  const fee = free ? 0 : tierFee(t, Number(weightGrams) || 0)
+  return [
+    {
+      '@type': 'OfferShippingDetails',
+      shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'GR' },
+      shippingRate: { '@type': 'MonetaryAmount', value: fee, currency: 'EUR' },
+      deliveryTime: {
+        '@type': 'ShippingDeliveryTime',
+        handlingTime: { '@type': 'QuantitativeValue', minValue: info.delivery.handlingDays[0], maxValue: info.delivery.handlingDays[1], unitCode: 'DAY' },
+        transitTime: { '@type': 'QuantitativeValue', minValue: info.delivery.transitDays[0], maxValue: info.delivery.transitDays[1], unitCode: 'DAY' },
+      },
+    },
+  ]
+}

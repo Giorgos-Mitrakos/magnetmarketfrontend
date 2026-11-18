@@ -1,263 +1,196 @@
 // app/search/page.tsx
-
+// (2026-10-26) Αναζήτηση:
+//  - ίδια φίλτρα με τις κατηγορίες (κατασκευαστής, κατηγορία, άμεσα διαθέσιμα, προσφορές,
+//    τιμή από / έως), ενεργά φίλτρα με ✕, ίδια κουμπιά στο κινητό
+//  - οι σελίδες αναζήτησης ΔΕΝ μπαίνουν στη Google (noindex, follow) — οδηγία της Google
+//    για εσωτερικές αναζητήσεις· ο τίτλος της καρτέλας έχει τη λέξη που αναζητήθηκε
+//  - πεδίο αναζήτησης μέσα στη σελίδα (και χωρίς JavaScript) όταν δεν υπάρχουν αποτελέσματα,
+//    με προτάσεις: προσφορές και οι κύριες κατηγορίες
 import { Metadata } from 'next'
+import Link from 'next/link'
 import PaginationBar from '@/components/molecules/pagination'
 import SearchTracker from '@/components/molecules/SearchTracker'
 import CategoryPageHeader from '@/components/organisms/categoryPageHeader'
-import MobileSearchFilters from '@/components/organisms/mobileSearchFilters'
+import CategoryFilters from '@/components/organisms/categoryFilters'
+import MobileFilters from '@/components/organisms/mobileFilters'
 import ProductCard from '@/components/organisms/productCard'
-import SearchFilters from '@/components/organisms/searchFilters'
-import AvailabilityFilter from "@/components/molecules/AvailabilityFilter";
-import {
-    organizationStructuredData,
-    storeStructuredData
-} from '@/lib/helpers/structureData'
+import AvailabilityFilter from '@/components/molecules/AvailabilityFilter'
+import ActiveFilters from '@/components/molecules/ActiveFilters'
+import EmptyResults from '@/components/molecules/EmptyResults'
+import { organizationStructuredData, storeStructuredData } from '@/lib/helpers/structureData'
 import { FilterProps } from '@/lib/interfaces/filters'
 import { IProductCard } from '@/lib/interfaces/product'
-import type {
-    BreadcrumbList,
-    WebPage,
-    WebSite,
-    SearchResultsPage
-} from 'schema-dts'
+import { getMenu } from '@/lib/queries/categoryQuery'
+import type { WebSite, SearchResultsPage } from 'schema-dts'
+import { jsonLd } from '@/lib/helpers/jsonLd'
 
 const BASE_URL = process.env.NEXT_URL || 'https://magnetmarket.gr'
 
-type SearchProps = {
-    searchParams: { [key: string]: string | string[] | undefined }
+type SearchParams = { [key: string]: string | string[] | undefined }
+type SearchProps = { searchParams: Promise<SearchParams> }
+
+interface SearchResponse {
+    products: IProductCard[]
+    meta: { pagination: { total: number; page: number; pageSize: number; pageCount: number } }
+    searchFilters: FilterProps[]
+    priceRange?: { min: number; max: number } | null
 }
 
-/* -------------------------------------------------------------------------- */
-/*                              Data Fetching                                  */
-/* -------------------------------------------------------------------------- */
+const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v)
 
-async function getFilteredProducts(searchParams: {
-    [key: string]: string | string[] | undefined
-}) {
-    // Αν θέλεις να μην χτυπάει το API χωρίς παραμέτρους:
-    if (!searchParams || Object.keys(searchParams).length === 0) return null
+/** Φίλτρα (όχι η ίδια η αναζήτηση / σελίδα / ταξινόμηση) */
+const FILTER_KEYS = ['brands', 'Κατασκευαστές', 'Κατηγορίες', 'stock', 'sale', 'price_min', 'price_max']
 
+async function getSearchResults(searchParams: SearchParams): Promise<SearchResponse | null> {
+    const search = one(searchParams.search)?.trim()
+    if (!search) return null
     try {
-        const { sort, page, pageSize, Κατασκευαστές, Κατηγορίες, search } = searchParams
-
-        // Smart caching - διαφορετικό cache time ανάλογα με το context
-        let cacheTime = 900 // Default 15 λεπτά
-
-        // Πρώτη σελίδα cache περισσότερο (πιο σημαντική για SEO)
-        if (!page || page === '1') {
-            cacheTime = 600 // 10 λεπτά για την πρώτη σελίδα
-        }
-
-        // Φιλτραρισμένα αποτελέσματα cache λιγότερο (πιο δυναμικά)
-        if (Κατηγορίες || (sort && sort !== 'price:asc') || pageSize || Κατασκευαστές || search) {
-            cacheTime = 300 // 5 λεπτά για φιλτραρισμένα
-        }
-
-        // Σελίδες μετά την πρώτη cache λιγότερο
-        if (page && Number(page) > 1) {
-            cacheTime = 600 // 10 λεπτά για επόμενες σελίδες
-        }
-
-        const myHeaders = new Headers()
-
-        myHeaders.append('Content-Type', 'application/json')
-        myHeaders.append('Authorization', `Bearer ${process.env.ADMIN_JWT_SECRET}`)
-
-        const myInit = {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/product/searchProducts`, {
             method: 'POST',
-            headers: myHeaders,
-            body: JSON.stringify({
-                searchParams: searchParams,
-            }),
-            next: {
-                revalidate: 1,
-            },
-        }
-
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/product/searchProducts`,
-            myInit
-        )
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ searchParams }),
+            // Η αναζήτηση καταγράφεται στο Strapi — χωρίς cache, κάθε αναζήτηση μετράει
+            cache: 'no-store',
+        })
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
         const data = await response.json()
-
-        return data as {
-            products: IProductCard[]
-            meta: {
-                pagination: {
-                    total: number
-                    page: number
-                    pageSize: number
-                    pageCount: number
-                }
-            }
-            searchFilters: FilterProps[]
-        }
+        return data?.products ? (data as SearchResponse) : null
     } catch (error) {
         console.error('Search API Error:', error)
         return null
     }
 }
 
-/* -------------------------------------------------------------------------- */
-/*                          Structured Data Helper                             */
-/* -------------------------------------------------------------------------- */
-
-function generateSearchStructuredData() {
-    // WebSite με SearchAction
+function structuredData(term: string | undefined) {
     const websiteNode: WebSite = {
         '@type': 'WebSite',
         '@id': `${BASE_URL}/#website`,
         url: BASE_URL,
         name: 'Magnet Market',
-        publisher: {
-            '@id': `${BASE_URL}/#organization`,
-        },
-        potentialAction: {
-            '@type': 'SearchAction',
-            target: {
-                '@type': 'EntryPoint',
-                urlTemplate: `${BASE_URL}/search?search={search_term_string}`,
-            },
-            // @ts-ignore - query-input is valid but not in types
-            'query-input': 'required name=search_term_string',
-        },
+        publisher: { '@id': `${BASE_URL}/#organization` },
     }
-
-    // BreadcrumbList
-    const breadcrumbList: BreadcrumbList = {
-        '@type': 'BreadcrumbList',
-        '@id': `${BASE_URL}/search#breadcrumb`,
-        itemListElement: [
-            {
-                '@type': 'ListItem',
-                position: 1,
-                name: 'Home',
-                item: BASE_URL,
-            },
-            {
-                '@type': 'ListItem',
-                position: 2,
-                name: 'Αναζήτηση',
-                item: `${BASE_URL}/search`,
-            },
-        ],
-    }
-
-    // SearchResultsPage
-    const searchResultsPage: SearchResultsPage = {
+    const page: SearchResultsPage = {
         '@type': 'SearchResultsPage',
         '@id': `${BASE_URL}/search#webpage`,
         url: `${BASE_URL}/search`,
-        name: 'Αναζήτηση Προϊόντων',
-        description: 'Αναζητήστε προϊόντα τεχνολογίας στο Magnet Market',
-        isPartOf: {
-            '@id': `${BASE_URL}/#website`,
-        },
-        about: {
-            '@id': `${BASE_URL}/#organization`,
-        },
-        breadcrumb: {
-            '@id': `${BASE_URL}/search#breadcrumb`,
-        },
+        name: term ? `Αναζήτηση: ${term}` : 'Αναζήτηση προϊόντων',
+        isPartOf: { '@id': `${BASE_URL}/#website` },
         inLanguage: 'el-GR',
     }
-
-    return {
-        '@context': 'https://schema.org',
-        '@graph': [
-            organizationStructuredData,
-            storeStructuredData,
-            websiteNode,
-            breadcrumbList,
-            searchResultsPage,
-        ],
-    }
+    return { '@context': 'https://schema.org', '@graph': [organizationStructuredData, storeStructuredData, websiteNode, page] }
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                  Page                                       */
-/* -------------------------------------------------------------------------- */
+/** Πεδίο αναζήτησης μέσα στη σελίδα — απλή φόρμα GET, δουλεύει και χωρίς JavaScript */
+function SearchBox({ defaultValue = '' }: { defaultValue?: string }) {
+    return (
+        <form action="/search" method="get" role="search" className="mx-auto flex w-full max-w-lg gap-2">
+            <label htmlFor="search-page-input" className="sr-only">Αναζήτηση προϊόντων</label>
+            <input
+                id="search-page-input"
+                name="search"
+                type="search"
+                defaultValue={defaultValue}
+                placeholder="Προϊόν, μάρκα ή κωδικός…"
+                autoComplete="off"
+                enterKeyHint="search"
+                className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 focus:border-siteColors-blue focus:outline-none focus:ring-2 focus:ring-siteColors-blue/30 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+            />
+            <button type="submit" className="rounded-lg bg-siteColors-purple px-5 py-3 font-semibold text-white hover:bg-siteColors-purple/90">
+                Αναζήτηση
+            </button>
+        </form>
+    )
+}
 
-export default async function SearchPage({ searchParams }: SearchProps) {
-    const response = await getFilteredProducts(searchParams)
+/** Προτάσεις όταν δεν βρέθηκε τίποτα: προσφορές + κύριες κατηγορίες */
+async function Suggestions() {
+    const menu = await getMenu()
+    const top = menu.filter((c) => c.slug && !c.isSpecial).slice(0, 10)
+    const chip = 'rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-siteColors-purple hover:text-siteColors-purple dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200'
+    return (
+        <div className="mt-8">
+            <p className="mb-3 text-sm font-semibold text-slate-600 dark:text-slate-300">Ίσως σας ενδιαφέρουν:</p>
+            <div className="flex flex-wrap justify-center gap-2">
+                <Link href="/offers" className={`${chip} border-red-200 text-red-700 dark:border-red-900 dark:text-red-300`}>🔥 Προσφορές</Link>
+                {top.map((c) => (
+                    <Link key={c.slug} href={`/category/${c.slug}`} className={chip}>{c.name}</Link>
+                ))}
+            </div>
+        </div>
+    )
+}
 
-    const isInitialState = !searchParams.search // Ελέγχουμε αν ο χρήστης έχει γράψει κάτι
-
-    // Generate structured data
-    const structuredData = generateSearchStructuredData()
+export default async function SearchPage(props: SearchProps) {
+    const searchParams = await props.searchParams;
+    const term = one(searchParams.search)?.trim() || ''
+    const response = term ? await getSearchResults(searchParams) : null
+    const total = response?.meta?.pagination?.total ?? 0
+    const hasFilters = FILTER_KEYS.some((k) => searchParams[k] != null && searchParams[k] !== '')
 
     return (
         <>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ 
-                    __html: JSON.stringify(structuredData).replaceAll('&quot;', '"')
-                }}
-                suppressHydrationWarning
-            />
-            <SearchTracker
-                searchTerm={(searchParams.search as string) || ''}
-                resultsCount={response?.meta?.pagination?.total ?? 0}
-                products={response?.products || []}
-            />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(structuredData(term)) }} suppressHydrationWarning />
+            <SearchTracker searchTerm={term} resultsCount={total} products={response?.products || []} />
 
             <div className="mt-8">
-                {/* Δυναμικός Τίτλος */}
-                <h1 className="mb-4 text-center font-medium uppercase text-2xl">
-                    {isInitialState ? (
-                        'Αναζήτηση Προϊόντων'
-                    ) : (
+                <h1 className="mb-4 text-center text-2xl font-medium text-slate-800 dark:text-slate-100">
+                    {term ? (
                         <>
-                            ΑΠΟΤΕΛΕΣΜΑΤΑ ΑΝΑΖΗΤΗΣΗΣ ΓΙΑ:{' '}
-                            <span className="font-semibold text-xl text-purple-700 dark:text-purple-400">
-                                {searchParams.search}
-                            </span>
+                            Αποτελέσματα για{' '}
+                            <span className="font-semibold text-purple-700 dark:text-purple-400">«{term}»</span>
+                            {total > 0 && <span className="ml-2 text-base font-normal text-slate-500 dark:text-slate-400">({total})</span>}
                         </>
+                    ) : (
+                        'Αναζήτηση προϊόντων'
                     )}
                 </h1>
 
-                <div className="mt-8 grid lg:grid-cols-4 gap-4">
-                    {/* Φίλτρα - Εμφανίζονται μόνο αν έχουμε αποτελέσματα */}
-                    {!isInitialState && response?.products && response.products.length > 0 && (
-                        <div className="hidden lg:flex lg:flex-col bg-slate-100 dark:bg-slate-700 p-4 rounded h-fit">
-                            <SearchFilters searchFilters={response?.searchFilters || []} />
-                        </div>
-                    )}
+                {!term ? (
+                    // Χωρίς λέξη αναζήτησης
+                    <div className="flex flex-col items-center justify-center rounded-xl border border-slate-100 bg-white px-4 py-16 text-center shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                        <h2 className="mb-3 text-2xl font-bold text-slate-800 dark:text-white">Τι ψάχνετε σήμερα;</h2>
+                        <p className="mx-auto mb-6 max-w-sm text-slate-500 dark:text-slate-400">
+                            Γράψτε το προϊόν, τη μάρκα ή τον κωδικό που σας ενδιαφέρει.
+                        </p>
+                        <SearchBox />
+                        <Suggestions />
+                    </div>
+                ) : total === 0 && !hasFilters ? (
+                    // Δεν βρέθηκε τίποτα (χωρίς φίλτρα)
+                    <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-16 text-center dark:border-slate-700 dark:bg-slate-900">
+                        <h2 className="mb-2 text-xl font-bold text-slate-800 dark:text-white">Δεν βρέθηκε κάτι για «{term}»</h2>
+                        <p className="mb-6 text-slate-500 dark:text-slate-400">
+                            Δοκιμάστε λιγότερες ή πιο γενικές λέξεις, ή μόνο τη μάρκα / τον κωδικό του προϊόντος.
+                        </p>
+                        <SearchBox defaultValue={term} />
+                        <Suggestions />
+                    </div>
+                ) : (
+                    <div className="mb-8 grid w-full pt-4">
+                        <div className="grid gap-4 lg:grid-cols-4">
+                            <aside className="hidden h-fit rounded-lg border border-gray-100 bg-slate-50 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800 lg:flex lg:flex-col" aria-label="Φίλτρα αναζήτησης">
+                                <CategoryFilters availableFilters={response?.searchFilters ?? []} priceRange={response?.priceRange ?? null} idPrefix="d" />
+                            </aside>
 
-                    <div
-                        className={`flex flex-col pr-4 w-full ${!isInitialState && response?.products?.length ? 'col-span-3' : 'col-span-4'
-                            }`}
-                    >
-                        {isInitialState ? (
-                            /* CASE 1: INITIAL STATE (Πριν την αναζήτηση) */
-                            <div className="flex flex-col items-center justify-center py-20 text-center bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
-                                <div className="text-6xl mb-6">⚡</div>
-                                <h2 className="text-2xl font-bold mb-3 text-slate-800 dark:text-white">
-                                    Τι ψάχνετε σήμερα;
-                                </h2>
-                                <p className="text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-8">
-                                    Πληκτρολογήστε το προϊόν, τη μάρκα ή την κατηγορία που σας ενδιαφέρει για να
-                                    βρείτε τις καλύτερες τιμές.
-                                </p>
-                            </div>
-                        ) : response && response.products.length > 0 ? (
-                            /* CASE 2: ΕΧΟΥΜΕ ΑΠΟΤΕΛΕΣΜΑΤΑ */
-                            <>
-                                <CategoryPageHeader totalItems={response?.meta?.pagination?.total ?? 0} />
-                                <AvailabilityFilter />
-                                <section className="grid gap-1 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 place-content-center">
-                                    {response.products.map((product) => (
-                                        <div key={product.id}>
-                                            <ProductCard product={product} />
-                                        </div>
-                                    ))}
-                                </section>
-                                <MobileSearchFilters searchFilters={response?.searchFilters || []} />
+                            <div className="col-span-3 flex w-full min-w-0 flex-col px-2 lg:pl-0 lg:pr-4">
+                                <CategoryPageHeader totalItems={total} defaultSortLabel="ΣΧΕΤΙΚΟΤΗΤΑ" showNewest />
+                                <AvailabilityFilter showSale />
+                                <ActiveFilters availableFilters={response?.searchFilters ?? []} />
+
+                                {response && response.products.length > 0 ? (
+                                    <section className="grid grid-cols-1 place-content-center gap-1 sm:grid-cols-2 md:grid-cols-3" aria-label={`Αποτελέσματα για ${term}`}>
+                                        {response.products.map((product) => (
+                                            <article key={product.id}>
+                                                <ProductCard product={product} />
+                                            </article>
+                                        ))}
+                                    </section>
+                                ) : (
+                                    <EmptyResults />
+                                )}
+
+                                <MobileFilters availableFilters={response?.searchFilters ?? []} priceRange={response?.priceRange ?? null} totalItems={total} />
+
                                 {response?.meta?.pagination && (
                                     <PaginationBar
                                         totalItems={response.meta.pagination.total}
@@ -265,67 +198,24 @@ export default async function SearchPage({ searchParams }: SearchProps) {
                                         itemsPerPage={response.meta.pagination.pageSize}
                                     />
                                 )}
-                            </>
-                        ) : (
-                            /* CASE 3: ΜΗΔΕΝΙΚΑ ΑΠΟΤΕΛΕΣΜΑΤΑ */
-                            <div className="flex flex-col items-center justify-center py-20 text-center bg-slate-50 dark:bg-slate-900 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700">
-                                <div className="text-6xl mb-4">🔎</div>
-                                <h2 className="text-xl font-bold mb-2 text-slate-800 dark:text-white">
-                                    Δεν βρέθηκε τίποτα
-                                </h2>
-                                <p className="text-slate-500 dark:text-slate-400">
-                                    Δοκιμάστε μια διαφορετική λέξη-κλειδί.
-                                </p>
                             </div>
-                        )}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </>
     )
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                Metadata                                     */
-/* -------------------------------------------------------------------------- */
-
-export const metadata: Metadata = {
-    title: 'Αναζήτηση Προϊόντων Τεχνολογίας | Magnet Market',
-    description: 'Αναζητήστε και βρείτε τα καλύτερα προϊόντα τεχνολογίας: υπολογιστές, laptops, smartphones, tablets, κάμερες, εκτυπωτές και πολλά άλλα.',
-    keywords: 'αναζήτηση, search, laptop, υπολογιστές, smartphones, τεχνολογία, προϊόντα',
-
-    robots: {
-        index: true, // ✅ Search pages CAN be indexed
-        follow: true,
-    },
-
-    alternates: {
-        canonical: `${BASE_URL}/search`,
-    },
-
-    openGraph: {
-        title: 'Αναζήτηση Προϊόντων | Magnet Market',
-        description: 'Βρείτε τα καλύτερα προϊόντα τεχνολογίας στις καλύτερες τιμές',
-        url: `${BASE_URL}/search`,
-        siteName: 'magnetmarket.gr',
-        type: 'website',
-        locale: 'el_GR',
-        images: [
-            {
-                url: `${BASE_URL}/_next/static/media/MARKET MAGNET-LOGO.79db5357.svg`,
-                width: 1200,
-                height: 630,
-                alt: 'Magnet Market Logo',
-            },
-        ],
-    },
-
-    twitter: {
-        card: 'summary_large_image',
-        title: 'Αναζήτηση Προϊόντων | Magnet Market',
-        description: 'Βρείτε τα καλύτερα προϊόντα τεχνολογίας',
-        images: [`${BASE_URL}/_next/static/media/MARKET MAGNET-LOGO.79db5357.svg`],
-    },
-
-    // ΑΦΑΙΡΕΘΗΚΕ το other: { 'application/ld+json' }
+export async function generateMetadata(props: SearchProps): Promise<Metadata> {
+    const searchParams = await props.searchParams;
+    const term = one(searchParams.search)?.trim()
+    const title = term ? `«${term.slice(0, 60)}» — Αναζήτηση | Magnet Market` : 'Αναζήτηση προϊόντων | Magnet Market'
+    return {
+        title,
+        description: 'Αναζήτηση προϊόντων στο Magnet Market με όνομα, μάρκα ή κωδικό.',
+        // Εσωτερική αναζήτηση: όχι στο ευρετήριο της Google, αλλά ακολουθεί τους συνδέσμους προϊόντων
+        robots: { index: false, follow: true, googleBot: { index: false, follow: true } },
+        alternates: { canonical: `${BASE_URL}/search` },
+    }
 }

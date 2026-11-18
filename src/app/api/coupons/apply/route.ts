@@ -1,61 +1,31 @@
-import { getServerSession } from "next-auth";
+// Έλεγχος κουπονιού: γίνεται με το quote του Strapi (ίδιοι κανόνες με την
+// παραγγελία — εξαιρούμενα προϊόντα, ελάχιστο ποσό, χρήσεις ανά email).
+// Καμία «δέσμευση» εδώ: η χρήση καταγράφεται μόνο μαζί με την παραγγελία.
+// Όριο διαφορετικών κωδικών ανά IP στο Strapi (COUPON_VALIDATE_RATE_LIMIT).
 import { NextRequest, NextResponse } from "next/server";
-
-interface RequestBody {
-  code: string;
-  userId?: string;
-  cart?: any; // Replace with your Cart type
-}
-
-interface StrapiError {
-  message: string;
-  details?: string;
-}
+import { publicErrorMessage, storefrontFetch } from "@/lib/helpers/storefrontApi";
+import { IQuoteResponse } from "@/lib/helpers/checkoutPayload";
 
 export async function POST(req: NextRequest) {
-  if (req.method !== "POST") {
-    return NextResponse.json(
-      { message: "Method not allowed" },
-      { status: 405 }
-    );
-  }
-
-  const session = await getServerSession();
-
-  try {
-    const body: RequestBody = await req.json();
-
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/coupons/apply`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.ADMIN_JWT_SECRET}`,
-        },
-        body: JSON.stringify({
-          ...body,
-          user: body.userId ? { id: body.userId } : null,
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const errorData: StrapiError = await response.json();
-      throw new Error(errorData.message || "Application failed");
+    try {
+        const body = await req.json()
+        const code = String(body?.couponCode ?? '').trim()
+        if (!code) return NextResponse.json({ success: false, message: 'Συμπληρώστε τον κωδικό κουπονιού' })
+        if (!body?.billing_address?.email_address) {
+            return NextResponse.json({ success: false, message: 'Συμπληρώστε πρώτα το email σας' })
+        }
+        const quote = await storefrontFetch<IQuoteResponse>('/orders/quote', { body })
+        if (!quote.coupon) {
+            return NextResponse.json({ success: false, message: quote.couponError || 'Το κουπόνι δεν είναι έγκυρο' })
+        }
+        const coupon = {
+            id: quote.coupon.code,
+            code: quote.coupon.code,
+            discountType: quote.coupon.discountType,
+            discountValue: quote.coupon.discountValue,
+        }
+        return NextResponse.json({ success: true, coupon, message: 'Το κουπόνι εφαρμόστηκε' })
+    } catch (error) {
+        return NextResponse.json({ success: false, message: publicErrorMessage(error) })
     }
-
-    const data = await response.json();
-    return NextResponse.json(data, { status: response.status });
-
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Application failed";
-    return NextResponse.json(
-      {
-        message,
-        details: process.env.NODE_ENV === "development" ? error instanceof Error ? error.stack : undefined : undefined,
-      },
-      { status: 500 }
-    );
-  }
 }

@@ -1,97 +1,52 @@
-'use client'
-import { memo, useEffect, useState } from 'react'
-import dynamic from "next/dynamic"
-import { ProductCardSkeleton } from "@/components/organisms/productCard"
-import { IProductCard } from "@/lib/interfaces/product"
-import { trackViewItemList } from "@/lib/helpers/advanced-analytics"
+// components/molecules/homepage/hotOrSaleClient.tsx
+//
+// Λίστα προϊόντων με χρωματιστή κεφαλίδα (style «header» στο block του admin).
+// Server component (το όνομα του αρχείου έμεινε από την παλιά έκδοση): τα
+// προϊόντα έρχονται έτοιμα στο HTML. Το Analytics μετράει τη λίστα όταν φανεί.
+import Carousel from '@/components/atoms/carousel'
+import ViewListTracker from '@/components/atoms/ViewListTracker'
+import { IProductCard } from '@/lib/interfaces/product'
+import SaleCountdown from '@/components/atoms/SaleCountdown'
 
-const Carousel = dynamic(() => import('@/components/atoms/carousel'), {
-  ssr: false,
-  loading: () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {Array.from({ length: 4 }, (_, i) => (
-        <ProductCardSkeleton key={i} />
-      ))}
-    </div>
-  )
-})
-
-interface HotOrSaleClientProps {
+interface HotOrSaleProps {
   id: string
   title: string
   type: string
   initialData: IProductCard[] | null
+  /** Αντίστροφη μέτρηση στην κεφαλίδα (προσφορές που λήγουν) */
+  endsAt?: string | null
 }
 
-const getHeaderColors = (type: string) => {
-  switch (type) {
-    case 'hot':
-      return 'bg-[#a9488e] dark:bg-gradient-to-br dark:from-[#5a2349] dark:to-[#8c3a75] text-white dark:text-slate-200'
-    case 'new':
-      return 'bg-[#246eb5] dark:bg-gradient-to-br dark:from-[#153a61] dark:to-[#1e5a95] text-white dark:text-slate-200'
-    case 'sale':
-      return 'bg-[#6e276f] dark:bg-gradient-to-br dark:from-[#3d183e] dark:to-[#5a205b] text-white dark:text-slate-200'
-    case 'expected':
-      // Πορτοκαλί χρώμα για expected products
-      return 'bg-[#f97316] dark:bg-gradient-to-br dark:from-[#9a3412] dark:to-[#ea580c] text-white dark:text-slate-200'
-    case 'backorder':
-      // Κόκκινο χρώμα για backorder products
-      return 'bg-[#dc2626] dark:bg-gradient-to-br dark:from-[#991b1b] dark:to-[#b91c1c] text-white dark:text-slate-200'
-    default:
-      return 'bg-[#24488f] dark:bg-gradient-to-br dark:from-[#132247] dark:to-[#1d3a72] text-white dark:text-slate-200'
-  }
+const HEADER_COLORS: Record<string, string> = {
+  hot: 'bg-[#a9488e] dark:bg-gradient-to-br dark:from-[#5a2349] dark:to-[#8c3a75]',
+  new: 'bg-[#246eb5] dark:bg-gradient-to-br dark:from-[#153a61] dark:to-[#1e5a95]',
+  sale: 'bg-[#6e276f] dark:bg-gradient-to-br dark:from-[#3d183e] dark:to-[#5a205b]',
+  expected: 'bg-[#f97316] dark:bg-gradient-to-br dark:from-[#9a3412] dark:to-[#ea580c]',
+  backorder: 'bg-[#dc2626] dark:bg-gradient-to-br dark:from-[#991b1b] dark:to-[#b91c1c]',
+  default: 'bg-[#24488f] dark:bg-gradient-to-br dark:from-[#132247] dark:to-[#1d3a72]',
 }
 
-const HotOrSaleClient = memo(({ id, title, type, initialData }: HotOrSaleClientProps) => {
-  const headerColorClasses = getHeaderColors(type)
-  const hasError = initialData === null
-  const hasProducts = initialData && initialData.length > 0
-  const [hasTracked, setHasTracked] = useState(false)
-
-  useEffect(() => {
-    if (!hasTracked && hasProducts && initialData) {
-      // Χρησιμοποίησε requestIdleCallback ή μεγαλύτερο timeout
-      const timeoutId = setTimeout(() => {
-
-        trackViewItemList(initialData, title, `homepage_${type}_${id}`)
-        setHasTracked(true)
-      }, 2000) // Αύξησε σε 2 δευτερόλεπτα
-
-      return () => clearTimeout(timeoutId)
-    }
-  }, [hasProducts, initialData, hasTracked, title, type, id])
-
-  if (!hasProducts) return null
+export default function HotOrSaleClient({ id, title, type, initialData, endsAt }: HotOrSaleProps) {
+  if (!initialData?.length) return null
+  const listId = `homepage_${type}_${id}`
 
   return (
-    <section key={id} className="my-8">
-      <div className="rounded-xl shadow-lg overflow-hidden border border-gray-200 min-h-[764px]">
-        <div className={`${headerColorClasses} py-4 px-6`}>
-          <h2 className="text-center text-xl md:text-2xl font-bold">
-            {title}
-          </h2>
-        </div>
-
-        <div className="bg-white h-full dark:bg-slate-800 p-4 transition-opacity duration-300">
-          {hasError ? (
-            <div className="flex items-center justify-center h-[600px]">
-              <div className="text-center text-gray-500">
-                <p className="text-lg mb-2">⚠️ Failed to load products</p>
-                <p className="text-sm">Please try refreshing the page</p>
-              </div>
+    <section id={id} className="my-8">
+      <div className="rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-slate-700">
+        <div className={`${HEADER_COLORS[type] ?? HEADER_COLORS.default} text-white dark:text-slate-200 py-4 px-6`}>
+          <h2 className="text-center text-xl md:text-2xl font-bold">{title}</h2>
+          {endsAt && (
+            <div className="mt-2 text-center">
+              <SaleCountdown endsAt={endsAt} variant="header" label="Η πρώτη λήγει σε" />
             </div>
-          ) : (
-            <Carousel
-              products={initialData}
-              listName={title}
-              listId={`homepage_${type}_${id}`}
-            />
           )}
+        </div>
+        <div className="bg-white dark:bg-slate-800 px-2 sm:px-4 py-2">
+          <ViewListTracker products={initialData} listName={title} listId={listId}>
+            <Carousel products={initialData} listName={title} listId={listId} />
+          </ViewListTracker>
         </div>
       </div>
     </section>
   )
-})
-
-HotOrSaleClient.displayName = 'HotOrSaleClient'
-export default HotOrSaleClient
+}

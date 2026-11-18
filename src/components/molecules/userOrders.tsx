@@ -1,29 +1,22 @@
 'use client'
+// «Οι παραγγελίες μου» (2026-10-26)
+// - Πρόοδος παραγγελίας (καταχώρηση → επεξεργασία → αποστολή → παράδοση)
+// - Σύνδεσμος παρακολούθησης της αποστολής
+// - Τραπεζική κατάθεση σε εκκρεμότητα: ποσό, αιτιολογία και λογαριασμοί
+// - Κόστη με εκπτώσεις (πακέτου / κουπονιού), ίδια με τη σελίδα «Ευχαριστούμε»
+// Το παλιό κουμπί «Ακύρωση» αφαιρέθηκε: δεν έκανε τίποτα.
 
-import { useApiRequest } from "@/repositories/clientRepository";
+import { useAccount } from "@/hooks/useAccount";
 import { useState } from "react";
-import {
-    FaCaretUp,
-    FaCaretDown,
-    FaRegImage,
-    FaTruck,
-    FaReceipt,
-    FaBox,
-    FaEuroSign
-} from "react-icons/fa";
+import Link from "next/link";
+import { FaRegImage, FaTruck, FaReceipt, FaBox, FaChevronDown } from "react-icons/fa";
 import { getStrapiMedia } from "@/repositories/medias";
-import Image from "next/image";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { FaRegTrashCan } from "react-icons/fa6";
-import { IImageAttr } from "@/lib/interfaces/image";
+import Banks from "@/components/atoms/banks";
 
-// Types
 interface Address {
-    id: number;
     firstname: string;
     lastname: string;
-    telephone: string;
-    mobilePhone: string;
     street: string;
     city: string;
     state: string;
@@ -33,390 +26,337 @@ interface Address {
     doy: string;
     companyName: string;
     businessActivity: string;
-    title: string;
-    isInvoice: boolean;
-    different_shipping?: boolean;
 }
 
-interface Product {
-    id: string | number;
+interface OrderLine {
+    id: string;
     name: string;
     slug: string;
-    image: IImageAttr,
+    image: { url: string } | null;
     price: number;
     sale_price: number;
     quantity: number;
 }
 
 interface Order {
-    id: number | string;
+    id: string;
     createdAt: string;
-    updatedAt: string;
-    shipping_address: Address;
-    billing_address: Address;
-    different_shipping: boolean;
-    products: Product[];
-    total: number;
-    shipping: { name: string; cost: number };
-    payment: { name: string; cost: number };
     status: string;
-    comments: { date: string; type: string; comment: string };
+    statusCode?: string;
+    total: number;
+    subtotal?: number | null;
+    discount?: number;
+    bundleDiscount?: number;
+    shipping: { name: string; cost: number };
+    payment: { name: string; cost: number; method?: string | null };
+    paymentStatus?: string | null;
     isInvoice: boolean;
+    different_shipping: boolean;
     trackingNumber?: string;
+    trackingUrl?: string;
+    shippedAt?: string | null;
+    deliveredAt?: string | null;
+    billing_address: Address | null;
+    shipping_address: Address | null;
+    products: OrderLine[];
 }
 
-interface OrdersResponse {
-    orders: Order[];
+const euro = (v: number) => `${(Number(v) || 0).toFixed(2).replace('.', ',')} €`
+const fmtDate = (s?: string | null) =>
+    s ? new Intl.DateTimeFormat('el-GR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Athens' }).format(new Date(s)) : ''
+const unit = (p: OrderLine) => (p.sale_price || p.price)
+
+const STOPPED = ['cancelled', 'refunded', 'failed']
+
+const BADGE: Record<string, string> = {
+    pending: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200',
+    payment_pending: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
+    confirmed: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200',
+    processing: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200',
+    completed: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
+    cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
+    refunded: 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+    failed: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
 }
 
-// Status Badge Component
-const StatusBadge = ({ status }: { status: string }) => {
-    const getStatusConfig = (status: string) => {
-        const config = {
-            'Ολοκληρωμένη': {
-                color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-                icon: '✅'
-            },
-            'Σε Επεξεργασία': {
-                color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-                icon: '⏳'
-            },
-            'Ακυρωμένη': {
-                color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-                icon: '❌'
-            },
-            'Αποστολή': {
-                color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-                icon: '🚚'
-            }
-        };
+/** Τι βλέπει ο πελάτης ως κατάσταση (με αποστολή/παράδοση όταν τις ξέρουμε) */
+function customerStatus(o: Order): string {
+    const code = o.statusCode ?? ''
+    if (STOPPED.includes(code)) return o.status
+    if (o.deliveredAt) return 'Παραδόθηκε'
+    if (o.shippedAt || o.trackingNumber) return 'Στάλθηκε'
+    return o.status
+}
 
-        return config[status as keyof typeof config] || {
-            color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
-            icon: '📦'
-        };
-    };
+/**
+ * 0 καταχώρηση · 1 επεξεργασία · 2 αποστολή
+ * (2026-10-28) Χωρίς βήμα «Παραδόθηκε»: δεν καταγράφουμε παραδόσεις (για την παράδοση ο
+ * πελάτης έχει τον σύνδεσμο παρακολούθησης της courier). Αν αργότερα έρχεται αυτόματα από
+ * το API της courier, προστίθεται ξανά εδώ και στο STEPS.
+ */
+function stepOf(o: Order): number {
+    if (o.shippedAt || o.trackingNumber || o.statusCode === 'completed') return 2
+    if (o.statusCode === 'confirmed' || o.statusCode === 'processing') return 1
+    return 0
+}
 
-    const { color, icon } = getStatusConfig(status);
+const STEPS = ['Καταχωρήθηκε', 'Σε επεξεργασία', 'Στάλθηκε']
 
+function Progress({ order }: { order: Order }) {
+    const step = stepOf(order)
     return (
-        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${color}`}>
-            <span className="mr-1">{icon}</span>
-            {status}
-        </span>
-    );
-};
+        <ol className="grid grid-cols-3 gap-1" aria-label="Πρόοδος παραγγελίας">
+            {STEPS.map((label, i) => (
+                <li key={label} className="text-center">
+                    <div className={`h-1.5 rounded-full ${i <= step ? 'bg-siteColors-purple' : 'bg-gray-200 dark:bg-gray-600'}`} />
+                    <div className={`mt-1 text-[11px] sm:text-xs ${i <= step ? 'text-gray-900 dark:text-white font-semibold' : 'text-gray-400'}`}>
+                        {label}
+                    </div>
+                </li>
+            ))}
+        </ol>
+    )
+}
 
-// Product Image Component
-const ProductImage = ({ product }: { product: Product }) => {
-    if (product.image && product.image.url) {
-        return (
-            <Image
-                width={64}
-                height={64}
-                src={product.image.formats?.small?.url ? getStrapiMedia(product.image.formats.small.url)! : getStrapiMedia(product.image.url)!}
-                alt={product.name}
-                className="rounded-lg object-cover border"
-                placeholder="blur"
-                blurDataURL={product.image.formats?.small?.url ? getStrapiMedia(product.image.formats.small.url)! : getStrapiMedia(product.image.url)!}
-            />
-        );
-    }
-
+function AddressBlock({ title, icon, a, invoice }: { title: string; icon: React.ReactNode; a: Address | null; invoice?: boolean }) {
+    if (!a) return null
+    const person = [a.firstname, a.lastname].filter(Boolean).join(' ')
     return (
-        <div className="w-16 h-16 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg border">
-            <FaRegImage className="text-2xl text-gray-400" />
+        <div className="bg-gray-50 dark:bg-gray-700/40 p-4 rounded-lg">
+            <h4 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-white">{icon}{title}</h4>
+            <div className="text-sm space-y-1 text-gray-700 dark:text-gray-300">
+                {invoice ? (
+                    <>
+                        <div className="font-medium">{a.companyName}</div>
+                        {a.businessActivity && <div>{a.businessActivity}</div>}
+                        <div>Α.Φ.Μ. {a.afm}{a.doy ? ` · Δ.Ο.Υ. ${a.doy}` : ''}</div>
+                        {person && <div>{person}</div>}
+                    </>
+                ) : (
+                    person && <div className="font-medium">{person}</div>
+                )}
+                <div>{a.street}</div>
+                <div>{[a.zipCode, a.city, a.state].filter(Boolean).join(', ')}</div>
+            </div>
         </div>
-    );
-};
+    )
+}
 
-// Order Accordion Component
-const OrderAccordion = ({ order }: { order: Order }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const orderDate = new Date(order.createdAt);
+function OrderCard({ order }: { order: Order }) {
+    const [open, setOpen] = useState(false)
+    const code = order.statusCode ?? ''
+    const isBank = order.payment.method === 'bank_transfer' || order.payment.name === 'Τραπεζική κατάθεση'
+    const awaitingDeposit = isBank && code === 'payment_pending'
+    const itemsCount = order.products.reduce((n, p) => n + (p.quantity || 0), 0)
+    const productsCost = order.subtotal ?? order.products.reduce((t, p) => t + unit(p) * p.quantity, 0)
+    const bundle = order.bundleDiscount ?? 0
+    const coupon = Math.max(0, (order.discount ?? 0) - bundle)
+    const detailsId = `order-${order.id}-details`
 
-    const productsCost = order.products.reduce((total, item) =>
-        total + (item.sale_price || item.price) * item.quantity, 0
-    );
-
-    const canCancel = !['Ολοκληρωμένη', 'Ακυρωμένη'].includes(order.status);
+    const costLines = [
+        { label: 'Προϊόντα', value: productsCost },
+        bundle > 0 ? { label: 'Έκπτωση πακέτου', value: -bundle } : null,
+        coupon > 0 ? { label: 'Έκπτωση κουπονιού', value: -coupon } : null,
+        { label: order.shipping.name ? `Αποστολή (${order.shipping.name})` : 'Αποστολή', value: order.shipping.cost },
+        order.payment.cost ? { label: order.payment.name ? `Πληρωμή (${order.payment.name})` : 'Πληρωμή', value: order.payment.cost } : null,
+    ].filter(Boolean) as { label: string; value: number }[]
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-4 overflow-hidden transition-all duration-200 hover:shadow-md">
-            {/* Order Header */}
-            <div
-                className="grid grid-cols-1 lg:grid-cols-12 gap-4 p-6 items-center cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-750"
-                onClick={() => setIsOpen(!isOpen)}
+        <article className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <button
+                type="button"
+                onClick={() => setOpen(!open)}
+                aria-expanded={open}
+                aria-controls={detailsId}
+                className="w-full text-left p-4 sm:p-5 pb-3 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors"
             >
-                <div className="lg:col-span-1 flex items-center">
-                    {isOpen ?
-                        <FaCaretUp className="text-siteColors-purple text-lg" /> :
-                        <FaCaretDown className="text-gray-400 text-lg" />
-                    }
-                </div>
-
-                <div className="lg:col-span-2">
-                    <div className="text-sm text-gray-500 dark:text-gray-400 lg:hidden">Ημερομηνία</div>
-                    <div className="font-semibold text-gray-900 dark:text-white">
-                        {orderDate.toLocaleDateString('el-GR')}
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <div className="font-bold text-gray-900 dark:text-white">Παραγγελία #{order.id}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {fmtDate(order.createdAt)} · {itemsCount} {itemsCount === 1 ? 'προϊόν' : 'προϊόντα'}
+                        </div>
                     </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {orderDate.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })}
-                    </div>
-                </div>
-
-                <div className="lg:col-span-2">
-                    <div className="text-sm text-gray-500 dark:text-gray-400 lg:hidden">Αρ. Παραγγελίας</div>
-                    <div className="font-mono font-semibold text-siteColors-purple dark:text-siteColors-lightblue">
-                        #{order.id}
+                    <div className="flex items-center gap-3">
+                        <span className={`inline-flex px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${BADGE[code] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'}`}>
+                            {customerStatus(order)}
+                        </span>
+                        <span className="font-bold text-siteColors-purple dark:text-siteColors-lightblue whitespace-nowrap">{euro(order.total)}</span>
+                        <FaChevronDown className={`text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
                     </div>
                 </div>
+            </button>
 
-                <div className="lg:col-span-3">
-                    <div className="text-sm text-gray-500 dark:text-gray-400 lg:hidden">Tracking</div>
-                    <div className="flex items-center text-sm">
-                        {order.trackingNumber || order.status === 'Ολοκληρωμένη' ? (
-                            <>
-                                <FaTruck className="mr-2 text-blue-500" />
-                                <span className="font-mono bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
-                                    {order.trackingNumber}
-                                </span>
-                            </>
-                        ) : (
-                            <span className="text-gray-400 flex items-center">
-                                <FaBox className="mr-2" />
-                                Σε προετοιμασία
-                            </span>
-                        )}
+            <div className="px-4 sm:px-5 pb-4">
+                {/* Μικρογραφίες προϊόντων */}
+                <div className="flex gap-2 overflow-hidden">
+                    {order.products.slice(0, 5).map((p) => (
+                        <Thumb key={p.id} line={p} size={44} />
+                    ))}
+                    {order.products.length > 5 && (
+                        <span className="w-11 h-11 rounded-lg bg-gray-100 dark:bg-gray-700 text-sm text-gray-600 dark:text-gray-300 flex items-center justify-center">
+                            +{order.products.length - 5}
+                        </span>
+                    )}
+                </div>
+
+                {!STOPPED.includes(code) && (
+                    <div className="mt-4">
+                        <Progress order={order} />
                     </div>
-                </div>
-
-                <div className="lg:col-span-2">
-                    <div className="text-sm text-gray-500 dark:text-gray-400 lg:hidden">Κατάσταση</div>
-                    <StatusBadge status={order.status} />
-                </div>
-
-                <div className="lg:col-span-2 flex justify-end">
-                    <button
-                        className={`inline-flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${canCancel
-                            ? 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 hover:scale-105'
-                            : 'text-gray-400 cursor-not-allowed opacity-50'
-                            }`}
-                        disabled={!canCancel}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <FaRegTrashCan className="mr-2" />
-                        <span className="hidden lg:inline">Ακύρωση</span>
-                    </button>
-                </div>
+                )}
             </div>
 
-            {/* Order Details */}
-            {isOpen && (
-                <div className="border-t border-gray-200 dark:border-gray-700 px-6 py-6 animate-fade-in">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                        {/* Billing Address */}
-                        <div className="bg-gray-50 dark:bg-gray-750 p-4 rounded-lg">
-                            <h3 className="font-semibold mb-3 flex items-center text-gray-900 dark:text-white">
-                                <FaReceipt className="mr-2 text-siteColors-purple" />
-                                Χρέωση {!order.different_shipping && '- Αποστολή'}
-                            </h3>
-                            <div className="text-sm space-y-2 text-gray-700 dark:text-gray-300">
-                                {order.isInvoice ? (
-                                    <>
-                                        <div className="font-medium">{order.billing_address.companyName}</div>
-                                        <div>{order.billing_address.businessActivity}</div>
-                                        <div>Α.Φ.Μ: {order.billing_address.afm}</div>
-                                        <div>Δ.Ο.Υ: {order.billing_address.doy}</div>
-                                    </>
-                                ) : (
-                                    <div className="font-medium">
-                                        {order.billing_address.firstname} {order.billing_address.lastname}
-                                    </div>
-                                )}
-                                <div>{order.billing_address.street}, {order.billing_address.city}</div>
-                                <div>{order.billing_address.state}, Τ.Κ: {order.billing_address.zipCode}</div>
-                                <div>{order.billing_address.country}</div>
+            {/* Χρήσιμα χωρίς άνοιγμα: παρακολούθηση / κατάθεση */}
+            {(order.trackingNumber || awaitingDeposit) && (
+                <div className="px-4 sm:px-5 pb-4 space-y-3">
+                    {order.trackingNumber && (
+                        <div className="flex flex-wrap items-center gap-2 text-sm">
+                            <FaTruck className="text-blue-500" aria-hidden />
+                            <span className="text-gray-600 dark:text-gray-300">Αριθμός αποστολής:</span>
+                            <span className="font-mono font-semibold">{order.trackingNumber}</span>
+                            {order.trackingUrl && (
+                                <a href={order.trackingUrl} target="_blank" rel="noopener noreferrer"
+                                    className="ml-auto px-3 py-1.5 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">
+                                    Παρακολούθηση
+                                </a>
+                            )}
+                        </div>
+                    )}
+                    {awaitingDeposit && (
+                        <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 p-4 text-sm">
+                            <p className="font-semibold text-amber-900 dark:text-amber-200">Περιμένουμε την κατάθεσή σας</p>
+                            <p className="mt-1 text-amber-900/80 dark:text-amber-100/80">
+                                Ποσό <strong>{euro(order.total)}</strong> · Αιτιολογία <strong>Αριθμός παραγγελίας {order.id}</strong>
+                            </p>
+                            <div className="mt-3 rounded-lg bg-white p-3">
+                                <Banks />
                             </div>
                         </div>
-
-                        {/* Shipping Address */}
-                        {order.different_shipping && (
-                            <div className="bg-gray-50 dark:bg-gray-750 p-4 rounded-lg">
-                                <h3 className="font-semibold mb-3 flex items-center text-gray-900 dark:text-white">
-                                    <FaTruck className="mr-2 text-siteColors-purple" />
-                                    Αποστολή
-                                </h3>
-                                <div className="text-sm space-y-2 text-gray-700 dark:text-gray-300">
-                                    <div className="font-medium">
-                                        {order.shipping_address.firstname} {order.shipping_address.lastname}
-                                    </div>
-                                    <div>{order.shipping_address.street}, {order.shipping_address.city}</div>
-                                    <div>{order.shipping_address.state}, Τ.Κ: {order.shipping_address.zipCode}</div>
-                                    <div>{order.shipping_address.country}</div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Order Summary */}
-                        <div className="bg-gray-50 dark:bg-gray-750 p-4 rounded-lg">
-                            <h3 className="font-semibold mb-3 text-gray-900 dark:text-white">Σύνοψη Παραγγελίας</h3>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600 dark:text-gray-400">Προϊόντα:</span>
-                                    <span className="font-medium">{order.products.length}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600 dark:text-gray-400">Τιμολόγιο:</span>
-                                    <span className={order.isInvoice ? "text-green-600 font-medium" : "text-gray-600"}>
-                                        {order.isInvoice ? "Ναι" : "Όχι"}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between pt-2 border-t border-gray-200 dark:border-gray-600">
-                                    <span className="font-semibold">Σύνολο:</span>
-                                    <span className="font-bold text-lg text-siteColors-purple dark:text-siteColors-lightblue">
-                                        {order.total.toFixed(2)} €
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Products Section */}
-                    <div className="bg-gray-50 dark:bg-gray-750 rounded-lg p-6">
-                        <h3 className="font-semibold mb-4 text-gray-900 dark:text-white flex items-center">
-                            <FaBox className="mr-2 text-siteColors-purple" />
-                            Προϊόντα ({order.products.length})
-                        </h3>
-
-                        <div className="space-y-4">
-                            {order.products.map((product) => (
-                                <div key={product.id} className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                                    <div className="flex items-center space-x-4 flex-1">
-                                        <ProductImage product={product} />
-
-                                        <div className="min-w-0 flex-1">
-                                            <h4 className="font-medium text-gray-900 dark:text-white line-clamp-2">
-                                                {product.name}
-                                            </h4>
-                                            <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                                <span>Κωδικός: {product.id}</span>
-                                                <span>Ποσότητα: {product.quantity}</span>
-                                                <span>Τιμή: {(product.sale_price || product.price).toFixed(2)} €</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="text-right">
-                                        <div className="font-bold text-lg text-siteColors-purple dark:text-siteColors-lightblue">
-                                            {((product.sale_price || product.price) * product.quantity).toFixed(2)} €
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Order Totals */}
-                        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                            <div className="flex justify-end">
-                                <div className="w-80 space-y-3">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-600 dark:text-gray-400">Υποσύνολο:</span>
-                                        <span>{productsCost.toFixed(2)} €</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-600 dark:text-gray-400">{order.shipping.name}:</span>
-                                        <span>{order.shipping.cost.toFixed(2)} €</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-600 dark:text-gray-400">{order.payment.name}:</span>
-                                        <span>{order.payment.cost.toFixed(2)} €</span>
-                                    </div>
-                                    <div className="flex justify-between text-lg font-bold pt-3 border-t border-gray-200 dark:border-gray-600">
-                                        <span className="flex items-center">
-                                            <FaEuroSign className="mr-1 text-siteColors-purple" />
-                                            Σύνολο:
-                                        </span>
-                                        <span className="text-siteColors-purple dark:text-siteColors-lightblue">
-                                            {order.total.toFixed(2)} €
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    )}
                 </div>
             )}
-        </div>
-    );
-};
 
-// Main UserOrders Component
-const UserOrders = ({ jwt }: { jwt: string }) => {
-    const { data, loading, error }: { data: OrdersResponse, loading: boolean, error: any } = useApiRequest({ method: "GET", api: "/api/user-address/getUserOrders", jwt })
+            {open && (
+                <div id={detailsId} className="border-t border-gray-200 dark:border-gray-700 p-4 sm:p-5 space-y-5">
+                    <ul className="divide-y divide-gray-100 dark:divide-gray-700">
+                        {order.products.map((p) => (
+                            <li key={p.id} className="flex items-center gap-3 py-3">
+                                <Thumb line={p} size={56} />
+                                <div className="min-w-0 flex-1">
+                                    {p.slug ? (
+                                        <Link href={`/product/${p.slug}`} className="font-medium text-gray-900 dark:text-white hover:underline line-clamp-2">
+                                            {p.name}
+                                        </Link>
+                                    ) : (
+                                        <span className="font-medium text-gray-900 dark:text-white line-clamp-2">{p.name}</span>
+                                    )}
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                                        {p.quantity} × {euro(unit(p))}
+                                    </div>
+                                </div>
+                                <div className="font-semibold whitespace-nowrap">{euro(unit(p) * p.quantity)}</div>
+                            </li>
+                        ))}
+                    </ul>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                        <div className="grid gap-4">
+                            <AddressBlock
+                                title={order.isInvoice ? 'Τιμολόγιο' : (order.different_shipping ? 'Χρέωση' : 'Χρέωση & αποστολή')}
+                                icon={<FaReceipt className="text-siteColors-purple" aria-hidden />}
+                                a={order.billing_address}
+                                invoice={order.isInvoice}
+                            />
+                            {order.different_shipping && (
+                                <AddressBlock title="Αποστολή" icon={<FaTruck className="text-siteColors-purple" aria-hidden />} a={order.shipping_address} />
+                            )}
+                        </div>
+                        <div className="bg-gray-50 dark:bg-gray-700/40 p-4 rounded-lg text-sm space-y-2 h-fit">
+                            {costLines.map((l) => (
+                                <div key={l.label} className="flex justify-between gap-3">
+                                    <span className="text-gray-600 dark:text-gray-300">{l.label}</span>
+                                    <span>{euro(l.value)}</span>
+                                </div>
+                            ))}
+                            <div className="flex justify-between gap-3 pt-2 border-t border-gray-200 dark:border-gray-600 text-base font-bold">
+                                <span>Σύνολο</span>
+                                <span className="text-siteColors-purple dark:text-siteColors-lightblue">{euro(order.total)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Για αλλαγή ή ακύρωση της παραγγελίας επικοινωνήστε μαζί μας αναφέροντας τον αριθμό #{order.id}.
+                    </p>
+                </div>
+            )}
+        </article>
+    )
+}
+
+function Thumb({ line, size }: { line: OrderLine; size: number }) {
+    const src = line.image?.url ? getStrapiMedia(line.image.url) : null
+    const style = { width: size, height: size }
+    if (!src) {
+        return (
+            <span style={style} className="shrink-0 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg">
+                <FaRegImage className="text-gray-400" aria-hidden />
+            </span>
+        )
+    }
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={src} alt={line.name} style={style} loading="lazy" className="shrink-0 rounded-lg object-contain bg-white border border-gray-100" />
+}
+
+const UserOrders = (_props: { jwt?: string }) => {
+    const { data, loading, error, mutate } = useAccount<{ orders: Order[] }>('orders')
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center py-12">
+            <div className="flex justify-center items-center py-12" role="status">
                 <AiOutlineLoading3Quarters className="animate-spin text-2xl text-siteColors-purple mr-3" />
                 <span className="text-gray-600 dark:text-gray-300">Φόρτωση παραγγελιών...</span>
             </div>
-        );
+        )
     }
 
     if (error) {
         return (
-            <div className="text-center py-8">
-                <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg">
-                    Σφάλμα φόρτωσης παραγγελιών. Παρακαλώ δοκιμάστε ξανά αργότερα.
-                </div>
+            <div className="text-center py-8 px-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg">
+                <p>Δεν φορτώθηκαν οι παραγγελίες σας.</p>
+                <button type="button" onClick={() => mutate()} className="mt-3 underline font-semibold">Δοκιμάστε ξανά</button>
             </div>
-        );
+        )
     }
 
-    if (!data?.orders || data.orders.length === 0) {
+    const orders = data?.orders ?? []
+    if (!orders.length) {
         return (
             <div className="text-center py-12">
-                <FaBox className="text-6xl text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
-                    Δεν βρέθηκαν παραγγελίες
-                </h3>
-                <p className="text-gray-500 dark:text-gray-500">
-                    Οι μελλοντικές παραγγελίες σας θα εμφανίζονται εδώ.
+                <FaBox className="text-6xl text-gray-300 dark:text-gray-600 mx-auto mb-4" aria-hidden />
+                <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">Δεν έχετε παραγγελίες ακόμα</h2>
+                <p className="text-gray-500 dark:text-gray-400">
+                    Παραγγελίες που κάνατε ως επισκέπτης με το ίδιο email θα εμφανιστούν εδώ μόλις επιβεβαιωθεί ο λογαριασμός σας.
                 </p>
+                <Link href="/" className="inline-block mt-6 px-5 py-2.5 rounded-lg bg-siteColors-purple text-white font-semibold">
+                    Συνέχεια αγορών
+                </Link>
             </div>
-        );
+        )
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Οι παραγγελίες μου
-                </h2>
-                <span className="bg-siteColors-purple text-white px-3 py-1 rounded-full text-sm font-medium">
-                    {data.orders.length} παραγγελίες
-                </span>
+        <div className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Οι παραγγελίες μου</h2>
+                <span className="text-sm text-gray-500 dark:text-gray-400">{orders.length} {orders.length === 1 ? 'παραγγελία' : 'παραγγελίες'}</span>
             </div>
-
-            {/* Desktop Headers */}
-            <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 bg-gray-100 dark:bg-gray-750 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300">
-                <div className="col-span-1"></div>
-                <div className="col-span-2">Ημερομηνία</div>
-                <div className="col-span-2">Αρ. Παραγγελίας</div>
-                <div className="col-span-3">Tracking</div>
-                <div className="col-span-2">Κατάσταση</div>
-                <div className="col-span-2">Ενέργειες</div>
-            </div>
-
-            {/* Orders List */}
-            <div>
-                {data.orders.map((order) => (
-                    <OrderAccordion key={order.id} order={order} />
-                ))}
-            </div>
+            {orders.map((order) => (
+                <OrderCard key={order.id} order={order} />
+            ))}
         </div>
-    );
-};
+    )
+}
 
-export default UserOrders;
+export default UserOrders

@@ -7,6 +7,9 @@ import { FaShoppingBag } from "react-icons/fa"
 
 export const addToCartToast = (item: ICartItem) => {
     const itemPrice = item.is_sale && item.sale_price ? item.sale_price : item.price
+    // (2026-10-28) Η ποσότητα που προστέθηκε (πριν έγραφε πάντα «1» και την τιμή ενός τεμαχίου)
+    const qty = Math.max(1, Number(item.quantity) || 1)
+    const thumbUrl = item.image ? getStrapiMedia(item.image.formats?.thumbnail?.url || item.image.url) : null
 
     toast.success(() => (
         <div className="flex items-start justify-center  p-2">
@@ -20,16 +23,14 @@ export const addToCartToast = (item: ICartItem) => {
                 <div className="flex items-start gap-4">
                     {/* Product Image - Μεγαλύτερη και με λευκό φόντο */}
                     <div className="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden bg-white flex items-center justify-center border border-gray-100">
-                        {item.image ? (
+                        {thumbUrl ? (
                             <Image
                                 width={96}
                                 height={96}
-                                src={getStrapiMedia(item.image.formats.thumbnail.url)!}
+                                src={thumbUrl}
                                 alt={item.name || ""}
                                 quality={90}
                                 className="w-full h-full object-contain p-1"
-                                blurDataURL={getStrapiMedia(item.image.formats.thumbnail.url)!}
-                                placeholder="blur"
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gray-100">
@@ -48,15 +49,20 @@ export const addToCartToast = (item: ICartItem) => {
                             <div className="flex items-center gap-2 text-gray-600">
                                 <FaShoppingBag className="w-4 h-4" />
                                 <span className="text-sm font-medium">
-                                    Ποσότητα: 1
+                                    Ποσότητα: {qty}
                                 </span>
                             </div>
 
-                            {/* Πιο έντονη τιμή */}
-                            <div className="flex items-baseline gap-1">
+                            {/* Πιο έντονη τιμή (σύνολο για την ποσότητα· με πολλά τεμάχια και η τιμή τεμαχίου) */}
+                            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                                 <span className="font-bold text-2xl text-slate-700 whitespace-nowrap">
-                                    €{itemPrice.toFixed(2)}
+                                    €{(itemPrice * qty).toFixed(2)}
                                 </span>
+                                {qty > 1 && (
+                                    <span className="text-xs text-gray-500 whitespace-nowrap">
+                                        ({qty} × €{itemPrice.toFixed(2)})
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </div>

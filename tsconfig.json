@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -9,10 +9,10 @@
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
       {
@@ -23,6 +23,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/molecules/searchInput.tsx", "src/components/atoms/swiperCube.js", "src/components/molecules/productImageWidget.tsx", "src/components/molecules/homepage/heroCarousel.tsx", "src/components/atoms/carousel.tsx", "src/app/api/auth/[...nextauth]/options.js", "src/app/api/auth/[...nextauth]/options.js", "src/app/api/auth/[...nextauth]/options.js", "src/components/molecules/homepage/brandsBanner.tsx", "src/components/molecules/homepage/heroFixedBanners.tsx", "src/components/molecules/homepage/categoriesBanner.tsx", "src/components/atoms/bestPriceOrderTracking.js", "src/app/api/coupons/validate.js", "src/app/api/coupons/validate/route.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/molecules/searchInput.tsx", "src/components/atoms/swiperCube.js", "src/components/molecules/productImageWidget.tsx", "src/components/molecules/homepage/heroCarousel.tsx", "src/components/atoms/carousel.tsx", "src/app/api/auth/[...nextauth]/options.js", "src/app/api/auth/[...nextauth]/options.js", "src/app/api/auth/[...nextauth]/options.js", "src/components/molecules/homepage/brandsBanner.tsx", "src/components/molecules/homepage/heroFixedBanners.tsx", "src/components/molecules/homepage/categoriesBanner.tsx", "src/components/atoms/bestPriceOrderTracking.js", "src/app/api/coupons/validate.js", "src/app/api/coupons/validate/route.ts", ".next/dev/types/**/*.ts"],
   "exclude": ["node_modules"]
 }

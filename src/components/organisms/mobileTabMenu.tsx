@@ -12,6 +12,7 @@ import { ToggleMobileMenu } from '../atoms/toggleMobileMenu';
 import { useCheckout } from '@/context/checkout';
 import { MenuData } from './mainMenu';
 import { trackCartIconClick } from '@/lib/helpers/advanced-analytics';
+import WishlistHeaderLink from '@/components/atoms/WishlistHeaderLink';
 
 const SearchInput = dynamic(() => import('@/components/molecules/searchInput'), {
     ssr: false,
@@ -46,6 +47,7 @@ export default function MobileTabMenu({ menuData }: { menuData: MenuData[] }) {
                     <AiOutlineSearch aria-label="Κουμπί εμφάνισης της αναζήτησης" />
                 </button>
                 <ToggleMobileMenu location="bottom-nav" />
+                <WishlistHeaderLink className='py-4 xs:px-4' badgeClassName='top-2 -right-1 xs:right-1' onClick={() => closeMenu()} />
                 <Link href="/account" className='py-4 xs:px-4' onClick={() => closeMenu()}
                     aria-label="Σύνδεσμος ανακατεύθυνσης στο λογαριασμό σας">
                     <AiOutlineUser aria-label="Κουμπί ανακατεύθυνσης στο λογαριασμό σας" />
@@ -64,4 +66,4 @@ export default function MobileTabMenu({ menuData }: { menuData: MenuData[] }) {
             </div>
         </div>
     )
-}
+}

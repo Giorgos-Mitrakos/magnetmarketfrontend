@@ -8,6 +8,7 @@ import type {
   WebSite,
   WebPage,
   ImageObject,
+  Store,
 } from 'schema-dts'
 import { organizationStructuredData, storeStructuredData } from './structureData'
 
@@ -37,6 +38,8 @@ interface CategoryStructuredDataProps {
   currentPage: number
   totalPages: number
   baseUrl: string
+  /** (2026-10-26) Προϊόντα ανά σελίδα (για τις θέσεις του ItemList) */
+  pageSize?: number
 }
 
 interface HomepageStructuredDataProps {
@@ -51,6 +54,8 @@ interface HomepageStructuredDataProps {
     logoUrl: string | null
   }>
   heroImages?: string[]
+  /** (2026-10-26) Το κατάστημα με ωράριο/τηλέφωνο από τις ρυθμίσεις (storeWithInfo) */
+  store?: Store
 }
 
 /* ==================== Website Node ==================== */
@@ -63,15 +68,7 @@ export const websiteNode: WebSite = {
   publisher: {
     '@id': `${BASE_URL}/#organization`,
   },
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: {
-      '@type': 'EntryPoint',
-      urlTemplate: `${BASE_URL}/search?q={search_term_string}`,
-    },
-    // @ts-ignore - query-input is valid but not in types
-    'query-input': 'required name=search_term_string',
-  },
+  // (2026-10-26) Χωρίς SearchAction: η Google δεν δείχνει πια πλαίσιο αναζήτησης (sitelinks searchbox)
 }
 
 /* ==================== Category Structured Data ==================== */
@@ -88,6 +85,7 @@ export function generateCategoryStructuredData({
   currentPage,
   totalPages,
   baseUrl,
+  pageSize = 12,
 }: CategoryStructuredDataProps): Graph {
 
   const baseUrlWithoutQuery = baseUrl.split('?')[0]
@@ -150,7 +148,7 @@ export function generateCategoryStructuredData({
     numberOfItems: products.length,
     itemListElement: products.map((product, index) => ({
       '@type': 'ListItem',
-      position: (currentPage - 1) * 12 + index + 1,
+      position: (currentPage - 1) * pageSize + index + 1,
       url: `${BASE_URL}/product/${product.slug}`,
       name: product.name,
     })),
@@ -186,6 +184,14 @@ interface BrandProductsStructuredDataProps {
   totalPages: number
   baseUrl: string
   availableCategories?: string[]
+  /** (2026-10-24) Περιγραφή του κατασκευαστή (Strapi) — αλλιώς ουδέτερο κείμενο */
+  description?: string | null
+  /** Πλήρες URL λογότυπου */
+  logoUrl?: string | null
+  /** Προϊόντα ανά σελίδα (για τις θέσεις του ItemList) */
+  pageSize?: number
+  /** (2026-10-27) Σελίδα «κατηγορία + μάρκα»: όνομα κατηγορίας, τίτλος («Κάμερες Ezviz»), διεύθυνση */
+  landing?: { name: string; title: string; url: string } | null
 }
 
 /**
@@ -200,6 +206,10 @@ export function generateBrandProductsStructuredData({
   totalPages,
   baseUrl,
   availableCategories = [],
+  description = null,
+  logoUrl = null,
+  pageSize = 12,
+  landing = null,
 }: BrandProductsStructuredDataProps): any {
 
   const brandPageUrl = `${BASE_URL}/brands/${brandSlug}`
@@ -213,7 +223,7 @@ export function generateBrandProductsStructuredData({
       {
         '@type': 'ListItem',
         position: 1,
-        name: 'Home',
+        name: 'Αρχική',
         item: BASE_URL,
       },
       {
@@ -228,6 +238,7 @@ export function generateBrandProductsStructuredData({
         name: brandName,
         item: brandPageUrl,
       },
+      ...(landing ? [{ '@type': 'ListItem' as const, position: 4, name: landing.name, item: landing.url }] : []),
     ],
   }
 
@@ -236,8 +247,8 @@ export function generateBrandProductsStructuredData({
     '@type': 'CollectionPage',
     '@id': `${baseUrl}#webpage`,
     url: baseUrl,
-    name: `Προϊόντα ${brandName}`,
-    description: `Ανακαλύψτε προϊόντα ${brandName} με εγγύηση ελληνικής αντιπροσωπείας`,
+    name: landing ? landing.title : `Προϊόντα ${brandName}`,
+    description: description || `${landing ? landing.title : `Προϊόντα ${brandName}`} στο Magnet Market`,
     isPartOf: {
       '@id': `${BASE_URL}/#website`,
     },
@@ -246,6 +257,7 @@ export function generateBrandProductsStructuredData({
       '@id': `${brandPageUrl}#brand`,
       name: brandName,
       url: brandPageUrl,
+      ...(logoUrl ? { logo: logoUrl } : {}),
     },
     breadcrumb: {
       '@id': `${baseUrl}#breadcrumb`,
@@ -277,12 +289,12 @@ export function generateBrandProductsStructuredData({
     '@id': `${baseUrl}#itemlist`,
     url: baseUrl,
     name: totalPages > 1
-      ? `${brandName} Προϊόντα - Σελίδα ${currentPage} από ${totalPages}`
-      : `${brandName} Προϊόντα`,
+      ? `${landing ? landing.title : `${brandName} Προϊόντα`} - Σελίδα ${currentPage} από ${totalPages}`
+      : landing ? landing.title : `${brandName} Προϊόντα`,
     numberOfItems: products.length,
     itemListElement: products.map((product, index) => ({
       '@type': 'ListItem',
-      position: (currentPage - 1) * 12 + index + 1,
+      position: (currentPage - 1) * pageSize + index + 1,
       url: `${BASE_URL}/product/${product.slug}`,
       name: product.name,
     })),
@@ -359,6 +371,7 @@ export function generateHomepageStructuredData({
   featuredCategories = [],
   featuredBrands = [],
   heroImages = [],
+  store,
 }: HomepageStructuredDataProps = {}): any {
 
   /* -------------------- BreadcrumbList (Homepage) -------------------- */
@@ -369,7 +382,7 @@ export function generateHomepageStructuredData({
       {
         '@type': 'ListItem',
         position: 1,
-        name: 'Home',
+        name: 'Αρχική',
         item: BASE_URL,
       },
     ],
@@ -392,17 +405,6 @@ export function generateHomepageStructuredData({
       '@id': `${BASE_URL}/#breadcrumb`,
     },
     inLanguage: 'el-GR',
-    potentialAction: [
-      {
-        '@type': 'SearchAction',
-        target: {
-          '@type': 'EntryPoint',
-          urlTemplate: `${BASE_URL}/search?q={search_term_string}`,
-        },
-        // @ts-ignore - query-input is valid but not in types
-        'query-input': 'required name=search_term_string',
-      },
-    ],
   }
 
   // Πρόσθεσε hero images αν υπάρχουν
@@ -457,7 +459,7 @@ export function generateHomepageStructuredData({
   /* -------------------- @graph Assembly -------------------- */
   const graph: any[] = [
     organizationStructuredData,
-    storeStructuredData,
+    store ?? storeStructuredData,
     websiteNode,
     breadcrumbList,
     webPage,
@@ -499,7 +501,7 @@ export function generateBrandsStructuredData({
       {
         '@type': 'ListItem',
         position: 1,
-        name: 'Home',
+        name: 'Αρχική',
         item: BASE_URL,
       },
       {
@@ -516,8 +518,8 @@ export function generateBrandsStructuredData({
     '@type': 'WebPage',
     '@id': `${BASE_URL}/brands#webpage`,
     url: `${BASE_URL}/brands`,
-    name: 'Κατασκευαστές Προϊόντων Τεχνολογίας',
-    description: 'Ανακαλύψτε τους κορυφαίους κατασκευαστές τεχνολογίας που συνεργαζόμαστε για προϊόντα υψηλής ποιότητας',
+    name: 'Κατασκευαστές',
+    description: 'Όλοι οι κατασκευαστές των προϊόντων του Magnet Market',
     isPartOf: {
       '@id': `${BASE_URL}/#website`,
     },
@@ -593,4 +595,4 @@ export function getCategoryStructuredData(breadcrumbs: Breadcrumb[]) {
   structuredData.push(generateBreadcrumbStructuredData(breadcrumbs))
   structuredData.push(organizationStructuredData)
   return structuredData
-}
+}

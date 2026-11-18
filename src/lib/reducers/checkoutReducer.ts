@@ -79,6 +79,8 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
                 const updatedItems = [...state.cart];
                 updatedItems[existingItemIndex] = {
                     ...updatedItems[existingItemIndex],
+                    // ο (νέος) σύνδεσμος προπαραγγελίας κρατιέται στη γραμμή
+                    ...(newItem.preorderToken ? { preorderToken: newItem.preorderToken, preorderMax: newItem.preorderMax } : {}),
                     quantity: updatedItems[existingItemIndex].quantity + newItem.quantity,
                 };
 
@@ -113,7 +115,8 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
             if (!state) return initialCheckoutState;
             const updatedItems = state.cart.map((item) =>
                 item.id === action.payload.item.id
-                    ? { ...item, quantity: item.quantity + 1 }
+                    // Προπαραγγελία με σύνδεσμο: όχι πάνω από το όριο του συνδέσμου
+                    ? { ...item, quantity: item.preorderMax ? Math.min(item.preorderMax, item.quantity + 1) : item.quantity + 1 }
                     : item
             );
 
@@ -136,7 +139,7 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
         }
 
         case "CLEAR_CART": {
-            newState = { ...state, cart: [] };
+            newState = { ...state, cart: [], islandVatDeclared: false };
             break;
         }
 
@@ -229,6 +232,11 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
             break;
         }
 
+        case 'SET_ISLAND_VAT_DECLARED': {
+            newState = { ...state, islandVatDeclared: action.payload }
+            break;
+        }
+
         case 'PURCHASE_COMPLETE': {
             const { transactionId, shipping, tax, items, coupon } = action.payload;
 
@@ -246,10 +254,16 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
                 console.log('[Reducer] ⚠️ Transaction already tracked, skipping');
             }
 
-            // Clear cart μετά το tracking
+            // Clear cart μετά το tracking — (2026-10-25) και κουπόνι / αποστολή / πληρωμή,
+            // ώστε η επόμενη παραγγελία να μην ξεκινά με το κουπόνι της προηγούμενης
             newState = {
                 ...state,
-                cart: []
+                cart: [],
+                islandVatDeclared: false,
+                appliedCoupon: null,
+                shippingMethod: null,
+                paymentMethod: null,
+                installments: 1
             };
             break;
         }

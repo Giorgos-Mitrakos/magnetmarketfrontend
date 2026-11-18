@@ -1,65 +1,31 @@
-import { ICartItem } from "@/lib/interfaces/cart";
+// Έλεγχος κουπονιού: γίνεται με το quote του Strapi (ίδιοι κανόνες με την
+// παραγγελία — εξαιρούμενα προϊόντα, ελάχιστο ποσό, χρήσεις ανά email).
+// Καμία «δέσμευση» εδώ: η χρήση καταγράφεται μόνο μαζί με την παραγγελία.
+// Όριο διαφορετικών κωδικών ανά IP στο Strapi (COUPON_VALIDATE_RATE_LIMIT).
 import { NextRequest, NextResponse } from "next/server";
-
-interface RequestBody {
-  code: string;
-  userId?: string;
-  cart?: ICartItem[]; // Replace with your Cart type
-  cartTotal: number
-}
-
-interface StrapiError {
-  data: object,
-  error: {
-    status: number,
-    name: string,
-    message: string,
-    details: {}
-  }
-}
+import { publicErrorMessage, storefrontFetch } from "@/lib/helpers/storefrontApi";
+import { IQuoteResponse } from "@/lib/helpers/checkoutPayload";
 
 export async function POST(req: NextRequest) {
-  if (req.method !== "POST") {
-    return NextResponse.json(
-      { message: "Method not allowed" },
-      { status: 405 }
-    );
-  }
-
-  try {
-    const body: RequestBody = await req.json();
-
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/coupons/validate`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.ADMIN_JWT_SECRET}`,
-        },
-        body: JSON.stringify({
-          ...body,
-          user: body.userId ? { id: body.userId } : null,
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const errorData: StrapiError = await response.json();
-      throw new Error(errorData.error.message || "Validation failed");
+    try {
+        const body = await req.json()
+        const code = String(body?.couponCode ?? '').trim()
+        if (!code) return NextResponse.json({ valid: false, message: 'Συμπληρώστε τον κωδικό κουπονιού' })
+        if (!body?.billing_address?.email_address) {
+            return NextResponse.json({ valid: false, message: 'Συμπληρώστε πρώτα το email σας' })
+        }
+        const quote = await storefrontFetch<IQuoteResponse>('/orders/quote', { body })
+        if (!quote.coupon) {
+            return NextResponse.json({ valid: false, message: quote.couponError || 'Το κουπόνι δεν είναι έγκυρο' })
+        }
+        const coupon = {
+            id: quote.coupon.code,
+            code: quote.coupon.code,
+            discountType: quote.coupon.discountType,
+            discountValue: quote.coupon.discountValue,
+        }
+        return NextResponse.json({ valid: true, coupon, discount: Math.round((quote.discount - (quote.bundleDiscount ?? 0)) * 100) / 100 })
+    } catch (error) {
+        return NextResponse.json({ valid: false, message: publicErrorMessage(error) })
     }
-
-    const data = await response.json();
-    return NextResponse.json(data, { status: response.status });
-
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Validation failed";
-    return NextResponse.json(
-      {
-        message,
-        details: process.env.NODE_ENV === "development" ? error instanceof Error ? error.stack : undefined : undefined,
-      },
-      { status: 500 }
-    );
-  }
 }

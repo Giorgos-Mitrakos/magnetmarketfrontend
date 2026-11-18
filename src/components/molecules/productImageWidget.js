@@ -1,15 +1,17 @@
 'use client'
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { register } from 'swiper/element/bundle';
-import { FaRegImage } from 'react-icons/fa6';
+import { FaRegImage, FaExpand, FaXmark, FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
 import { getStrapiMedia } from '@/repositories/medias';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 register();
 
-const ProductImageWidget = ({ images }) => {
+const ProductImageWidget = ({ images, productName = '' }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  // (2026-10-22) Μεγέθυνση σε πλήρη οθόνη (null = κλειστό)
+  const [lightbox, setLightbox] = useState(null);
   const [loadedImages, setLoadedImages] = useState(() => {
     // Lazy initialization - τρέχει μόνο στο πρώτο render
     const initial = {};
@@ -27,12 +29,16 @@ const ProductImageWidget = ({ images }) => {
 
   // Memoize image URLs για να μην ξανά-υπολογίζονται
   const imageUrls = useMemo(() => {
-    return images?.map(item => ({
-      main: item.formats?.small?.url || item.formats?.thumbnail?.url || item.url,
+    // (2026-10-22) Κύρια εικόνα σε μεγάλη ανάλυση (πριν: small ≈500px, θολή και
+    // χωρίς νόημα το zoom) — το next/image τη μικραίνει όσο χρειάζεται
+    return images?.map((item, index) => ({
+      main: item.formats?.large?.url || item.url,
+      full: item.url,
       thumb: item.formats?.thumbnail?.url || item.formats?.small?.url || item.url,
-      alt: item.alternativeText
+      // (2026-10-26) alternativeText που είναι απλώς όνομα αρχείου (π.χ. «12345_1.jpg») → το όνομα του προϊόντος
+      alt: (item.alternativeText && !/\.(jpe?g|png|webp|gif|avif)$/i.test(item.alternativeText) ? item.alternativeText : null) || (productName ? `${productName} — εικόνα ${index + 1}` : `Εικόνα προϊόντος ${index + 1}`)
     })) || [];
-  }, [images?.length]); // Μόνο length, όχι ολόκληρο το array
+  }, [images, productName]); // σταθερό reference από το ProductImageWidgetWrapper (useMemo)
 
   // Reset ΜΟΝΟ αν άλλαξε το pathname Ή ο αριθμός εικόνων
   useEffect(() => {
@@ -60,16 +66,19 @@ const ProductImageWidget = ({ images }) => {
       prevPathnameRef.current = pathname;
       prevImagesLengthRef.current = images?.length;
     }
-  }, [pathname, images?.length]);
+  }, [pathname, images]);
 
+  // Με loop το activeIndex του swiper δεν είναι η θέση της εικόνας — realIndex / slideToLoop
   const handleThumbClick = useCallback((index) => {
     setActiveIndex(index);
-    mainSwiperRef.current?.swiper?.slideTo(index);
+    const sw = mainSwiperRef.current?.swiper;
+    if (sw) (sw.params?.loop ? sw.slideToLoop(index) : sw.slideTo(index));
   }, []);
 
   const handleSlideChange = useCallback((swiper) => {
-    setActiveIndex(swiper.activeIndex);
-    thumbSwiperRef.current?.swiper?.slideTo(swiper.activeIndex);
+    const index = swiper.realIndex ?? swiper.activeIndex;
+    setActiveIndex(index);
+    thumbSwiperRef.current?.swiper?.slideTo(index);
   }, []);
 
   const handleImageLoad = useCallback((index) => {
@@ -88,11 +97,13 @@ const ProductImageWidget = ({ images }) => {
     });
   }, []);
 
-  // Initialize swipers - τρέχει μόνο άπαξ
+  const imagesCount = images?.length ?? 0;
+
+  // Αρχικοποίηση των swipers μία φορά: αν έχουν ήδη αρχικοποιηθεί, το effect
+  // δεν κάνει τίποτα (έλεγχος .swiper) — τα deps απλώς το ξανατρέχουν αν οι
+  // εικόνες ήρθαν αργότερα
   useEffect(() => {
     if (!mainSwiperRef.current || mainSwiperRef.current.swiper) return;
-    
-    const imagesCount = images?.length;
     if (!imagesCount) return;
 
     Object.assign(mainSwiperRef.current, {
@@ -100,17 +111,19 @@ const ProductImageWidget = ({ images }) => {
       slidesPerView: 1,
       zoom: true,
       effect: 'fade',
+      // (2026-10-28) Χωρίς crossFade η προηγούμενη εικόνα μένει ορατή από κάτω (διάφανο φόντο)
+      fadeEffect: { crossFade: true },
       loop: imagesCount > 2,
       on: {
         slideChange: (swiper) => handleSlideChange(swiper)
       }
     });
     mainSwiperRef.current.initialize();
-  }, []); // Empty deps - initialize once
+  }, [imagesCount, handleSlideChange]);
 
   useEffect(() => {
     if (!thumbSwiperRef.current || thumbSwiperRef.current.swiper) return;
-    if (!images?.length || images.length <= 1) return;
+    if (imagesCount <= 1) return;
 
     Object.assign(thumbSwiperRef.current, {
       spaceBetween: 8,
@@ -119,7 +132,45 @@ const ProductImageWidget = ({ images }) => {
       watchSlidesProgress: true,
     });
     thumbSwiperRef.current.initialize();
-  }, []); // Empty deps - initialize once
+  }, [imagesCount]);
+
+  const total = imageUrls.length;
+  const lbPrev = useCallback(() => setLightbox(i => (i == null ? i : (i - 1 + total) % total)), [total]);
+  const lbNext = useCallback(() => setLightbox(i => (i == null ? i : (i + 1) % total)), [total]);
+  const lbClose = useCallback(() => {
+    setLightbox(i => {
+      // Η κύρια εικόνα μένει στη θέση που έκλεισε η μεγέθυνση
+      if (i != null) handleThumbClick(i);
+      return null;
+    });
+  }, [handleThumbClick]);
+
+  // Πλήκτρα (Esc, βελάκια) + κλείδωμα scroll όσο είναι ανοιχτή η μεγέθυνση
+  useEffect(() => {
+    if (lightbox == null) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') lbClose();
+      else if (e.key === 'ArrowLeft') lbPrev();
+      else if (e.key === 'ArrowRight') lbNext();
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [lightbox, lbClose, lbPrev, lbNext]);
+
+  // Swipe στο κινητό
+  const touchStartX = useRef(null);
+  const onTouchStart = (e) => { touchStartX.current = e.touches?.[0]?.clientX ?? null; };
+  const onTouchEnd = (e) => {
+    if (touchStartX.current == null) return;
+    const dx = (e.changedTouches?.[0]?.clientX ?? touchStartX.current) - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(dx) > 50) (dx > 0 ? lbPrev() : lbNext());
+  };
 
   if (!images || images.length === 0) {
     return (
@@ -129,12 +180,14 @@ const ProductImageWidget = ({ images }) => {
     );
   }
 
-  const allImagesLoaded = Object.values(loadedImages).every(loaded => loaded);
+  // (2026-10-22) Μόνο η ΠΡΩΤΗ εικόνα κρύβεται μέχρι να φορτώσει (πριν: όλες,
+  // που καθυστερούσε την εμφάνιση της κύριας εικόνας)
+  const firstImageLoaded = loadedImages[0] === true;
 
   return (
     <div className="w-full max-w-full overflow-hidden">
       <div className="relative h-64 sm:h-80 md:h-96 mb-4 rounded-lg overflow-hidden bg-white dark:bg-gray-800">
-        {!allImagesLoaded && (
+        {!firstImageLoaded && (
           <div className="absolute inset-0 flex items-center justify-center z-10 bg-gray-100 dark:bg-gray-800">
             <div className="animate-pulse flex flex-col items-center">
               <FaRegImage className="h-12 w-12 text-gray-400 dark:text-gray-600 mb-2" />
@@ -143,22 +196,27 @@ const ProductImageWidget = ({ images }) => {
           </div>
         )}
         
+        {/* (2026-10-28) React 19: το init={false} δεν γράφεται πλέον στο HTML του server και
+            το swiper ξεκινούσε μόνο του (χωρίς τις ρυθμίσεις μας) → πρέπει να είναι κείμενο "false" */}
         <swiper-container
           ref={mainSwiperRef}
-          init={false}
+          init="false"
           class="h-full w-full"
         >
           {imageUrls.map((img, index) => (
             <swiper-slide key={`main-${index}`} lazy="true">
-              <div className="swiper-zoom-container h-full w-full relative">
+              <div
+                className="swiper-zoom-container h-full w-full relative cursor-zoom-in"
+                onClick={() => setLightbox(index)}
+              >
                 <Image
                   src={getStrapiMedia(img.main)}
-                  alt={img.alt || `Product image ${index + 1}`}
+                  alt={img.alt}
                   fill
                   className="object-contain"
                   quality={85}
                   priority={index === 0}
-                  sizes="100vw"
+                  sizes="(min-width: 1024px) 38vw, (min-width: 768px) 50vw, 100vw"
                   onLoad={() => handleImageLoad(index)}
                   onError={() => handleImageError(index)}
                   unoptimized={false}
@@ -168,6 +226,15 @@ const ProductImageWidget = ({ images }) => {
           ))}
         </swiper-container>
         
+        <button
+          type="button"
+          className="absolute top-2 right-2 z-20 bg-white/90 dark:bg-gray-700/90 p-2 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+          onClick={() => setLightbox(activeIndex)}
+          aria-label="Μεγέθυνση εικόνας σε πλήρη οθόνη"
+        >
+          <FaExpand className="w-4 h-4 text-gray-700 dark:text-gray-200" />
+        </button>
+
         {images.length > 1 && (
           <>
             <div className="absolute top-1/2 left-2 transform -translate-y-1/2 z-20">
@@ -196,7 +263,7 @@ const ProductImageWidget = ({ images }) => {
         <div className="px-2">
           <swiper-container
             ref={thumbSwiperRef}
-            init={false}
+            init="false"
             class="thumbnail-swiper"
           >
             {imageUrls.map((img, index) => (
@@ -212,9 +279,9 @@ const ProductImageWidget = ({ images }) => {
                 >
                   <Image
                     src={getStrapiMedia(img.thumb)}
-                    alt={img.alt || `Μικρογραφία ${index + 1}`}
+                    alt={`Μικρογραφία: ${img.alt}`}
                     fill
-                    className="object-cover"
+                    className="object-contain bg-white p-1"
                     quality={60}
                     sizes="80px"
                     unoptimized={false}
@@ -225,8 +292,64 @@ const ProductImageWidget = ({ images }) => {
           </swiper-container>
         </div>
       )}
+
+      {/* (2026-10-22) Μεγέθυνση σε πλήρη οθόνη */}
+      {lightbox != null && imageUrls[lightbox] && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Εικόνες προϊόντος σε πλήρη οθόνη"
+          onClick={lbClose}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
+          <div className="relative w-full h-full max-w-6xl max-h-[90vh] m-4" onClick={(e) => e.stopPropagation()}>
+            <Image
+              key={imageUrls[lightbox].full}
+              src={getStrapiMedia(imageUrls[lightbox].full)}
+              alt={imageUrls[lightbox].alt}
+              fill
+              className="object-contain"
+              sizes="100vw"
+              quality={90}
+            />
+          </div>
+          <button
+            type="button"
+            className="absolute top-4 right-4 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white"
+            onClick={lbClose}
+            aria-label="Κλείσιμο"
+          >
+            <FaXmark className="w-6 h-6" />
+          </button>
+          {total > 1 && (
+            <>
+              <button
+                type="button"
+                className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white"
+                onClick={(e) => { e.stopPropagation(); lbPrev(); }}
+                aria-label="Προηγούμενη εικόνα"
+              >
+                <FaChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                type="button"
+                className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white"
+                onClick={(e) => { e.stopPropagation(); lbNext(); }}
+                aria-label="Επόμενη εικόνα"
+              >
+                <FaChevronRight className="w-6 h-6" />
+              </button>
+              <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/80 text-sm">
+                {lightbox + 1} / {total}
+              </span>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };
 
-export default ProductImageWidget;
+export default ProductImageWidget;

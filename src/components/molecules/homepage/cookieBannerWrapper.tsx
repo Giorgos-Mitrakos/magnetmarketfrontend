@@ -1,10 +1,10 @@
-import { getCookieConsent } from "@/lib/helpers/cookies";
+import { hasCookieChoice } from "@/lib/helpers/cookies";
 import CookieBannerClient from "./cookieBannerClient";
 
-export default function CookieBannerWrapper() {
-  const consent = getCookieConsent();
+export default async function CookieBannerWrapper() {
+  // Το banner εμφανίζεται μόνο όσο ο επισκέπτης δεν έχει απαντήσει —
+  // και η «Απόρριψη» είναι απάντηση (cookie_consent=false)
+  if (await hasCookieChoice()) return null;
 
-  if (consent) return null;
-
-  return <CookieBannerClient consent={consent} />;
+  return <CookieBannerClient consent={false} />;
 }

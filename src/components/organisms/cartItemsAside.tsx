@@ -22,14 +22,15 @@ const CartItem = ({ item }: { item: ICartItem }) => {
             <div className="flex-shrink-0 relative">
                 {imageUrl ? (
                     <div className="relative h-14 w-14">
+                        {/* (2026-10-28) sizes: η εικόνα είναι 56px (χωρίς αυτό η Next.js κατέβαζε μεγαλύτερη).
+                            Βγήκε το blur: το blurDataURL ήταν η ίδια η εικόνα, όχι μικρό data URL */}
                         <Image
                             src={imageUrl}
                             alt={item.name}
                             fill
+                            sizes="56px"
                             className="object-contain"
                             quality={75}
-                            placeholder="blur"
-                            blurDataURL={imageUrl}
                         />
                         <div className="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-siteColors-pink border-2 border-white rounded-full -top-2 left-0 dark:border-slate-800">
                             {item.quantity}

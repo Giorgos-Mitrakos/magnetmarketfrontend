@@ -4,12 +4,15 @@ import { ClientSafeProvider, LiteralUnion, getProviders, getCsrfToken, signIn } 
 import Link from "next/link"
 import { useState, useEffect } from "react";
 import { useFormik } from "formik";
-import { BuiltInProviderType } from 'next-auth/providers'
+import { BuiltInProviderType } from 'next-auth/providers/index'
 import CustomInput from '@/components/atoms/input'
 import { useSearchParams } from 'next/navigation'
 import { FaEye, FaEyeSlash, FaArrowRight, FaCheck, FaInfoCircle } from 'react-icons/fa'
-import { FiUser, FiMail, FiLock, FiTruck, FiHeart, FiClock, FiPercent } from 'react-icons/fi'
+import { FiMail, FiLock } from 'react-icons/fi'
+import AccountBenefits from '@/components/atoms/AccountBenefits'
+import ResendConfirmation from '@/components/atoms/ResendConfirmation'
 import { FaBagShopping } from 'react-icons/fa6';
+import { safeRedirect } from '@/lib/helpers/safeRedirect';
 
 export interface ILoginData {
     email: string;
@@ -37,9 +40,13 @@ export default function RegisterComp() {
     const [providers, setProviders] = useState<Record<LiteralUnion<BuiltInProviderType, string>, ClientSafeProvider> | null>()
     const [isLoading, setIsLoading] = useState(false);
     const [passwordStrength, setPasswordStrength] = useState(0);
+    // Όταν η Strapi ζητά επιβεβαίωση email, η εγγραφή δεν συνδέει αμέσως τον χρήστη
+    const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
     const searchParams = useSearchParams()
-    const callbackUrl = searchParams.get('callbackUrl')
+    // (2026-10-26) Μόνο σελίδες του site (όχι ξένες διευθύνσεις)
+    const rawCallback = searchParams.get('callbackUrl')
+    const callbackUrl = rawCallback ? safeRedirect(rawCallback, '') || null : null
 
     useEffect(() => {
         async function getProv() {
@@ -87,7 +94,14 @@ export default function RegisterComp() {
                     })
                 });
 
-                const result = await newUser.json();
+                const result = await newUser.json().catch(() => ({}));
+
+                if (newUser.ok && !result.jwt) {
+                    // Απαιτείται επιβεβαίωση email → δείχνουμε οδηγίες αντί για αυτόματη σύνδεση
+                    setPendingEmail(values.email);
+                    setIsLoading(false);
+                    return;
+                }
 
                 if (newUser.ok) {
                     // Κάντε signIn με τα credentials μετά την επιτυχή εγγραφή
@@ -108,12 +122,12 @@ export default function RegisterComp() {
                     }
                 } else {
                     console.error('Registration failed:', result.error);
-                    formik.setFieldError('email', result.error?.message || 'Registration failed');
+                    formik.setFieldError('email', registerErrorMessage(result.error?.message));
                     setIsLoading(false);
                 }
             } catch (error) {
                 console.error('Registration error:', error);
-                formik.setFieldError('email', 'An unexpected error occurred');
+                formik.setFieldError('email', 'Παρουσιάστηκε απρόσμενο σφάλμα. Δοκιμάστε ξανά.');
                 setIsLoading(false);
             }
         }
@@ -147,7 +161,7 @@ export default function RegisterComp() {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 dark:from-slate-800 dark:to-slate-800 px-4">
             <div className="max-w-6xl mx-auto flex flex-col lg:flex-row rounded-2xl overflow-hidden shadow-xl bg-white">
                 {/* Left Panel - Branding & Features */}
-                <div className="w-full lg:w-2/5 bg-gradient-to-b from-siteColors-blue to-siteColors-purple text-white p-8 lg:p-12 flex flex-col justify-between">
+                <div className="order-2 lg:order-1 w-full lg:w-2/5 bg-gradient-to-b from-siteColors-blue to-siteColors-purple text-white p-8 lg:p-12 flex flex-col justify-between">
                     <div>
                         <div className="flex items-center mb-12">
                             <FaBagShopping className="h-8 w-8 mr-2" />
@@ -158,58 +172,43 @@ export default function RegisterComp() {
                             Γίνετε μέλος της οικογένειας μας και αποκτήστε πρόσβαση σε εξατομικευμένες προσφορές και προνόμια.
                         </p>
 
-                        <div className="space-y-5">
-                            <div className="flex items-start">
-                                <div className="bg-siteColors-lightblue p-2 rounded-full mr-4 mt-1">
-                                    <FiTruck className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Γρήγορη Ολοκλήρωση Αγορών</h3>
-                                    <p className="text-blue-200 text-sm">Αποθηκεύστε τα στοιχεία σας για γρηγορότερες αγορές</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-start">
-                                <div className="bg-siteColors-lightblue p-2 rounded-full mr-4 mt-1">
-                                    <FiPercent className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Εξατομικευμένες Προσφορές</h3>
-                                    <p className="text-blue-200 text-sm">Λάβετε προσφορές βασισμένες στις προτιμήσεις σας</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-start">
-                                <div className="bg-siteColors-lightblue p-2 rounded-full mr-4 mt-1">
-                                    <FiClock className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Ιστορικό Παραγγελιών</h3>
-                                    <p className="text-blue-200 text-sm">Πρόσβαση στο πλήρες ιστορικό αγορών σας</p>
-                                </div>
-                            </div>
-
-                            {/* Το κρατάω για το μέλλον όπου θα φτιάξω αγαπημένα
-                            <div className="flex items-start">
-                                <div className="bg-siteColors-lightblue p-2 rounded-full mr-4 mt-1">
-                                    <FiHeart className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Λίστα Αγαπημένων</h3>
-                                    <p className="text-blue-200 text-sm">Αποθηκεύστε τα αγαπημένα σας προϊόντα</p>
-                                </div>
-                            </div> */}
-                        </div>
+                        <AccountBenefits />
                     </div>
 
                     <div className="mt-8 text-blue-200 text-sm">
-                        <p>© 2025 MagnetMarket. All rights reserved.</p>
+                        <p>© {new Date().getFullYear()} MagnetMarket. Με επιφύλαξη παντός δικαιώματος.</p>
                     </div>
                 </div>
 
                 {/* Right Panel - Registration Form */}
-                <div className="w-full lg:w-3/5 p-8 lg:p-12">
+                <div className="order-1 lg:order-2 w-full lg:w-3/5 p-6 sm:p-8 lg:p-12">
                     <div className="max-w-md mx-auto">
+                        {pendingEmail ? (
+                            <div className="py-6 text-center" role="status">
+                                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                                    <FiMail className="h-8 w-8 text-green-600" aria-hidden="true" />
+                                </div>
+                                <h2 className="text-2xl font-bold text-gray-800">Ελέγξτε το email σας</h2>
+                                <p className="mt-4 text-gray-600">
+                                    Ο λογαριασμός σας δημιουργήθηκε! Στείλαμε έναν σύνδεσμο επιβεβαίωσης στο{' '}
+                                    <strong className="break-all text-gray-800">{pendingEmail}</strong>.
+                                </p>
+                                <p className="mt-3 text-gray-600">
+                                    Πατήστε τον σύνδεσμο για να ενεργοποιηθεί ο λογαριασμός και μετά συνδεθείτε.
+                                    Η επιβεβαίωση γίνεται για την ασφάλειά σας, ώστε κανείς άλλος να μη μπορεί να χρησιμοποιήσει το email σας.
+                                </p>
+                                <div className="mt-6 rounded-lg bg-slate-50 p-4 text-sm text-gray-600">
+                                    Δεν το βλέπετε; Ελέγξτε τον φάκελο ανεπιθύμητης αλληλογραφίας (spam).
+                                    <ResendConfirmation email={pendingEmail} className="mt-2" />
+                                </div>
+                                <Link
+                                    href={`/login${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`}
+                                    className="mt-8 inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-siteColors-blue to-siteColors-purple px-6 py-3 text-sm font-medium text-white hover:from-siteColors-lightblue hover:to-siteColors-pink"
+                                >
+                                    Μετάβαση στη σύνδεση <FaArrowRight className="ml-2" />
+                                </Link>
+                            </div>
+                        ) : (<>
                         <div className="text-center mb-10">
                             <h2 className="text-3xl font-bold text-gray-800">Εγγραφή</h2>
                             <p className="text-gray-600 mt-2">Δημιουργήστε νέο λογαριασμό</p>
@@ -361,6 +360,13 @@ export default function RegisterComp() {
                                     : null}
                             </div>
 
+                            <p className="text-xs text-gray-500">
+                                Με τη δημιουργία λογαριασμού αποδέχεστε τους{' '}
+                                <Link href="/pages/oroi-kai-proypotheseis" target="_blank" className="underline hover:text-siteColors-purple">Όρους χρήσης</Link>{' '}
+                                και την{' '}
+                                <Link href="/pages/politiki-aporritoy" target="_blank" className="underline hover:text-siteColors-purple">Πολιτική απορρήτου</Link>.
+                            </p>
+
                             <div>
                                 <button
                                     type="submit"
@@ -427,9 +433,19 @@ export default function RegisterComp() {
                                 </div>
                             </div>
                         )}
+                        </>)}
                     </div>
                 </div>
             </div>
         </div>
     )
 }
+
+// Μετάφραση μηνυμάτων σφάλματος εγγραφής της Strapi
+function registerErrorMessage(message?: string): string {
+    const m = String(message ?? '').toLowerCase()
+    if (m.includes('already taken')) return 'Υπάρχει ήδη λογαριασμός με αυτό το email. Συνδεθείτε ή επαναφέρετε τον κωδικό σας.'
+    if (m.includes('register action is currently disabled')) return 'Οι εγγραφές είναι προσωρινά απενεργοποιημένες.'
+    if (m.includes('email')) return 'Το email δεν είναι έγκυρο.'
+    return 'Η εγγραφή δεν ολοκληρώθηκε. Δοκιμάστε ξανά.'
+}

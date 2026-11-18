@@ -25,7 +25,7 @@ const ProductCardPrice = ({ product }: { product: ISimilarProductPage }) => {
   if (isAskForPrice) {
     return (
       <div className="flex justify-end items-center mt-3">
-        <div className="bg-gradient-to-r from-siteColors-purple/10 to-siteColors-pink/10 dark:from-siteColors-purple/20 dark:to-siteColors-pink/20 p-2 rounded-lg border border-siteColors-purple/30 w-full">
+        <div className="relative z-10 bg-gradient-to-r from-siteColors-purple/10 to-siteColors-pink/10 dark:from-siteColors-purple/20 dark:to-siteColors-pink/20 p-2 rounded-lg border border-siteColors-purple/30 w-full">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-siteColors-purple dark:bg-siteColors-purple-light flex items-center justify-center">
@@ -72,6 +72,19 @@ const ProductCardPrice = ({ product }: { product: ISimilarProductPage }) => {
             </span>
           </div>
         </div>
+      ) : product.previous_price && product.previous_price > price ? (
+        // Έπεσε η τιμή χωρίς προσφορά: «ήταν» = η χαμηλότερη τιμή των 30 ημερών πριν τη μείωση
+        <div className="flex flex-col items-end">
+          <span
+            className="text-sm line-through text-gray-500 dark:text-slate-400 mb-1"
+            title="Χαμηλότερη τιμή των τελευταίων 30 ημερών πριν τη μείωση"
+          >
+            {product.previous_price.toFixed(2)} €
+          </span>
+          <span className="text-xl font-bold text-siteColors-purple dark:text-white">
+            {price.toFixed(2)} €
+          </span>
+        </div>
       ) : (
         <span className="text-xl font-bold text-siteColors-purple dark:text-white">
           {price.toFixed(2)} €
@@ -81,4 +94,4 @@ const ProductCardPrice = ({ product }: { product: ISimilarProductPage }) => {
   );
 };
 
-export default ProductCardPrice;
+export default ProductCardPrice;

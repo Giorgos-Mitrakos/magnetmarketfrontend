@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     locale: 'el_GR',
     images: [
       {
-        url: `${BASE_URL}/_next/static/media/MARKET MAGNET-LOGO.79db5357.svg`,
+        url: `${BASE_URL}/MARKET%20MAGNET-LOGO.png`,
         width: 1200,
         height: 630,
         alt: 'Magnet Market Logo',
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Σύνδεση Λογαριασμού | Magnet Market',
     description: 'Συνδεθείτε στον λογαριασμό σας για να συνεχίσετε τις αγορές σας',
-    images: [`${BASE_URL}/_next/static/media/MARKET MAGNET-LOGO.79db5357.svg`],
+    images: [`${BASE_URL}/MARKET%20MAGNET-LOGO.png`],
   },
 
   // Additional metadata
