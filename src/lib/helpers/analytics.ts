@@ -9,6 +9,13 @@ import { sendDedupedEvent } from './event-deduplication';
 // ============================================
 const isDev = process.env.NODE_ENV === 'development';
 
+/** (2026-11-19) Ποσό με 2 δεκαδικά για τα analytics. Τα προϊόντα «Ζητήστε τιμή» έρχονται
+ *  χωρίς τιμή (null) — πριν, το price.toFixed() έσπαγε τη σελίδα (π.χ. αναζήτηση «dahua»). */
+export const money = (v: unknown): number => {
+    const n = Number(v);
+    return Number.isFinite(n) ? Number(n.toFixed(2)) : 0;
+};
+
 // ============================================
 // NATIVE GTAG EVENT SENDER (with deduplication)
 // ============================================
@@ -128,7 +135,7 @@ export const trackCartEvent = (
 
     const params = {
         currency: "EUR",
-        value: Number(totalValue.toFixed(2)),
+        value: money(totalValue),
         items: items.map(item => {
             const categories = createCategories(item);
             const price = item.is_sale && item.sale_price ? item.sale_price : item.price;
@@ -138,12 +145,12 @@ export const trackCartEvent = (
                 item_name: item.name,
                 item_brand: item.brand || 'Unknown',
                 discount: item.is_sale && item.sale_price
-                    ? Number((item.price - item.sale_price).toFixed(2))
+                    ? money(item.price - item.sale_price)
                     : 0,
                 item_category: categories.item_category,
                 item_category2: categories.item_category2,
                 item_category3: categories.item_category3,
-                price: Number(price.toFixed(2)),
+                price: money(price),
                 quantity: item.quantity,
             }
         }),
@@ -185,18 +192,18 @@ export const trackAddToCart = (item: ICartItem, quantity: number = 1) => {
     
     const params = {
         currency: "EUR",
-        value: Number((price * quantity).toFixed(2)),
+        value: money(price * quantity),
         items: [{
             item_id: item.id.toString(),
             item_name: item.name,
             item_brand: item.brand || 'Unknown',
             discount: item.is_sale && item.sale_price
-                ? Number((item.price - item.sale_price).toFixed(2))
+                ? money(item.price - item.sale_price)
                 : 0,
             item_category: categories.item_category,
             item_category2: categories.item_category2,
             item_category3: categories.item_category3,
-            price: Number(price.toFixed(2)),
+            price: money(price),
             quantity: quantity,
         }]
     };
@@ -211,7 +218,7 @@ export const trackRemoveFromCart = (item: ICartItem) => {
     
     const params = {
         currency: "EUR",
-        value: Number((price * item.quantity).toFixed(2)),
+        value: money(price * item.quantity),
         items: [{
             item_id: item.id.toString(),
             item_name: item.name,
@@ -219,7 +226,7 @@ export const trackRemoveFromCart = (item: ICartItem) => {
             item_category: categories.item_category,
             item_category2: categories.item_category2,
             item_category3: categories.item_category3,
-            price: Number(price.toFixed(2)),
+            price: money(price),
             quantity: item.quantity,
         }]
     };
@@ -262,7 +269,7 @@ export const trackSelectItem = (item: any, listName?: string) => {
             item_category: categoryName,
             item_category2: category2,
             item_category3: category3,
-            price: Number(price.toFixed(2)),
+            price: money(price),
         }]
     };
 
@@ -298,10 +305,10 @@ export const trackPurchase = (
 
     const params = {
         transaction_id: transactionId,
-        value: Number(value.toFixed(2)),
+        value: money(value),
         currency: "EUR",
-        shipping: Number(shipping.toFixed(2)),
-        tax: Number(tax.toFixed(2)),
+        shipping: money(shipping),
+        tax: money(tax),
         coupon: coupon || undefined,
         items: items.map(item => {
             const categories = createCategories(item);
@@ -312,12 +319,12 @@ export const trackPurchase = (
                 item_name: item.name,
                 item_brand: item.brand || 'Unknown',
                 discount: item.is_sale && item.sale_price
-                    ? Number((item.price - item.sale_price).toFixed(2))
+                    ? money(item.price - item.sale_price)
                     : 0,
                 item_category: categories.item_category,
                 item_category2: categories.item_category2,
                 item_category3: categories.item_category3,
-                price: Number(price.toFixed(2)),
+                price: money(price),
                 quantity: item.quantity,
             }
         })

@@ -7,7 +7,8 @@ const ProductCardPrice = ({ product }: { product: ISimilarProductPage }) => {
   const price = product.price;
   const is_sale = product.is_sale;
   const salePrice = product.sale_price;
-  const isAskForPrice = product.status === 'AskForPrice';
+  // (2026-11-19) Χωρίς τιμή (π.χ. «Ζητήστε τιμή») → ποτέ price.toFixed() σε null
+  const isAskForPrice = product.status === 'AskForPrice' || price == null;
 
   const { profit, discount } = getPrices({ price: price, sale_price: salePrice });
 

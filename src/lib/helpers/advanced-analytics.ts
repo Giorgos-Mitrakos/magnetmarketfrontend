@@ -1,6 +1,6 @@
 // lib/helpers/advanced-analytics.ts
 import { ICartItem } from '@/lib/interfaces/cart';
-import { createCategories } from './analytics';
+import { createCategories, money } from './analytics';
 import { sendDedupedEvent } from './event-deduplication';
 
 // ============================================
@@ -109,7 +109,7 @@ export const trackViewItemList = (
       item_category: categoryName,
       item_category2: category2,
       item_category3: category3,
-      price: Number(price.toFixed(2)),
+      price: money(price),
       index: index,
     };
   });
@@ -175,7 +175,7 @@ export const trackProductImpression = (
 
   sendEvent('view_item', {
     currency: 'EUR',
-    value: Number(price.toFixed(2)),
+    value: money(price),
     items: [{
       item_id: item.id.toString(),
       item_name: item.name,
@@ -183,7 +183,7 @@ export const trackProductImpression = (
       item_category: categoryName,
       item_category2: category2,
       item_category3: category3,
-      price: Number(price.toFixed(2)),
+      price: money(price),
       index: position,
       item_list_name: listName,
     }]
@@ -204,7 +204,7 @@ export const trackViewItem = (item: any) => {
     : item.price;
 
   const discount = item.is_sale && item.sale_price
-    ? Number((item.price - item.sale_price).toFixed(2))
+    ? money(item.price - item.sale_price)
     : 0;
 
   let categoryName = 'Uncategorized';
@@ -227,7 +227,7 @@ export const trackViewItem = (item: any) => {
 
   sendEvent('view_item', {
     currency: 'EUR',
-    value: Number(price.toFixed(2)),
+    value: money(price),
     items: [{
       item_id: item.id.toString(),
       item_name: item.name,
@@ -235,7 +235,7 @@ export const trackViewItem = (item: any) => {
       item_category: categoryName,
       item_category2: category2,
       item_category3: category3,
-      price: Number(price.toFixed(2)),
+      price: money(price),
       discount: discount,
     }]
   }, identifier);
@@ -283,7 +283,7 @@ export const trackAddToWishlist = (item: any) => {
 
   sendEvent('add_to_wishlist', {
     currency: 'EUR',
-    value: Number(price.toFixed(2)),
+    value: money(price),
     items: [{
       item_id: item.id.toString(),
       item_name: item.name,
@@ -291,7 +291,7 @@ export const trackAddToWishlist = (item: any) => {
       item_category: categoryName,
       item_category2: category2,
       item_category3: category3,
-      price: Number(price.toFixed(2)),
+      price: money(price),
     }]
   }, identifier);
 };
