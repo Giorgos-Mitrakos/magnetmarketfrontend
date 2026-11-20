@@ -90,7 +90,8 @@ function ProductPrice({ product, preorder = null, perks = null, delivery = null 
     sale_price: product.sale_price
   });
   const hasDiscount = product.is_sale && product.sale_price;
-  const isAskForPrice = product.status === 'AskForPrice';
+  // (2026-11-19) Χωρίς τιμή (brand «Ζητήστε τιμή», σε όποια κατάσταση) = όπως το «Ζητήστε τιμή»
+  const isAskForPrice = product.status === 'AskForPrice' || product.price == null;
   const isOutOfStock = product.status === 'OutOfStock';
   const IsExpected = product.status === 'IsExpected';
   const isBackorder = product.status === 'Backorder';

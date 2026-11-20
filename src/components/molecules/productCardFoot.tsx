@@ -13,7 +13,8 @@ const ProductCardFoot = ({ product }: { product: IProductCard }) => {
     const { dispatch } = useCheckout()
     const router = useRouter()
 
-    const isAskForPrice = product.status === 'AskForPrice';
+    // (2026-11-19) Χωρίς τιμή (brand «Ζητήστε τιμή», σε όποια κατάσταση) = όπως το «Ζητήστε τιμή»
+    const isAskForPrice = product.status === 'AskForPrice' || product.price == null;
     const isOutOfStock = product.status === 'OutOfStock';
     const isExpacted = product.status === 'IsExpected';
 

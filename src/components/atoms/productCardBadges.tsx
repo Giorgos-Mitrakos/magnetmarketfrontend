@@ -44,7 +44,7 @@ export default function ProductCardBadges({ product }: { product: IProductCard }
     if (product.is_new) top.push(NEW_BADGE)
     const shown = top.slice(0, MAX_TOP_BADGES)
 
-    const canBuy = !['AskForPrice', 'OutOfStock', 'Discontinued'].includes(product.status)
+    const canBuy = product.price != null && !['AskForPrice', 'OutOfStock', 'Discontinued'].includes(product.status)
     const stock = Number(product.inventory) || 0
     const lowStock = canBuy && product.is_in_house && stock >= 1 && stock <= LOW_STOCK_MAX
 

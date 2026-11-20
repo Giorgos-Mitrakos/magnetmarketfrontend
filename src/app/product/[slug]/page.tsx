@@ -287,7 +287,7 @@ export default async function ProductPage(
     product.status === 'IsExpected'
       ? getPreorderPass(Array.isArray(ppParam) ? ppParam[0] : ppParam, product.documentId ?? '')
       : Promise.resolve(null),
-    product.status === 'AskForPrice' ? Promise.resolve(null) : getProductPerks(effectivePrice),
+    product.status === 'AskForPrice' || product.price == null ? Promise.resolve(null) : getProductPerks(effectivePrice),
     getStoreInfo(),
   ])
 
@@ -380,7 +380,8 @@ export default async function ProductPage(
         }))
       : undefined,
     // «Ζητήστε τιμή»: χωρίς προσφορά (δεν υπάρχει τιμή πώλησης)
-    offers: product.status === 'AskForPrice' ? undefined : {
+    // (2026-11-19) Και χωρίς τιμή (brand «Ζητήστε τιμή» σε κάθε κατάσταση)
+    offers: product.status === 'AskForPrice' || product.price == null ? undefined : {
       ...getOfferData(product, storeInfo),
     },
 

@@ -22,7 +22,8 @@ function ProductAddToCart({ product, preorder = null }: {
 }) {
   const { checkout, dispatch } = useCheckout()
 
-  const isAskForPrice = product.status === 'AskForPrice';
+  // (2026-11-19) Χωρίς τιμή (brand «Ζητήστε τιμή», σε όποια κατάσταση) = όπως το «Ζητήστε τιμή»
+  const isAskForPrice = product.status === 'AskForPrice' || product.price == null;
   const isOutOfStock = product.status === 'OutOfStock';
   const isExpacted = product.status === 'IsExpected';
   const isPreorder = isExpacted && !!preorder;
@@ -31,7 +32,7 @@ function ProductAddToCart({ product, preorder = null }: {
   const [qty, setQty] = useState(1)
   const inCartQty = checkout.cart.find(c => c.id === product.id)?.quantity ?? 0
   const maxQty = isPreorder ? Math.max(0, preorder!.maxQuantity - inCartQty) : 99
-  const blockedLabel = isAskForPrice ? "Μη Διαθέσιμο" : isOutOfStock ? "Εξαντλήθηκε" : "Αναμένεται";
+  const blockedLabel = isOutOfStock ? "Εξαντλήθηκε" : isAskForPrice ? "Μη Διαθέσιμο" : "Αναμένεται";
 
   const item: ICartItem = {
     id: product.id,
