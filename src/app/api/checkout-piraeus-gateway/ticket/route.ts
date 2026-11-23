@@ -52,9 +52,12 @@ export async function POST(request: NextRequest) {
 
     await saveTicket({ merchantReference: payment.merchantReference, tranTicket: ticketResponse.TranTicket })
 
-    // ParamBackLink: ΔΕΝ είναι URL — κατά το εγχειρίδιο της τράπεζας είναι
-    // query string («p1=v1&p2=v2») που προστίθεται στο Backlink URL που έχει
-    // δηλωθεί στην τράπεζα (κουμπί «Ακύρωση»). Το route /cancel δεν το χρειάζεται.
+    // (2026-11-23) Το ParamBackLink ΠΡΕΠΕΙ να στέλνεται στη φόρμα της τράπεζας.
+    // Είχε αφαιρεθεί (14/10) και από το άνοιγμα ΚΑΜΙΑ πληρωμή με κάρτα δεν
+    // πέτυχε: η τράπεζα γύριζε τον πελάτη στο /fail χωρίς να δημιουργηθεί
+    // συναλλαγή στο back office. Ο παλιός κώδικας (tag live-old), που δούλευε,
+    // έστελνε URL — κρατάμε την ίδια μορφή, με τη σελίδα σύνοψης του νέου site.
+    const siteUrl = (process.env.NEXT_URL || 'https://magnetmarket.gr').replace(/\/+$/, '')
     return NextResponse.json({
       AcquirerId: Number(ACQUIRER_ID),
       MerchantId: Number(MERCHANT_ID),
@@ -62,6 +65,7 @@ export async function POST(request: NextRequest) {
       User: PEIRAIWS_USERNAME,
       LanguageCode: 'el-GR',
       MerchantReference: payment.merchantReference,
+      ParamBackLink: `${siteUrl}/checkout/order-summary`,
     })
   } catch (err) {
     console.error('Piraeus ticket:', err)

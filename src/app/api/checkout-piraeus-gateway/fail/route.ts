@@ -5,7 +5,7 @@
 // πελάτης ξαναδοκιμάζει από το καλάθι, που μένει γεμάτο).
 import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
-import { checkAuthResponse, getTicket, readBankResponse, recordPaymentResult, redirectHtml } from "@/lib/helpers/piraeusGateway";
+import { checkAuthResponse, getTicket, notifyAdmin, readBankResponse, recordPaymentResult, redirectHtml } from "@/lib/helpers/piraeusGateway";
 
 /** Κατηγορία μηνύματος για τη σελίδα αποτυχίας (cookie _rcf) */
 function resultCategory(resultCode: string): number {
@@ -23,6 +23,19 @@ function resultCategory(resultCode: string): number {
 export async function POST(request: NextRequest) {
     try {
         const bankResponse = readBankResponse(await request.formData())
+
+        // (2026-11-23) Πάντα καταγραφή του λόγου αποτυχίας (log + email στην ομάδα),
+        // ακόμα κι όταν η απάντηση δεν έχει υπογραφή — αλλιώς ο κωδικός της
+        // τράπεζας χανόταν και δεν ξέραμε γιατί απέτυχε η πληρωμή.
+        const reason = [
+            `Παραγγελία ${bankResponse.MerchantReference || '—'}`,
+            `ResultCode ${bankResponse.ResultCode || '—'} ${bankResponse.ResultDescription || ''}`.trim(),
+            `ResponseCode ${bankResponse.ResponseCode || '—'} ${bankResponse.ResponseDescription || ''}`.trim(),
+            `StatusFlag ${bankResponse.StatusFlag || '—'}`,
+            `Υπογραφή ${bankResponse.HashKey ? 'ναι' : 'όχι'}`,
+        ].join(' · ')
+        console.error('Piraeus fail:', reason)
+        notifyAdmin({ title: 'Πειραιώς: αποτυχία πληρωμής', data: reason })
 
         const category = resultCategory(bankResponse.ResultCode)
         if (category !== 0) {
@@ -46,5 +59,10 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         console.error('Piraeus fail:', error)
     }
+    return redirectHtml('/checkout/failure')
+}
+
+// (2026-11-23) Ανανέωση/«Πίσω» στη σελίδα της επιστροφής → κανονική σελίδα αποτυχίας (αντί για 405)
+export async function GET() {
     return redirectHtml('/checkout/failure')
 }
