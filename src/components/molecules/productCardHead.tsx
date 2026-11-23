@@ -43,7 +43,8 @@ const ProductCardHead = ({ product }: { product: IProductCard }) => {
         )}
       </div>
 
-      {discount && profit && is_sale && (
+      {/* (2026-11-23) Πάντα boolean: με «discount && …» ένα NaN/0 εμφανιζόταν ως κείμενο («NaN») */}
+      {is_sale && discount > 0 && profit > 0 && (
         <div className="flex justify-end">
           <div className="bg-gradient-to-br from-siteColors-pink to-siteColors-purple text-center text-white text-xs font-bold py-1 px-2 rounded-full shadow-md">
             {profit < 50 ? `${discount.toFixed(0)}%` : `Κέρδος ${profit.toFixed(2)}€`}
