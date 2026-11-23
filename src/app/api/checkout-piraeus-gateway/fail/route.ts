@@ -32,6 +32,10 @@ export async function POST(request: NextRequest) {
             `ResultCode ${bankResponse.ResultCode || '—'} ${bankResponse.ResultDescription || ''}`.trim(),
             `ResponseCode ${bankResponse.ResponseCode || '—'} ${bankResponse.ResponseDescription || ''}`.trim(),
             `StatusFlag ${bankResponse.StatusFlag || '—'}`,
+            // AuthStatus: 01 = επιτυχής ταυτοποίηση κατόχου (3D Secure), 03 = αποτυχία
+            `AuthStatus ${bankResponse.AuthStatus || '—'}`,
+            // Ο κωδικός που ζητά η υποστήριξη της τράπεζας για να βρει τη συναλλαγή
+            `SupportReferenceID ${bankResponse.SupportReferenceID || '—'}`,
             `Υπογραφή ${bankResponse.HashKey ? 'ναι' : 'όχι'}`,
         ].join(' · ')
         console.error('Piraeus fail:', reason)

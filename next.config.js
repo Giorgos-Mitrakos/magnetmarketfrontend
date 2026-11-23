@@ -37,9 +37,10 @@ const nextConfig = {
     ],
   },
 
-  // Αφαίρεσε console.logs από production
+  // Αφαίρεσε console.logs από production — (2026-11-23) ΚΡΑΤΑ τα console.error/warn,
+  // αλλιώς στην παραγωγή δεν γράφεται κανένα σφάλμα στο log (π.χ. αποτυχίες πληρωμών)
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
   },
 
   // (2026-11-18) Δοκιμαστικό site (π.χ. test.magnetmarket.gr): SITE_NOINDEX=true στο .env
