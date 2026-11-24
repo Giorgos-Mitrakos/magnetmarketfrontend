@@ -8,6 +8,7 @@
 //  - σε λάθος, μεταφορά στο πρώτο πεδίο με πρόβλημα
 import { useFormik } from "formik"
 import PostalSuggestions from '@/components/atoms/PostalSuggestions'
+import GeoCombobox from '@/components/atoms/GeoCombobox'
 import * as Yup from 'yup'
 import Radio from "../atoms/radio"
 import CustomInput from "../atoms/input"
@@ -265,15 +266,17 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
         setFieldValue(isShipping ? 'ship_state' : 'state', "")
     }, [handleChange, setFieldValue])
 
-    const handleStateChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>, isShipping: boolean = false) => {
-        handleChange(e)
+    // (2026-11-24) Νομός/Πόλη με πληκτρολόγηση (GeoCombobox): νέα τιμή → καθαρίζουν τα εξαρτώμενα πεδία
+    const selectState = useCallback((v: string, isShipping: boolean = false) => {
+        setFieldValue(isShipping ? 'ship_state' : 'state', v)
         setFieldValue(isShipping ? 'ship_city' : 'city', "")
-    }, [handleChange, setFieldValue])
-
-    const handleCityChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>, isShipping: boolean = false) => {
-        handleChange(e)
         setFieldValue(isShipping ? 'ship_zipCode' : 'zipCode', "")
-    }, [handleChange, setFieldValue])
+    }, [setFieldValue])
+
+    const selectCity = useCallback((v: string, isShipping: boolean = false) => {
+        setFieldValue(isShipping ? 'ship_city' : 'city', v)
+        setFieldValue(isShipping ? 'ship_zipCode' : 'zipCode', "")
+    }, [setFieldValue])
 
     const isInvoiceValue = formik.values.isInvoice
     const onCheckNoteChange = useCallback(() => {
@@ -480,18 +483,18 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                             <label htmlFor="state" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                                 Νομός*
                             </label>
-                            <select
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition-colors"
+                            <GeoCombobox
                                 id='state'
                                 name='state'
-                                onChange={(e) => handleStateChange(e, false)}
+                                value={formik.values.state}
+                                options={states?.countries?.data[0]?.attributes.states.data.map(x => x.attributes.name) ?? []}
+                                placeholder='Γράψτε ή επιλέξτε νομό'
+                                loading={loadingState}
+                                onSelect={(v) => selectState(v, false)}
                                 onBlur={formik.handleBlur}
-                                value={formik.values.state}>
-                                <option value="">--Επέλεξε Νομό--</option>
-                                {!loadingState && states?.countries?.data[0]?.attributes.states.data.map(x => (
-                                    <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>
-                                ))}
-                            </select>
+                                invalid={!!(formik.errors.state && formik.touched.state)}
+                                inputClassName="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition-colors"
+                            />
                             {formik.errors.state && formik.touched.state && (
                                 <small className="text-sm text-red-500 mt-1 block">{formik.errors.state}</small>
                             )}
@@ -501,18 +504,18 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                             <label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                                 Πόλη*
                             </label>
-                            <select
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition-colors"
+                            <GeoCombobox
                                 id='city'
                                 name='city'
-                                onChange={(e) => handleCityChange(e, false)}
+                                value={formik.values.city}
+                                options={regions?.states?.data[0]?.attributes.regions.data.map(x => x.attributes.name) ?? []}
+                                placeholder='Γράψτε ή επιλέξτε πόλη'
+                                loading={loadingRegions}
+                                onSelect={(v) => selectCity(v, false)}
                                 onBlur={formik.handleBlur}
-                                value={formik.values.city}>
-                                <option value="">--Επέλεξε πόλη--</option>
-                                {!loadingRegions && regions?.states?.data[0]?.attributes.regions.data.map(x => (
-                                    <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>
-                                ))}
-                            </select>
+                                invalid={!!(formik.errors.city && formik.touched.city)}
+                                inputClassName="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition-colors"
+                            />
                             {formik.errors.city && formik.touched.city && (
                                 <small className="text-sm text-red-500 mt-1 block">{formik.errors.city}</small>
                             )}
@@ -694,18 +697,18 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                     <label htmlFor="ship_state" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                                         Νομός*
                                     </label>
-                                    <select
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition-colors"
+                                    <GeoCombobox
                                         id='ship_state'
                                         name='ship_state'
-                                        onChange={(e) => handleStateChange(e, true)}
+                                        value={formik.values.ship_state}
+                                        options={shipStates?.countries?.data[0]?.attributes.states.data.map(x => x.attributes.name) ?? []}
+                                        placeholder='Γράψτε ή επιλέξτε νομό'
+                                        loading={loadingShipState}
+                                        onSelect={(v) => selectState(v, true)}
                                         onBlur={formik.handleBlur}
-                                        value={formik.values.ship_state}>
-                                        <option value="">--Επέλεξε Νομό--</option>
-                                        {!loadingShipState && shipStates?.countries?.data[0]?.attributes.states.data.map(x => (
-                                            <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>
-                                        ))}
-                                    </select>
+                                        invalid={!!(formik.errors.ship_state && formik.touched.ship_state)}
+                                        inputClassName="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition-colors"
+                                    />
                                     {formik.errors.ship_state && formik.touched.ship_state && (
                                         <small className="text-sm text-red-500 mt-1 block">{formik.errors.ship_state}</small>
                                     )}
@@ -715,18 +718,18 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                     <label htmlFor="ship_city" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                                         Πόλη*
                                     </label>
-                                    <select
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition-colors"
+                                    <GeoCombobox
                                         id='ship_city'
                                         name='ship_city'
-                                        onChange={(e) => handleCityChange(e, true)}
+                                        value={formik.values.ship_city}
+                                        options={shipRegions?.states?.data[0]?.attributes.regions.data.map(x => x.attributes.name) ?? []}
+                                        placeholder='Γράψτε ή επιλέξτε πόλη'
+                                        loading={loadingShipRegions}
+                                        onSelect={(v) => selectCity(v, true)}
                                         onBlur={formik.handleBlur}
-                                        value={formik.values.ship_city}>
-                                        <option value="">--Επέλεξε πόλη--</option>
-                                        {!loadingShipRegions && shipRegions?.states?.data[0]?.attributes.regions.data.map(x => (
-                                            <option key={x.id} value={x.attributes.name}>{x.attributes.name}</option>
-                                        ))}
-                                    </select>
+                                        invalid={!!(formik.errors.ship_city && formik.touched.ship_city)}
+                                        inputClassName="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition-colors"
+                                    />
                                     {formik.errors.ship_city && formik.touched.ship_city && (
                                         <small className="text-sm text-red-500 mt-1 block">{formik.errors.ship_city}</small>
                                     )}

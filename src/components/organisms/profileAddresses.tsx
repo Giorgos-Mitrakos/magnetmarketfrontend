@@ -2,6 +2,7 @@
 
 import { useFormik } from "formik"
 import PostalSuggestions from '@/components/atoms/PostalSuggestions'
+import GeoCombobox from '@/components/atoms/GeoCombobox'
 import * as Yup from 'yup'
 import CustomInput from "../atoms/input"
 import { useGeo } from "@/hooks/useGeo"
@@ -203,6 +204,49 @@ const StatusMessage = ({ type, message, onClose }: { type: 'success' | 'error'; 
 )
 
 // Select με ετικέτα/σφάλμα — έξω από τη φόρμα, ώστε να μη «ξαναχτίζεται» σε κάθε πλήκτρο (2026-10-26)
+
+// (2026-11-24) Νομός/Πόλη με πληκτρολόγηση — ίδια εμφάνιση με τα υπόλοιπα πεδία της σελίδας
+const ComboField = ({ id, label, value, options, placeholder, loading, onSelect, onBlur, error, touched }: {
+    id: string
+    label: string
+    value: string
+    options: string[]
+    placeholder: string
+    loading?: boolean
+    onSelect: (v: string) => void
+    onBlur: (e: React.FocusEvent<HTMLInputElement>) => void
+    error?: string
+    touched?: boolean
+}) => (
+    <div className="relative">
+        <label htmlFor={id} className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            {label}
+        </label>
+        <GeoCombobox
+            id={id}
+            name={id}
+            value={value}
+            options={options}
+            placeholder={placeholder}
+            loading={loading}
+            onSelect={onSelect}
+            onBlur={onBlur}
+            invalid={!!(error && touched)}
+            inputClassName={`w-full h-min p-2 border-2 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-siteColors-purple focus:border-siteColors-purple transition-all duration-200 ${
+                error && touched
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+            }`}
+        />
+        {error && touched && (
+            <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
+                <FaExclamationTriangle className="w-3 h-3 mr-1" />
+                {error}
+            </p>
+        )}
+    </div>
+)
+
 const SelectInput = ({ 
     id, 
     name, 
@@ -694,52 +738,33 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, onSaved }
                                 </SelectInput>
                                 )}
 
-                                <SelectInput
+                                <ComboField
                                     id="state"
-                                    name="state"
-                                    value={formik.values.state}
-                                    onChange={(e) => {
-                                        formik.handleChange(e)
-                                        formik.setFieldValue('city', "")
-                                        formik.setFieldValue('zipCode', "")
-                                    }}
-                                    onBlur={formik.handleBlur}
                                     label="Νομός *"
+                                    value={formik.values.state}
+                                    options={states?.countries?.data[0]?.attributes.states.data.map(x => x.attributes.name) ?? []}
+                                    placeholder="Γράψτε ή επιλέξτε νομό"
                                     loading={loadingState}
+                                    onSelect={(v) => { formik.setFieldValue('state', v); formik.setFieldValue('city', ""); formik.setFieldValue('zipCode', ""); }}
+                                    onBlur={formik.handleBlur}
                                     error={formik.errors.state}
                                     touched={formik.touched.state}
-                                >
-                                    <option value="">-- Επέλεξε Νομό --</option>
-                                    {states?.countries?.data[0]?.attributes.states.data.map(x => (
-                                        <option key={x.id} value={x.attributes.name}>
-                                            {x.attributes.name}
-                                        </option>
-                                    ))}
-                                </SelectInput>
+                                />
                             </FormFieldGroup>
 
                             <FormFieldGroup>
-                                <SelectInput
+                                <ComboField
                                     id="city"
-                                    name="city"
-                                    value={formik.values.city}
-                                    onChange={(e) => {
-                                        formik.handleChange(e)
-                                        formik.setFieldValue('zipCode', "")
-                                    }}
-                                    onBlur={formik.handleBlur}
                                     label="Πόλη *"
+                                    value={formik.values.city}
+                                    options={regions?.states?.data[0]?.attributes.regions.data.map(x => x.attributes.name) ?? []}
+                                    placeholder="Γράψτε ή επιλέξτε πόλη"
                                     loading={loadingRegions}
+                                    onSelect={(v) => { formik.setFieldValue('city', v); formik.setFieldValue('zipCode', ""); }}
+                                    onBlur={formik.handleBlur}
                                     error={formik.errors.city}
                                     touched={formik.touched.city}
-                                >
-                                    <option value="">-- Επέλεξε Πόλη --</option>
-                                    {regions?.states?.data[0]?.attributes.regions.data.map(x => (
-                                        <option key={x.id} value={x.attributes.name}>
-                                            {x.attributes.name}
-                                        </option>
-                                    ))}
-                                </SelectInput>
+                                />
 
                                 <div className="relative">
                                     <label htmlFor="zipCode" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
@@ -903,45 +928,33 @@ const ProfileAddresses = ({ userInfo, billingAddress, shippingAddress, onSaved }
                                     </SelectInput>
                                     )}
 
-                                    <SelectInput
+                                    <ComboField
                                         id="ship_state"
-                                        name="ship_state"
-                                        value={formik.values.ship_state}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
                                         label="Νομός *"
+                                        value={formik.values.ship_state}
+                                        options={shipStates?.countries?.data[0]?.attributes.states.data.map(x => x.attributes.name) ?? []}
+                                        placeholder="Γράψτε ή επιλέξτε νομό"
                                         loading={loadingShipState}
+                                        onSelect={(v) => { formik.setFieldValue('ship_state', v); formik.setFieldValue('ship_city', ""); formik.setFieldValue('ship_zipCode', ""); }}
+                                        onBlur={formik.handleBlur}
                                         error={formik.errors.ship_state}
                                         touched={formik.touched.ship_state}
-                                    >
-                                        <option value="">-- Επέλεξε Νομό --</option>
-                                        {shipStates?.countries?.data[0]?.attributes.states.data.map(x => (
-                                            <option key={x.id} value={x.attributes.name}>
-                                                {x.attributes.name}
-                                            </option>
-                                        ))}
-                                    </SelectInput>
+                                    />
                                 </FormFieldGroup>
 
                                 <FormFieldGroup>
-                                    <SelectInput
+                                    <ComboField
                                         id="ship_city"
-                                        name="ship_city"
-                                        value={formik.values.ship_city}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
                                         label="Πόλη *"
+                                        value={formik.values.ship_city}
+                                        options={shipRegions?.states?.data[0]?.attributes.regions.data.map(x => x.attributes.name) ?? []}
+                                        placeholder="Γράψτε ή επιλέξτε πόλη"
                                         loading={loadingShipRegions}
+                                        onSelect={(v) => { formik.setFieldValue('ship_city', v); formik.setFieldValue('ship_zipCode', ""); }}
+                                        onBlur={formik.handleBlur}
                                         error={formik.errors.ship_city}
                                         touched={formik.touched.ship_city}
-                                    >
-                                        <option value="">-- Επέλεξε Πόλη --</option>
-                                        {shipRegions?.states?.data[0]?.attributes.regions.data.map(x => (
-                                            <option key={x.id} value={x.attributes.name}>
-                                                {x.attributes.name}
-                                            </option>
-                                        ))}
-                                    </SelectInput>
+                                    />
 
                                     <div className="relative">
                                         <label htmlFor="ship_zipCode" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
