@@ -53,12 +53,14 @@ const HeaderActions = ({ user }: any) => {
                     </div>
                 </div>
             </div>}
-            <p className=" text-xs font-semibold text-siteColors-purple dark:text-slate-200 pr-2"
-                aria-label="Όνομα συνδεδεμένου λογαριασμού">
+            {/* (2026-11-24) «Είσοδος»: αρκετά μεγάλο και με απόσταση από το εικονίδιο λογαριασμού για να πατιέται
+                (PageSpeed: «Touch targets do not have sufficient size or spacing»). Χωρίς aria-label: το όνομα του
+                κουμπιού είναι το ορατό κείμενο (το «Σύνδεση» δεν ταίριαζε με το «Είσοδος»). */}
+            <div className="text-xs font-semibold text-siteColors-purple dark:text-slate-200 pr-2">
                 {user ? <span className="block truncate" title={user}>Γεια σου, {user}!</span> :
-                    <button className="uppercase text-xs font-semibold text-siteColors-purple dark:text-slate-200"
-                        onClick={() => signIn()} aria-label="Σύνδεση">Είσοδος</button>}
-            </p>
+                    <button type="button" className="inline-flex items-center min-h-[24px] px-2 py-1 mt-1 rounded uppercase text-xs font-semibold text-siteColors-purple hover:underline dark:text-slate-200"
+                        onClick={() => signIn()}>Είσοδος</button>}
+            </div>
             {/* <div className="absolute w-full">
                 <Minicart />
             </div> */}
