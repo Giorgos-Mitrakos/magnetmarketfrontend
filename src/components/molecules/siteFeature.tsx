@@ -22,9 +22,10 @@ const SiteFeature = (props: SiteFeatureProps) => {
             </div>
             
             <div className="pl-4">
-                <h3 className={`font-semibold text-slate-800 dark:text-slate-100 mb-1 group-hover:text-siteColors-lightblue dark:group-hover:text-blue-400 transition-colors duration-300 ${props.isMobile ? 'text-sm' : 'text-sm md:text-base'}`}>
+                {/* (2026-11-24) <p> αντί για <h3>: δεν είναι τίτλος ενότητας και χαλούσε τη σειρά επικεφαλίδων (PageSpeed) */}
+                <p className={`font-semibold text-slate-800 dark:text-slate-100 mb-1 group-hover:text-siteColors-lightblue dark:group-hover:text-blue-400 transition-colors duration-300 ${props.isMobile ? 'text-sm' : 'text-sm md:text-base'}`}>
                     {props.header}
-                </h3>
+                </p>
                 <p className={`text-slate-600 dark:text-slate-300 leading-tight ${props.isMobile ? 'text-xs' : 'text-xs md:text-sm'}`}>
                     {props.content}
                 </p>

@@ -154,10 +154,13 @@ const DrawerHeader = ({
         <div className="flex justify-start">
             {showBackButton && (
                 <button
+                    type="button"
+                    // (2026-11-24) Κουμπιά μόνο με εικονίδιο: όνομα για αναγνώστες οθόνης (PageSpeed / προσβασιμότητα)
+                    aria-label="Πίσω"
                     className="flex items-center text-gray-800 dark:text-white text-sm p-2 rounded-lg hover:bg-siteColors-lightblue/10 transition-colors"
                     onClick={onBack}
                 >
-                    <FaArrowLeftLong className="w-4 h-4 mr-2" />
+                    <FaArrowLeftLong className="w-4 h-4 mr-2" aria-hidden="true" />
                 </button>
             )}
         </div>
@@ -169,10 +172,12 @@ const DrawerHeader = ({
         <div className="flex justify-end">
             {showCloseButton && (
                 <button
+                    type="button"
                     onClick={onClose}
+                    aria-label="Κλείσιμο μενού"
                     className="p-2 text-gray-800 dark:text-white hover:bg-siteColors-lightblue/10 rounded-lg transition-colors"
                 >
-                    <AiOutlineClose className="text-xl" />
+                    <AiOutlineClose className="text-xl" aria-hidden="true" />
                 </button>
             )}
         </div>

@@ -89,7 +89,10 @@ const HeroBanners = ({ slides, layout = 'full', autoplaySeconds = 5, priority = 
 
   return (
     <section className="w-full my-4">
-      <div className="aspect-[16/9] sm:aspect-[21/9] md:aspect-[5/2] lg:aspect-[16/5] xl:aspect-[16/5] rounded-xl overflow-hidden">
+      {/* (2026-11-24) Δύο σταθερές αναλογίες, ίδιες με τις εικόνες που ανεβαίνουν:
+          κινητό (κάτω από 768px, «mobile_image») 16:9 → 1200×675 · υπολογιστής 16:5 → 1920×600.
+          Πριν άλλαζε σε 4 πλάτη (16:9, 21:9, 5:2, 16:5) και η εικόνα παραμορφωνόταν. */}
+      <div className="aspect-[16/9] md:aspect-[16/5] rounded-xl overflow-hidden">
         <HeroCarousel
           carousel={slides}
           className="h-full"

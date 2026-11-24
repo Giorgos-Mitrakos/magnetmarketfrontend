@@ -25,6 +25,9 @@ const ResponsiveImage = ({ image, mobileImage, alt, sizes, priority = false, eag
         sizes,
         // (2026-10-28) Next.js 16: το priority λέγεται πλέον preload
         preload: priority,
+        // (2026-11-24) Η κύρια εικόνα (LCP) με υψηλή προτεραιότητα — το ζητούσε το PageSpeed
+        // («fetchpriority=high should be applied to the image preload request»)
+        fetchPriority: priority ? ('high' as const) : undefined,
         loading: priority || eager ? ('eager' as const) : ('lazy' as const),
         quality: 85,
     }

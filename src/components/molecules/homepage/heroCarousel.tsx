@@ -147,7 +147,8 @@ const HeroCarousel = ({
                     fill
                     priority={banner.priority}
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 80vw"
-                    className="object-fill transition-transform duration-700 ease-out group-hover/slide:scale-105 rounded-xl"
+                    // (2026-11-24) object-cover: εικόνα με άλλη αναλογία κόβεται λίγο στις άκρες αντί να παραμορφώνεται
+                    className="object-cover transition-transform duration-700 ease-out group-hover/slide:scale-105 rounded-xl"
                   />
                 </div>
               )

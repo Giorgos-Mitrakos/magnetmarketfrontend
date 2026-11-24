@@ -179,7 +179,9 @@ export default async function RootLayout({
     <html lang="el" suppressHydrationWarning>
       <head>
         {/* Preconnect to external domains */}
-        <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL}  crossOrigin="anonymous" />
+        {/* (2026-11-24) Χωρίς preconnect στο API: ο browser δεν το καλεί στην πρώτη φόρτωση (οι εικόνες
+            περνούν από το /_next/image του site) — το PageSpeed το έβγαζε «Unused preconnect».
+            Μένει μόνο το φθηνό dns-prefetch για όσες σελίδες το χρειαστούν αργότερα. */}
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_API_URL} />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://www.google-analytics.com" />
