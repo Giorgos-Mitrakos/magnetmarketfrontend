@@ -1,21 +1,16 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { setCookie } from "cookies-next";
 import { FaCookieBite, FaTimes } from "react-icons/fa";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 
 export default function CookieBannerClient({ consent }: { consent: boolean }) {
-  const [hidden, setHidden] = useState(true);
-  const [animate, setAnimate] = useState(false);
-
-  useEffect(() => {
-    if (!consent) {
-      setTimeout(() => {
-        setHidden(false);
-        setTimeout(() => setAnimate(true), 10);
-      }, 800);
-    }
-  }, [consent]);
+  // (2026-11-25) Εμφανίζεται ΑΜΕΣΩΣ από το HTML (ο server ξέρει ήδη αν υπάρχει απάντηση — βλ.
+  // cookieBannerWrapper). Πριν περίμενε τη JavaScript + 0,8″ + fade-in και, ως το μεγαλύτερο
+  // στοιχείο στην οθόνη του κινητού, έσπρωχνε το LCP του PageSpeed στα ~4″.
+  const [hidden, setHidden] = useState(consent);
+  // Μόνο για το κλείσιμο (fade-out)
+  const [animate, setAnimate] = useState(true);
 
   const updateConsent = (allowed: boolean) => {
     // Facebook Pixel: ξεκινά σε «revoke» (layout.tsx) αν δεν υπάρχει συγκατάθεση
