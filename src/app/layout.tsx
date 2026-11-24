@@ -184,7 +184,8 @@ export default async function RootLayout({
             Μένει μόνο το φθηνό dns-prefetch για όσες σελίδες το χρειαστούν αργότερα. */}
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_API_URL} />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
-        <link rel="preconnect" href="https://www.google-analytics.com" />
+        {/* (2026-11-24) crossorigin: το GA στέλνει τα δεδομένα με αίτημα CORS — χωρίς αυτό η σύνδεση δεν ξαναχρησιμοποιούνταν (PageSpeed) */}
+        <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://connect.facebook.net" />
 
         {/* Google Consent Mode v2 - Dynamic based on cookie */}

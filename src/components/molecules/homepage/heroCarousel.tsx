@@ -6,7 +6,7 @@ import ResponsiveImage from './responsiveImage';
 import { EffectFade, Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { IHeroSlide } from '@/lib/queries/homepage';
 import { HiChevronLeft, HiChevronRight, HiPlay, HiPause } from 'react-icons/hi';
-import { useRef, useState, useCallback, useMemo } from 'react';
+import { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import type { Swiper as SwiperType } from 'swiper';
 import { TrackableLink } from '@/components/atoms/TrackableLink'; 
 
@@ -45,6 +45,25 @@ const HeroCarousel = ({
       priority: priority && index === 0
     })) || [];
   }, [carousel]);
+
+  // (2026-11-24) Το πρώτο banner εμφανίζεται ΑΜΕΣΩΣ ως απλή εικόνα (από το HTML) και το Swiper
+  // ενεργοποιείται από πάνω του όταν ο browser ελευθερωθεί. Πριν το Swiper, με το «στήσιμο» του
+  // loop και το fade-in, ξανα-ζωγράφιζε την εικόνα ~1,8″ αργότερα (PageSpeed: «Element render delay»).
+  // Με ένα μόνο banner δεν φορτώνει καθόλου Swiper.
+  const [swiperReady, setSwiperReady] = useState(false);
+  useEffect(() => {
+    if (processedCarousel.length < 2) return;
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number
+      cancelIdleCallback?: (id: number) => void
+    };
+    if (w.requestIdleCallback) {
+      const id = w.requestIdleCallback(() => setSwiperReady(true), { timeout: 3000 });
+      return () => w.cancelIdleCallback?.(id);
+    }
+    const t = setTimeout(() => setSwiperReady(true), 1500);
+    return () => clearTimeout(t);
+  }, [processedCarousel.length]);
 
   const handleSlideChange = useCallback((swiper: SwiperType) => {
     setCurrentSlide(swiper.realIndex);
@@ -92,6 +111,34 @@ const HeroCarousel = ({
     <div className={`relative group overflow-hidden rounded-xl shadow-2xl h-full ${className}`}>
       {/* (2026-10-26) Χωρίς spinner πάνω από το πρώτο banner: η εικόνα είναι ήδη στο HTML */}
 
+      {/* (2026-11-24) Σταθερό πρώτο banner — μένει από κάτω και όταν ανοίξει το Swiper (ίδια εικόνα, χωρίς «αναβόσβημα») */}
+      <div className="absolute inset-0" aria-hidden={swiperReady || undefined}>
+        <ResponsiveImage
+          image={processedCarousel[0].image}
+          mobileImage={processedCarousel[0].mobile_image}
+          alt={processedCarousel[0].alt}
+          fill
+          priority={processedCarousel[0].priority}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 80vw"
+          className="object-cover rounded-xl"
+        />
+        {!swiperReady && processedCarousel[0].href && (
+          <TrackableLink
+            href={processedCarousel[0].href}
+            target={processedCarousel[0].open_in_new_tab ? '_blank' : undefined}
+            className="absolute inset-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            bannerId={`banner_${processedCarousel[0].id || 0}`}
+            bannerName={processedCarousel[0].title || processedCarousel[0].link_label || 'Banner 1'}
+            bannerPosition={`${trackingLocation}_slide_0`}
+            bannerType="hero"
+          >
+            <span className="sr-only">{processedCarousel[0].alt}</span>
+          </TrackableLink>
+        )}
+      </div>
+
+      {swiperReady && (
+      <div className="absolute inset-0">
       <Swiper
         onSwiper={handleSwiperInit}
         onSlideChange={handleSlideChange}
@@ -145,7 +192,7 @@ const HeroCarousel = ({
                     mobileImage={banner.mobile_image}
                     alt={banner.alt}
                     fill
-                    priority={banner.priority}
+                    priority={false}
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 80vw"
                     // (2026-11-24) object-cover: εικόνα με άλλη αναλογία κόβεται λίγο στις άκρες αντί να παραμορφώνεται
                     className="object-cover transition-transform duration-700 ease-out group-hover/slide:scale-105 rounded-xl"
@@ -170,9 +217,11 @@ const HeroCarousel = ({
           </SwiperSlide>
         ))}
       </Swiper>
+      </div>
+      )}
 
       {/* Controls */}
-      {showControls && processedCarousel.length > 1 && (
+      {showControls && swiperReady && processedCarousel.length > 1 && (
         <>
           <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out">
             <button
