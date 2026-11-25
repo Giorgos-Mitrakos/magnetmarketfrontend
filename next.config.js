@@ -23,6 +23,10 @@ const nextConfig = {
     // (2026-10-28) Next.js 16: επιτρέπονται μόνο οι ποιότητες που δηλώνονται εδώ
     // (όσες χρησιμοποιούμε σε quality={…}). Άλλη τιμή → στρογγυλεύει στην πλησιέστερη.
     qualities: [60, 75, 80, 85, 90],
+    // (2026-11-25) Οι βελτιστοποιημένες εικόνες μένουν 30 ημέρες στην cache του browser (ήταν λίγες ώρες —
+    // WebPageTest «Cache Static Content: D»). Τα αρχεία του Strapi έχουν μοναδικό όνομα, άρα μια νέα εικόνα
+    // παίρνει νέο URL και δεν κινδυνεύουμε να βλέπει ο επισκέπτης την παλιά.
+    minimumCacheTTL: 2592000,
     // (2026-10-28) Next.js 16: μπλοκάρει εικόνες από τοπικές IP. Τις επιτρέπουμε μόνο
     // όταν το Strapi είναι τοπικό (ανάπτυξη) — στην παραγωγή μένει κλειστό.
     dangerouslyAllowLocalIP: isLocalApi,
@@ -46,8 +50,23 @@ const nextConfig = {
   // (2026-11-18) Δοκιμαστικό site (π.χ. test.magnetmarket.gr): SITE_NOINDEX=true στο .env
   // → καμία σελίδα στο Google (X-Robots-Tag σε όλες τις απαντήσεις + robots.txt «Disallow: /»).
   async headers() {
-    if (process.env.SITE_NOINDEX !== 'true') return []
-    return [{ source: '/:path*', headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] }]
+    // (2026-11-25) Headers ασφαλείας σε όλες τις σελίδες (securityheaders.com).
+    // - X-Frame-Options: το site δεν ανοίγει μέσα σε <iframe> άλλου site (clickjacking)
+    // - X-Content-Type-Options: ο browser δεν «μαντεύει» τύπο αρχείου
+    // - Referrer-Policy: σε άλλα sites πηγαίνει μόνο το https://magnetmarket.gr, όχι ολόκληρη η διεύθυνση
+    // - Permissions-Policy: κλειστά κάμερα / μικρόφωνο / τοποθεσία (δεν τα χρησιμοποιεί το site)
+    // Το Content-Security-Policy ΔΕΝ μπαίνει εδώ: θέλει λίστα με όλα τα scripts τρίτων
+    // (Google, Facebook, BestPrice, τράπεζα) και, αν λείπει ένα, σπάει λειτουργία.
+    const security = [
+      { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+      { key: 'X-Content-Type-Options', value: 'nosniff' },
+      { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+      { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()' },
+    ]
+    const noindex = process.env.SITE_NOINDEX === 'true'
+      ? [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }]
+      : []
+    return [{ source: '/:path*', headers: [...security, ...noindex] }]
   },
 }
 
