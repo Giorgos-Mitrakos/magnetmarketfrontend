@@ -10,7 +10,7 @@ import { notFound, permanentRedirect } from "next/navigation"
 import { Metadata } from "next"
 import CategoryPageTemplate from "@/components/templates/categoryPage"
 import { getCategoriesMapping, getCategoryMetadata, getCategoryProducts, ICategoryMetadata } from "@/lib/queries/categoryQuery"
-import { generateCategoryStructuredData, generateSubcategoriesItemList } from "@/lib/helpers/structuredDataHelpers"
+import { generateCategoryStructuredData } from "@/lib/helpers/structuredDataHelpers"
 import { getStrapiMedia } from "@/repositories/medias"
 import { jsonLd } from '@/lib/helpers/jsonLd'
 
@@ -97,12 +97,9 @@ export async function CategoryRoute({ path, searchParams }: { path: string[], se
             .slice(0, 16)
             .map((b) => ({ name: `${meta.name} ${b.name}`, href: `/brands/${b.slug}/${meta.slug}`, count: b.numberOfItems }))
 
-    const structuredData = meta.categories?.length > 0
-        ? [mainStructuredData, {
-            '@context': 'https://schema.org',
-            ...generateSubcategoriesItemList({ categoryName: meta.name, categories: meta.categories, baseUrl }),
-        }]
-        : [mainStructuredData]
+    // (2026-11-25) Η Google δέχεται ΜΙΑ λίστα (ItemList) ανά σελίδα — με δεύτερη έβγαζε σφάλμα «Έχουν καθοριστεί πολλά στοιχεία ListItem στη σελίδα» (Rich Results).
+    // Μένει μόνο η λίστα προϊόντων (μέσα στο mainStructuredData)· οι υποκατηγορίες φαίνονται ως σύνδεσμοι στη σελίδα.
+    const structuredData = [mainStructuredData]
 
     return (
         <>

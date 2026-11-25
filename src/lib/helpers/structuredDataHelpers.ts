@@ -325,7 +325,9 @@ export function generateBrandProductsStructuredData({
     itemList,
   ]
 
-  if (categoriesItemList) graph.push(categoriesItemList)
+  // (2026-11-25) Η Google δέχεται ΜΙΑ λίστα (ItemList) ανά σελίδα — με δεύτερη έβγαζε σφάλμα «Έχουν καθοριστεί πολλά στοιχεία ListItem στη σελίδα» (Rich Results).
+  // Μένει μόνο η λίστα προϊόντων· οι κατηγορίες του brand φαίνονται ως σύνδεσμοι μέσα στη σελίδα.
+  void categoriesItemList
 
   return {
     '@context': 'https://schema.org',
@@ -465,9 +467,10 @@ export function generateHomepageStructuredData({
     webPage,
   ]
 
-  // Πρόσθεσε ItemLists αν υπάρχουν
+  // (2026-11-25) Η Google δέχεται ΜΙΑ λίστα (ItemList) ανά σελίδα — με δεύτερη έβγαζε σφάλμα «Έχουν καθοριστεί πολλά στοιχεία ListItem στη σελίδα» (Rich Results).
+  // Στην αρχική μένουν μόνο οι κατηγορίες· οι κατασκευαστές φαίνονται ως σύνδεσμοι μέσα στη σελίδα.
   if (categoriesItemList) graph.push(categoriesItemList)
-  if (brandsItemList) graph.push(brandsItemList)
+  void brandsItemList
 
   return {
     '@context': 'https://schema.org',

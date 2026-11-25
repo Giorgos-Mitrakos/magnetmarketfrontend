@@ -13,6 +13,8 @@ export function returnPolicy(): MerchantReturnPolicy {
     merchantReturnDays: 14,
     returnMethod: 'https://schema.org/ReturnByMail',
     returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility',
+    // (2026-11-25) Υπαναχώρηση 14 ημερών: πλήρης επιστροφή της τιμής (Rich Results: «Λείπει το πεδίο refundType»)
+    refundType: 'https://schema.org/FullRefund',
   }
 }
 
@@ -72,6 +74,10 @@ export const storeStructuredData: Store = {
 
   name: 'Magnet Market',
   url: 'https://magnetmarket.gr',
+  // (2026-11-25) Τηλέφωνο + εικόνα και στο κατάστημα (Rich Results: «Λείπει το πεδίο telephone / image»).
+  // Στην αρχική το τηλέφωνο αντικαθίσταται από τις ρυθμίσεις (storeWithInfo).
+  telephone: '+30-2221121657',
+  image: 'https://magnetmarket.gr/MM-LOGO-220-02.jpg',
 
   parentOrganization: {
     '@id': 'https://magnetmarket.gr/#organization',
@@ -81,10 +87,10 @@ export const storeStructuredData: Store = {
     '@type': 'PostalAddress',
     streetAddress: 'Απολλόδωρου του Κυζικηνού',
     addressLocality: 'Νέα Αρτάκη',
+    addressRegion: 'Ευβοίας',
     postalCode: '34600',
     addressCountry: 'GR',
   },
-
 
   geo: {
     '@type': 'GeoCoordinates',
