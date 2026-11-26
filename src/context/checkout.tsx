@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { ICartItem } from "@/lib/interfaces/cart";
 import { ICouponApplianceResponse, ICouponValidationResponse } from "@/lib/interfaces/coupon";
 import { flattenJSON } from "@/lib/helpers/helpers";
+import { useSession } from "next-auth/react";
+import { useCartSnapshot } from "@/lib/helpers/cartSnapshot";
 
 interface IShippingContext {
     checkout: ICheckoutState
@@ -85,6 +87,10 @@ export const CheckoutProvider = ({ children }: any) => {
             fetchShipping()
         }
     }, [isClient]);
+
+    // (2026-11-25) Αντίγραφο καλαθιού για τις υπενθυμίσεις «Ξέχασες κάτι στο καλάθι»
+    const { data: session } = useSession()
+    useCartSnapshot(checkout.cart, checkout.addresses.billing.email, isClient, session?.user?.email)
 
     // Η τελευταία κατάσταση του ταμείου για το παρακάτω effect: τρέχει μόνο όταν
     // αλλάζει κάτι που επηρεάζει το κόστος, αλλά διαβάζει πάντα την τρέχουσα κατάσταση

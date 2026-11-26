@@ -17,6 +17,7 @@ import { useGeo } from "@/hooks/useGeo"
 import { useCheckout } from "@/context/checkout"
 import { ICountries, ICustomerInfo, IRegionPostals, IRegions, IStates } from "@/lib/interfaces/addresses"
 import { IProfile } from "./checkout/CustomerInfoClient"
+import { rememberCartEmail } from "@/lib/helpers/cartSnapshot";
 
 export type FormInputRef = {
     /** Έλεγχος + αποθήκευση· true όταν τα στοιχεία είναι σωστά και αποθηκεύτηκαν */
@@ -304,9 +305,9 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                             name='email'
                             autoComplete="email"
                             inputMode="email"
-                            hint="Εδώ θα λάβετε την επιβεβαίωση και την ενημέρωση για την αποστολή"
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
+                            hint="Εδώ θα λάβετε την επιβεβαίωση και την ενημέρωση για την αποστολή. Αν δεν ολοκληρώσετε την παραγγελία, μπορεί να σας στείλουμε μια υπενθύμιση για το καλάθι σας."
+                            onChange={(e) => { formik.handleChange(e); rememberCartEmail(e.target.value) }}
+                            onBlur={(e) => { formik.handleBlur(e); rememberCartEmail((e.target as HTMLInputElement).value) }}
                             value={formik.values.email}
                             label='Email*'
                             error={formik.touched.email ? formik.errors.email : undefined}

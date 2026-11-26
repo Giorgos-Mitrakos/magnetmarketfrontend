@@ -63,6 +63,25 @@ const nextConfig = {
       { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
       { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()' },
     ]
+    // (2026-11-25) Content-Security-Policy σε «μόνο αναφορά»: ΔΕΝ μπλοκάρει τίποτα, οι browsers
+    // στέλνουν ό,τι θα μπλόκαρε στο /api/csp-report → αρχείο csp-reports.log στον server.
+    // Μετά τον έλεγχο (~09/12): συμπλήρωση της λίστας και αλλαγή σε 'Content-Security-Policy'.
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://scripts.bestprice.gr https://360.bestprice.gr https://apis.google.com",
+      "style-src 'self' 'unsafe-inline'",
+      `img-src 'self' data: blob: ${apiUrl.origin} https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://www.facebook.com https://*.bestprice.gr https://i.ytimg.com https://*.google.com https://*.gstatic.com`,
+      "font-src 'self' data:",
+      `connect-src 'self' ${apiUrl.origin} https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://www.facebook.com https://connect.facebook.net https://*.bestprice.gr`,
+      "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://www.facebook.com https://www.googletagmanager.com https://*.google.com https://*.bestprice.gr",
+      "form-action 'self' https://paycenter.piraeusbank.gr",
+      "frame-ancestors 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+      'report-uri /api/csp-report',
+    ].join('; ')
+    security.push({ key: 'Content-Security-Policy-Report-Only', value: csp })
+
     const noindex = process.env.SITE_NOINDEX === 'true'
       ? [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }]
       : []

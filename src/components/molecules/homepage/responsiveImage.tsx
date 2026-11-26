@@ -48,7 +48,7 @@ const ResponsiveImage = ({ image, mobileImage, alt, sizes, priority = false, eag
         )
     }
 
-    const { props: { srcSet: desktopSrcSet, sizes: desktopSizes } } = getImageProps({
+    const { props: { srcSet: desktopSrcSet, sizes: desktopSizes, src: desktopSrc } } = getImageProps({
         ...common,
         ...dims(image),
         alt,
@@ -61,12 +61,42 @@ const ResponsiveImage = ({ image, mobileImage, alt, sizes, priority = false, eag
         src: getStrapiMedia(mobileImage.url)!,
     })
 
+    // (2026-11-26) Το getImageProps ΔΕΝ βάζει προφόρτωση (το preload/priority ισχύει μόνο στο <Image>).
+    // Με ξεχωριστή εικόνα κινητού η κύρια εικόνα (LCP) έμενε χωρίς <link rel="preload"> και ο browser
+    // την ανακάλυπτε αργά. Δύο preload με media: κατεβαίνει ΜΟΝΟ αυτό που ταιριάζει στην οθόνη.
+    // Το React 19 μεταφέρει τα <link> στο <head>.
+    const preloads = priority ? (
+        <>
+            <link
+                rel="preload"
+                as="image"
+                href={mobileProps.src}
+                imageSrcSet={mobileProps.srcSet}
+                imageSizes={mobileProps.sizes}
+                media="(max-width: 767px)"
+                fetchPriority="high"
+            />
+            <link
+                rel="preload"
+                as="image"
+                href={desktopSrc}
+                imageSrcSet={desktopSrcSet}
+                imageSizes={desktopSizes}
+                media="(min-width: 768px)"
+                fetchPriority="high"
+            />
+        </>
+    ) : null
+
     return (
+        <>
+        {preloads}
         <picture className={fill ? 'contents' : 'block'}>
             <source media="(min-width: 768px)" srcSet={desktopSrcSet} sizes={desktopSizes} />
             {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
             <img {...mobileProps} className={`${sizeClass} ${className}`} />
         </picture>
+        </>
     )
 }
 
