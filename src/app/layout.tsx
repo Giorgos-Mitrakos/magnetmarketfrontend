@@ -14,7 +14,6 @@ import { MenuProvider } from '@/context/menu'
 import { Toaster } from 'sonner'
 import SessionProviders from '@/components/molecules/sessionProvider'
 import { getSession } from './api/auth/[...nextauth]/options'
-import { GoogleAnalytics } from '@next/third-parties/google'
 import Script from 'next/script'
 import { Suspense } from 'react'
 import BestPriceScript from '@/components/atoms/bestPrice360'
@@ -208,7 +207,10 @@ export default async function RootLayout({
         </Script>
 
         {/* Facebook Pixel — χωρίς συγκατάθεση cookies μένει σε «revoke»: κρατά τα
-            events και δεν στέλνει τίποτα μέχρι το «Αποδοχή όλων» (fbq consent grant) */}
+            events και δεν στέλνει τίποτα μέχρι το «Αποδοχή όλων» (fbq consent grant).
+            (2026-11-26) Το fbq ορίζεται αμέσως (τα events μπαίνουν σε ουρά), αλλά το fbevents.js
+            (~100 KB) κατεβαίνει 1,5″ μετά το πλήρες φόρτωμα της σελίδας — αλλιώς στο κινητό
+            «έτρωγε» εύρος από το κεντρικό banner (PageSpeed: LCP). */}
         <Script
           id="pixel-script"
           strategy='afterInteractive'
@@ -218,9 +220,9 @@ export default async function RootLayout({
               {if(f.fbq)return;n=f.fbq=function(){n.callMethod ?
                 n.callMethod.apply(n, arguments) : n.queue.push(arguments)};
               if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-              n.queue=[];t=b.createElement(e);t.async=!0;
+              n.queue=[];(function(fn){var w=window;function go(){setTimeout(function(){(w.requestIdleCallback||function(c){setTimeout(c,1)})(fn,{timeout:3000})},1500)}if(document.readyState==='complete')go();else w.addEventListener('load',go,{once:true})})(function(){t=b.createElement(e);t.async=!0;
               t.src=v;s=b.getElementsByTagName(e)[0];
-              s.parentNode.insertBefore(t,s)}(window, document,'script',
+              s.parentNode.insertBefore(t,s)})}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
               ${hasConsent ? '' : "fbq('consent', 'revoke');"}
               fbq('init', '${process.env.FACEBOOK_PIXEL}');
@@ -292,8 +294,28 @@ export default async function RootLayout({
 
         <BestPriceScript />
 
-        {/* GA loads AFTER consent mode */}
-        <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />
+        {/* GA μετά το consent mode. (2026-11-26) Το config μπαίνει αμέσως στο dataLayer (τίποτα δεν
+            χάνεται), αλλά το gtag.js (~170 KB) κατεβαίνει 1,5″ μετά το πλήρες φόρτωμα της σελίδας,
+            ώστε να μην ανταγωνίζεται το κεντρικό banner στο κινητό (PageSpeed: LCP). Αντικαθιστά
+            το <GoogleAnalytics> του @next/third-parties, που το φόρτωνε αμέσως. */}
+        <Script
+          id="ga-deferred"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              window.gtag = window.gtag || function(){ dataLayer.push(arguments); };
+              gtag('js', new Date());
+              gtag('config', '${GA_MEASUREMENT_ID}');
+              (function(fn){var w=window;function go(){setTimeout(function(){(w.requestIdleCallback||function(c){setTimeout(c,1)})(fn,{timeout:3000})},1500)}if(document.readyState==='complete')go();else w.addEventListener('load',go,{once:true})})(function(){
+                var s = document.createElement('script');
+                s.async = true;
+                s.src = 'https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}';
+                document.head.appendChild(s);
+              });
+            `,
+          }}
+        />
       </body>
     </html>
   )
