@@ -2,6 +2,7 @@ import { SideMenuType } from "@/components/templates/categoryPage";
 import { FilterProps } from "../interfaces/filters";
 import { IImageAttr } from "../interfaces/image";
 import { IProductCard } from "../interfaces/product";
+import { slimProductCards } from "../helpers/slimProduct";
 import { contentCache } from "../helpers/contentCache";
 import process from "process";
 import { cache } from "react";
@@ -84,7 +85,9 @@ const fetchCategoryProducts = cache(async function fetchCategoryProducts(body: s
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return (await response.json()) as ICategoryProductsResponse
+    const data = (await response.json()) as ICategoryProductsResponse
+    // (2026-11-26) Ελαφριά μορφή κάρτας — τα προϊόντα περνάνε σε client components (διπλά στη σελίδα)
+    return { ...data, products: slimProductCards(data.products) }
 })
 
 /** Στοιχεία κατηγορίας (όνομα, περιγραφή, SEO, υποκατηγορίες, γονικές). null = δεν υπάρχει. */
@@ -143,6 +146,25 @@ export async function getCategoriesMapping() {
     }[]
 }
 
+// (2026-11-26) Το μενού μπαίνει σε ΚΑΘΕ σελίδα (HTML + δεδομένα του React): κρατάμε μόνο ό,τι
+// δείχνουν το μενού υπολογιστή, το mobile drawer και η αναζήτηση. Πριν κάθε κατηγορία είχε
+// την εικόνα σε όλα τα μεγέθη (formats, caption κ.λπ.) — ~109 KB σε κάθε σελίδα.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function slimMenu(list: any): any[] {
+    if (!Array.isArray(list)) return []
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return list.map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        ...(c.description ? { description: c.description } : {}),
+        ...(c.isSpecial ? { isSpecial: true } : {}),
+        // Εικονίδιο δίπλα στο όνομα (mobile drawer) — διακοσμητικό, άρα κενό alt
+        image: c.image?.url ? { url: c.image.url, alternativeText: '' } : null,
+        categories: slimMenu(c.categories),
+    }))
+}
+
 export async function getMenu() {
     const myHeaders = new Headers();
 
@@ -169,7 +191,7 @@ export async function getMenu() {
         return []
     }
 
-    const data = await response.json();
+    const data = slimMenu(await response.json());
 
     return data as {
         id: number,

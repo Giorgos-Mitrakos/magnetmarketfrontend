@@ -46,11 +46,11 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
   },
-  // (2026-11-26) Το CSS μέσα στο HTML αντί για ξεχωριστά αρχεία. Στο κινητό τα 3 CSS
-  // «μπλόκαραν» την πρώτη εμφάνιση ~1,5″ (PageSpeed: Element render delay 1,9″ στο banner).
-  // Ισχύει μόνο στο production build. Αν δημιουργήσει θέμα, αρκεί να γίνει false.
+  // (2026-11-26) inlineCss: δοκιμάστηκε και ΑΠΕΝΕΡΓΟΠΟΙΗΘΗΚΕ. Το Next βάζει το CSS ΔΥΟ φορές
+  // στη σελίδα (<style> + δεδομένα του React): +~40 KB συμπιεσμένα σε ΚΑΘΕ σελίδα, ενώ ως αρχείο
+  // (~23 KB) κατεβαίνει μία φορά και μένει στην cache για τις επόμενες σελίδες.
   experimental: {
-    inlineCss: true,
+    inlineCss: false,
   },
 
   // (2026-11-18) Δοκιμαστικό site (π.χ. test.magnetmarket.gr): SITE_NOINDEX=true στο .env

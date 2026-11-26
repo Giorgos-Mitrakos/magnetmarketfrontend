@@ -1,5 +1,6 @@
 import { contentCache } from '../helpers/contentCache'
 import { IProductCard } from "../interfaces/product";
+import { slimProductCard, slimProductCards } from "../helpers/slimProduct";
 
 /**
  * Αρχική σελίδα από το backend v3 (GET /api/homepage).
@@ -20,11 +21,29 @@ export async function getHomepageData(): Promise<IHomepage> {
       console.error('Homepage API error:', response.status, response.statusText)
       return { body: [], seo: null, updatedAt: null }
     }
-    return (await response.json()) as IHomepage
+    return slimHomepage((await response.json()) as IHomepage)
   } catch (error) {
     console.error('Homepage API error:', error)
     return { body: [], seo: null, updatedAt: null }
   }
+}
+
+/**
+ * (2026-11-26) Τα προϊόντα των blocks σε ελαφριά μορφή κάρτας — πριν κάθε κάρτα είχε όλο το
+ * προϊόν (barcode, mpn, εικόνα σε όλα τα μεγέθη κ.λπ.), ~84 KB μόνο για τις καρτέλες προϊόντων.
+ */
+function slimHomepage(data: IHomepage): IHomepage {
+  if (!Array.isArray(data?.body)) return data
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const body = data.body.map((block: any) => {
+    const b = { ...block }
+    if (Array.isArray(b.products)) b.products = slimProductCards(b.products)
+    if (b.product && typeof b.product === 'object') b.product = slimProductCard(b.product)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (Array.isArray(b.tabs)) b.tabs = b.tabs.map((t: any) => ({ ...t, products: slimProductCards(t.products) }))
+    return b
+  })
+  return { ...data, body } as IHomepage
 }
 
 /* ==================== Τύποι ==================== */
