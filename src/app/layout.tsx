@@ -13,7 +13,6 @@ import CrossSellDialog from '@/components/organisms/CrossSellDialog'
 import { MenuProvider } from '@/context/menu'
 import { Toaster } from 'sonner'
 import SessionProviders from '@/components/molecules/sessionProvider'
-import { getSession } from './api/auth/[...nextauth]/options'
 import Script from 'next/script'
 import { Suspense } from 'react'
 import BestPriceScript from '@/components/atoms/bestPrice360'
@@ -164,7 +163,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await getSession()
   const menuData = await getMenu()
   const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID as string
 
@@ -253,7 +251,9 @@ export default async function RootLayout({
       </head>
 
       <body className={`${inter.className} h-full dark:bg-slate-800`}>
-        <SessionProviders session={session}>
+        {/* (2026-11-26) Χωρίς session από τον server: το layout δεν περιέχει κανένα προσωπικό στοιχείο, άρα
+            οι σελίδες μπορούν να σερβίρονται από cache. Ο browser ζητά το session αμέσως μετά το φόρτωμα. */}
+        <SessionProviders>
           <CheckoutProvider>
           <WishlistProvider>
             <Toaster
@@ -275,7 +275,7 @@ export default async function RootLayout({
             <Αnnouncement />
 
             <MenuProvider>
-              <Header user={session?.user?.name?.split('@')[0]} menuData={menuData} />
+              <Header menuData={menuData} />
 
               <main
                 className='mx-2 sm:mx-4 md:mx-8 relative'

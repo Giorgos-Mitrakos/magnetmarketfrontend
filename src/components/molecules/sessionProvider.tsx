@@ -4,7 +4,9 @@ import type { Session } from "next-auth"
 import { SessionProvider } from "next-auth/react"
 
 interface Props {
-    session: Session | null
+    /** (2026-11-26) Προαιρετικό: χωρίς αυτό το SessionProvider ζητά το session από τον browser
+     *  (/api/auth/session). ΜΗΝ περάσεις null — σημαίνει «αποσυνδεδεμένος». */
+    session?: Session | null
     children: React.ReactNode,
 }
 

@@ -1,6 +1,7 @@
 // src/app/register/page.tsx
 
 import { Metadata } from 'next'
+import { Suspense } from 'react'
 import RegisterComp from '@/components/organisms/registerComp'
 
 const BASE_URL = process.env.NEXT_URL || 'https://magnetmarket.gr'
@@ -11,7 +12,13 @@ const BASE_URL = process.env.NEXT_URL || 'https://magnetmarket.gr'
 
 export default function Register() {
   // ℹ️ NO structured data needed - auth pages are noindex
-  return <RegisterComp />
+  // (2026-11-26) Η σελίδα φτιάχνεται πλέον στατικά (χωρίς session στο layout) — το RegisterComp διαβάζει
+  // το URL (useSearchParams, π.χ. callbackUrl), οπότε χρειάζεται Suspense για να περάσει το build.
+  return (
+    <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" />}>
+      <RegisterComp />
+    </Suspense>
+  )
 }
 
 /* -------------------------------------------------------------------------- */

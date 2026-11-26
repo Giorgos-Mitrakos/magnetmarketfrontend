@@ -1,6 +1,7 @@
 // src/app/login/page.tsx
 
 import { Metadata } from 'next'
+import { Suspense } from 'react'
 import LoginComp from '@/components/organisms/loginComp'
 
 const BASE_URL = process.env.NEXT_URL || 'https://magnetmarket.gr'
@@ -11,7 +12,13 @@ const BASE_URL = process.env.NEXT_URL || 'https://magnetmarket.gr'
 
 export default function Login() {
   // ℹ️ NO structured data needed - login pages are noindex
-  return <LoginComp />
+  // (2026-11-26) Η σελίδα φτιάχνεται πλέον στατικά (χωρίς session στο layout) — το LoginComp διαβάζει
+  // το URL (useSearchParams, π.χ. callbackUrl), οπότε χρειάζεται Suspense για να περάσει το build.
+  return (
+    <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" />}>
+      <LoginComp />
+    </Suspense>
+  )
 }
 
 /* -------------------------------------------------------------------------- */

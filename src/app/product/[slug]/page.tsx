@@ -52,9 +52,10 @@ import { jsonLd } from '@/lib/helpers/jsonLd'
 import { autoProductDescription, autoProductTitle } from '@/lib/helpers/productSeo'
 import { getStrapiMedia } from '@/repositories/medias'
 
+// (2026-11-26) Πάντα φρέσκια σε κάθε επίσκεψη: τιμή/απόθεμα αλλάζουν συνεχώς από τα imports (το webhook
+// του Strapi δεν ανανεώνει προϊόντα). Αφαιρέθηκαν τα revalidate/generateStaticParams, που μετά την
+// αφαίρεση του session από το layout έκαναν το Next να τη θεωρεί στατική (● στο build) με cache 24 ωρών.
 export const dynamic = 'force-dynamic'
-export const dynamicParams = true
-export const revalidate = 86400
 
 type MetadataProps = {
   params: { slug: string }
@@ -670,8 +671,4 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
       ...(images.length ? { images: [images[0]] } : {}),
     },
   };
-}
-
-export function generateStaticParams() {
-  return []
 }

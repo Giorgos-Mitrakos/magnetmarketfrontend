@@ -32,11 +32,10 @@ interface MenuData {
 }
 
 interface HeaderProps {
-    user: any;
     menuData: MenuData[]; // Προσθήκη των προ-φορτωμένων δεδομένων
 }
 
-export default function Header({ user, menuData }: HeaderProps) {
+export default function Header({ menuData }: HeaderProps) {
     const [openMenu, setOpenMenu] = useState(false)
     const { checkout, dispatch } = useCheckout()
     const { isMenuOpen, isSearchOpen, toggleSearchDrawer, toggleMenuDrawer, closeMenu } = useContext(MenuContext)
@@ -73,7 +72,7 @@ export default function Header({ user, menuData }: HeaderProps) {
                 <div className="hidden place-self-center w-2/3 lg:flex items-center justify-center">
                     <SearchInput />
                 </div>
-                <HeaderActions user={user} />
+                <HeaderActions />
             </header>
             {/* Floating Offers Button */}
             {pathname !== '/offers' && !pathname.includes('/checkout/') && !pathname.includes('/shopping-cart') && (
