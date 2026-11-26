@@ -46,6 +46,12 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
   },
+  // (2026-11-26) Το CSS μέσα στο HTML αντί για ξεχωριστά αρχεία. Στο κινητό τα 3 CSS
+  // «μπλόκαραν» την πρώτη εμφάνιση ~1,5″ (PageSpeed: Element render delay 1,9″ στο banner).
+  // Ισχύει μόνο στο production build. Αν δημιουργήσει θέμα, αρκεί να γίνει false.
+  experimental: {
+    inlineCss: true,
+  },
 
   // (2026-11-18) Δοκιμαστικό site (π.χ. test.magnetmarket.gr): SITE_NOINDEX=true στο .env
   // → καμία σελίδα στο Google (X-Robots-Tag σε όλες τις απαντήσεις + robots.txt «Disallow: /»).
