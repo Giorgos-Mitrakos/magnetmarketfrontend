@@ -1,10 +1,8 @@
-import { hasCookieChoice } from "@/lib/helpers/cookies";
 import CookieBannerClient from "./cookieBannerClient";
 
-export default async function CookieBannerWrapper() {
-  // Το banner εμφανίζεται μόνο όσο ο επισκέπτης δεν έχει απαντήσει —
-  // και η «Απόρριψη» είναι απάντηση (cookie_consent=false)
-  if (await hasCookieChoice()) return null;
-
-  return <CookieBannerClient consent={false} />;
+// (2026-11-26) Χωρίς ανάγνωση cookies στον server (αλλιώς καμία σελίδα δεν μπορεί να σερβιριστεί από
+// cache). Το banner είναι πάντα στο HTML· όποιος έχει ήδη απαντήσει δεν το βλέπει ποτέ: το inline
+// script του layout βάζει data-cc στο <html> → CSS display:none, και μετά το component αφαιρείται.
+export default function CookieBannerWrapper() {
+  return <CookieBannerClient />;
 }

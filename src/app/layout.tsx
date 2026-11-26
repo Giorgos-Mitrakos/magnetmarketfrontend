@@ -20,7 +20,6 @@ import BestPriceScript from '@/components/atoms/bestPrice360'
 import BestPriceBadge from '@/components/atoms/bestPriceBadge'
 import { getMenu } from '@/lib/queries/categoryQuery'
 import CookieBannerWrapper from '@/components/molecules/homepage/cookieBannerWrapper'
-import { cookies } from 'next/headers'
 import ScrollTracker from '@/components/molecules/ScrollTracker'
 import CompareBar from '@/components/compare/CompareBar'
 
@@ -169,10 +168,6 @@ export default async function RootLayout({
   const menuData = await getMenu()
   const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID as string
 
-  // Check if user has given consent (server-side)
-  const cookieStore = await cookies()
-  const consentCookie = cookieStore.get('cookie_consent')
-  const hasConsent = consentCookie?.value === 'true'
 
   return (
     <html lang="el" suppressHydrationWarning>
@@ -187,24 +182,36 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://connect.facebook.net" />
 
-        {/* Google Consent Mode v2 - Dynamic based on cookie */}
-        <Script id="google-consent-mode" strategy="beforeInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            
-            gtag('consent', 'default', {
-              'ad_storage': ${hasConsent ? "'granted'" : "'denied'"},
-              'analytics_storage': ${hasConsent ? "'granted'" : "'denied'"},
-              'ad_personalization': ${hasConsent ? "'granted'" : "'denied'"},
-              'ad_user_data': ${hasConsent ? "'granted'" : "'denied'"},
-              'wait_for_update': 500
-            });
-            
-            gtag('set', 'ads_data_redaction', true);
-            gtag('set', 'url_passthrough', true);
-          `}
-        </Script>
+        {/* Google Consent Mode v2. (2026-11-26) Η συγκατάθεση διαβάζεται ΕΔΩ, στον browser, και όχι
+            στον server: έτσι η σελίδα δεν χρειάζεται cookies για να φτιαχτεί και μπορεί να σερβίρεται από
+            cache. Απλό inline script στο <head> → τρέχει πριν από οτιδήποτε άλλο (και πριν το GA).
+            Επίσης βάζει data-cc στο <html> όταν ο επισκέπτης έχει ήδη απαντήσει (Αποδοχή ή Απόρριψη),
+            ώστε το banner cookies να μην εμφανίζεται ούτε για μια στιγμή (βλ. <style> από κάτω). */}
+        <script
+          id="google-consent-mode"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function () {
+                var m = document.cookie.match(/(?:^|;\\s*)cookie_consent=([^;]*)/);
+                var choice = m ? decodeURIComponent(m[1]) : null;
+                var granted = choice === 'true' ? 'granted' : 'denied';
+                if (choice !== null) document.documentElement.setAttribute('data-cc', '1');
+                window.dataLayer = window.dataLayer || [];
+                window.gtag = window.gtag || function(){ dataLayer.push(arguments); };
+                gtag('consent', 'default', {
+                  'ad_storage': granted,
+                  'analytics_storage': granted,
+                  'ad_personalization': granted,
+                  'ad_user_data': granted,
+                  'wait_for_update': 500
+                });
+                gtag('set', 'ads_data_redaction', true);
+                gtag('set', 'url_passthrough', true);
+              })();
+            `,
+          }}
+        />
+        <style dangerouslySetInnerHTML={{ __html: 'html[data-cc] #mm-cookie-banner{display:none}' }} />
 
         {/* Facebook Pixel — χωρίς συγκατάθεση cookies μένει σε «revoke»: κρατά τα
             events και δεν στέλνει τίποτα μέχρι το «Αποδοχή όλων» (fbq consent grant).
@@ -224,7 +231,7 @@ export default async function RootLayout({
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)})}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
-              ${hasConsent ? '' : "fbq('consent', 'revoke');"}
+              if (!/(?:^|;\\s*)cookie_consent=true(?:;|$)/.test(document.cookie)) fbq('consent', 'revoke');
               fbq('init', '${process.env.FACEBOOK_PIXEL}');
               fbq('track', 'PageView');
             `,

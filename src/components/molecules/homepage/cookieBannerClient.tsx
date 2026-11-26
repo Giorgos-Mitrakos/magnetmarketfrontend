@@ -1,14 +1,18 @@
 "use client";
-import { useState } from "react";
-import { setCookie } from "cookies-next";
+import { useEffect, useState } from "react";
+import { getCookie, setCookie } from "cookies-next";
 import { FaCookieBite, FaTimes } from "react-icons/fa";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 
-export default function CookieBannerClient({ consent }: { consent: boolean }) {
-  // (2026-11-25) Εμφανίζεται ΑΜΕΣΩΣ από το HTML (ο server ξέρει ήδη αν υπάρχει απάντηση — βλ.
-  // cookieBannerWrapper). Πριν περίμενε τη JavaScript + 0,8″ + fade-in και, ως το μεγαλύτερο
-  // στοιχείο στην οθόνη του κινητού, έσπρωχνε το LCP του PageSpeed στα ~4″.
-  const [hidden, setHidden] = useState(consent);
+export default function CookieBannerClient() {
+  // (2026-11-25) Εμφανίζεται ΑΜΕΣΩΣ από το HTML (χωρίς αναμονή JavaScript / fade-in — ως το μεγαλύτερο
+  // στοιχείο στην οθόνη του κινητού, η καθυστέρηση έσπρωχνε το LCP του PageSpeed στα ~4″).
+  // (2026-11-26) Ο server δεν διαβάζει πλέον το cookie: όποιος έχει ήδη απαντήσει δεν βλέπει το banner
+  // χάρη στο data-cc του <html> (inline script του layout) + CSS, και εδώ απλώς αφαιρείται.
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => {
+    if (getCookie("cookie_consent") !== undefined) setHidden(true);
+  }, []);
   // Μόνο για το κλείσιμο (fade-out)
   const [animate, setAnimate] = useState(true);
 
@@ -59,6 +63,7 @@ export default function CookieBannerClient({ consent }: { consent: boolean }) {
 
   return (
     <div
+      id="mm-cookie-banner"
       className={`
         fixed bottom-4 left-4 right-4 max-w-md mx-auto z-50
         bg-white p-5 rounded-xl shadow-lg border border-gray-200
