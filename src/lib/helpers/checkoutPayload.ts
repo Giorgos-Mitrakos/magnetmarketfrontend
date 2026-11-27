@@ -104,6 +104,7 @@ export function buildOrderPayload(checkout: ICheckoutState) {
                     ? { repr_identity_type: Number(a.reprIdentityType), repr_identity_no: s(a.reprIdentityNo) }
                     : {}),
                 ...(s(a.reprMobile) ? { repr_mobile: s(a.reprMobile).replace(/[\s-]/g, '') } : {}),
+                ...(/^\d{6}$/.test(s(a.otpId)) ? { otp_id: s(a.otpId) } : {}),
             }
             : undefined,
     }

@@ -227,12 +227,38 @@ export default function Article45Section({ afm }: { afm: string }) {
                             {repr.kind === 'checking' ? 'Επαλήθευση…' : 'Επαλήθευση στην ΑΑΔΕ'}
                         </button>
                         {repr.kind === 'verified' && (
-                            <span role="status" className="text-sm text-green-700 dark:text-green-300">
-                                ✔️ Τα στοιχεία επαληθεύτηκαν.{repr.otpRequired && ' Θα σας σταλεί κωδικός (OTP) στο κινητό για την ολοκλήρωση της καταχώρισης.'}
-                            </span>
+                            <span role="status" className="text-sm text-green-700 dark:text-green-300">✔️ Τα στοιχεία επαληθεύτηκαν.</span>
                         )}
                         {repr.kind === 'failed' && <span role="status" className="text-sm text-amber-700 dark:text-amber-300">{repr.text}</span>}
                     </div>
+
+                    {/* (2026-11-27) Η ΑΑΔΕ ΔΕΝ στέλνει SMS. Τον κωδικό μιας χρήσης τον εκδίδει η ίδια η επιχείρηση-αγοραστής
+                        στην εφαρμογή «Υπηρεσία άρθρου 39α» της ΑΑΔΕ (Διαχείριση Κωδικών Μιας Χρήσης Εκπροσώπου), μόνο αν
+                        έχει δηλώσει ότι τον απαιτεί για τον εκπρόσωπο. */}
+                    {repr.kind === 'verified' && repr.otpRequired && (
+                        <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-950">
+                            <p className="text-sm text-slate-800 dark:text-slate-200">
+                                Η επιχείρησή σας έχει δηλώσει στην ΑΑΔΕ ότι για αυτόν τον εκπρόσωπο απαιτείται <strong>κωδικός μιας χρήσης</strong>.
+                                Ο κωδικός <strong>δεν αποστέλλεται με SMS</strong>· τον δημιουργεί η επιχείρηση στην εφαρμογή «Υπηρεσία άρθρου 39α»
+                                της ΑΑΔΕ (Διαχείριση Κωδικών Μιας Χρήσης Εκπροσώπου).
+                            </p>
+                            <div className="mt-3 max-w-[220px]">
+                                <label htmlFor="a45-otp" className="mb-1 block text-sm text-gray-700 dark:text-slate-300">Κωδικός μιας χρήσης (6 ψηφία)</label>
+                                <input
+                                    id="a45-otp"
+                                    className={inputClass}
+                                    inputMode="numeric"
+                                    maxLength={6}
+                                    autoComplete="one-time-code"
+                                    value={a45?.otpId ?? ''}
+                                    onChange={(e) => a45 && dispatch({ type: 'SET_ARTICLE_45', payload: { ...a45, otpId: e.target.value.replace(/\D/g, '') } })}
+                                />
+                            </div>
+                            <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">
+                                Προαιρετικό τώρα — αν δεν τον έχετε, θα σας τον ζητήσουμε πριν την έκδοση του τιμολογίου. Ο κωδικός πρέπει να είναι ενεργός εκείνη τη στιγμή.
+                            </p>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

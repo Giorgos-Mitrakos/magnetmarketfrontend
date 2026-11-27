@@ -29,6 +29,8 @@ export type Article45State = {
     /** 5 τελευταίοι χαρακτήρες ταυτότητας/διαβατηρίου */
     reprIdentityNo?: string;
     reprMobile?: string;
+    /** Κωδικός μιας χρήσης (6 ψηφία) που εκδίδει η επιχείρηση-αγοραστής στην εφαρμογή 39α της ΑΑΔΕ */
+    otpId?: string;
 };
 
 export type Totals = {
@@ -182,4 +184,4 @@ type PurchaseCompleteAction = {
 }
 
 // Actions for useReducer
-export type CheckoutAction = CartAction | AddressAction | ShippingAction | PaymentAction | CouponAction | LocalStorageAction | PurchaseCompleteAction;
+export type CheckoutAction = CartAction | AddressAction | ShippingAction | PaymentAction | CouponAction | LocalStorageAction | PurchaseCompleteAction;
