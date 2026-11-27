@@ -72,13 +72,40 @@ export function buildQuotePayload(checkout: ICheckoutState, couponCode?: string 
         paymentDocumentId: paymentId ? String(paymentId) : undefined,
         installmentsCount: paymentId ? Math.max(1, Number(checkout.installments) || 1) : 1,
         couponCode: couponCode ?? checkout.appliedCoupon?.code ?? undefined,
+        // (2026-11-26) Άρθρο 45: στο quote μόνο η ένδειξη (προεπισκόπηση τιμών χωρίς ΦΠΑ στις
+        // επιλέξιμες γραμμές) — ο έλεγχος στην ΑΑΔΕ γίνεται στη δημιουργία της παραγγελίας
+        article_45: article45Active(checkout) ? { is_tax_free: true } : undefined,
     }
 }
 
+/** Ενεργή επιλογή άρθρου 45: τιμολόγιο + το ίδιο ΑΦΜ με αυτό που ελέγχθηκε */
+export function article45Active(checkout: ICheckoutState): boolean {
+    const b = checkout.addresses.billing
+    const a = checkout.article45
+    return !!(a?.requested && b.isInvoice && normalizeAfmForAadeCheck(b.afm) === a.afm)
+}
+
+/** Α.Φ.Μ. χωρίς κενά / παύλες / πρόθεμα EL-GR (ίδιο με το normalizeAfm της φόρμας στοιχείων) */
+export const normalizeAfmForAadeCheck = (v?: string | null) =>
+    String(v ?? '').replace(/[\s\-.()/]/g, '').toUpperCase().replace(/^(EL|GR)/, '')
+
 export function buildOrderPayload(checkout: ICheckoutState) {
+    const a = checkout.article45
     return {
         ...buildQuotePayload(checkout),
         delivery_notes: s(checkout.addresses.deliveryNotes) || undefined,
+        // (2026-11-26) Άρθρο 45: ΑΦΜ + (προαιρετικά) στοιχεία εκπροσώπου. Το Strapi ξαναελέγχει
+        // στην ΑΑΔΕ και εφαρμόζει την απαλλαγή μόνο αν επιβεβαιωθεί.
+        article_45: a && article45Active(checkout)
+            ? {
+                is_tax_free: true,
+                afm: a.afm,
+                ...(a.reprIdentityType && s(a.reprIdentityNo).length === 5
+                    ? { repr_identity_type: Number(a.reprIdentityType), repr_identity_no: s(a.reprIdentityNo) }
+                    : {}),
+                ...(s(a.reprMobile) ? { repr_mobile: s(a.reprMobile).replace(/[\s-]/g, '') } : {}),
+            }
+            : undefined,
     }
 }
 

@@ -16,6 +16,19 @@ export type ICheckoutState = {
     totals: Totals;
     /** Δήλωση για τον μειωμένο ΦΠΑ νησιών (προορισμός/εγκατάσταση στο νησί) */
     islandVatDeclared?: boolean;
+    /** (2026-11-26) Απαλλαγή ΦΠΑ άρθρου 45 (πρώην 39α) — ο τελικός έλεγχος γίνεται ΠΑΝΤΑ στο Strapi (ΑΑΔΕ) */
+    article45?: Article45State | null;
+};
+
+/** (2026-11-26) Επιλογή του πελάτη για το άρθρο 45. Τα στοιχεία εκπροσώπου είναι προαιρετικά. */
+export type Article45State = {
+    requested: boolean;
+    /** Το ΑΦΜ για το οποίο έγινε ο έλεγχος — αν αλλάξει, η επιλογή ακυρώνεται */
+    afm: string;
+    reprIdentityType?: number | null;
+    /** 5 τελευταίοι χαρακτήρες ταυτότητας/διαβατηρίου */
+    reprIdentityNo?: string;
+    reprMobile?: string;
 };
 
 export type Totals = {
@@ -154,6 +167,7 @@ type PaymentAction = { type: "SAVE_INSTALLMENTS"; payload: number }
 type CouponAction = { type: "APPLY_COUPON"; payload: ICoupon }
     | { type: "REMOVE_COUPON" }
     | { type: "SET_ISLAND_VAT_DECLARED"; payload: boolean }
+    | { type: "SET_ARTICLE_45"; payload: Article45State | null }
 
 type LocalStorageAction = { type: "CLEAR_LOCALESTORAGE" }
 

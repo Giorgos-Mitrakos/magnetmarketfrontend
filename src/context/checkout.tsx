@@ -122,6 +122,7 @@ export const CheckoutProvider = ({ children }: any) => {
     }, [checkout.cart, checkout.shippingMethod, checkout.paymentMethod, checkout.appliedCoupon, checkout.installments,
         checkout.addresses.billing.state, checkout.addresses.billing.city, checkout.addresses.billing.zipCode,
         checkout.addresses.billing.isInvoice, checkout.addresses.billing.afm, checkout.islandVatDeclared,
+        checkout.article45?.requested, checkout.article45?.afm,
         checkout.addresses.shipping.state, checkout.addresses.shipping.city, checkout.addresses.shipping.zipCode,
         checkout.addresses.different_shipping]);
 

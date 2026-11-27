@@ -237,6 +237,11 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
             break;
         }
 
+        case 'SET_ARTICLE_45': {
+            newState = { ...state, article45: action.payload }
+            break;
+        }
+
         case 'PURCHASE_COMPLETE': {
             const { transactionId, shipping, tax, items, coupon } = action.payload;
 
@@ -260,6 +265,7 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
                 ...state,
                 cart: [],
                 islandVatDeclared: false,
+                article45: null,
                 appliedCoupon: null,
                 shippingMethod: null,
                 paymentMethod: null,
@@ -274,6 +280,12 @@ export const checkoutReducer = (state: ICheckoutState, action: CheckoutAction): 
         }
     }
 
-    saveCheckoutToLocalStorage(newState);
+    // (2026-11-26) Τα στοιχεία ταυτότητας/κινητού του εκπροσώπου (άρθρο 45) ΔΕΝ γράφονται στο
+    // localStorage — μένουν μόνο στη μνήμη όσο ο πελάτης είναι στο ταμείο
+    saveCheckoutToLocalStorage(
+        newState.article45
+            ? { ...newState, article45: { requested: newState.article45.requested, afm: newState.article45.afm } }
+            : newState
+    );
     return newState;
-}
+}

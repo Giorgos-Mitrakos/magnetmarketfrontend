@@ -12,12 +12,14 @@ import GeoCombobox from '@/components/atoms/GeoCombobox'
 import * as Yup from 'yup'
 import Radio from "../atoms/radio"
 import CustomInput from "../atoms/input"
-import { forwardRef, useImperativeHandle, useCallback } from "react"
+import { forwardRef, useImperativeHandle, useCallback, useEffect } from "react"
 import { useGeo } from "@/hooks/useGeo"
 import { useCheckout } from "@/context/checkout"
 import { ICountries, ICustomerInfo, IRegionPostals, IRegions, IStates } from "@/lib/interfaces/addresses"
 import { IProfile } from "./checkout/CustomerInfoClient"
 import { rememberCartEmail } from "@/lib/helpers/cartSnapshot";
+import AadeLookupButton, { AadeBusiness } from "@/components/molecules/checkout/AadeLookupButton"
+import Article45Section from "@/components/molecules/checkout/Article45Section"
 
 export type FormInputRef = {
     /** Έλεγχος + αποθήκευση· true όταν τα στοιχεία είναι σωστά και αποθηκεύτηκαν */
@@ -284,6 +286,24 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
         setFieldValue('isInvoice', !isInvoiceValue)
     }, [isInvoiceValue, setFieldValue])
 
+    // (2026-11-26) Επιστροφή σε απόδειξη → ακυρώνεται η απαλλαγή άρθρου 45
+    const hasArticle45 = !!checkout.article45
+    useEffect(() => {
+        if (!isInvoiceValue && hasArticle45) dispatch({ type: 'SET_ARTICLE_45', payload: null })
+    }, [isInvoiceValue, hasArticle45, dispatch])
+
+    // (2026-11-26) Στοιχεία από την ΑΑΔΕ: επωνυμία / Δ.Ο.Υ. / δραστηριότητα αντικαθίστανται,
+    // η οδός μόνο αν είναι κενή. Νομός / πόλη / Τ.Κ. μένουν στον πελάτη (υπόδειξη στο μήνυμα).
+    const onAadeResult = useCallback((b: AadeBusiness) => {
+        if (b.name) setFieldValue('companyName', b.name)
+        if (b.doy) setFieldValue('doy', b.doy)
+        if (b.businessActivity) setFieldValue('businessActivity', b.businessActivity)
+        if (b.street && !String(formik.values.street ?? '').trim()) setFieldValue('street', b.street)
+    }, [setFieldValue, formik.values.street])
+
+    const afmValid = isValidAfm(formik.values.afm)
+    const afmNormalized = normalizeAfm(formik.values.afm)
+
     const differentShippingValue = formik.values.different_shipping
     const onDifferentAddressChange = useCallback(() => {
         setFieldValue('different_shipping', !differentShippingValue)
@@ -404,6 +424,10 @@ const Addresses = forwardRef<FormInputRef, IProfile>((props, ref) => {
                                     error={formik.touched.doy ? formik.errors.doy : undefined}
                                 />
                             </div>
+                            <div className="md:col-span-2">
+                                <AadeLookupButton afm={afmNormalized} disabled={!afmValid} onResult={onAadeResult} />
+                            </div>
+                            {afmValid && <Article45Section afm={afmNormalized} />}
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
