@@ -3,13 +3,18 @@
 import useProductPrice from "@/hooks/useProductPrice"
 import { getStrapiMedia } from "@/repositories/medias"
 import { ICartItem } from "@/lib/interfaces/cart"
+import { QuoteLine } from "@/lib/interfaces/shipping"
 import Image from "next/image"
 import Link from "next/link"
 import { useCheckout } from "@/context/checkout"
 
-const CartItem = ({ item }: { item: ICartItem }) => {
+const DEFAULT_VAT = 24
+
+const CartItem = ({ item, line }: { item: ICartItem; line?: QuoteLine }) => {
     const { profit, discount, isSale, salePrice, isLoading, error, data } = useProductPrice(item.id)
     const redAlert = item.isAvailable
+    // Η γραμμή του quote ισχύει μόνο αν αφορά την ίδια ποσότητα (αλλιώς το quote ξαναϋπολογίζεται)
+    const adjusted = !!line && line.quantity === item.quantity && (line.taxExempt || line.vatRate !== DEFAULT_VAT)
 
     const imageUrl = item.image
         ? getStrapiMedia(item.image.formats?.thumbnail?.url ||
@@ -66,6 +71,7 @@ const CartItem = ({ item }: { item: ICartItem }) => {
 
             {/* Price Calculation - Fixed width, no wrapping */}
             <div className="flex-shrink-0 flex flex-col items-end justify-start ml-2">
+              <div className={adjusted ? 'opacity-60' : undefined}>
                 {/* Unit Price */}
                 <div className="text-xs text-slate-500 dark:text-slate-400 mb-1 whitespace-nowrap">
                     {item.quantity} x {data?.product.data.attributes.price.toFixed(2)} €
@@ -97,6 +103,18 @@ const CartItem = ({ item }: { item: ICartItem }) => {
                         {data && (item.quantity * data.product.data.attributes.price).toFixed(2)} €
                     </div>
                 )}
+              </div>
+                {/* (2026-11-27) Τιμή όπως χρεώνεται: χωρίς ΦΠΑ (άρθρο 45) ή με μειωμένο ΦΠΑ νησιών — από το Strapi */}
+                {adjusted && line && (
+                    <div className="mt-1 text-right">
+                        <div className="text-sm font-bold text-green-700 dark:text-green-300 whitespace-nowrap">
+                            {line.totalPrice.toFixed(2)} €
+                        </div>
+                        <div className="text-[11px] text-green-700 dark:text-green-300 whitespace-nowrap">
+                            {line.taxExempt ? 'χωρίς ΦΠΑ · άρθρο 45' : `με ΦΠΑ ${line.vatRate}%`}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     )
@@ -114,7 +132,11 @@ export default function CartAside() {
             <div className="max-h-72 overflow-y-auto">
                 {checkout.cart.length > 0 ? (
                     checkout.cart.map(item => (
-                        <CartItem key={item.id} item={item} />
+                        <CartItem
+                            key={item.id}
+                            item={item}
+                            line={item.documentId ? checkout.totals.lines?.find((l) => l.documentId === item.documentId) : undefined}
+                        />
                     ))
                 ) : (
                     <div className="text-center py-4 text-slate-500 dark:text-slate-400">
@@ -126,4 +148,4 @@ export default function CartAside() {
 
         </div>
     )
-}
+}

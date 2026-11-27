@@ -49,6 +49,18 @@ export type Totals = {
     /** (2026-10-23) Μέρος του discount από πακέτα «Αγοράστε τα μαζί» */
     bundleDiscount?: number;
     bundles?: AppliedBundle[];
+    /** (2026-11-27) Σύνολα ανά προϊόν από το Strapi (άρθρο 45 / ΦΠΑ νησιών) */
+    lines?: QuoteLine[];
+}
+
+/** (2026-11-27) Σύνολο γραμμής όπως το υπολόγισε το Strapi (πριν από κουπόνι/πακέτα) */
+export type QuoteLine = {
+    documentId: string;
+    quantity: number;
+    totalPrice: number;
+    vatRate: number;
+    /** Χωρίς ΦΠΑ — άρθρο 45 */
+    taxExempt: boolean;
 }
 
 /** (2026-10-23) Πακέτο «Αγοράστε τα μαζί» που εφαρμόστηκε στο καλάθι */

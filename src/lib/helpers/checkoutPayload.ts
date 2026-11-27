@@ -4,7 +4,7 @@
 // Strapi v3 για quote / παραγγελία. Στέλνονται ΜΟΝΟ επιλογές του πελάτη
 // (προϊόντα + ποσότητες, διευθύνσεις, documentId αποστολής/πληρωμής, δόσεις,
 // κουπόνι) — ποτέ τιμές ή κόστη: αυτά τα υπολογίζει πάντα το Strapi.
-import { AppliedBundle, ICheckoutState, IslandVatInfo } from "../interfaces/shipping"
+import { AppliedBundle, ICheckoutState, IslandVatInfo, QuoteLine } from "../interfaces/shipping"
 
 type BillingState = ICheckoutState['addresses']['billing']
 type ShippingState = ICheckoutState['addresses']['shipping']
@@ -127,4 +127,6 @@ export interface IQuoteResponse {
     /** (2026-10-23) Μέρος του discount από πακέτα «Αγοράστε τα μαζί» */
     bundleDiscount?: number
     bundles?: AppliedBundle[]
+    /** (2026-11-27) Σύνολα ανά προϊόν */
+    lines?: QuoteLine[]
 }

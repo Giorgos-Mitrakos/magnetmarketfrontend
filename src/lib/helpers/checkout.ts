@@ -42,6 +42,7 @@ export async function calculateTotals(checkout: ICheckoutState): Promise<Totals>
             islandVat: quote.islandVat ?? null,
             bundleDiscount: quote.bundleDiscount ?? 0,
             bundles: quote.bundles ?? [],
+            lines: quote.lines ?? [],
         }
     } catch (error) {
         // Π.χ. ο τρόπος πληρωμής δεν επιτρέπεται για αυτό το ποσό: δείχνουμε
